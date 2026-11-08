@@ -3,6 +3,7 @@ import { describe, it } from 'remix/test'
 
 import type { CurrentUser } from './middleware/current-user.ts'
 import {
+  canAssignItemOwner,
   canDisableAccount,
   canEditCollectif,
   canEditOwnProfile,
@@ -14,6 +15,7 @@ import {
   canReviewAccounts,
   canReviewCollectifs,
   canSeeFullAddress,
+  canStoreItemsIn,
 } from './permissions.ts'
 
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
@@ -124,5 +126,32 @@ describe('permissions: accounts', () => {
     assert.equal(canSeeFullAddress(user(), collectifPlace), false)
     assert.equal(canSeeFullAddress(user(), homePlace), false)
     assert.equal(canSeeFullAddress(null, homePlace), false)
+  })
+
+  it('"Add an item to a location": admin; responsible if C\'s location; user if own location', () => {
+    const collectifPlace = { collectif_id: 'c1', user_id: null }
+    const homePlace = { collectif_id: null, user_id: 'u1' }
+    assert.equal(
+      canStoreItemsIn(user({ isAdmin: true }), { collectif_id: null, user_id: 'u9' }),
+      true,
+    )
+    assert.equal(
+      canStoreItemsIn(user({ managedCollectifIds: new Set(['c1']) }), collectifPlace),
+      true,
+    )
+    assert.equal(canStoreItemsIn(user(), collectifPlace), false)
+    assert.equal(canStoreItemsIn(user(), homePlace), true)
+    assert.equal(canStoreItemsIn(user({ id: 'u2' }), homePlace), false)
+    assert.equal(canStoreItemsIn(null, homePlace), false)
+  })
+
+  it('item owner: oneself, or a collectif one manages', () => {
+    assert.equal(canAssignItemOwner(user(), { userId: 'u1' }), true)
+    assert.equal(canAssignItemOwner(user(), { userId: 'u2' }), false)
+    assert.equal(
+      canAssignItemOwner(user({ managedCollectifIds: new Set(['c1']) }), { collectifId: 'c1' }),
+      true,
+    )
+    assert.equal(canAssignItemOwner(user(), { collectifId: 'c1' }), false)
   })
 })

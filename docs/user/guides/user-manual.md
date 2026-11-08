@@ -35,3 +35,17 @@ Tout utilisateur validé peut déclarer ses propres lieux ; personne d'autre ne 
 Seule la **ville** d'un lieu est montrée aux autres utilisateurs, sur la page du collectif comme
 sur la page du lieu ; l'adresse et les notes restent réservées aux personnes qui gèrent le lieu
 (vous pour un lieu personnel, les responsables pour un lieu de collectif) et aux administrateurs.
+
+## Ajouter du matériel
+
+Ouvrez **Mon matériel**, puis **Ajouter du matériel**. Il faut d'abord avoir au moins un lieu (voir
+ci-dessus).
+
+- **Rangé dans** : un lieu que vous gérez (le vôtre, ou celui d'un collectif dont vous êtes
+  responsable).
+- **Appartient à** : vous, ou un collectif dont vous êtes responsable. Le propriétaire et le lieu
+  peuvent être différents : votre ampli peut être rangé au local du collectif.
+- Le reste décrit l'objet : nom, catégorie, quantité (pour un lot d'objets identiques), marque,
+  modèle, numéro de série, état, valeur estimée et description.
+
+Un lieu qui contient encore du matériel ne peut pas être supprimé : déplacez d'abord le matériel.

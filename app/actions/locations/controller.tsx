@@ -3,6 +3,7 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
+import { locationHoldsItems } from '../../data/items.ts'
 import {
   deleteLocation,
   findLocationById,
@@ -62,6 +63,11 @@ export default createController(routes.locations, {
       const location = await findLocationById(db, context.params.locationId)
       if (location === null) return notFound(context)
       if (!canManageLocation(actor, location)) return forbidden(context)
+      // US-0.4.1: the foreign key also refuses it; this check gives a readable message.
+      if (await locationHoldsItems(db, location.id)) {
+        session.flash('notice', `« ${location.name} » contient du matériel : déplacez-le d’abord.`)
+        return redirect(routes.locations.index.href(), 303)
+      }
 
       await db.transaction(async (tx) => {
         await deleteLocation(tx, location.id)

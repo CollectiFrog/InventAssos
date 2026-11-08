@@ -123,3 +123,62 @@ export function ErrorSummary(handle: Handle<{ errors: FieldErrors }>) {
       </div>
     )
 }
+
+/** One choice of a select. */
+export interface SelectOption {
+  value: string
+  label: string
+}
+
+/** Props of a labelled select. */
+export interface SelectFieldProps {
+  name: string
+  label: string
+  options: SelectOption[]
+  value?: string | null
+  error?: string
+  hint?: RemixNode
+  required?: boolean
+  /** Label of an empty first option, for optional selects. */
+  emptyLabel?: string
+}
+
+/** A labelled select with its hint and error message. */
+export function SelectField(handle: Handle<SelectFieldProps>) {
+  return () => {
+    const p = handle.props
+    const id = `field-${p.name}`
+    return (
+      <div class={p.error ? 'field field-invalid' : 'field'}>
+        <label for={id}>
+          {p.label}
+          {p.required ? null : <span class="optional"> (facultatif)</span>}
+        </label>
+        {p.hint ? (
+          <p class="hint" id={`${id}-hint`}>
+            {p.hint}
+          </p>
+        ) : null}
+        <select
+          id={id}
+          name={p.name}
+          required={p.required}
+          aria-invalid={p.error ? 'true' : undefined}
+          aria-describedby={p.error ? `${id}-error` : undefined}
+        >
+          {p.emptyLabel !== undefined ? <option value="">{p.emptyLabel}</option> : null}
+          {p.options.map((option) => (
+            <option key={option.value} value={option.value} selected={option.value === p.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {p.error ? (
+          <p class="error" id={`${id}-error`}>
+            {p.error}
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+}

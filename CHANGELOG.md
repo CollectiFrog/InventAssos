@@ -23,6 +23,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Responsibles edit their collectif's description and contact phone.
 - Administration is one queue at `/admin` with pending accounts, collectifs and responsibles and their counts.
 - Storage locations: responsibles create, edit and delete their collectif's locations from "Mes lieux".
+- Items: add equipment (category, quantity, brand, model, condition, value…) to a location you manage; "Mon matériel" lists it.
 - Location page; only the city is shown to others, the address and notes stay with the location's managers and admins.
 - Personal storage locations: every validated user lists the places where they keep equipment.
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
