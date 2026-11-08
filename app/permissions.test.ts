@@ -6,6 +6,7 @@ import {
   canDisableAccount,
   canEditCollectif,
   canEditOwnProfile,
+  canManageCollectifLocations,
   canManageResponsibles,
   canRequestCollectif,
   canRequestResponsibility,
@@ -85,5 +86,19 @@ describe('permissions: accounts', () => {
     assert.equal(canEditCollectif(user({ managedCollectifIds: new Set(['c2']) }), 'c1'), false)
     assert.equal(canEditCollectif(user(), 'c1'), false)
     assert.equal(canEditCollectif(null, 'c1'), false)
+  })
+
+  it('"Create, edit, delete C\'s locations": admin and responsible of C', () => {
+    assert.equal(canManageCollectifLocations(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(
+      canManageCollectifLocations(user({ managedCollectifIds: new Set(['c1']) }), 'c1'),
+      true,
+    )
+    assert.equal(
+      canManageCollectifLocations(user({ managedCollectifIds: new Set(['c2']) }), 'c1'),
+      false,
+    )
+    assert.equal(canManageCollectifLocations(user(), 'c1'), false)
+    assert.equal(canManageCollectifLocations(null, 'c1'), false)
   })
 })

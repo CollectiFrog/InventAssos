@@ -25,6 +25,12 @@ export const routes = route({
     edit: form('/collectifs/:slug/modifier'),
     requestResponsibility: post('/collectifs/:slug/devenir-responsable'),
   },
+  locations: {
+    index: get('/lieux'),
+    create: form('/lieux/nouveau'),
+    edit: form('/lieux/:locationId/modifier'),
+    remove: post('/lieux/:locationId/supprimer'),
+  },
   admin: {
     index: get('/admin'),
     approveAccount: post('/admin/comptes/:userId/accepter'),

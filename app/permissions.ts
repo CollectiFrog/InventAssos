@@ -55,3 +55,19 @@ export function canEditCollectif(actor: Actor, collectifId: string): boolean {
   if (!isValidatedUser(actor)) return false
   return actor.isAdmin || actor.managedCollectifIds.has(collectifId)
 }
+
+/** "Create, edit, delete C's locations": platform admin, or an active responsible of C. */
+export function canManageCollectifLocations(actor: Actor, collectifId: string): boolean {
+  if (!isValidatedUser(actor)) return false
+  return actor.isAdmin || actor.managedCollectifIds.has(collectifId)
+}
+
+/** Whoever may edit or delete this location, according to its owner. */
+export function canManageLocation(
+  actor: Actor,
+  location: { collectif_id: string | null; user_id: string | null },
+): boolean {
+  if (location.collectif_id !== null)
+    return canManageCollectifLocations(actor, location.collectif_id)
+  return false
+}

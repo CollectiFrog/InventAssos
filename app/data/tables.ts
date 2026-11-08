@@ -99,3 +99,20 @@ export const responsibles = table({
 })
 
 export type Responsible = TableRow<typeof responsibles>
+
+export const locations = table({
+  name: 'locations',
+  columns: {
+    id: c.uuid(),
+    name: c.text(),
+    city: c.text(),
+    address: c.text().nullable(),
+    notes: c.text().nullable(),
+    collectif_id: c.uuid().nullable(),
+    user_id: c.uuid().nullable(),
+    created_at: c.timestamp({ withTimezone: true }),
+    updated_at: c.timestamp({ withTimezone: true }),
+  },
+})
+
+export type Location = TableRow<typeof locations>
