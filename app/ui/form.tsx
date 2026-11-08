@@ -1,0 +1,74 @@
+import type { Handle, RemixNode } from 'remix/component'
+
+/** Field errors keyed by field name, as returned by `parseForm`. */
+export type FieldErrors = Partial<Record<string, string>>
+
+/** Hidden CSRF token; every POST form must include it (csrf middleware). */
+export function CsrfField(handle: Handle<{ token: string }>) {
+  return () => <input type="hidden" name="_csrf" value={handle.props.token} />
+}
+
+/** Props of a labelled text input. */
+export interface TextFieldProps {
+  name: string
+  label: string
+  value?: string | null
+  error?: string
+  hint?: RemixNode
+  type?: 'text' | 'email' | 'tel' | 'number' | 'search'
+  required?: boolean
+  autoComplete?: string
+  maxLength?: number
+}
+
+/** A labelled input with its hint and error message, linked for screen readers. */
+export function TextField(handle: Handle<TextFieldProps>) {
+  return () => {
+    const p = handle.props
+    const id = `field-${p.name}`
+    const describedBy = [p.hint ? `${id}-hint` : null, p.error ? `${id}-error` : null]
+      .filter(Boolean)
+      .join(' ')
+
+    return (
+      <div class={p.error ? 'field field-invalid' : 'field'}>
+        <label for={id}>
+          {p.label}
+          {p.required ? null : <span class="optional"> (facultatif)</span>}
+        </label>
+        {p.hint ? (
+          <p class="hint" id={`${id}-hint`}>
+            {p.hint}
+          </p>
+        ) : null}
+        <input
+          id={id}
+          name={p.name}
+          // The JSX types narrow attributes per input type; this component accepts the text-like ones.
+          type={(p.type ?? 'text') as 'text'}
+          value={p.value ?? ''}
+          required={p.required}
+          autoComplete={p.autoComplete}
+          maxLength={p.maxLength}
+          aria-invalid={p.error ? 'true' : undefined}
+          aria-describedby={describedBy || undefined}
+        />
+        {p.error ? (
+          <p class="error" id={`${id}-error`}>
+            {p.error}
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+}
+
+/** Banner shown above a form that failed validation. */
+export function ErrorSummary(handle: Handle<{ errors: FieldErrors }>) {
+  return () =>
+    Object.keys(handle.props.errors).length === 0 ? null : (
+      <div class="notice notice-error" role="alert">
+        Le formulaire contient des erreurs : corrigez les champs signalés.
+      </div>
+    )
+}

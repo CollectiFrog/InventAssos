@@ -9,6 +9,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 ### Added
 
 - First page of the application, in French, served from a Remix 3 + PostgreSQL skeleton.
+- Sign-up: a visitor asks for an account with their name and e-mail; platform admins are notified by e-mail.
 
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD

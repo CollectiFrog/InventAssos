@@ -1,7 +1,5 @@
-// Helpers to build requests against the router in tests.
-
-/** Origin used for every test request. */
-export const testOrigin = 'http://inventassos.test'
+// Helpers to build bare requests against the router in tests.
+import { testOrigin } from './app.ts'
 
 /** Builds a GET request for a path. */
 export function get(path: string, headers?: HeadersInit): Request {

@@ -20,9 +20,9 @@ test:
 build:
 	NODE_ENV=production node --import remix/node-tsx --input-type=module -e "await import('./app/router.ts')"
 
-# Local development: database in Docker, app with auto-restart on http://localhost:3000.
+# Local development: database and Mailpit in Docker, app with auto-restart on http://localhost:3000.
 db:
-	docker compose up -d --wait db
+	docker compose up -d --wait db mail
 
 dev: db
 	npm run dev

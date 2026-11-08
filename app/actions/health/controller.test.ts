@@ -1,11 +1,10 @@
 import * as assert from 'remix/assert'
 import type { Database } from 'remix/data-table'
 import { after, before, describe, it } from 'remix/test'
-
+import { createTestApp } from '../../../test/app.ts'
 import { openTestDatabase } from '../../../test/database.ts'
 import { get } from '../../../test/http.ts'
 import { openDatabase } from '../../db.ts'
-import { createAppRouter } from '../../router.ts'
 import { routes } from '../../routes.ts'
 
 describe('health probes', () => {
@@ -24,7 +23,7 @@ describe('health probes', () => {
   })
 
   it('liveness answers 200 without querying the database', async () => {
-    const router = createAppRouter({ db: unreachable })
+    const router = createTestApp(unreachable).router
     const response = await router.fetch(get(routes.health.live.href()))
 
     assert.equal(response.status, 200)
@@ -33,7 +32,7 @@ describe('health probes', () => {
   })
 
   it('readiness answers 200 when the database answers', async () => {
-    const router = createAppRouter({ db })
+    const router = createTestApp(db).router
     const response = await router.fetch(get(routes.health.ready.href()))
 
     assert.equal(response.status, 200)
@@ -41,7 +40,7 @@ describe('health probes', () => {
   })
 
   it('readiness answers 503 when the database is unreachable', async () => {
-    const router = createAppRouter({ db: unreachable })
+    const router = createTestApp(unreachable).router
     const response = await router.fetch(get(routes.health.ready.href()))
 
     assert.equal(response.status, 503)

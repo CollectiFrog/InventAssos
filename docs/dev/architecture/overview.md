@@ -23,26 +23,30 @@ flowchart LR
 
 ## Components
 
-| Component       | Responsibility                                     | Code / where                             |
-|-----------------|----------------------------------------------------|------------------------------------------|
-| Entry point     | read config, migrate, listen, shut down cleanly    | `server.ts`, `app/config.ts`             |
-| Routes          | the URL contract, used for every link and redirect | `app/routes.ts`                          |
-| Router          | middleware chain and controller mapping            | `app/router.ts`, `app/middleware/`       |
-| Controllers     | pages, forms, server actions                       | `app/actions/<area>/controller.tsx`      |
-| Views           | server-rendered Remix components (ADR 0015)        | `app/actions/**/*-page.tsx`, `app/ui/`   |
-| Auth            | sign-up, e-mail sign-in links, sessions, CSRF      | `app/` (V0.2)                            |
-| Permissions     | one function per action, deny by default           | `app/` (V0.2)                            |
-| Data access     | one module per entity, the only place with SQL     | `app/data/`                              |
-| Migrations      | versioned SQL, applied at startup (ADR 0013)       | `db/migrations/NNNN_slug/{up,down}.sql`  |
-| Mailer          | sign-in links and admin notifications through SMTP | `app/` (V0.2)                            |
-| Import / export | CSV and Excel parsing and generation, server side  | `app/` (V0.8)                            |
-| Static files    | stylesheet, favicon                                | `public/`                                |
-| Tests           | router tests against PostgreSQL (ADR 0012)         | `**/*.test.ts` next to the code, `test/` |
+| Component       | Responsibility                                     | Code / where                              |
+|-----------------|----------------------------------------------------|-------------------------------------------|
+| Entry point     | read config, migrate, listen, shut down cleanly    | `server.ts`, `app/config.ts`              |
+| Routes          | the URL contract, used for every link and redirect | `app/routes.ts`                           |
+| Router          | middleware chain and controller mapping            | `app/router.ts`, `app/middleware/`        |
+| Controllers     | pages, forms, server actions                       | `app/actions/<area>/controller.tsx`       |
+| Views           | server-rendered Remix components (ADR 0015)        | `app/actions/**/*-page.tsx`, `app/ui/`    |
+| Auth            | sign-up, e-mail sign-in links, sessions, CSRF      | `app/actions/sign-up/`, `app/middleware/` |
+| Permissions     | one function per action, deny by default           | `app/` (V0.2)                             |
+| Data access     | one module per entity, the only place with SQL     | `app/data/`                               |
+| Migrations      | versioned SQL, applied at startup (ADR 0013)       | `db/migrations/NNNN_slug/{up,down}.sql`   |
+| Mailer          | sign-in links and admin notifications (ADR 0016)   | `app/mail/`                               |
+| Import / export | CSV and Excel parsing and generation, server side  | `app/` (V0.8)                             |
+| Static files    | stylesheet, favicon                                | `public/`                                 |
+| Health probes   | `/healthz` (process), `/readyz` (database)         | `app/actions/health/`                     |
+| Tests           | router tests against PostgreSQL (ADR 0012)         | `**/*.test.ts` next to the code, `test/`  |
 
 A request goes `server.ts` → `router.fetch` → middleware (`app/middleware/index.ts`) → the
 controller action matched in `app/routes.ts` → a `Response`. `createAppRouter(deps)` receives its
-services (database, later mailer and session storage), so tests build the same router with test
-doubles.
+services (database, mailer, settings, session secret), so tests build the same router with test
+doubles (`test/app.ts`).
+
+Middleware order: static files → database, mailer, settings on the context → session
+(PostgreSQL, ADR 0017) → form data → CSRF check on unsafe methods → renderer.
 
 ## Data
 
@@ -69,3 +73,5 @@ session secret, `PLATFORM_ADMIN_EMAILS`, S3 (from V0.7). No deployment value liv
 | Migrations              | [0013](../../adr/0013-sql-migrations-at-startup/)  |
 | Lint and format         | [0014](../../adr/0014-lint-and-format-with-biome/) |
 | Server-rendered HTML    | [0015](../../adr/0015-server-rendered-html/)       |
+| E-mail                  | [0016](../../adr/0016-mail-through-nodemailer/)    |
+| Sessions                | [0017](../../adr/0017-sessions-in-postgresql/)     |

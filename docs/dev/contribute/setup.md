@@ -28,7 +28,8 @@ cp .env.example .env  # defaults match compose.yaml
 make dev              # starts PostgreSQL in Docker, then the app on http://localhost:3000
 ```
 
-`make dev` restarts the server when a file changes. Migrations in `db/migrations/` are applied at
+`make dev` restarts the server when a file changes. Without `SMTP_URL`, e-mails (sign-in links)
+are printed in the terminal; with `SMTP_URL=smtp://localhost:1025` they land in Mailpit. Migrations in `db/migrations/` are applied at
 startup. Useful commands:
 
 | Command                                                  | Does                                             |

@@ -1,14 +1,24 @@
 // Application configuration, read once from environment variables (see .env.example).
 
-/** Settings the app needs at runtime; nothing here has a default for production secrets. */
+/** Settings the app needs at runtime. Production never falls back to a default secret. */
 export interface Config {
+  production: boolean
   databaseUrl: string
   port: number
+  /** Public origin, used in e-mail links and to check the Origin of form posts. */
+  appUrl: string
+  sessionSecret: string
+  /** Lower-cased e-mails that are platform admins (US-0.2.5). */
+  adminEmails: ReadonlySet<string>
+  /** SMTP connection URL; without it outside production, e-mails are written to the log. */
+  smtpUrl: string | null
+  mailFrom: string
 }
 
 /** Reads and validates the configuration; throws with every missing or invalid variable listed. */
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const errors: string[] = []
+  const production = env.NODE_ENV === 'production'
 
   const databaseUrl = env.DATABASE_URL ?? ''
   if (databaseUrl === '') errors.push('DATABASE_URL is required')
@@ -16,7 +26,37 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const port = Number(env.PORT ?? '3000')
   if (!Number.isInteger(port) || port < 1 || port > 65535) errors.push('PORT must be a TCP port')
 
+  const appUrl = (env.APP_URL ?? (production ? '' : `http://localhost:${port}`)).replace(/\/$/, '')
+  if (!URL.canParse(appUrl)) errors.push('APP_URL must be an absolute URL (https://…)')
+
+  const sessionSecret = env.SESSION_SECRET ?? ''
+  if (sessionSecret.length < 32) errors.push('SESSION_SECRET must be at least 32 characters')
+
+  const smtpUrl = env.SMTP_URL?.trim() || null
+  if (production && smtpUrl === null) errors.push('SMTP_URL is required in production')
+
+  const mailFrom = env.MAIL_FROM?.trim() || 'InventAssos <noreply@collecti-frog.fr>'
+
   if (errors.length > 0) throw new Error(`Invalid configuration: ${errors.join('; ')}`)
 
-  return { databaseUrl, port }
+  return {
+    production,
+    databaseUrl,
+    port,
+    appUrl,
+    sessionSecret,
+    adminEmails: parseEmailList(env.PLATFORM_ADMIN_EMAILS),
+    smtpUrl,
+    mailFrom,
+  }
+}
+
+/** Parses a comma-separated list of e-mails, ignoring blanks and case. */
+export function parseEmailList(value: string | undefined): ReadonlySet<string> {
+  return new Set(
+    (value ?? '')
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter((email) => email !== ''),
+  )
 }
