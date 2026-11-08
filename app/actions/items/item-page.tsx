@@ -2,8 +2,10 @@ import type { Handle, RemixNode } from 'remix/component'
 
 import type { ItemDetails } from '../../data/items.ts'
 import { routes } from '../../routes.ts'
-import { conditionLabels, formatEuros } from '../../ui/labels.ts'
+import { archiveReasonLabels, conditionLabels, formatEuros } from '../../ui/labels.ts'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
+
+const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'Europe/Paris' })
 
 /** Props of an item's page. */
 export interface ItemPageProps {
@@ -26,6 +28,13 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
           {item.name}
           {item.quantity > 1 ? ` × ${item.quantity}` : null}
         </h1>
+        {item.archived_at && item.archive_reason ? (
+          <p class="notice">
+            Archivé le {dateFormat.format(new Date(String(item.archived_at)))} :{' '}
+            {archiveReasonLabels[item.archive_reason].toLowerCase()}. Il n’apparaît plus dans
+            l’inventaire.
+          </p>
+        ) : null}
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}
@@ -81,13 +90,16 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
           </dd>
         </dl>
         {item.description ? <p class="prose">{item.description}</p> : null}
-        {canEdit ? (
+        {canEdit && !item.archived_at ? (
           <p class="actions">
             <a class="button secondary" href={routes.items.edit.index.href({ itemId: item.id })}>
               Modifier
             </a>
             <a class="button secondary" href={routes.items.move.index.href({ itemId: item.id })}>
               Déplacer
+            </a>
+            <a class="button secondary" href={routes.items.archive.index.href({ itemId: item.id })}>
+              Archiver
             </a>
           </p>
         ) : null}

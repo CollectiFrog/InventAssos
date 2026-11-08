@@ -188,3 +188,16 @@ export async function updateItemFields(
 export async function moveItem(db: Database, itemId: string, locationId: string): Promise<void> {
   await db.update(items, itemId, { location_id: locationId, updated_at: new Date() })
 }
+
+/** Takes an item out of the inventory, keeping its row and history (no hard delete in V0.x). */
+export async function archiveItem(
+  db: Database,
+  itemId: string,
+  reason: NonNullable<Item['archive_reason']>,
+): Promise<void> {
+  await db.update(items, itemId, {
+    archived_at: new Date(),
+    archive_reason: reason,
+    updated_at: new Date(),
+  })
+}

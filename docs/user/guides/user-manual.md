@@ -65,3 +65,9 @@ Sur la page d'un objet, **Déplacer** propose les lieux que vous gérez. Il faut
 l'objet **et** gérer le lieu de destination : un responsable déplace le matériel entre les lieux de
 son collectif ; une personne peut reprendre chez elle l'objet qu'elle avait déposé au local. Chaque
 déplacement est noté dans l'historique de l'objet.
+
+## Archiver du matériel
+
+Un objet vendu, perdu ou cassé s'**archive** depuis sa page (même droits que pour le modifier) :
+choisissez la raison. Il disparaît de l'inventaire et des listes, mais n'est pas supprimé : sa page
+et son historique restent consultables par ceux qui le gèrent.
