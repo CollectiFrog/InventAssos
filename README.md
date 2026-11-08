@@ -13,8 +13,16 @@ autres le trouvent et contactent le propriétaire.*
 
 ## Quick start
 
-Comes with V0.1 (Remix 3 + PostgreSQL skeleton). See
-[`docs/dev/contribute/setup.md`](docs/dev/contribute/setup.md).
+Requires Node.js ≥ 24.3 and Docker.
+
+```sh
+npm ci
+cp .env.example .env
+make dev     # PostgreSQL in Docker, then the app on http://localhost:3000
+make check   # lint, typecheck, test, build
+```
+
+Details: [`docs/dev/contribute/setup.md`](docs/dev/contribute/setup.md).
 
 ## Contributing
 

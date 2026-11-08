@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/remix/schema/remix.json",
+  "test": {
+    "exclude": ["node_modules/**", "docs/**", "dist/**"],
+    // One file at a time: test files share one PostgreSQL database.
+    "concurrency": 1,
+    "setup": "./test/setup.ts"
+  },
+  "db": {
+    "adapter": { "type": "postgres", "connectionString": { "env": "DATABASE_URL" } },
+    "migrations": { "directory": "./db/migrations" }
+  }
+}
