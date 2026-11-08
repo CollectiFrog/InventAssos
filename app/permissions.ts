@@ -78,3 +78,14 @@ export function canManageLocation(
   if (location.user_id !== null) return canManagePersonalLocations(actor, location.user_id)
   return false
 }
+
+/**
+ * "See a location's full address": its managers and the platform admin. Everybody else gets the
+ * city only (ADR 0010); notes follow the same rule since they often hold access codes.
+ */
+export function canSeeFullAddress(
+  actor: Actor,
+  location: { collectif_id: string | null; user_id: string | null },
+): boolean {
+  return isActiveAdmin(actor) || canManageLocation(actor, location)
+}

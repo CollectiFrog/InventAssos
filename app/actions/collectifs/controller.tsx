@@ -7,7 +7,7 @@ import {
   listCollectifs,
   listPendingRequestsBy,
 } from '../../data/collectifs.ts'
-import { listCollectifLocations } from '../../data/locations.ts'
+import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
 import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/responsibles.ts'
 import { sendSafely } from '../../mail/mailer.ts'
 import { newResponsibleRequestMail } from '../../mail/messages.ts'
@@ -16,6 +16,7 @@ import {
   canManageCollectifLocations,
   canManageResponsibles,
   canRequestResponsibility,
+  canSeeFullAddress,
   isValidatedUser,
 } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
@@ -65,7 +66,9 @@ export default createController(routes.collectifs, {
           canManageResponsibles={canManageResponsibles(actor)}
           membership={membership}
           canEdit={canEditCollectif(actor, collectif.id)}
-          locations={await listCollectifLocations(db, collectif.id)}
+          locations={(await listCollectifLocations(db, collectif.id)).map((location) =>
+            redactLocation(location, canSeeFullAddress(actor, location)),
+          )}
           canManageLocations={canManageCollectifLocations(actor, collectif.id)}
           notice={typeof notice === 'string' ? notice : undefined}
         />,

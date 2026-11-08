@@ -3,11 +3,18 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
-import { deleteLocation, findLocationById, listLocationsOwnedBy } from '../../data/locations.ts'
-import { canManageLocation, isValidatedUser } from '../../permissions.ts'
+import {
+  deleteLocation,
+  findLocationById,
+  findLocationWithOwner,
+  listLocationsOwnedBy,
+  redactLocation,
+} from '../../data/locations.ts'
+import { canManageLocation, canSeeFullAddress, isValidatedUser } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
+import { LocationPage } from './location-page.tsx'
 import { LocationsPage } from './locations-pages.tsx'
 import { ownerOptionsFor } from './owners.ts'
 
@@ -28,6 +35,22 @@ export default createController(routes.locations, {
           locations={await listLocationsOwnedBy(db, actor.id, [...actor.managedCollectifIds])}
           canCreate={(await ownerOptionsFor(db, actor)).length > 0}
           notice={typeof notice === 'string' ? notice : undefined}
+        />,
+      )
+    },
+
+    async show(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      if (!isValidatedUser(actor)) return forbidden(context)
+
+      const location = await findLocationWithOwner(context.db, context.params.locationId)
+      if (location === null) return notFound(context)
+      return context.render(
+        <LocationPage
+          viewer={viewerOf(context)}
+          location={redactLocation(location, canSeeFullAddress(actor, location))}
+          canManage={canManageLocation(actor, location)}
         />,
       )
     },
