@@ -35,7 +35,10 @@ export function Layout(handle: Handle<LayoutProps>) {
             <nav aria-label="Compte" class="account-nav">
               {viewer ? (
                 <>
-                  <span class="viewer">{viewer.name}</span>
+                  <span class="viewer">
+                    {viewer.name}
+                    {viewer.isAdmin ? <span class="badge">admin</span> : null}
+                  </span>
                   <form method="post" action={routes.signOut.href()}>
                     <input type="hidden" name="_csrf" value={viewer.csrfToken} />
                     <button type="submit" class="secondary">

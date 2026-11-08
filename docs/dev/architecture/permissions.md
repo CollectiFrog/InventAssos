@@ -5,6 +5,11 @@ sidebar:
   order: 3
 ---
 
+**Platform admin** means: the account's e-mail is listed in `PLATFORM_ADMIN_EMAILS`, read on every
+request (`context.currentUser.isAdmin`). A listed e-mail becomes an active account at its first
+sign-in, without approval; removing it from the list removes the rights at the next request.
+`users.is_platform_admin` only records the last known state.
+
 Everything is denied unless a row below allows it. Pending, rejected, disabled and deleted users
 can only see their status page and sign out.
 

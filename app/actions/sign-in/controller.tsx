@@ -4,7 +4,7 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { consumeSignInToken, createSignInToken } from '../../data/sign-in-tokens.ts'
-import { findUserByEmail, findUserById } from '../../data/users.ts'
+import { createUser, findUserByEmail, findUserById, syncPlatformAdmin } from '../../data/users.ts'
 import { sendSafely } from '../../mail/mailer.ts'
 import { signInLinkMail } from '../../mail/messages.ts'
 import { sessionUserKey } from '../../middleware/current-user.ts'
@@ -43,7 +43,13 @@ export const signInFormController = createController(routes.signIn.form, {
       }
 
       const { db, mailer, settings } = context
-      const user = await findUserByEmail(db, parsed.value.email)
+      const email = parsed.value.email
+      let user = await findUserByEmail(db, email)
+      // A listed platform admin may sign in before anyone created their account (US-0.2.5).
+      if (user === null && settings.adminEmails.has(email)) {
+        user = await createUser(db, { email, name: email.split('@')[0] ?? email, status: 'active' })
+      }
+      if (user !== null) user = await syncPlatformAdmin(db, user, settings.adminEmails)
       if (user !== null && canSignIn.has(user.status)) {
         const token = await createSignInToken(db, user.id)
         const url = settings.appUrl + routes.signIn.link.index.href({ token })
@@ -75,9 +81,10 @@ export const signInLinkController = createController(routes.signIn.link, {
     },
 
     async action(context) {
-      const { db, session } = context
+      const { db, session, settings } = context
       const userId = await consumeSignInToken(db, context.params.token)
-      const user = userId === null ? null : await findUserById(db, userId)
+      let user = userId === null ? null : await findUserById(db, userId)
+      if (user !== null) user = await syncPlatformAdmin(db, user, settings.adminEmails)
       if (user === null || !canSignIn.has(user.status)) {
         return context.render(<SignInLinkInvalidPage />, { status: 400 })
       }

@@ -160,3 +160,14 @@ button.danger {
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+.badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  vertical-align: middle;
+}
