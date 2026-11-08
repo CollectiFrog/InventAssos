@@ -118,3 +118,29 @@ export function canDepositForPerson(
 ): boolean {
   return location.collectif_id !== null && canManageCollectifLocations(actor, location.collectif_id)
 }
+
+/** The ownership and storage of an item, as the permission checks need them. */
+export interface ItemAccess {
+  owner_collectif_id: string | null
+  owner_user_id: string | null
+  /** Owner of the location the item is stored in. */
+  locationCollectifId: string | null
+  locationUserId: string | null
+}
+
+/**
+ * "Edit, move, archive an item": admin; responsible of C if the item is in C's location or owned
+ * by C; validated user if they own it or it is in their own location (ADR 0009).
+ */
+export function canEditItem(actor: Actor, item: ItemAccess): boolean {
+  if (!isValidatedUser(actor)) return false
+  if (actor.isAdmin) return true
+  if (item.owner_user_id === actor.id) return true
+  if (item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id)) {
+    return true
+  }
+  return canManageLocation(actor, {
+    collectif_id: item.locationCollectifId,
+    user_id: item.locationUserId,
+  })
+}

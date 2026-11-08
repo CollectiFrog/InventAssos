@@ -164,3 +164,22 @@ export async function locationHoldsItems(db: Database, locationId: string): Prom
   const item = await db.findOne(items, { where: { location_id: locationId } })
   return item !== null
 }
+
+/** Updates the descriptive fields; returns the names of the fields that changed (for the log). */
+export async function updateItemFields(
+  db: Database,
+  item: Item,
+  fields: ItemFields,
+): Promise<string[]> {
+  const next = toColumns(fields)
+  const changed = (Object.keys(next) as (keyof typeof next)[]).filter((key) => {
+    const before = item[key]
+    const after = next[key]
+    if (key === 'estimated_value') {
+      return (before === null ? null : Number(before)) !== after
+    }
+    return before !== after
+  })
+  if (changed.length > 0) await db.update(items, item.id, { ...next, updated_at: new Date() })
+  return changed
+}

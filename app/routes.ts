@@ -29,6 +29,7 @@ export const routes = route({
     index: get('/materiel'),
     create: form('/materiel/nouveau'),
     show: get('/materiel/:itemId'),
+    edit: form('/materiel/:itemId/modifier'),
   },
   locations: {
     index: get('/lieux'),
