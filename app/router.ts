@@ -1,23 +1,20 @@
 import { createRouter } from 'remix/router'
 
 import accountController from './actions/account/controller.tsx'
-import profileController from './actions/account/profile-controller.tsx'
-import adminCollectifsController from './actions/admin/collectifs-controller.tsx'
+import profileController from './actions/account/profile/controller.tsx'
+import adminCollectifsController from './actions/admin/collectifs/controller.tsx'
 import adminController from './actions/admin/controller.tsx'
-import adminResponsiblesController from './actions/admin/responsibles-controller.tsx'
-import {
-  collectifsController,
-  requestCollectifController,
-} from './actions/collectifs/controller.tsx'
-import editCollectifController from './actions/collectifs/edit-controller.tsx'
+import adminResponsiblesController from './actions/admin/responsibles/controller.tsx'
+import collectifsController from './actions/collectifs/controller.tsx'
+import editCollectifController from './actions/collectifs/edit/controller.tsx'
+import requestCollectifController from './actions/collectifs/request/controller.tsx'
 import controller from './actions/controller.tsx'
 import healthController from './actions/health/controller.ts'
-import {
-  signInController,
-  signInFormController,
-  signInLinkController,
-} from './actions/sign-in/controller.tsx'
-import { signUpController, signUpFormController } from './actions/sign-up/controller.tsx'
+import signInController from './actions/sign-in/controller.tsx'
+import signInFormController from './actions/sign-in/form/controller.tsx'
+import signInLinkController from './actions/sign-in/link/controller.tsx'
+import signUpController from './actions/sign-up/controller.tsx'
+import signUpFormController from './actions/sign-up/form/controller.tsx'
 import { type AppDependencies, appMiddleware } from './middleware/index.ts'
 import { routes } from './routes.ts'
 

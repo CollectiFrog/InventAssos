@@ -3,12 +3,12 @@ import { getCsrfToken } from 'remix/middleware/csrf'
 import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
-import { findUserById, updateProfile } from '../../data/users.ts'
-import { canEditOwnProfile } from '../../permissions.ts'
-import { routes } from '../../routes.ts'
-import { formValue, optionalPhone, parseForm, requiredText } from '../../validation.ts'
-import { forbidden, requireUser } from '../guards.tsx'
-import { viewerOf } from '../viewer.ts'
+import { findUserById, updateProfile } from '../../../data/users.ts'
+import { canEditOwnProfile } from '../../../permissions.ts'
+import { routes } from '../../../routes.ts'
+import { formValue, optionalPhone, parseForm, requiredText } from '../../../validation.ts'
+import { forbidden, requireUser } from '../../guards.tsx'
+import { viewerOf } from '../../viewer.ts'
 import { ProfilePage } from './profile-page.tsx'
 
 const profileSchema = f.object({

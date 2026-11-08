@@ -23,8 +23,8 @@ export const CurrentUserKey = createContextKey<CurrentUser | null>()
 /** Session key holding the signed-in user's ID. */
 export const sessionUserKey = 'userId'
 
-/** Statuses that keep a session; a disabled or deleted account is signed out on its next request. */
-const signedInStatuses: ReadonlySet<UserStatus> = new Set(['pending', 'active', 'rejected'])
+/** Statuses that keep a session and may sign in; disabled and deleted accounts may not. */
+export const signedInStatuses: ReadonlySet<UserStatus> = new Set(['pending', 'active', 'rejected'])
 
 /** Loads the user whose ID is in the session. Needs the session middleware before it. */
 export function loadCurrentUser(
