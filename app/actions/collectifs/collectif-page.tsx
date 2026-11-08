@@ -1,9 +1,11 @@
 import type { Handle } from 'remix/component'
 
+import type { ItemSummary } from '../../data/items.ts'
 import type { Collectif, Location } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
+import { ItemList } from '../items/items-pages.tsx'
 
 /** The viewer's relation to the collectif, which decides the call to action. */
 export type Membership = 'responsible' | 'pending' | 'none'
@@ -20,6 +22,7 @@ export interface CollectifPageProps {
   canEdit: boolean
   locations: Location[]
   canManageLocations: boolean
+  items: ItemSummary[]
   notice?: string
 }
 
@@ -36,6 +39,7 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
       canEdit,
       locations,
       canManageLocations,
+      items,
       notice,
     } = handle.props
     const slug = collectif.slug
@@ -61,6 +65,8 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           <dt>Responsables</dt>
           <dd>{responsibles.length > 0 ? responsibles.map((r) => r.name).join(', ') : 'aucun'}</dd>
         </dl>
+        <h2>Matériel</h2>
+        {items.length === 0 ? <p>Aucun matériel déclaré.</p> : <ItemList items={items} />}
         <h2>Lieux de stockage</h2>
         {locations.length === 0 ? (
           <p>Aucun lieu déclaré.</p>

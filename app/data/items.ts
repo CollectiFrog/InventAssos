@@ -132,6 +132,8 @@ export interface ItemDetails extends Item {
   locationUserId: string | null
   ownerName: string
   ownerSlug: string | null
+  /** Set when a person owns the item, to link to their page. */
+  ownerUserId: string | null
   /** The collectif's contact phone, or the owner's phone; null when none is shared. */
   contactPhone: string | null
 }
@@ -161,6 +163,7 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
     ownerName: String(row.owner_name ?? ''),
     ownerSlug: row.owner_slug == null ? null : String(row.owner_slug),
     contactPhone: row.contact_phone == null ? null : String(row.contact_phone),
+    ownerUserId: item.owner_user_id,
   }
 }
 
@@ -274,4 +277,18 @@ export async function listOwnerContactEmails(db: Database, item: Item): Promise<
         select email from users where id = ${item.owner_user_id} and status = 'active'
       `)
   return (result.rows ?? []).map((row) => String(row.email))
+}
+
+/** Active items owned by a collectif or a person, by name (US-0.6.4). */
+export async function listItemsOwnedBy(db: Database, owner: ItemOwner): Promise<ItemSummary[]> {
+  const condition =
+    'collectifId' in owner
+      ? sql`i.owner_collectif_id = ${owner.collectifId}`
+      : sql`i.owner_user_id = ${owner.userId}`
+  const result = await db.exec(sql`
+    select ${summaryColumns} from items i ${summaryJoins}
+    where i.archived_at is null and ${condition}
+    order by lower(i.name), i.id
+  `)
+  return (result.rows ?? []).map(toSummary)
 }

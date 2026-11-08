@@ -7,6 +7,7 @@ import {
   listCollectifs,
   listPendingRequestsBy,
 } from '../../data/collectifs.ts'
+import { listItemsOwnedBy } from '../../data/items.ts'
 import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
 import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/responsibles.ts'
 import { sendSafely } from '../../mail/mailer.ts'
@@ -70,6 +71,7 @@ export default createController(routes.collectifs, {
             redactLocation(location, canSeeFullAddress(actor, location)),
           )}
           canManageLocations={canManageCollectifLocations(actor, collectif.id)}
+          items={await listItemsOwnedBy(db, { collectifId: collectif.id })}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
