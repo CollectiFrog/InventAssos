@@ -15,6 +15,7 @@ node_modules/
 dist/
 build/
 coverage/
+.coverage/
 
 # Claude Code local settings
 .claude/settings.local.json

@@ -12,6 +12,7 @@ and for humans. `CLAUDE.md` only imports this file: **never copy rules into it**
 |----------------------------------------------------------------|------------------------------------------------|
 | [`coding-conventions`](.ia/skills/coding-conventions/SKILL.md) | writing or reviewing any code, test, doc       |
 | [`git-workflow`](.ia/skills/git-workflow/SKILL.md)             | branching, committing, opening a PR, releasing |
+| [`remix`](.ia/skills/remix/SKILL.md)                           | writing or changing any app code               |
 
 Claude Code loads these skills automatically through the symlink `.claude/skills → ../.ia/skills`.
 Other agents: open the `SKILL.md` yourself before the task it covers.
@@ -39,16 +40,16 @@ Other agents: open the `SKILL.md` yourself before the task it covers.
 
 The CI calls the same targets as you. Run them before opening a PR.
 
-| Command          | Does                           |
-|------------------|--------------------------------|
-| `make lint`      | lint                           |
-| `make typecheck` | static type checks             |
-| `make test`      | unit tests                     |
-| `make build`     | production build               |
-| `make check`     | all four, in that order        |
-| `make docs`      | build both documentation sites |
-
-<!-- TEMPLATE: replace the Makefile placeholders with the project's real commands, then delete this line. -->
+| Command          | Does                             |
+|------------------|----------------------------------|
+| `make lint`      | lint                             |
+| `make typecheck` | static type checks               |
+| `make test`      | tests, against PostgreSQL        |
+| `make build`     | load the production module graph |
+| `make check`     | all four, in that order          |
+| `make docs`      | build both documentation sites   |
+| `make db`        | start PostgreSQL (Docker)        |
+| `make dev`       | `make db`, then the app on :3000 |
 
 ## Repository map
 
@@ -65,6 +66,11 @@ The CI calls the same targets as you. Run them before opening a PR.
 | `docs/site/`         | the Starlight app that renders both sites                   |
 | `.github/workflows/` | CI (PR checks), PR title, docs, release                     |
 | `CHANGELOG.md`       | user-visible changes, Keep a Changelog format               |
+| `server.ts`          | entry point: config, migrations, HTTP server                |
+| `app/`               | the Remix 3 application (routes, actions, data, ui)         |
+| `db/migrations/`     | SQL migrations, applied at startup                          |
+| `public/`            | static files served as is                                   |
+| `test/`              | shared test helpers (test database, requests)               |
 
 Project-specific rules go below this line, kept short.
 
@@ -72,7 +78,8 @@ Project-specific rules go below this line, kept short.
 
 - **Remix 3 is not React.** Remix 3 (stable since 2026-10-01) has its own component model and
   packages; most models were trained before it. Read the official docs
-  (<https://remix.run>, <https://api.remix.run>) before writing code. Never write React, Remix v2
+  (<https://remix.run>, <https://api.remix.run>, or offline `node_modules/remix/INDEX.md`) before
+  writing code; the [`remix`](.ia/skills/remix/SKILL.md) skill says how. Never write React, Remix v2
   or React Router code. See `docs/adr/0006-remix-3-full-stack.md`.
 - **Deny by default.** Every action is checked on the server against
   `docs/dev/architecture/permissions.md`; the UI is never the only barrier. Each rule has a test.

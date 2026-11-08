@@ -1,4 +1,4 @@
-# Weekly update PRs for CI actions and the docs site. Add the project's own ecosystems here.
+# Weekly update PRs for CI actions, the app and the docs site.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -6,6 +6,13 @@ updates:
     target-branch: dev
     schedule: { interval: weekly }
     commit-message: { prefix: ci }
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dev
+    schedule: { interval: weekly }
+    commit-message: { prefix: build, include: scope }
+    groups:
+      remix: { patterns: ['remix', '@remix-run/*'] }
   - package-ecosystem: npm
     directory: /docs/site
     target-branch: dev

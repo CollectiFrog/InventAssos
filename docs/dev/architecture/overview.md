@@ -23,17 +23,26 @@ flowchart LR
 
 ## Components
 
-| Component        | Responsibility                                     | Code / where            |
-|------------------|----------------------------------------------------|-------------------------|
-| Routes and views | pages, forms, server actions                       | `app/` (V0.1)           |
-| Auth             | sign-up, e-mail sign-in links, sessions, CSRF      | `app/` (V0.2)           |
-| Permissions      | one function per action, deny by default           | `app/` (V0.2)           |
-| Data access      | one module per entity, the only place with SQL     | `app/` (V0.1)           |
-| Migrations       | versioned schema changes, run at startup           | `db/migrations/` (V0.1) |
-| Mailer           | sign-in links and admin notifications through SMTP | `app/` (V0.2)           |
-| Import / export  | CSV and Excel parsing and generation, server side  | `app/` (V0.8)           |
+| Component       | Responsibility                                     | Code / where                             |
+|-----------------|----------------------------------------------------|------------------------------------------|
+| Entry point     | read config, migrate, listen, shut down cleanly    | `server.ts`, `app/config.ts`             |
+| Routes          | the URL contract, used for every link and redirect | `app/routes.ts`                          |
+| Router          | middleware chain and controller mapping            | `app/router.ts`, `app/middleware/`       |
+| Controllers     | pages, forms, server actions                       | `app/actions/<area>/controller.tsx`      |
+| Views           | server-rendered Remix components (ADR 0015)        | `app/actions/**/*-page.tsx`, `app/ui/`   |
+| Auth            | sign-up, e-mail sign-in links, sessions, CSRF      | `app/` (V0.2)                            |
+| Permissions     | one function per action, deny by default           | `app/` (V0.2)                            |
+| Data access     | one module per entity, the only place with SQL     | `app/data/`                              |
+| Migrations      | versioned SQL, applied at startup (ADR 0013)       | `db/migrations/NNNN_slug/{up,down}.sql`  |
+| Mailer          | sign-in links and admin notifications through SMTP | `app/` (V0.2)                            |
+| Import / export | CSV and Excel parsing and generation, server side  | `app/` (V0.8)                            |
+| Static files    | stylesheet, favicon                                | `public/`                                |
+| Tests           | router tests against PostgreSQL (ADR 0012)         | `**/*.test.ts` next to the code, `test/` |
 
-Paths are indicative until V0.1 sets them; update this table in the same PR.
+A request goes `server.ts` → `router.fetch` → middleware (`app/middleware/index.ts`) → the
+controller action matched in `app/routes.ts` → a `Response`. `createAppRouter(deps)` receives its
+services (database, later mailer and session storage), so tests build the same router with test
+doubles.
 
 ## Data
 
@@ -47,12 +56,16 @@ session secret, `PLATFORM_ADMIN_EMAILS`, S3 (from V0.7). No deployment value liv
 
 ## Decisions
 
-| Topic                   | ADR                                               |
-|-------------------------|---------------------------------------------------|
-| Framework               | [0006](../../adr/0006-remix-3-full-stack/)        |
-| Database                | [0007](../../adr/0007-postgresql/)                |
-| Accounts and sign-in    | [0008](../../adr/0008-app-managed-accounts/)      |
-| Ownership and locations | [0009](../../adr/0009-ownership-and-locations/)   |
-| Personal data retention | [0010](../../adr/0010-personal-data-retention/)   |
-| Admin validation        | [0011](../../adr/0011-platform-admin-validation/) |
-| Deployment              | [0005](../../adr/0005-deployment/)                |
+| Topic                   | ADR                                                |
+|-------------------------|----------------------------------------------------|
+| Framework               | [0006](../../adr/0006-remix-3-full-stack/)         |
+| Database                | [0007](../../adr/0007-postgresql/)                 |
+| Accounts and sign-in    | [0008](../../adr/0008-app-managed-accounts/)       |
+| Ownership and locations | [0009](../../adr/0009-ownership-and-locations/)    |
+| Personal data retention | [0010](../../adr/0010-personal-data-retention/)    |
+| Admin validation        | [0011](../../adr/0011-platform-admin-validation/)  |
+| Deployment              | [0005](../../adr/0005-deployment/)                 |
+| Tests                   | [0012](../../adr/0012-testing-with-remix-test/)    |
+| Migrations              | [0013](../../adr/0013-sql-migrations-at-startup/)  |
+| Lint and format         | [0014](../../adr/0014-lint-and-format-with-biome/) |
+| Server-rendered HTML    | [0015](../../adr/0015-server-rendered-html/)       |
