@@ -58,3 +58,10 @@ Un lieu qui contient encore du matériel ne peut pas être supprimé : déplacez
 Sur la page d'un objet, **Modifier** est proposé à son propriétaire (vous, ou les responsables du
 collectif propriétaire) et à ceux qui gèrent le lieu où il est rangé. Un objet que vous avez déposé
 au local d'un collectif reste donc modifiable par vous.
+
+## Déplacer du matériel
+
+Sur la page d'un objet, **Déplacer** propose les lieux que vous gérez. Il faut pouvoir modifier
+l'objet **et** gérer le lieu de destination : un responsable déplace le matériel entre les lieux de
+son collectif ; une personne peut reprendre chez elle l'objet qu'elle avait déposé au local. Chaque
+déplacement est noté dans l'historique de l'objet.

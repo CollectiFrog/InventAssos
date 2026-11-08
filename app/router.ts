@@ -13,6 +13,7 @@ import healthController from './actions/health/controller.ts'
 import itemsController from './actions/items/controller.tsx'
 import createItemController from './actions/items/create/controller.tsx'
 import editItemController from './actions/items/edit/controller.tsx'
+import moveItemController from './actions/items/move/controller.tsx'
 import locationsController from './actions/locations/controller.tsx'
 import createLocationController from './actions/locations/create/controller.tsx'
 import editLocationController from './actions/locations/edit/controller.tsx'
@@ -40,6 +41,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.items, itemsController)
   router.map(routes.items.create, createItemController)
   router.map(routes.items.edit, editItemController)
+  router.map(routes.items.move, moveItemController)
   router.map(routes.locations, locationsController)
   router.map(routes.locations.create, createLocationController)
   router.map(routes.locations.edit, editLocationController)

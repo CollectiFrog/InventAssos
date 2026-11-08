@@ -86,6 +86,9 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
             <a class="button secondary" href={routes.items.edit.index.href({ itemId: item.id })}>
               Modifier
             </a>
+            <a class="button secondary" href={routes.items.move.index.href({ itemId: item.id })}>
+              Déplacer
+            </a>
           </p>
         ) : null}
         {history}
