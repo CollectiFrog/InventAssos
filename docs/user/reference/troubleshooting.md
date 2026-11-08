@@ -1,6 +1,6 @@
 ---
-title: Troubleshooting
-description: Known problems and how to solve them.
+title: Dépannage
+description: Problèmes connus et solutions.
 ---
 
-<!-- Symptom as a heading, then cause and fix. -->
+<!-- Le symptôme en titre, puis la cause et la solution. -->

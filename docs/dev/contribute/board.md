@@ -6,7 +6,7 @@ sidebar:
 ---
 
 Work in progress is tracked on a **GitHub Projects** board:
-<!-- TEMPLATE: replace with the board URL --> `https://github.com/users/OWNER/projects/N`.
+<!-- TEMPLATE: replace with the board URL --> `https://github.com/orgs/CollectiFrog/projects/N`.
 
 Each card is an issue or a pull request, so the board never needs manual copying.
 
@@ -24,6 +24,6 @@ Link a PR to its issue with `Closes #N` in the description: merging closes the i
 
 1. GitHub → your profile → **Projects** → **New project** → *Board*.
 2. Rename the `Status` options to the columns above.
-3. Project → **Workflows**: enable *Auto-add to project* (filter `repo:OWNER/REPO is:issue,pr`),
+3. Project → **Workflows**: enable *Auto-add to project* (filter `repo:CollectiFrog/InventAssos is:issue,pr`),
    *Item closed* → Done, *Pull request merged* → Done.
 4. Repository → **Projects** tab → link the project. Put its URL on this page.

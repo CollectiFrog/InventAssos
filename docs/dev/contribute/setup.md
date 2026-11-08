@@ -7,11 +7,10 @@ sidebar:
 
 ## Requirements
 
-<!-- TEMPLATE: runtime and tools with versions, e.g. Node 22, Docker. -->
-
+- Node.js ≥ 24.3 (required by Remix 3).
+- Docker, to run PostgreSQL locally (the exact command arrives with V0.1).
 - Git, with symlinks enabled on Windows: `git config --global core.symlinks true`
   (and Developer Mode on), so `.claude/skills` resolves.
-- Node.js ≥ 22.12, only to preview the documentation.
 
 ## Get the code
 
