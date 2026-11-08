@@ -107,3 +107,14 @@ export function canAssignItemOwner(
   if ('userId' in owner) return owner.userId === actor.id
   return actor.isAdmin || actor.managedCollectifIds.has(owner.collectifId)
 }
+
+/**
+ * US-0.5.2: a person may own an item stored in a collectif's location, set by whoever manages
+ * that location (a responsible of C, or the admin). The person must be a validated account.
+ */
+export function canDepositForPerson(
+  actor: Actor,
+  location: { collectif_id: string | null; user_id: string | null },
+): boolean {
+  return location.collectif_id !== null && canManageCollectifLocations(actor, location.collectif_id)
+}

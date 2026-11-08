@@ -45,6 +45,9 @@ ci-dessus).
   responsable).
 - **Appartient à** : vous, ou un collectif dont vous êtes responsable. Le propriétaire et le lieu
   peuvent être différents : votre ampli peut être rangé au local du collectif.
+- **Dépôt d'une personne** : un responsable peut ranger au local de son collectif un objet qui
+  appartient à quelqu'un d'autre. Choisissez « Une autre personne » et indiquez son e-mail ; son
+  compte doit être validé. La personne retrouve l'objet dans son matériel et peut le modifier.
 - Le reste décrit l'objet : nom, catégorie, quantité (pour un lot d'objets identiques), marque,
   modèle, numéro de série, état, valeur estimée et description.
 

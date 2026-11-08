@@ -25,9 +25,13 @@ export async function ownerOptions(db: Database, actor: CurrentUser): Promise<Se
   const collectifs = (await listCollectifs(db, 'active')).filter((c) =>
     canAssignItemOwner(actor, { collectifId: c.id }),
   )
+  const canDeposit = actor.isAdmin || actor.managedCollectifIds.size > 0
   return [
     { value: 'me', label: 'Moi' },
     ...collectifs.map((c) => ({ value: `collectif:${c.id}`, label: c.name })),
+    ...(canDeposit
+      ? [{ value: 'person', label: 'Une autre personne (dépôt au local du collectif)' }]
+      : []),
   ]
 }
 
