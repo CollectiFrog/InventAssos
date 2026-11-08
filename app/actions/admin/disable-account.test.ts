@@ -35,7 +35,7 @@ describe('disable an account (US-0.2.7)', () => {
   })
 
   it('lists active accounts with a disable button, except the admin themselves', async () => {
-    const page = await admin.get(routes.admin.accounts.href())
+    const page = await admin.get(routes.admin.index.href())
     const boss = await findUserByEmail(db, 'boss@example.org')
 
     assert.match(page.text, /Max Member/)
@@ -51,7 +51,7 @@ describe('disable an account (US-0.2.7)', () => {
 
     const response = await admin.post(routes.admin.disableAccount.href({ userId: member.id }))
 
-    assert.equal(response.location, routes.admin.accounts.href())
+    assert.equal(response.location, routes.admin.index.href())
     assert.equal((await findUserById(db, member.id))?.status, 'disabled')
     assert.doesNotMatch((await memberClient.get(routes.home.href())).text, /Bonjour Max/)
     const [entry] = await listEntityHistory(db, 'user', member.id)

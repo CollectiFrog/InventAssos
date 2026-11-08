@@ -36,9 +36,7 @@ export function Layout(handle: Handle<LayoutProps>) {
               {viewer ? (
                 <>
                   <a href={routes.collectifs.index.href()}>Collectifs</a>
-                  {viewer.isAdmin ? (
-                    <a href={routes.admin.accounts.href()}>Administration</a>
-                  ) : null}
+                  {viewer.isAdmin ? <a href={routes.admin.index.href()}>Administration</a> : null}
                   <a class="viewer" href={routes.account.profile.index.href()}>
                     {viewer.name}
                     {viewer.isAdmin ? <span class="badge">admin</span> : null}

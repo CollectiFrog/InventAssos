@@ -38,7 +38,7 @@ describe('accept or reject a responsible request (US-0.3.4)', () => {
   })
 
   it('lists the request in the admin queue', async () => {
-    const page = await admin.get(routes.admin.accounts.href())
+    const page = await admin.get(routes.admin.index.href())
     assert.match(page.text, /<strong>Max<\/strong> \(max@example\.org\) veut gérer/)
   })
 

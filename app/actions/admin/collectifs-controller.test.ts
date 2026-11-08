@@ -38,7 +38,7 @@ describe('accept or reject a collectif (US-0.3.2)', () => {
   })
 
   it('lists the pending collectif with its requester', async () => {
-    const page = await admin.get(routes.admin.accounts.href())
+    const page = await admin.get(routes.admin.index.href())
     assert.match(page.text, /Les Grenouilles/)
     assert.match(page.text, /Demandé par Rita/)
   })

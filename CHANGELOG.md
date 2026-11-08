@@ -21,6 +21,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Collectif page with its description, contact phone and responsibles; a validated user can ask to become responsible.
 - Admins accept or reject requests to become responsible of a collectif.
 - Responsibles edit their collectif's description and contact phone.
+- Administration is one queue at `/admin` with pending accounts, collectifs and responsibles and their counts.
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 

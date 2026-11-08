@@ -32,7 +32,7 @@ describe('approve or reject accounts (US-0.2.4)', () => {
   })
 
   it('lists pending accounts for the admin', async () => {
-    const page = await admin.get(routes.admin.accounts.href())
+    const page = await admin.get(routes.admin.index.href())
 
     assert.equal(page.status, 200)
     assert.match(page.text, /Pat Pending/)
@@ -42,7 +42,7 @@ describe('approve or reject accounts (US-0.2.4)', () => {
   it('accepts an account, e-mails the person and logs IDs only', async () => {
     const response = await admin.post(routes.admin.approveAccount.href({ userId: pending.id }))
 
-    assert.equal(response.location, routes.admin.accounts.href())
+    assert.equal(response.location, routes.admin.index.href())
     assert.equal((await findUserById(db, pending.id))?.status, 'active')
     assert.equal(app.mailer.outbox[0]?.to, 'pat@example.org')
     assert.match(app.mailer.outbox[0]?.subject ?? '', /validé/)
@@ -50,7 +50,7 @@ describe('approve or reject accounts (US-0.2.4)', () => {
     const [entry] = await listEntityHistory(db, 'user', pending.id)
     assert.equal(entry?.action, 'account.approved')
     assert.doesNotMatch(JSON.stringify(entry), /Pat|example\.org/)
-    assert.match((await admin.get(routes.admin.accounts.href())).text, /Aucune demande en attente/)
+    assert.match((await admin.get(routes.admin.index.href())).text, /Aucune demande en attente/)
   })
 
   it('rejects with a reason, e-mails it, and keeps it out of the log', async () => {
@@ -89,7 +89,7 @@ describe('approve or reject accounts (US-0.2.4)', () => {
     const client = app.client()
     await signIn(app, client, 'val@example.org')
 
-    assert.equal((await client.get(routes.admin.accounts.href())).status, 403)
+    assert.equal((await client.get(routes.admin.index.href())).status, 403)
     const approve = await client.post(routes.admin.approveAccount.href({ userId: pending.id }))
     const reject = await client.post(routes.admin.rejectAccount.href({ userId: pending.id }))
     assert.equal(approve.status, 403)
@@ -98,7 +98,7 @@ describe('approve or reject accounts (US-0.2.4)', () => {
   })
 
   it('sends a visitor to sign-in', async () => {
-    const response = await app.client().get(routes.admin.accounts.href())
+    const response = await app.client().get(routes.admin.index.href())
 
     assert.equal(response.location, routes.signIn.form.index.href())
   })

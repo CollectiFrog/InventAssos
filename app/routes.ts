@@ -26,7 +26,7 @@ export const routes = route({
     requestResponsibility: post('/collectifs/:slug/devenir-responsable'),
   },
   admin: {
-    accounts: get('/admin/comptes'),
+    index: get('/admin'),
     approveAccount: post('/admin/comptes/:userId/accepter'),
     rejectAccount: post('/admin/comptes/:userId/refuser'),
     disableAccount: post('/admin/comptes/:userId/desactiver'),

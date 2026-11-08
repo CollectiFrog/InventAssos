@@ -50,7 +50,7 @@ export const signUpFormController = createController(routes.signUp.form, {
         if (admins.length > 0)
           await sendSafely(
             mailer,
-            newAccountRequestMail(admins, settings.appUrl + routes.admin.accounts.href()),
+            newAccountRequestMail(admins, settings.appUrl + routes.admin.index.href()),
           )
       } else if (existing.status === 'rejected') {
         // A rejected person may apply again (open point US-0.2.4): back to the queue.
@@ -59,7 +59,7 @@ export const signUpFormController = createController(routes.signUp.form, {
         if (admins.length > 0)
           await sendSafely(
             mailer,
-            newAccountRequestMail(admins, settings.appUrl + routes.admin.accounts.href()),
+            newAccountRequestMail(admins, settings.appUrl + routes.admin.index.href()),
           )
       } else {
         // Same answer as a new sign-up, so the form never reveals which e-mails have an account.

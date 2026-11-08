@@ -9,8 +9,8 @@ import { Layout, type Viewer } from '../../ui/layout.tsx'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'Europe/Paris' })
 
-/** Props of the account review page. */
-export interface AccountsPageProps {
+/** Props of the admin queue. */
+export interface QueuePageProps {
   viewer: Viewer
   csrfToken: string
   pending: User[]
@@ -22,8 +22,8 @@ export interface AccountsPageProps {
   notice?: string
 }
 
-/** Pending accounts with accept and reject buttons (US-0.2.4). */
-export function AccountsPage(handle: Handle<AccountsPageProps>) {
+/** Every pending request in one place (US-0.3.7), then the active accounts. */
+export function QueuePage(handle: Handle<QueuePageProps>) {
   return () => {
     const {
       viewer,
@@ -43,7 +43,20 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
             {notice}
           </p>
         ) : null}
-        <h2>Comptes à valider</h2>
+        <ul class="summary" aria-label="Demandes en attente">
+          <li>
+            <a href="#comptes">{plural(pending.length, 'compte', 'comptes')}</a>
+          </li>
+          <li>
+            <a href="#collectifs">{plural(pendingCollectifs.length, 'collectif', 'collectifs')}</a>
+          </li>
+          <li>
+            <a href="#responsables">
+              {plural(pendingResponsibles.length, 'responsable', 'responsables')}
+            </a>
+          </li>
+        </ul>
+        <h2 id="comptes">Comptes à valider</h2>
         {pending.length === 0 ? (
           <p>Aucune demande en attente.</p>
         ) : (
@@ -82,7 +95,7 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
             ))}
           </ul>
         )}
-        <h2>Collectifs à valider</h2>
+        <h2 id="collectifs">Collectifs à valider</h2>
         {pendingCollectifs.length === 0 ? (
           <p>Aucune demande de collectif.</p>
         ) : (
@@ -125,7 +138,7 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
             ))}
           </ul>
         )}
-        <h2>Responsables à valider</h2>
+        <h2 id="responsables">Responsables à valider</h2>
         {pendingResponsibles.length === 0 ? (
           <p>Aucune demande de responsable.</p>
         ) : (
@@ -155,7 +168,7 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
             })}
           </ul>
         )}
-        <h2>Comptes actifs</h2>
+        <h2 id="comptes-actifs">Comptes actifs</h2>
         <p>
           Désactiver un compte coupe immédiatement ses accès (ses sessions sont fermées) sans rien
           supprimer : son matériel reste visible.
@@ -182,4 +195,9 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
       </Layout>
     )
   }
+}
+
+/** "0 compte en attente", "2 comptes en attente". */
+function plural(count: number, one: string, many: string): string {
+  return `${count} ${count > 1 ? many : one} en attente`
 }

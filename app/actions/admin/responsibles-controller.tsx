@@ -21,7 +21,7 @@ import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, requireUser } from '../guards.tsx'
 
-const queueUrl = routes.admin.accounts.href()
+const queueUrl = routes.admin.index.href()
 const removeSchema = f.object({ replacementEmail: f.field(optionalText(254)) })
 
 /** Thrown inside the removal transaction to roll it back with a message for the admin. */
