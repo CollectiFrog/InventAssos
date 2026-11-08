@@ -131,3 +131,12 @@ export function responsibleRejectedMail(to: string, collectifName: string): Mail
     text: `Bonjour,\n\nVotre demande pour devenir responsable du collectif « ${collectifName} » n’a pas été acceptée.${signature}`,
   }
 }
+
+/** To the person: they no longer manage the collectif. */
+export function responsibleRemovedMail(to: string, collectifName: string): Mail {
+  return {
+    to,
+    subject: `Vous n’êtes plus responsable de « ${collectifName} »`,
+    text: `Bonjour,\n\nUn administrateur vous a retiré du rôle de responsable du collectif « ${collectifName} ».${signature}`,
+  }
+}

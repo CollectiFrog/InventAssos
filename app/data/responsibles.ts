@@ -47,14 +47,33 @@ export async function listManagedCollectifIds(db: Database, userId: string): Pro
   return (result.rows ?? []).map((row) => String(row.collectif_id))
 }
 
-/** Names of the active responsibles of a collectif, for display. */
-export async function listResponsibleNames(db: Database, collectifId: string): Promise<string[]> {
+/** Active responsibles of a collectif (ID and name), for display. */
+export async function listActiveResponsibles(
+  db: Database,
+  collectifId: string,
+): Promise<{ id: string; name: string }[]> {
   const result = await db.exec(sql`
-    select u.name from responsibles r join users u on u.id = r.user_id
+    select u.id, u.name from responsibles r join users u on u.id = r.user_id
     where r.collectif_id = ${collectifId} and r.status = 'active'
     order by u.name
   `)
-  return (result.rows ?? []).map((row) => String(row.name))
+  return (result.rows ?? []).map((row) => ({ id: String(row.id), name: String(row.name) }))
+}
+
+/**
+ * Counts active responsibles, locking their rows until the transaction ends, so two admins
+ * removing the last two responsibles at once cannot both succeed.
+ */
+export async function countActiveResponsiblesForUpdate(
+  db: Database,
+  collectifId: string,
+): Promise<number> {
+  const result = await db.exec(sql`
+    select user_id from responsibles
+    where collectif_id = ${collectifId} and status = 'active'
+    for update
+  `)
+  return result.rows?.length ?? 0
 }
 
 /** A pending responsible request, with what the admin needs to decide. */

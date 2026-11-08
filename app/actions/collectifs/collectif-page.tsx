@@ -13,7 +13,9 @@ export interface CollectifPageProps {
   viewer: Viewer
   csrfToken: string
   collectif: Collectif
-  responsibleNames: string[]
+  responsibles: { id: string; name: string }[]
+  /** Platform admins see a remove form per responsible (US-0.3.6). */
+  canManageResponsibles: boolean
   membership: Membership
   canEdit: boolean
   notice?: string
@@ -22,8 +24,16 @@ export interface CollectifPageProps {
 /** Public profile of an active collectif. */
 export function CollectifPage(handle: Handle<CollectifPageProps>) {
   return () => {
-    const { viewer, csrfToken, collectif, responsibleNames, membership, canEdit, notice } =
-      handle.props
+    const {
+      viewer,
+      csrfToken,
+      collectif,
+      responsibles,
+      canManageResponsibles,
+      membership,
+      canEdit,
+      notice,
+    } = handle.props
     const slug = collectif.slug
     return (
       <Layout title={collectif.name} viewer={viewer}>
@@ -45,7 +55,7 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           <dt>Téléphone de contact</dt>
           <dd>{collectif.contact_phone ?? 'non renseigné'}</dd>
           <dt>Responsables</dt>
-          <dd>{responsibleNames.length > 0 ? responsibleNames.join(', ') : 'aucun'}</dd>
+          <dd>{responsibles.length > 0 ? responsibles.map((r) => r.name).join(', ') : 'aucun'}</dd>
         </dl>
         {membership === 'responsible' ? (
           <p class="status">Vous êtes responsable de ce collectif.</p>
@@ -64,6 +74,42 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
             </button>
           </form>
         )}
+        {canManageResponsibles && responsibles.length > 0 ? (
+          <section>
+            <h2>Gérer les responsables</h2>
+            <p class="status">
+              Un collectif actif garde toujours au moins un responsable : pour retirer le dernier,
+              indiquez l’e-mail d’un utilisateur validé qui le remplace.
+            </p>
+            <ul class="cards">
+              {responsibles.map((r) => (
+                <li key={r.id} class="card">
+                  <form
+                    method="post"
+                    action={routes.admin.responsibles.remove.href({
+                      collectifId: collectif.id,
+                      userId: r.id,
+                    })}
+                    class="inline-form"
+                  >
+                    <CsrfField token={csrfToken} />
+                    <strong>{r.name}</strong>
+                    <label for={`replacement-${r.id}`}>Remplacé par (e-mail, facultatif)</label>
+                    <input
+                      id={`replacement-${r.id}`}
+                      name="replacementEmail"
+                      type="email"
+                      maxLength={254}
+                    />
+                    <button type="submit" class="danger">
+                      Retirer
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </Layout>
     )
   }

@@ -11,11 +11,12 @@ import {
   listPendingRequestsBy,
   slugify,
 } from '../../data/collectifs.ts'
-import { findResponsible, listResponsibleNames, setResponsible } from '../../data/responsibles.ts'
+import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/responsibles.ts'
 import { sendSafely } from '../../mail/mailer.ts'
 import { newCollectifRequestMail, newResponsibleRequestMail } from '../../mail/messages.ts'
 import {
   canEditCollectif,
+  canManageResponsibles,
   canRequestCollectif,
   canRequestResponsibility,
   isValidatedUser,
@@ -76,7 +77,8 @@ export const collectifsController = createController(routes.collectifs, {
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
           collectif={collectif}
-          responsibleNames={await listResponsibleNames(db, collectif.id)}
+          responsibles={await listActiveResponsibles(db, collectif.id)}
+          canManageResponsibles={canManageResponsibles(actor)}
           membership={membership}
           canEdit={canEditCollectif(actor, collectif.id)}
           notice={typeof notice === 'string' ? notice : undefined}
