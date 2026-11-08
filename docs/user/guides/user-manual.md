@@ -71,3 +71,11 @@ déplacement est noté dans l'historique de l'objet.
 Un objet vendu, perdu ou cassé s'**archive** depuis sa page (même droits que pour le modifier) :
 choisissez la raison. Il disparaît de l'inventaire et des listes, mais n'est pas supprimé : sa page
 et son historique restent consultables par ceux qui le gèrent.
+
+## Historique d'un objet
+
+En bas de la page d'un objet, l'**historique** liste ce qui lui est arrivé : ajout, modifications
+(quels champs), déplacements (d'où vers où) et archivage, avec la date et la personne. Tous les
+utilisateurs validés le voient. La plateforme ne garde dans son journal que des identifiants : les
+noms sont retrouvés au moment de l'affichage, et une personne qui a supprimé son compte apparaît
+comme « un compte supprimé ».

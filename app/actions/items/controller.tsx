@@ -1,11 +1,13 @@
 import { createController } from 'remix/router'
 
+import { readHistory } from '../../data/audit-log.ts'
 import { findItemDetails, listItemsManagedBy } from '../../data/items.ts'
 import { canEditItem, isValidatedUser } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { storableLocations } from './choices.ts'
+import { ItemHistory } from './history.tsx'
 import { ItemPage } from './item-page.tsx'
 import { MyItemsPage } from './items-pages.tsx'
 
@@ -43,6 +45,7 @@ export default createController(routes.items, {
           viewer={viewerOf(context)}
           item={item}
           canEdit={canEditItem(actor, item)}
+          history={<ItemHistory entries={await readHistory(context.db, 'item', item.id)} />}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )

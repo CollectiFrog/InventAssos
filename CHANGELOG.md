@@ -28,6 +28,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Edit an item: its owner and the managers of its location.
 - Move an item to another location you manage; each move is recorded.
 - Archive a sold, lost or broken item: it leaves the inventory but keeps its page and history.
+- Item history: created, edited, moved and archived, with date and author.
 - Location page; only the city is shown to others, the address and notes stay with the location's managers and admins.
 - Personal storage locations: every validated user lists the places where they keep equipment.
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
