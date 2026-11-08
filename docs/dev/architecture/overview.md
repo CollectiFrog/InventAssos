@@ -23,22 +23,22 @@ flowchart LR
 
 ## Components
 
-| Component       | Responsibility                                     | Code / where                              |
-|-----------------|----------------------------------------------------|-------------------------------------------|
-| Entry point     | read config, migrate, listen, shut down cleanly    | `server.ts`, `app/config.ts`              |
-| Routes          | the URL contract, used for every link and redirect | `app/routes.ts`                           |
-| Router          | middleware chain and controller mapping            | `app/router.ts`, `app/middleware/`        |
-| Controllers     | pages, forms, server actions                       | `app/actions/<area>/controller.tsx`       |
-| Views           | server-rendered Remix components (ADR 0015)        | `app/actions/**/*-page.tsx`, `app/ui/`    |
-| Auth            | sign-up, e-mail sign-in links, sessions, CSRF      | `app/actions/sign-up/`, `app/middleware/` |
-| Permissions     | one function per action, deny by default           | `app/` (V0.2)                             |
-| Data access     | one module per entity, the only place with SQL     | `app/data/`                               |
-| Migrations      | versioned SQL, applied at startup (ADR 0013)       | `db/migrations/NNNN_slug/{up,down}.sql`   |
-| Mailer          | sign-in links and admin notifications (ADR 0016)   | `app/mail/`                               |
-| Import / export | CSV and Excel parsing and generation, server side  | `app/` (V0.8)                             |
-| Static files    | stylesheet, favicon                                | `public/`                                 |
-| Health probes   | `/healthz` (process), `/readyz` (database)         | `app/actions/health/`                     |
-| Tests           | router tests against PostgreSQL (ADR 0012)         | `**/*.test.ts` next to the code, `test/`  |
+| Component       | Responsibility                                              | Code / where                                   |
+|-----------------|-------------------------------------------------------------|------------------------------------------------|
+| Entry point     | read config, migrate, listen, shut down cleanly             | `server.ts`, `app/config.ts`                   |
+| Routes          | the URL contract, used for every link and redirect          | `app/routes.ts`                                |
+| Router          | middleware chain and controller mapping                     | `app/router.ts`, `app/middleware/`             |
+| Controllers     | pages, forms, server actions                                | `app/actions/<area>/controller.tsx`            |
+| Views           | server-rendered Remix components (ADR 0015)                 | `app/actions/**/*-page.tsx`, `app/ui/`         |
+| Auth            | sign-up, e-mail sign-in links, sessions, CSRF, current user | `app/actions/sign-{up,in}/`, `app/middleware/` |
+| Permissions     | one function per action, deny by default                    | `app/` (V0.2)                                  |
+| Data access     | one module per entity, the only place with SQL              | `app/data/`                                    |
+| Migrations      | versioned SQL, applied at startup (ADR 0013)                | `db/migrations/NNNN_slug/{up,down}.sql`        |
+| Mailer          | sign-in links and admin notifications (ADR 0016)            | `app/mail/`                                    |
+| Import / export | CSV and Excel parsing and generation, server side           | `app/` (V0.8)                                  |
+| Static files    | stylesheet, favicon                                         | `public/`                                      |
+| Health probes   | `/healthz` (process), `/readyz` (database)                  | `app/actions/health/`                          |
+| Tests           | router tests against PostgreSQL (ADR 0012)                  | `**/*.test.ts` next to the code, `test/`       |
 
 A request goes `server.ts` → `router.fetch` → middleware (`app/middleware/index.ts`) → the
 controller action matched in `app/routes.ts` → a `Response`. `createAppRouter(deps)` receives its
@@ -46,7 +46,12 @@ services (database, mailer, settings, session secret), so tests build the same r
 doubles (`test/app.ts`).
 
 Middleware order: static files → database, mailer, settings on the context → session
-(PostgreSQL, ADR 0017) → form data → CSRF check on unsafe methods → renderer.
+(PostgreSQL, ADR 0017) → current user (`context.currentUser`) → form data → CSRF check on unsafe
+methods → renderer.
+
+The sign-in link opens a page with a button that POSTs the token: e-mail scanners that prefetch
+links cannot burn it. The token is consumed by a single `UPDATE … WHERE used_at IS NULL AND
+expires_at > now()`, so two clicks cannot both succeed.
 
 ## Data
 

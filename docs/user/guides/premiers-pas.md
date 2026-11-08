@@ -17,6 +17,17 @@ InventAssos est un service en ligne : rien à installer, un navigateur suffit.
 Si l'adresse a déjà un compte, aucun nouveau compte n'est créé : vous recevez un e-mail qui vous le
 signale. Si votre demande avait été refusée, vous pouvez la refaire : elle repart en examen.
 
+## Se connecter
+
+InventAssos n'utilise pas de mot de passe.
+
+1. Choisissez **Se connecter** et indiquez votre adresse e-mail.
+2. Ouvrez l'e-mail « Votre lien de connexion InventAssos » et cliquez sur le lien.
+3. Sur la page qui s'ouvre, cliquez sur **Me connecter**.
+
+Le lien est valable **15 minutes** et ne sert **qu'une fois**. Vous restez connecté 30 jours sur cet
+appareil. Si le lien a expiré, demandez-en simplement un nouveau.
+
 ## Rejoindre ou créer un collectif
 
 <!-- Rédigé avec la V0.3. -->

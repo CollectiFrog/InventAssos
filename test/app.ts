@@ -59,7 +59,7 @@ export class TestClient {
     const body = new FormData()
     for (const [name, value] of Object.entries(fields)) body.set(name, value)
     if (options.csrf !== false) {
-      if (this.#csrfToken === null) await this.get(options.csrfFrom ?? '/inscription')
+      if (this.#csrfToken === null) await this.get(options.csrfFrom ?? '/connexion')
       body.set('_csrf', this.#csrfToken ?? '')
     }
     const headers = this.#headers()

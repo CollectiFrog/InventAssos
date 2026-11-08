@@ -7,6 +7,11 @@ export const routes = route({
     live: get('/healthz'),
     ready: get('/readyz'),
   },
+  signIn: {
+    form: form('/connexion'),
+    sent: get('/connexion/envoyee'),
+    link: form('/connexion/lien/:token'),
+  },
   signUp: {
     form: form('/inscription'),
     sent: get('/inscription/envoyee'),

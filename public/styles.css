@@ -142,3 +142,21 @@ button.danger {
 .notice-success {
   border-color: var(--accent);
 }
+
+.account-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+.account-nav form {
+  margin: 0;
+}
+.viewer {
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

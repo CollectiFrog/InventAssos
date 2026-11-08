@@ -10,6 +10,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 - First page of the application, in French, served from a Remix 3 + PostgreSQL skeleton.
 - Sign-up: a visitor asks for an account with their name and e-mail; platform admins are notified by e-mail.
+- Sign-in without password: a single-use link valid 15 minutes is sent by e-mail; sessions last 30 days.
 
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD

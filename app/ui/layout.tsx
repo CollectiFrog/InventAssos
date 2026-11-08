@@ -2,16 +2,20 @@ import type { Handle, RemixNode } from 'remix/component'
 
 import { routes } from '../routes.ts'
 
+/** What the header needs to know about the signed-in person; null for a visitor. */
+export type Viewer = { name: string; isAdmin: boolean; csrfToken: string } | null
+
 /** Props of the page shell. */
 export interface LayoutProps {
   title: string
+  viewer?: Viewer
   children?: RemixNode
 }
 
-/** The HTML document every page renders into. Server-rendered only: no client script yet. */
+/** The HTML document every page renders into. Server-rendered only (ADR 0015). */
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
-    const { title, children } = handle.props
+    const { title, viewer = null, children } = handle.props
 
     return (
       <html lang="fr">
@@ -28,6 +32,16 @@ export function Layout(handle: Handle<LayoutProps>) {
             <a class="brand" href={routes.home.href()}>
               InventAssos
             </a>
+            <nav aria-label="Compte" class="account-nav">
+              {viewer ? (
+                <span class="viewer">{viewer.name}</span>
+              ) : (
+                <>
+                  <a href={routes.signIn.form.index.href()}>Se connecter</a>
+                  <a href={routes.signUp.form.index.href()}>Créer un compte</a>
+                </>
+              )}
+            </nav>
           </header>
           <main>{children}</main>
         </body>

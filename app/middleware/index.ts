@@ -9,6 +9,7 @@ import { createMiddleware, type MiddlewareContext } from 'remix/router'
 import { createPostgresSessionStorage, sessionMaxAgeSeconds } from '../data/sessions.ts'
 import type { Mailer } from '../mail/mailer.ts'
 import { checkCsrf } from './csrf.ts'
+import { loadCurrentUser } from './current-user.ts'
 import { provideDatabase } from './database.ts'
 import { type AppSettings, provideMailer, provideSettings } from './services.ts'
 
@@ -39,6 +40,7 @@ export function appMiddleware(deps: AppDependencies) {
     provideMailer(deps.mailer),
     provideSettings(deps.settings),
     session(sessionCookie, createPostgresSessionStorage(deps.db)),
+    loadCurrentUser(deps.db, deps.settings.adminEmails),
     formData(),
     // Same reason as `secure`: compare form posts with the public origin, not the pod's URL.
     checkCsrf(appUrl.origin),
