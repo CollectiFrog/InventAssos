@@ -11,7 +11,12 @@ sign-in, without approval; removing it from the list removes the rights at the n
 `users.is_platform_admin` only records the last known state.
 
 Each row is a function in `app/permissions.ts`, tested in `app/permissions.test.ts`; controllers
-call it before acting and answer 403 otherwise, with a router test per protected route.
+call it before acting and answer 403 otherwise. `app/permissions.matrix.test.ts` then plays every
+implemented row through the real router for six actors (admin, responsible of C, responsible of
+another collectif, validated user, pending user, visitor) and checks the effect happened or not.
+A new row in this table needs a new entry in that matrix.
+
+"Import into / export from a location" arrives with V0.8 and is not implemented yet.
 
 Everything is denied unless a row below allows it. Pending, rejected, disabled and deleted users
 can only see their status page and sign out.
