@@ -29,3 +29,8 @@ export function canEditOwnProfile(actor: Actor): boolean {
 export function canDisableAccount(actor: Actor, targetUserId: string): boolean {
   return isActiveAdmin(actor) && actor.id !== targetUserId
 }
+
+/** "Request a new collectif": any validated user (admins and responsibles included). */
+export function canRequestCollectif(actor: Actor): boolean {
+  return isValidatedUser(actor)
+}

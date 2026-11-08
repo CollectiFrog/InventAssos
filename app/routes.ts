@@ -18,6 +18,10 @@ export const routes = route({
     status: get('/compte/statut'),
     reapply: post('/compte/statut/redemander'),
   },
+  collectifs: {
+    index: get('/collectifs'),
+    request: form('/collectifs/nouveau'),
+  },
   admin: {
     accounts: get('/admin/comptes'),
     approveAccount: post('/admin/comptes/:userId/accepter'),

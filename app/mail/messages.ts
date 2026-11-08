@@ -68,3 +68,12 @@ export function accountRejectedMail(to: string, reason: string | null): Mail {
       signature,
   }
 }
+
+/** To the platform admins: a collectif or a responsible request waits for a decision. */
+export function newCollectifRequestMail(to: string[], reviewUrl: string): Mail {
+  return {
+    to,
+    subject: 'Nouvelle demande de collectif',
+    text: `Une nouvelle demande de collectif attend votre validation :\n${reviewUrl}${signature}`,
+  }
+}

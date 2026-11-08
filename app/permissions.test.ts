@@ -2,7 +2,12 @@ import * as assert from 'remix/assert'
 import { describe, it } from 'remix/test'
 
 import type { CurrentUser } from './middleware/current-user.ts'
-import { canDisableAccount, canEditOwnProfile, canReviewAccounts } from './permissions.ts'
+import {
+  canDisableAccount,
+  canEditOwnProfile,
+  canRequestCollectif,
+  canReviewAccounts,
+} from './permissions.ts'
 
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
   return { id: 'u1', name: 'U', email: 'u@x.org', status: 'active', isAdmin: false, ...overrides }
@@ -27,5 +32,12 @@ describe('permissions: accounts', () => {
     assert.equal(canDisableAccount(user({ isAdmin: true }), 'u1'), false)
     assert.equal(canDisableAccount(user(), 'u2'), false)
     assert.equal(canDisableAccount(null, 'u2'), false)
+  })
+
+  it('"Request a new collectif": any validated user, admin included', () => {
+    assert.equal(canRequestCollectif(user()), true)
+    assert.equal(canRequestCollectif(user({ isAdmin: true })), true)
+    assert.equal(canRequestCollectif(user({ status: 'pending' })), false)
+    assert.equal(canRequestCollectif(null), false)
   })
 })
