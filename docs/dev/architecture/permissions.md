@@ -20,6 +20,7 @@ can only see their status page and sign out.
 |--------------------------------------------------|----------------|----------------------------------|------------------------------|
 | Approve or reject an account                     | yes            | no                               | no                           |
 | Disable an account                               | yes            | no                               | no                           |
+| Edit own profile (name, phone)                   | yes            | yes                              | yes                          |
 | Request a new collectif                          | yes            | yes                              | yes                          |
 | Approve or reject a collectif                    | yes            | no                               | no                           |
 | Request to become responsible of C               | —              | —                                | yes                          |

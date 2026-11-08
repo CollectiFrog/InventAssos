@@ -56,3 +56,13 @@ export function formValue(data: FormData, name: string): string {
   const value = data.get(name)
   return typeof value === 'string' ? value : ''
 }
+
+const phonePattern = /^\+?[0-9 .()-]{6,25}$/
+
+/** An optional phone number: digits, spaces, dots, dashes, parentheses, an optional leading +. */
+export function optionalPhone() {
+  return optionalText(25).refine(
+    (value) => value === null || phonePattern.test(value),
+    'Numéro de téléphone invalide.',
+  )
+}
