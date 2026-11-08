@@ -232,3 +232,10 @@ button.danger {
   display: grid;
   gap: 0.35rem;
 }
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

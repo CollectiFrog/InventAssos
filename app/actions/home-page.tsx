@@ -14,7 +14,16 @@ export function HomePage(handle: Handle<{ databaseOk: boolean; viewer: Viewer }>
           Inventaire de matériel partagé entre associations : chaque collectif référence son
           matériel, les autres le trouvent et contactent le propriétaire.
         </p>
-        {viewer ? null : (
+        {viewer ? (
+          <p class="actions">
+            <a class="button" href={routes.inventory.index.href()}>
+              Parcourir l’inventaire
+            </a>
+            <a class="button secondary" href={routes.items.index.href()}>
+              Mon matériel
+            </a>
+          </p>
+        ) : (
           <p class="actions">
             <a class="button" href={routes.signIn.form.index.href()}>
               Se connecter

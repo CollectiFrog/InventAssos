@@ -25,6 +25,9 @@ export const routes = route({
     edit: form('/collectifs/:slug/modifier'),
     requestResponsibility: post('/collectifs/:slug/devenir-responsable'),
   },
+  inventory: {
+    index: get('/inventaire'),
+  },
   items: {
     index: get('/materiel'),
     create: form('/materiel/nouveau'),

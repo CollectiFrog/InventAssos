@@ -201,3 +201,25 @@ export async function archiveItem(
     updated_at: new Date(),
   })
 }
+
+/** One page of the active inventory, and how many items match in total. */
+export interface InventoryPage {
+  items: ItemSummary[]
+  total: number
+}
+
+/** Active (non-archived) items of everybody, by name, one page at a time (US-0.6.1). */
+export async function listInventory(
+  db: Database,
+  options: { page: number; pageSize: number },
+): Promise<InventoryPage> {
+  const offset = (Math.max(1, options.page) - 1) * options.pageSize
+  const where = sql`where i.archived_at is null`
+  const count = await db.exec(sql`select count(*)::int as n from items i ${summaryJoins} ${where}`)
+  const result = await db.exec(sql`
+    select ${summaryColumns} from items i ${summaryJoins} ${where}
+    order by lower(i.name), i.id
+    limit ${options.pageSize} offset ${offset}
+  `)
+  return { items: (result.rows ?? []).map(toSummary), total: Number(count.rows?.[0]?.n ?? 0) }
+}
