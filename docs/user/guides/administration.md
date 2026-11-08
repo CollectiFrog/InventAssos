@@ -36,6 +36,13 @@ Quand une personne demande à **devenir responsable** d'un collectif existant, l
 dans **Administration**, section « Responsables à valider ». Vérifiez auprès des responsables
 actuels si besoin, puis **Accepter** ou **Refuser** ; la personne est prévenue par e-mail.
 
+## Retirer un responsable
+
+Sur la page d'un collectif, la section **Gérer les responsables** (visible des administrateurs)
+permet de **Retirer** un responsable, par exemple quand il quitte l'association. Un collectif garde
+toujours au moins un responsable : pour retirer le dernier, indiquez dans le même formulaire l'e-mail
+d'un utilisateur validé qui le remplace. La personne retirée est prévenue par e-mail.
+
 ## Désactiver un compte
 
 La page **Administration** liste aussi les comptes actifs. **Désactiver** coupe immédiatement
