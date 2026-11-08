@@ -26,6 +26,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - "Inventaire" page: the whole active inventory of the platform, paginated.
 - Inventory search (name, brand, model, description; case and accents ignored) and filters by category, collectif and city.
 - Item page shows the owner's contact phone; without one, a form e-mails the owner without revealing their address.
+- Collectif and person pages list the equipment they own.
 - Items: add equipment (category, quantity, brand, model, condition, value…) to a location you manage; "Mon matériel" lists it.
 - A responsible can store in the collectif's location an item owned by a person (deposit), identified by their e-mail.
 - Edit an item: its owner and the managers of its location.

@@ -19,6 +19,7 @@ import moveItemController from './actions/items/move/controller.tsx'
 import locationsController from './actions/locations/controller.tsx'
 import createLocationController from './actions/locations/create/controller.tsx'
 import editLocationController from './actions/locations/edit/controller.tsx'
+import peopleController from './actions/people/controller.tsx'
 import signInController from './actions/sign-in/controller.tsx'
 import signInFormController from './actions/sign-in/form/controller.tsx'
 import signInLinkController from './actions/sign-in/link/controller.tsx'
@@ -47,6 +48,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.items.move, moveItemController)
   router.map(routes.items.archive, archiveItemController)
   router.map(routes.locations, locationsController)
+  router.map(routes.people, peopleController)
   router.map(routes.locations.create, createLocationController)
   router.map(routes.locations.edit, editLocationController)
   router.map(routes.signIn, signInController)

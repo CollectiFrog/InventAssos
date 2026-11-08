@@ -28,6 +28,9 @@ export const routes = route({
   inventory: {
     index: get('/inventaire'),
   },
+  people: {
+    show: get('/personnes/:userId'),
+  },
   items: {
     index: get('/materiel'),
     create: form('/materiel/nouveau'),

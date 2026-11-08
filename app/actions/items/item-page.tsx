@@ -86,6 +86,8 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
           <dd>
             {item.ownerSlug ? (
               <a href={routes.collectifs.show.href({ slug: item.ownerSlug })}>{item.ownerName}</a>
+            ) : item.ownerUserId ? (
+              <a href={routes.people.show.href({ userId: item.ownerUserId })}>{item.ownerName}</a>
             ) : (
               item.ownerName
             )}
