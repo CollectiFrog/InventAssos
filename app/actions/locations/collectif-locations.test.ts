@@ -109,10 +109,11 @@ describe("a collectif's locations (US-0.4.1)", () => {
     assert.equal((await findLocationById(db, location.id))?.name, 'Local')
   })
 
-  it('refuses a validated user who manages no collectif (403)', async () => {
+  it("refuses a collectif's location to a validated user who does not manage it (403)", async () => {
     const max = await clientFor('max@example.org')
 
-    assert.equal((await max.get(routes.locations.create.index.href())).status, 403)
+    const form = await max.get(routes.locations.create.index.href())
+    assert.doesNotMatch(form.text, new RegExp(`collectif:${grenouilles.id}`))
     const response = await max.post(routes.locations.create.action.href(), {
       owner: `collectif:${grenouilles.id}`,
       ...fields,
