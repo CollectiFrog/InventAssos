@@ -44,3 +44,8 @@ export function canReviewCollectifs(actor: Actor): boolean {
 export function canRequestResponsibility(actor: Actor, collectifId: string): boolean {
   return isValidatedUser(actor) && !actor.managedCollectifIds.has(collectifId)
 }
+
+/** "Approve, reject or remove a responsible of C": platform admin only. */
+export function canManageResponsibles(actor: Actor): boolean {
+  return isActiveAdmin(actor)
+}

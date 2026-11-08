@@ -5,6 +5,7 @@ import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
 import { listPendingCollectifs } from '../../data/collectifs.ts'
+import { listPendingResponsibles } from '../../data/responsibles.ts'
 import { deleteUserSessions } from '../../data/sessions.ts'
 import { findUserById, listActiveUsers, listPendingUsers, setUserStatus } from '../../data/users.ts'
 import { sendSafely } from '../../mail/mailer.ts'
@@ -32,6 +33,7 @@ export default createController(routes.admin, {
           csrfToken={getCsrfToken(context)}
           pending={await listPendingUsers(context.db)}
           pendingCollectifs={await listPendingCollectifs(context.db)}
+          pendingResponsibles={await listPendingResponsibles(context.db)}
           active={await listActiveUsers(context.db)}
           selfId={actor.id}
           notice={typeof notice === 'string' ? notice : undefined}

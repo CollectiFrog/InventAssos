@@ -113,3 +113,21 @@ export function newResponsibleRequestMail(to: string[], reviewUrl: string): Mail
     text: `Une personne demande à devenir responsable d’un collectif :\n${reviewUrl}${signature}`,
   }
 }
+
+/** To the person: they now manage the collectif. */
+export function responsibleApprovedMail(to: string, collectifName: string, appUrl: string): Mail {
+  return {
+    to,
+    subject: `Vous êtes responsable de « ${collectifName} »`,
+    text: `Bonjour,\n\nVotre demande est acceptée : vous êtes responsable du collectif « ${collectifName} ».\n${appUrl}${signature}`,
+  }
+}
+
+/** To the person: their request to manage the collectif was rejected. */
+export function responsibleRejectedMail(to: string, collectifName: string): Mail {
+  return {
+    to,
+    subject: `Demande de responsable pour « ${collectifName} »`,
+    text: `Bonjour,\n\nVotre demande pour devenir responsable du collectif « ${collectifName} » n’a pas été acceptée.${signature}`,
+  }
+}

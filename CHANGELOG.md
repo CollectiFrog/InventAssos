@@ -19,6 +19,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Collectifs page; a validated user can request a new collectif, checked by an admin, with a unique name.
 - Admins accept or reject collectif requests; on acceptance the requester becomes the collectif's responsible.
 - Collectif page with its description, contact phone and responsibles; a validated user can ask to become responsible.
+- Admins accept or reject requests to become responsible of a collectif.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
 <!-- Compare links, one per release:

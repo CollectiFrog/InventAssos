@@ -56,3 +56,34 @@ export async function listResponsibleNames(db: Database, collectifId: string): P
   `)
   return (result.rows ?? []).map((row) => String(row.name))
 }
+
+/** A pending responsible request, with what the admin needs to decide. */
+export interface PendingResponsible {
+  userId: string
+  userName: string
+  userEmail: string
+  collectifId: string
+  collectifName: string
+  requestedAt: Date
+}
+
+/** Pending requests on active collectifs from active accounts, oldest first. */
+export async function listPendingResponsibles(db: Database): Promise<PendingResponsible[]> {
+  const result = await db.exec(sql`
+    select r.user_id, u.name as user_name, u.email as user_email,
+           r.collectif_id, c.name as collectif_name, r.requested_at
+    from responsibles r
+    join users u on u.id = r.user_id and u.status = 'active'
+    join collectifs c on c.id = r.collectif_id and c.status = 'active'
+    where r.status = 'pending'
+    order by r.requested_at
+  `)
+  return (result.rows ?? []).map((row) => ({
+    userId: String(row.user_id),
+    userName: String(row.user_name),
+    userEmail: String(row.user_email),
+    collectifId: String(row.collectif_id),
+    collectifName: String(row.collectif_name),
+    requestedAt: new Date(String(row.requested_at)),
+  }))
+}

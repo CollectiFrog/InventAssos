@@ -4,6 +4,7 @@ import accountController from './actions/account/controller.tsx'
 import profileController from './actions/account/profile-controller.tsx'
 import adminCollectifsController from './actions/admin/collectifs-controller.tsx'
 import adminController from './actions/admin/controller.tsx'
+import adminResponsiblesController from './actions/admin/responsibles-controller.tsx'
 import {
   collectifsController,
   requestCollectifController,
@@ -27,6 +28,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.account.profile, profileController)
   router.map(routes.admin, adminController)
   router.map(routes.admin.collectifs, adminCollectifsController)
+  router.map(routes.admin.responsibles, adminResponsiblesController)
   router.map(routes.collectifs, collectifsController)
   router.map(routes.collectifs.request, requestCollectifController)
   router.map(routes.health, healthController)
