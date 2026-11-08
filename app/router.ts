@@ -10,6 +10,9 @@ import editCollectifController from './actions/collectifs/edit/controller.tsx'
 import requestCollectifController from './actions/collectifs/request/controller.tsx'
 import controller from './actions/controller.tsx'
 import healthController from './actions/health/controller.ts'
+import locationsController from './actions/locations/controller.tsx'
+import createLocationController from './actions/locations/create/controller.tsx'
+import editLocationController from './actions/locations/edit/controller.tsx'
 import signInController from './actions/sign-in/controller.tsx'
 import signInFormController from './actions/sign-in/form/controller.tsx'
 import signInLinkController from './actions/sign-in/link/controller.tsx'
@@ -31,6 +34,9 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.collectifs.request, requestCollectifController)
   router.map(routes.collectifs.edit, editCollectifController)
   router.map(routes.health, healthController)
+  router.map(routes.locations, locationsController)
+  router.map(routes.locations.create, createLocationController)
+  router.map(routes.locations.edit, editLocationController)
   router.map(routes.signIn, signInController)
   router.map(routes.signIn.form, signInFormController)
   router.map(routes.signIn.link, signInLinkController)

@@ -20,3 +20,16 @@ vous contactent au sujet du matériel. Laissez le champ vide pour ne pas le part
 Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y
 changer la description et le téléphone de contact, visibles par les utilisateurs validés. Pour
 changer le nom, contactez un administrateur.
+
+## Gérer les lieux de stockage
+
+Un **lieu** est un endroit où du matériel est rangé : le local d'un collectif, un garage… Ouvrez
+**Mes lieux** en haut de la page.
+
+- **Ajouter un lieu** : choisissez à qui il appartient (un collectif dont vous êtes responsable),
+  puis indiquez son nom, sa ville, son adresse et des notes (accès, code…).
+- **Modifier** ou **Supprimer** un lieu depuis la même page. La page d'un collectif liste aussi ses
+  lieux.
+
+Seule la **ville** d'un lieu est montrée aux autres utilisateurs ; l'adresse et les notes restent
+réservées aux personnes qui gèrent le lieu et aux administrateurs.

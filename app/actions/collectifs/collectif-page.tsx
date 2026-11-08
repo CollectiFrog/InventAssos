@@ -1,6 +1,6 @@
 import type { Handle } from 'remix/component'
 
-import type { Collectif } from '../../data/tables.ts'
+import type { Collectif, Location } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
@@ -18,6 +18,8 @@ export interface CollectifPageProps {
   canManageResponsibles: boolean
   membership: Membership
   canEdit: boolean
+  locations: Location[]
+  canManageLocations: boolean
   notice?: string
 }
 
@@ -32,6 +34,8 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
       canManageResponsibles,
       membership,
       canEdit,
+      locations,
+      canManageLocations,
       notice,
     } = handle.props
     const slug = collectif.slug
@@ -57,6 +61,36 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           <dt>Responsables</dt>
           <dd>{responsibles.length > 0 ? responsibles.map((r) => r.name).join(', ') : 'aucun'}</dd>
         </dl>
+        <h2>Lieux de stockage</h2>
+        {locations.length === 0 ? (
+          <p>Aucun lieu déclaré.</p>
+        ) : (
+          <ul>
+            {locations.map((location) => (
+              <li key={location.id}>
+                {location.name} · {location.city}
+                {canManageLocations ? (
+                  <>
+                    {' '}
+                    <a href={routes.locations.edit.index.href({ locationId: location.id })}>
+                      modifier
+                    </a>
+                  </>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+        {canManageLocations ? (
+          <p>
+            <a
+              class="button secondary"
+              href={`${routes.locations.create.index.href()}?pour=collectif:${collectif.id}`}
+            >
+              Ajouter un lieu
+            </a>
+          </p>
+        ) : null}
         {membership === 'responsible' ? (
           <p class="status">Vous êtes responsable de ce collectif.</p>
         ) : membership === 'pending' ? (
