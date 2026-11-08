@@ -1,11 +1,19 @@
 import { createController } from 'remix/router'
 
-import { listInventory } from '../../data/items.ts'
+import { listCollectifs } from '../../data/collectifs.ts'
+import {
+  type InventoryFilters,
+  listCategories,
+  listInventory,
+  listInventoryCities,
+} from '../../data/items.ts'
 import { isValidatedUser } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { InventoryPage } from './inventory-page.tsx'
+
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /** Items per page of the inventory. */
 export const pageSize = 24
@@ -20,7 +28,16 @@ export default createController(routes.inventory, {
 
       const requested = Number.parseInt(context.url.searchParams.get('page') ?? '1', 10)
       const page = Number.isFinite(requested) && requested > 0 ? requested : 1
-      const { items, total } = await listInventory(context.db, { page, pageSize })
+      const params = context.url.searchParams
+      const read = (name: string) => params.get(name)?.trim().slice(0, 100) || undefined
+      const filters: InventoryFilters = {
+        query: read('q'),
+        categoryId: read('categorie'),
+        collectifId: uuidPattern.test(read('collectif') ?? '') ? read('collectif') : undefined,
+        city: read('ville'),
+      }
+      const { db } = context
+      const { items, total } = await listInventory(db, { page, pageSize, filters })
       const pageCount = Math.max(1, Math.ceil(total / pageSize))
 
       return context.render(
@@ -30,7 +47,19 @@ export default createController(routes.inventory, {
           total={total}
           page={Math.min(page, pageCount)}
           pageCount={pageCount}
-          hrefFor={(n) => `${routes.inventory.index.href()}?page=${n}`}
+          hrefFor={(n) => {
+            // Keep the search and filters in the pagination links.
+            const query = new URLSearchParams(params)
+            query.set('page', String(n))
+            return `${routes.inventory.index.href()}?${query}`
+          }}
+          filters={filters}
+          categories={(await listCategories(db)).map((c) => ({ value: c.id, label: c.name }))}
+          collectifs={(await listCollectifs(db, 'active')).map((c) => ({
+            value: c.id,
+            label: c.name,
+          }))}
+          cities={(await listInventoryCities(db)).map((city) => ({ value: city, label: city }))}
         />,
       )
     },

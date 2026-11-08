@@ -208,13 +208,37 @@ export interface InventoryPage {
   total: number
 }
 
-/** Active (non-archived) items of everybody, by name, one page at a time (US-0.6.1). */
+/** Search and filters of the inventory (US-0.6.2); empty values mean "any". */
+export interface InventoryFilters {
+  query?: string
+  categoryId?: string
+  collectifId?: string
+  city?: string
+}
+
+/** Escapes LIKE wildcards so a search for "50%" means the text "50%". */
+function likeLiteral(text: string): string {
+  return text.replace(/[\\%_]/g, (char) => `\\${char}`)
+}
+
+/** Active (non-archived) items of everybody, by name, one page at a time (US-0.6.1, US-0.6.2). */
 export async function listInventory(
   db: Database,
-  options: { page: number; pageSize: number },
+  options: { page: number; pageSize: number; filters?: InventoryFilters },
 ): Promise<InventoryPage> {
+  const f = options.filters ?? {}
+  const conditions = [sql`i.archived_at is null`]
+  if (f.query) {
+    conditions.push(sql`inv_fold(concat_ws(' ', i.name, i.brand, i.model, i.description))
+      like '%' || inv_fold(${likeLiteral(f.query)}) || '%'`)
+  }
+  if (f.categoryId) conditions.push(sql`i.category_id = ${f.categoryId}`)
+  if (f.collectifId) conditions.push(sql`i.owner_collectif_id = ${f.collectifId}::uuid`)
+  if (f.city) conditions.push(sql`inv_fold(l.city) = inv_fold(${f.city})`)
+  let where = sql`where ${conditions[0] ?? sql`true`}`
+  for (const condition of conditions.slice(1)) where = sql`${where} and ${condition}`
+
   const offset = (Math.max(1, options.page) - 1) * options.pageSize
-  const where = sql`where i.archived_at is null`
   const count = await db.exec(sql`select count(*)::int as n from items i ${summaryJoins} ${where}`)
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins} ${where}
@@ -222,4 +246,13 @@ export async function listInventory(
     limit ${options.pageSize} offset ${offset}
   `)
   return { items: (result.rows ?? []).map(toSummary), total: Number(count.rows?.[0]?.n ?? 0) }
+}
+
+/** Cities that hold at least one active item, for the city filter. */
+export async function listInventoryCities(db: Database): Promise<string[]> {
+  const result = await db.exec(sql`
+    select distinct l.city from items i join locations l on l.id = i.location_id
+    where i.archived_at is null order by l.city
+  `)
+  return (result.rows ?? []).map((row) => String(row.city))
 }

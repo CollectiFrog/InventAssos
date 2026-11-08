@@ -24,6 +24,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Administration is one queue at `/admin` with pending accounts, collectifs and responsibles and their counts.
 - Storage locations: responsibles create, edit and delete their collectif's locations from "Mes lieux".
 - "Inventaire" page: the whole active inventory of the platform, paginated.
+- Inventory search (name, brand, model, description; case and accents ignored) and filters by category, collectif and city.
 - Items: add equipment (category, quantity, brand, model, condition, value…) to a location you manage; "Mon matériel" lists it.
 - A responsible can store in the collectif's location an item owned by a person (deposit), identified by their e-mail.
 - Edit an item: its owner and the managers of its location.

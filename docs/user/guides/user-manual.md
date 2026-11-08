@@ -13,6 +13,10 @@ sidebar:
 page : nom, quantité, catégorie, ville et propriétaire. Cliquez sur un objet pour voir sa page.
 Les adresses des lieux n'y apparaissent jamais, seulement la ville.
 
+En haut de la liste, **Rechercher** cherche dans le nom, la marque, le modèle et la description
+(majuscules et accents ne comptent pas). Les filtres **Catégorie**, **Collectif propriétaire** et
+**Ville** se combinent entre eux et avec la recherche ; **Tout afficher** les efface.
+
 ## Modifier mon profil
 
 Cliquez sur votre nom en haut de la page. Vous pouvez y changer votre nom et indiquer un numéro de
