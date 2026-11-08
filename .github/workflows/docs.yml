@@ -1,0 +1,73 @@
+# One Pages site, two zones: user docs always from main at /, dev docs always from dev at /dev/.
+# Any push to either branch rebuilds both, so neither zone ever shows the other branch.
+name: Docs
+
+on:
+  push:
+    branches: [main, dev]
+    paths: ['docs/**', '.github/workflows/docs.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - id: pages
+        uses: actions/configure-pages@v6
+
+      - uses: actions/checkout@v7
+        with: { ref: main, path: main }
+
+      - id: dev
+        name: Does dev exist?
+        working-directory: main
+        run: |
+          if git ls-remote --exit-code --heads origin dev >/dev/null; then echo "ref=dev" >> "$GITHUB_OUTPUT"
+          else echo "ref=main" >> "$GITHUB_OUTPUT"; echo "::warning::No dev branch: dev docs built from main"; fi
+
+      - uses: actions/checkout@v7
+        with: { ref: '${{ steps.dev.outputs.ref }}', path: dev }
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: '*/docs/site/package-lock.json'
+
+      - name: Build user docs (main)
+        working-directory: main/docs/site
+        env: { DOCS_PAGES_URL: '${{ steps.pages.outputs.base_url }}' }
+        run: npm ci && npm run build:user
+
+      - name: Build dev docs (dev)
+        working-directory: dev/docs/site
+        env: { DOCS_PAGES_URL: '${{ steps.pages.outputs.base_url }}' }
+        run: npm ci && npm run build:dev
+
+      - name: Assemble
+        run: |
+          mkdir -p _site/dev
+          cp -r main/docs/site/dist/user/. _site/
+          cp -r dev/docs/site/dist/dev/. _site/dev/
+
+      - uses: actions/upload-pages-artifact@v5
+        with: { path: _site }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,33 @@
+---
+title: Project Name
+description: One sentence saying what this does for its users.
+template: splash
+hero:
+  tagline: One sentence saying what this does for its users.
+  actions:
+    - text: Install
+      link: guides/installation/
+      icon: right-arrow
+    - text: User manual
+      link: guides/user-manual/
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+{/* TEMPLATE: user docs are written in the project language (see .ia/context/project.md). */}
+
+<CardGrid>
+  <Card title="Install" icon="download">
+    Get it running in a few minutes. [Installation guide](guides/installation/)
+  </Card>
+  <Card title="Use it" icon="open-book">
+    Every feature, step by step. [User manual](guides/user-manual/)
+  </Card>
+  <Card title="Get help" icon="information">
+    [FAQ](reference/faq/) and [troubleshooting](reference/troubleshooting/).
+  </Card>
+  <Card title="Advanced mode" icon="seti:config">
+    Contributing or self-hosting? [Developer documentation](dev/)
+  </Card>
+</CardGrid>

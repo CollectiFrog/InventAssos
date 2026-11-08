@@ -1,0 +1,20 @@
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Secrets: commit .env.example only
+.env
+.env.*
+!.env.example
+
+# Dependencies and builds (add the project's own below)
+node_modules/
+dist/
+build/
+coverage/
+
+# Claude Code local settings
+.claude/settings.local.json

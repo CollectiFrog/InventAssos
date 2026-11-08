@@ -1,0 +1,41 @@
+# Checks every pull request. The Makefile targets are the contract: replace their placeholders,
+# and add the language setup step below (setup-node, setup-python, …).
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # TEMPLATE: language setup, e.g.
+      # - uses: actions/setup-node@v7
+      #   with: { node-version-file: .nvmrc, cache: npm }
+      # - run: npm ci
+      - run: make lint
+      - run: make typecheck
+      - run: make test
+      - run: make build
+
+  docs:
+    name: Docs build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs/site/package-lock.json
+      - run: make docs

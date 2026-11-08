@@ -1,0 +1,17 @@
+/*
+ * Design system tokens. Replace these values with the ones exported by your design system;
+ * Starlight reads the --sl-* variables. Full list: https://starlight.astro.build/guides/css-and-tailwind/
+ */
+:root {
+  --sl-font: system-ui, sans-serif;
+  --sl-font-mono: ui-monospace, monospace;
+  --sl-color-accent-low: #1e2a4a;
+  --sl-color-accent: #3d63dd;
+  --sl-color-accent-high: #c6d4f9;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d7e1fb;
+  --sl-color-accent: #2f50c4;
+  --sl-color-accent-high: #16244f;
+}
