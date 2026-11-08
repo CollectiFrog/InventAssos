@@ -30,6 +30,7 @@ export const routes = route({
     create: form('/materiel/nouveau'),
     show: get('/materiel/:itemId'),
     edit: form('/materiel/:itemId/modifier'),
+    move: form('/materiel/:itemId/deplacer'),
   },
   locations: {
     index: get('/lieux'),

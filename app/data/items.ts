@@ -183,3 +183,8 @@ export async function updateItemFields(
   if (changed.length > 0) await db.update(items, item.id, { ...next, updated_at: new Date() })
   return changed
 }
+
+/** Stores the item in another location. */
+export async function moveItem(db: Database, itemId: string, locationId: string): Promise<void> {
+  await db.update(items, itemId, { location_id: locationId, updated_at: new Date() })
+}

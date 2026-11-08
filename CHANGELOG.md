@@ -26,6 +26,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Items: add equipment (category, quantity, brand, model, condition, value…) to a location you manage; "Mon matériel" lists it.
 - A responsible can store in the collectif's location an item owned by a person (deposit), identified by their e-mail.
 - Edit an item: its owner and the managers of its location.
+- Move an item to another location you manage; each move is recorded.
 - Location page; only the city is shown to others, the address and notes stay with the location's managers and admins.
 - Personal storage locations: every validated user lists the places where they keep equipment.
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
