@@ -86,7 +86,8 @@ Project-specific rules go below this line, kept short.
   `docs/dev/architecture/permissions.md`; the UI is never the only barrier. Each rule has a test.
 - **Data access goes through one module per entity.** No SQL in routes or components.
 - **Audit log stores IDs only**: never a name, e-mail or phone (`docs/adr/0010-personal-data-retention.md`).
-- **Exact addresses never leave the owner.** Other users, exports and APIs get the city only.
+- **Exact addresses never leave the owner.** Other users, exports and APIs get the city only:
+  pass every location through `redactLocation(location, canSeeFullAddress(actor, location))`.
 - **Ownership ≠ storage.** An item has one owner (collectif xor person) and one location; never merge
   the two (`docs/adr/0009-ownership-and-locations.md`).
 - **Specs live in `docs/dev/product/`.** Work on a user story only once it is listed there; if a

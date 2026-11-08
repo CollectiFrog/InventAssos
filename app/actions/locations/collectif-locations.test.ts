@@ -66,7 +66,7 @@ describe("a collectif's locations (US-0.4.1)", () => {
     assert.equal(location?.name, 'Local Dupont')
     assert.match((await client.get(routes.locations.index.href())).text, /Local Dupont/)
     const page = await client.get(routes.collectifs.show.href({ slug: grenouilles.slug }))
-    assert.match(page.text, /Local Dupont · Rennes/)
+    assert.match(page.text, /Local Dupont<\/a> · Rennes/)
 
     const id = location?.id ?? ''
     await client.post(routes.locations.edit.action.href({ locationId: id }), {

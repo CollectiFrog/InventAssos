@@ -85,3 +85,37 @@ export async function listLocationsOwnedBy(
     ownerName: row.collectif_id ? (collectifNames.get(row.collectif_id) ?? '') : 'Moi',
   }))
 }
+
+/**
+ * Removes the private fields before a location reaches someone who may not see them
+ * (`canSeeFullAddress`): only the city of a storage place is public (ADR 0010).
+ */
+export function redactLocation<T extends { address: string | null; notes: string | null }>(
+  location: T,
+  canSeeFullAddress: boolean,
+): T {
+  return canSeeFullAddress ? location : { ...location, address: null, notes: null }
+}
+
+/** Loads a location with its owner's display name (collectif or person). */
+export async function findLocationWithOwner(
+  db: Database,
+  id: string,
+): Promise<(Location & { ownerName: string; ownerSlug: string | null }) | null> {
+  const result = await db.exec(sql`
+    select l.*, coalesce(c.name, u.name) as owner_name, c.slug as owner_slug
+    from locations l
+    left join collectifs c on c.id = l.collectif_id
+    left join users u on u.id = l.user_id
+    where l.id = ${id}
+  `)
+  const row = result.rows?.[0]
+  if (row === undefined) return null
+  const location = await findLocationById(db, id)
+  if (location === null) return null
+  return {
+    ...location,
+    ownerName: String(row.owner_name ?? ''),
+    ownerSlug: row.owner_slug == null ? null : String(row.owner_slug),
+  }
+}

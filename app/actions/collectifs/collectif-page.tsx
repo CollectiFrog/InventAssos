@@ -68,7 +68,11 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           <ul>
             {locations.map((location) => (
               <li key={location.id}>
-                {location.name} · {location.city}
+                <a href={routes.locations.show.href({ locationId: location.id })}>
+                  {location.name}
+                </a>{' '}
+                · {location.city}
+                {location.address ? ` · ${location.address}` : null}
                 {canManageLocations ? (
                   <>
                     {' '}

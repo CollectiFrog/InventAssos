@@ -13,6 +13,7 @@ import {
   canRequestResponsibility,
   canReviewAccounts,
   canReviewCollectifs,
+  canSeeFullAddress,
 } from './permissions.ts'
 
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
@@ -109,5 +110,19 @@ describe('permissions: accounts', () => {
     assert.equal(canManagePersonalLocations(user({ isAdmin: true }), 'u2'), false)
     assert.equal(canManagePersonalLocations(user({ status: 'pending' }), 'u1'), false)
     assert.equal(canManagePersonalLocations(null, 'u1'), false)
+  })
+
+  it('"See a location\'s full address": admin, responsible of the owning collectif, owner', () => {
+    const collectifPlace = { collectif_id: 'c1', user_id: null }
+    const homePlace = { collectif_id: null, user_id: 'u2' }
+    assert.equal(canSeeFullAddress(user({ isAdmin: true }), homePlace), true)
+    assert.equal(
+      canSeeFullAddress(user({ managedCollectifIds: new Set(['c1']) }), collectifPlace),
+      true,
+    )
+    assert.equal(canSeeFullAddress(user({ id: 'u2' }), homePlace), true)
+    assert.equal(canSeeFullAddress(user(), collectifPlace), false)
+    assert.equal(canSeeFullAddress(user(), homePlace), false)
+    assert.equal(canSeeFullAddress(null, homePlace), false)
   })
 })

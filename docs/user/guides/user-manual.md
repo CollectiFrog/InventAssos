@@ -32,5 +32,6 @@ Tout utilisateur validé peut déclarer ses propres lieux ; personne d'autre ne 
 - **Modifier** ou **Supprimer** un lieu depuis la même page. La page d'un collectif liste aussi ses
   lieux.
 
-Seule la **ville** d'un lieu est montrée aux autres utilisateurs ; l'adresse et les notes restent
-réservées aux personnes qui gèrent le lieu et aux administrateurs.
+Seule la **ville** d'un lieu est montrée aux autres utilisateurs, sur la page du collectif comme
+sur la page du lieu ; l'adresse et les notes restent réservées aux personnes qui gèrent le lieu
+(vous pour un lieu personnel, les responsables pour un lieu de collectif) et aux administrateurs.

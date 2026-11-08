@@ -30,6 +30,7 @@ export const routes = route({
     create: form('/lieux/nouveau'),
     edit: form('/lieux/:locationId/modifier'),
     remove: post('/lieux/:locationId/supprimer'),
+    show: get('/lieux/:locationId'),
   },
   admin: {
     index: get('/admin'),
