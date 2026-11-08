@@ -6,6 +6,8 @@ export interface Mail {
   to: string | string[]
   subject: string
   text: string
+  /** Where answers go, e.g. the person who wrote through the contact form. */
+  replyTo?: string
 }
 
 /** Sends e-mails; the app depends on this interface, never on a transport. */
@@ -18,7 +20,13 @@ export function createSmtpMailer(smtpUrl: string, from: string): Mailer {
   const transport = nodemailer.createTransport(smtpUrl)
   return {
     async send(mail) {
-      await transport.sendMail({ from, to: mail.to, subject: mail.subject, text: mail.text })
+      await transport.sendMail({
+        from,
+        to: mail.to,
+        replyTo: mail.replyTo,
+        subject: mail.subject,
+        text: mail.text,
+      })
     },
   }
 }
@@ -28,7 +36,8 @@ export function createLogMailer(log: (line: string) => void = console.log): Mail
   return {
     async send(mail) {
       const to = Array.isArray(mail.to) ? mail.to.join(', ') : mail.to
-      log(`[mail] To: ${to}\n[mail] Subject: ${mail.subject}\n${mail.text}\n[mail] ---`)
+      const replyTo = mail.replyTo ? `\n[mail] Reply-To: ${mail.replyTo}` : ''
+      log(`[mail] To: ${to}${replyTo}\n[mail] Subject: ${mail.subject}\n${mail.text}\n[mail] ---`)
     },
   }
 }

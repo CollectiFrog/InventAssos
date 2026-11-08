@@ -13,6 +13,8 @@ export interface ItemPageProps {
   item: ItemDetails
   /** Whether the viewer may edit, move and archive the item (`canEditItem`). */
   canEdit?: boolean
+  /** Contact section (US-0.6.3); absent on the viewer's own items. */
+  contact?: { csrfToken: string; sent?: boolean; error?: string }
   /** History section (US-0.5.6). */
   history?: RemixNode
   notice?: string
@@ -21,7 +23,7 @@ export interface ItemPageProps {
 /** An item: what it is, where it is stored (city), who owns it. */
 export function ItemPage(handle: Handle<ItemPageProps>) {
   return () => {
-    const { viewer, item, canEdit, history, notice } = handle.props
+    const { viewer, item, canEdit, contact, history, notice } = handle.props
     return (
       <Layout title={item.name} viewer={viewer}>
         <h1>
@@ -90,6 +92,49 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
           </dd>
         </dl>
         {item.description ? <p class="prose">{item.description}</p> : null}
+        {contact && !item.archived_at ? (
+          <section class="contact">
+            <h2>Contacter {item.ownerName}</h2>
+            {item.contactPhone ? (
+              <p>
+                Téléphone :{' '}
+                <a href={`tel:${item.contactPhone.replace(/[^0-9+]/g, '')}`}>{item.contactPhone}</a>
+              </p>
+            ) : (
+              <>
+                <p>Pas de téléphone renseigné. Écrivez-lui via la plateforme :</p>
+                {contact.sent ? (
+                  <p class="notice notice-success" role="status">
+                    Message envoyé. La réponse arrivera dans votre boîte e-mail.
+                  </p>
+                ) : null}
+                <form
+                  method="post"
+                  action={routes.items.contact.href({ itemId: item.id })}
+                  class="stack"
+                >
+                  <input type="hidden" name="_csrf" value={contact.csrfToken} />
+                  <div class={contact.error ? 'field field-invalid' : 'field'}>
+                    <label for="field-message">Votre message</label>
+                    <textarea
+                      id="field-message"
+                      name="message"
+                      rows={4}
+                      maxLength={2000}
+                      required
+                    />
+                    {contact.error ? <p class="error">{contact.error}</p> : null}
+                  </div>
+                  <p class="hint">
+                    Son adresse reste cachée ; la vôtre lui est transmise pour qu’il puisse vous
+                    répondre.
+                  </p>
+                  <button type="submit">Envoyer</button>
+                </form>
+              </>
+            )}
+          </section>
+        ) : null}
         {canEdit && !item.archived_at ? (
           <p class="actions">
             <a class="button secondary" href={routes.items.edit.index.href({ itemId: item.id })}>

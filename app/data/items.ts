@@ -132,6 +132,8 @@ export interface ItemDetails extends Item {
   locationUserId: string | null
   ownerName: string
   ownerSlug: string | null
+  /** The collectif's contact phone, or the owner's phone; null when none is shared. */
+  contactPhone: string | null
 }
 
 /** Loads an item with its category, location and owner names. */
@@ -141,7 +143,9 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
   const result = await db.exec(sql`
     select cat.name as category_name, l.name as location_name, l.city,
            l.collectif_id as location_collectif_id, l.user_id as location_user_id,
-           coalesce(oc.name, ou.name) as owner_name, oc.slug as owner_slug
+           coalesce(oc.name, ou.name) as owner_name, oc.slug as owner_slug,
+           case when i.owner_collectif_id is not null then oc.contact_phone else ou.phone end
+             as contact_phone
     from items i ${summaryJoins}
     where i.id = ${id}
   `)
@@ -156,6 +160,7 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
     locationUserId: row.location_user_id == null ? null : String(row.location_user_id),
     ownerName: String(row.owner_name ?? ''),
     ownerSlug: row.owner_slug == null ? null : String(row.owner_slug),
+    contactPhone: row.contact_phone == null ? null : String(row.contact_phone),
   }
 }
 
@@ -255,4 +260,18 @@ export async function listInventoryCities(db: Database): Promise<string[]> {
     where i.archived_at is null order by l.city
   `)
   return (result.rows ?? []).map((row) => String(row.city))
+}
+
+/** E-mails that receive a contact message about an item: its owner, or the collectif's responsibles. */
+export async function listOwnerContactEmails(db: Database, item: Item): Promise<string[]> {
+  const result = item.owner_collectif_id
+    ? await db.exec(sql`
+        select u.email from responsibles r join users u on u.id = r.user_id
+        where r.collectif_id = ${item.owner_collectif_id} and r.status = 'active'
+          and u.status = 'active'
+      `)
+    : await db.exec(sql`
+        select email from users where id = ${item.owner_user_id} and status = 'active'
+      `)
+  return (result.rows ?? []).map((row) => String(row.email))
 }

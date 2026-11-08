@@ -35,6 +35,7 @@ export const routes = route({
     edit: form('/materiel/:itemId/modifier'),
     move: form('/materiel/:itemId/deplacer'),
     archive: form('/materiel/:itemId/archiver'),
+    contact: post('/materiel/:itemId/contacter'),
   },
   locations: {
     index: get('/lieux'),
