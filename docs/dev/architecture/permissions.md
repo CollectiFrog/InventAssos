@@ -35,5 +35,7 @@ can only see their status page and sign out.
 | See a location's full address                    | yes            | if C's location                  | if own location              |
 | Import into / export from a location             | yes            | if C's location                  | if own location              |
 
+An admin can never disable their own account.
+
 Rules from ADR 0009: the owner of an item stored in a collectif's location may edit it without
 being responsible of that collectif; to put an item in a location, you must manage that location.

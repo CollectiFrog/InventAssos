@@ -12,13 +12,16 @@ export interface AccountsPageProps {
   viewer: Viewer
   csrfToken: string
   pending: User[]
+  active: User[]
+  /** The admin viewing the page: they cannot disable themselves. */
+  selfId: string
   notice?: string
 }
 
 /** Pending accounts with accept and reject buttons (US-0.2.4). */
 export function AccountsPage(handle: Handle<AccountsPageProps>) {
   return () => {
-    const { viewer, csrfToken, pending, notice } = handle.props
+    const { viewer, csrfToken, pending, active, selfId, notice } = handle.props
     return (
       <Layout title="Comptes à valider" viewer={viewer}>
         <h1>Comptes à valider</h1>
@@ -65,6 +68,30 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
             ))}
           </ul>
         )}
+        <h2>Comptes actifs</h2>
+        <p>
+          Désactiver un compte coupe immédiatement ses accès (ses sessions sont fermées) sans rien
+          supprimer : son matériel reste visible.
+        </p>
+        <ul class="cards">
+          {active.map((user) => (
+            <li key={user.id} class="card row">
+              <span>
+                <strong>{user.name}</strong> · {user.email}
+              </span>
+              {user.id === selfId ? (
+                <span class="status">vous</span>
+              ) : (
+                <form method="post" action={routes.admin.disableAccount.href({ userId: user.id })}>
+                  <CsrfField token={csrfToken} />
+                  <button type="submit" class="danger">
+                    Désactiver
+                  </button>
+                </form>
+              )}
+            </li>
+          ))}
+        </ul>
       </Layout>
     )
   }

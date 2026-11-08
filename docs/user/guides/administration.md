@@ -20,3 +20,9 @@ Chaque nouvelle demande vous est signalée par e-mail. Dans **Administration** :
 
 Chaque décision est enregistrée dans l'historique de la plateforme (qui a décidé, quand), sans le
 motif ni aucune donnée personnelle.
+
+## Désactiver un compte
+
+La page **Administration** liste aussi les comptes actifs. **Désactiver** coupe immédiatement
+l'accès de la personne : elle est déconnectée partout et ne peut plus recevoir de lien de connexion.
+Rien n'est supprimé, et son matériel reste visible. Vous ne pouvez pas désactiver votre propre compte.

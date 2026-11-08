@@ -196,3 +196,13 @@ button.danger {
   width: auto;
   flex: 1 1 12rem;
 }
+.card.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.card.row form {
+  margin: 0;
+}
