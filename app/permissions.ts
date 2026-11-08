@@ -39,3 +39,8 @@ export function canRequestCollectif(actor: Actor): boolean {
 export function canReviewCollectifs(actor: Actor): boolean {
   return isActiveAdmin(actor)
 }
+
+/** "Request to become responsible of C": a validated user who is not already responsible of C. */
+export function canRequestResponsibility(actor: Actor, collectifId: string): boolean {
+  return isValidatedUser(actor) && !actor.managedCollectifIds.has(collectifId)
+}

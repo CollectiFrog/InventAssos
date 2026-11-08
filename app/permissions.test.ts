@@ -6,6 +6,7 @@ import {
   canDisableAccount,
   canEditOwnProfile,
   canRequestCollectif,
+  canRequestResponsibility,
   canReviewAccounts,
   canReviewCollectifs,
 } from './permissions.ts'
@@ -54,5 +55,19 @@ describe('permissions: accounts', () => {
     assert.equal(canReviewCollectifs(user({ isAdmin: true })), true)
     assert.equal(canReviewCollectifs(user({ managedCollectifIds: new Set(['c1']) })), false)
     assert.equal(canReviewCollectifs(null), false)
+  })
+
+  it('"Request to become responsible of C": validated user not already responsible of C', () => {
+    assert.equal(canRequestResponsibility(user(), 'c1'), true)
+    assert.equal(
+      canRequestResponsibility(user({ managedCollectifIds: new Set(['c1']) }), 'c1'),
+      false,
+    )
+    assert.equal(
+      canRequestResponsibility(user({ managedCollectifIds: new Set(['c2']) }), 'c1'),
+      true,
+    )
+    assert.equal(canRequestResponsibility(user({ status: 'pending' }), 'c1'), false)
+    assert.equal(canRequestResponsibility(null, 'c1'), false)
   })
 })

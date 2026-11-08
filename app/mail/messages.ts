@@ -104,3 +104,12 @@ export function collectifRejectedMail(
       signature,
   }
 }
+
+/** To the platform admins: someone asks to manage a collectif. */
+export function newResponsibleRequestMail(to: string[], reviewUrl: string): Mail {
+  return {
+    to,
+    subject: 'Nouvelle demande de responsable',
+    text: `Une personne demande à devenir responsable d’un collectif :\n${reviewUrl}${signature}`,
+  }
+}

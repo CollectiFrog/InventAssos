@@ -43,5 +43,8 @@ Une fois votre compte validé, ouvrez **Collectifs** en haut de la page.
 - Votre association n'est pas encore inscrite : **Déclarer un collectif**, avec son nom, une
   description et éventuellement un téléphone de contact. Un administrateur vérifie la demande ;
   une fois validée, vous devenez **responsable** du collectif.
+- Votre association est déjà inscrite : ouvrez sa page et choisissez **Devenir responsable**. Un
+  administrateur valide la demande. Une seule demande à la fois par collectif ; si elle est
+  refusée, vous pouvez la refaire.
 - Deux collectifs ne peuvent pas porter le même nom (les accents, majuscules et la ponctuation ne
   comptent pas).

@@ -5,14 +5,20 @@ import { createController } from 'remix/router'
 
 import {
   createCollectifRequest,
+  findActiveCollectifBySlug,
   findCollectifHoldingSlug,
   listCollectifs,
   listPendingRequestsBy,
   slugify,
 } from '../../data/collectifs.ts'
+import { findResponsible, listResponsibleNames, setResponsible } from '../../data/responsibles.ts'
 import { sendSafely } from '../../mail/mailer.ts'
-import { newCollectifRequestMail } from '../../mail/messages.ts'
-import { canRequestCollectif, isValidatedUser } from '../../permissions.ts'
+import { newCollectifRequestMail, newResponsibleRequestMail } from '../../mail/messages.ts'
+import {
+  canRequestCollectif,
+  canRequestResponsibility,
+  isValidatedUser,
+} from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import {
   formValue,
@@ -21,8 +27,9 @@ import {
   parseForm,
   requiredText,
 } from '../../validation.ts'
-import { forbidden, requireUser } from '../guards.tsx'
+import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
+import { CollectifPage, type Membership } from './collectif-page.tsx'
 import { CollectifsPage, RequestCollectifPage } from './collectifs-pages.tsx'
 
 const requestSchema = f.object({
@@ -48,6 +55,58 @@ export const collectifsController = createController(routes.collectifs, {
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
+    },
+
+    async show(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      if (!isValidatedUser(actor)) return forbidden(context)
+
+      const { db } = context
+      const collectif = await findActiveCollectifBySlug(db, context.params.slug)
+      if (collectif === null) return notFound(context)
+
+      const link = await findResponsible(db, actor.id, collectif.id)
+      const membership: Membership =
+        link?.status === 'active' ? 'responsible' : link?.status === 'pending' ? 'pending' : 'none'
+      const notice = context.session.get('notice')
+      return context.render(
+        <CollectifPage
+          viewer={viewerOf(context)}
+          csrfToken={getCsrfToken(context)}
+          collectif={collectif}
+          responsibleNames={await listResponsibleNames(db, collectif.id)}
+          membership={membership}
+          notice={typeof notice === 'string' ? notice : undefined}
+        />,
+      )
+    },
+
+    // US-0.3.3: one open request per person and collectif; a rejected or removed person may ask again.
+    async requestResponsibility(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+
+      const { db, mailer, settings, session } = context
+      const collectif = await findActiveCollectifBySlug(db, context.params.slug)
+      if (collectif === null) return notFound(context)
+      if (!canRequestResponsibility(actor, collectif.id)) return forbidden(context)
+
+      const showUrl = routes.collectifs.show.href({ slug: collectif.slug })
+      const existing = await findResponsible(db, actor.id, collectif.id)
+      if (existing?.status === 'pending') {
+        session.flash('notice', 'Vous avez déjà une demande en cours pour ce collectif.')
+        return redirect(showUrl, 303)
+      }
+
+      await setResponsible(db, { userId: actor.id, collectifId: collectif.id, status: 'pending' })
+      const admins = [...settings.adminEmails]
+      if (admins.length > 0) {
+        const reviewUrl = settings.appUrl + routes.admin.accounts.href()
+        await sendSafely(mailer, newResponsibleRequestMail(admins, reviewUrl))
+      }
+      session.flash('notice', 'Demande envoyée : un administrateur va l’examiner.')
+      return redirect(showUrl, 303)
     },
   },
 })
