@@ -67,6 +67,11 @@ export class TestClient {
     return this.#send(new Request(new URL(path, testOrigin), { method: 'POST', body, headers }))
   }
 
+  /** The Cookie header this client would send, e.g. to replay it from elsewhere. */
+  cookieHeader(): string {
+    return this.#headers().get('Cookie') ?? ''
+  }
+
   /** Forgets every cookie, like closing a private window. */
   clearCookies(): void {
     this.#cookies.clear()
