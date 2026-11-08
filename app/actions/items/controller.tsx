@@ -35,7 +35,8 @@ export default createController(routes.items, {
       if (!isValidatedUser(actor)) return forbidden(context)
 
       const item = await findItemDetails(context.db, context.params.itemId)
-      if (item === null) return notFound(context)
+      // An archived item stays visible to those who manage it, for its history (US-0.5.5).
+      if (item === null || (item.archived_at && !canEditItem(actor, item))) return notFound(context)
       const notice = context.session.get('notice')
       return context.render(
         <ItemPage
