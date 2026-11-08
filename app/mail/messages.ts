@@ -140,3 +140,24 @@ export function responsibleRemovedMail(to: string, collectifName: string): Mail 
     text: `Bonjour,\n\nUn administrateur vous a retiré du rôle de responsable du collectif « ${collectifName} ».${signature}`,
   }
 }
+
+/** To an item's owner: a validated user writes about it through the contact form (US-0.6.3). */
+export function itemContactMail(input: {
+  to: string[]
+  senderName: string
+  senderEmail: string
+  itemName: string
+  itemUrl: string
+  message: string
+}): Mail {
+  return {
+    to: input.to,
+    replyTo: input.senderEmail,
+    subject: `À propos de « ${input.itemName} »`,
+    text:
+      `Bonjour,\n\n${input.senderName} (${input.senderEmail}) vous écrit au sujet de ` +
+      `« ${input.itemName} » :\n${input.itemUrl}\n\n---\n${input.message}\n---\n\n` +
+      'Répondez directement à cet e-mail pour lui écrire.' +
+      signature,
+  }
+}
