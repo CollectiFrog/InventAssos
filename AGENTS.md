@@ -83,7 +83,8 @@ Project-specific rules go below this line, kept short.
   writing code; the [`remix`](.ia/skills/remix/SKILL.md) skill says how. Never write React, Remix v2
   or React Router code. See `docs/adr/0006-remix-3-full-stack.md`.
 - **Deny by default.** Every action is checked on the server against
-  `docs/dev/architecture/permissions.md`; the UI is never the only barrier. Each rule has a test.
+  `docs/dev/architecture/permissions.md`; the UI is never the only barrier. Each rule has a unit test
+  and a row in `app/permissions.matrix.test.ts`.
 - **Data access goes through one module per entity.** No SQL in routes or components.
 - **Audit log stores IDs only**: never a name, e-mail or phone (`docs/adr/0010-personal-data-retention.md`).
 - **Exact addresses never leave the owner.** Other users, exports and APIs get the city only:
