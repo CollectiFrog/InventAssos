@@ -15,7 +15,12 @@ InventAssos est un service en ligne : rien à installer, un navigateur suffit.
    et vous écrit quand votre compte est validé.
 
 Si l'adresse a déjà un compte, aucun nouveau compte n'est créé : vous recevez un e-mail qui vous le
-signale. Si votre demande avait été refusée, vous pouvez la refaire : elle repart en examen.
+signale.
+
+Tant que votre compte n'est pas validé, vous pouvez vous connecter mais vous voyez seulement la page
+**Votre compte**, qui indique où en est votre demande. Si elle a été refusée, cette page affiche le
+motif éventuel et un bouton **Refaire une demande** ; vous pouvez aussi refaire une inscription
+avec la même adresse. Dans les deux cas, la demande repart en examen.
 
 ## Se connecter
 
