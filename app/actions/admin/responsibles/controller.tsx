@@ -2,24 +2,24 @@ import * as f from 'remix/data-schema/form-data'
 import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
-import { logAction } from '../../data/audit-log.ts'
-import { findCollectifById } from '../../data/collectifs.ts'
+import { logAction } from '../../../data/audit-log.ts'
+import { findCollectifById } from '../../../data/collectifs.ts'
 import {
   countActiveResponsiblesForUpdate,
   findResponsible,
   setResponsible,
-} from '../../data/responsibles.ts'
-import { findUserByEmail, findUserById } from '../../data/users.ts'
-import { sendSafely } from '../../mail/mailer.ts'
+} from '../../../data/responsibles.ts'
+import { findUserByEmail, findUserById } from '../../../data/users.ts'
+import { sendSafely } from '../../../mail/mailer.ts'
 import {
   responsibleApprovedMail,
   responsibleRejectedMail,
   responsibleRemovedMail,
-} from '../../mail/messages.ts'
-import { canManageResponsibles } from '../../permissions.ts'
-import { routes } from '../../routes.ts'
-import { optionalText, parseForm } from '../../validation.ts'
-import { forbidden, requireUser } from '../guards.tsx'
+} from '../../../mail/messages.ts'
+import { canManageResponsibles } from '../../../permissions.ts'
+import { routes } from '../../../routes.ts'
+import { optionalText, parseForm } from '../../../validation.ts'
+import { forbidden, requireUser } from '../../guards.tsx'
 
 const queueUrl = routes.admin.index.href()
 const removeSchema = f.object({ replacementEmail: f.field(optionalText(254)) })

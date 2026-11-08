@@ -1,8 +1,8 @@
 import type { Handle } from 'remix/component'
 
-import { routes } from '../../routes.ts'
-import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../ui/form.tsx'
-import { Layout, type Viewer } from '../../ui/layout.tsx'
+import { routes } from '../../../routes.ts'
+import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../../ui/form.tsx'
+import { Layout, type Viewer } from '../../../ui/layout.tsx'
 
 /** Props of the profile page. */
 export interface ProfilePageProps {

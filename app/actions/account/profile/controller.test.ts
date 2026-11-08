@@ -2,11 +2,11 @@ import * as assert from 'remix/assert'
 import type { Database } from 'remix/data-table'
 import { after, before, beforeEach, describe, it } from 'remix/test'
 
-import { createTestApp } from '../../../test/app.ts'
-import { signIn } from '../../../test/auth.ts'
-import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
-import { createUser, findUserByEmail, setUserStatus } from '../../data/users.ts'
-import { routes } from '../../routes.ts'
+import { createTestApp } from '../../../../test/app.ts'
+import { signIn } from '../../../../test/auth.ts'
+import { openTestDatabase, resetDatabase } from '../../../../test/database.ts'
+import { createUser, findUserByEmail, setUserStatus } from '../../../data/users.ts'
+import { routes } from '../../../routes.ts'
 
 const profileUrl = routes.account.profile.index.href()
 

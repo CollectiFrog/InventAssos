@@ -1,9 +1,15 @@
 import type { Handle } from 'remix/component'
 
-import type { Collectif } from '../../data/tables.ts'
-import { routes } from '../../routes.ts'
-import { CsrfField, ErrorSummary, type FieldErrors, TextArea, TextField } from '../../ui/form.tsx'
-import { Layout, type Viewer } from '../../ui/layout.tsx'
+import type { Collectif } from '../../../data/tables.ts'
+import { routes } from '../../../routes.ts'
+import {
+  CsrfField,
+  ErrorSummary,
+  type FieldErrors,
+  TextArea,
+  TextField,
+} from '../../../ui/form.tsx'
+import { Layout, type Viewer } from '../../../ui/layout.tsx'
 
 /** Props of the collectif edit form. */
 export interface EditCollectifPageProps {
