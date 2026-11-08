@@ -67,3 +67,8 @@ export async function syncPlatformAdmin(
     updated_at: new Date(),
   })
 }
+
+/** Accounts waiting for approval, oldest first. */
+export async function listPendingUsers(db: Database): Promise<User[]> {
+  return db.findMany(users, { where: { status: 'pending' }, orderBy: ['created_at', 'asc'] })
+}

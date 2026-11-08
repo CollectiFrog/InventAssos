@@ -171,3 +171,28 @@ button.danger {
   color: var(--accent);
   vertical-align: middle;
 }
+.cards {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+.card {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.card p {
+  margin-top: 0;
+}
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.inline-form input {
+  width: auto;
+  flex: 1 1 12rem;
+}

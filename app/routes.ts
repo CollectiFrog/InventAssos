@@ -17,6 +17,11 @@ export const routes = route({
     status: get('/compte/statut'),
     reapply: post('/compte/statut/redemander'),
   },
+  admin: {
+    accounts: get('/admin/comptes'),
+    approveAccount: post('/admin/comptes/:userId/accepter'),
+    rejectAccount: post('/admin/comptes/:userId/refuser'),
+  },
   signUp: {
     form: form('/inscription'),
     sent: get('/inscription/envoyee'),

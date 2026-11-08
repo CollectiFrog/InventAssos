@@ -46,3 +46,25 @@ export function alreadyRegisteredMail(to: string, signInUrl: string): Mail {
       `Pour vous connecter :\n${signInUrl}\n\nSi ce n’était pas vous, ignorez ce message.${signature}`,
   }
 }
+
+/** To the person: their account is open. */
+export function accountApprovedMail(to: string, signInUrl: string): Mail {
+  return {
+    to,
+    subject: 'Votre compte InventAssos est validé',
+    text: `Bonjour,\n\nVotre compte est validé : vous pouvez vous connecter.\n${signInUrl}${signature}`,
+  }
+}
+
+/** To the person: their request was rejected, with the admin's reason if any. */
+export function accountRejectedMail(to: string, reason: string | null): Mail {
+  return {
+    to,
+    subject: 'Votre demande de compte InventAssos',
+    text:
+      'Bonjour,\n\nVotre demande de compte n’a pas été acceptée.' +
+      (reason ? `\n\nMotif : ${reason}` : '') +
+      '\n\nSi la situation change, vous pouvez refaire une demande en vous connectant.' +
+      signature,
+  }
+}
