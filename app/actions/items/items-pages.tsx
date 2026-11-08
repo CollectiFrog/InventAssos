@@ -8,6 +8,7 @@ import {
   type FieldErrors,
   SelectField,
   type SelectOption,
+  TextField,
 } from '../../ui/form.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 import { ItemFields } from './item-fields.tsx'
@@ -69,7 +70,7 @@ export function ItemList(handle: Handle<{ items: ItemSummary[] }>) {
 export interface AddItemPageProps {
   viewer: Viewer
   csrfToken: string
-  values: ItemFormValues & { owner: string; locationId: string }
+  values: ItemFormValues & { owner: string; locationId: string; ownerEmail: string }
   errors?: FieldErrors
   categories: SelectOption[]
   locations: SelectOption[]
@@ -101,6 +102,15 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
             value={values.owner}
             error={errors.owner}
             required
+          />
+          <TextField
+            name="ownerEmail"
+            label="E-mail de la personne propriétaire"
+            type="email"
+            value={values.ownerEmail}
+            error={errors.ownerEmail}
+            maxLength={254}
+            hint="Seulement si « Une autre personne » : son compte doit être validé. Le matériel doit être rangé dans un lieu de votre collectif ; la personne pourra ensuite le modifier."
           />
           <ItemFields values={values} errors={errors} categories={categories} />
           <button type="submit">Ajouter</button>

@@ -4,6 +4,7 @@ import { describe, it } from 'remix/test'
 import type { CurrentUser } from './middleware/current-user.ts'
 import {
   canAssignItemOwner,
+  canDepositForPerson,
   canDisableAccount,
   canEditCollectif,
   canEditOwnProfile,
@@ -153,5 +154,19 @@ describe('permissions: accounts', () => {
       true,
     )
     assert.equal(canAssignItemOwner(user(), { collectifId: 'c1' }), false)
+  })
+
+  it("a person's item in C's location: set by C's responsible or the admin", () => {
+    const collectifPlace = { collectif_id: 'c1', user_id: null }
+    assert.equal(
+      canDepositForPerson(user({ managedCollectifIds: new Set(['c1']) }), collectifPlace),
+      true,
+    )
+    assert.equal(canDepositForPerson(user({ isAdmin: true }), collectifPlace), true)
+    assert.equal(canDepositForPerson(user(), collectifPlace), false)
+    assert.equal(
+      canDepositForPerson(user({ isAdmin: true }), { collectif_id: null, user_id: 'u1' }),
+      false,
+    )
   })
 })

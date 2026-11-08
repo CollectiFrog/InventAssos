@@ -3,11 +3,12 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../../data/audit-log.ts'
-import { createItem, listCategories } from '../../../data/items.ts'
+import { createItem, type ItemOwner, listCategories } from '../../../data/items.ts'
 import { findLocationById } from '../../../data/locations.ts'
+import { findUserByEmail, normalizeEmail } from '../../../data/users.ts'
 import type { CurrentUser } from '../../../middleware/current-user.ts'
 import type { AppContext } from '../../../middleware/index.ts'
-import { canStoreItemsIn, isValidatedUser } from '../../../permissions.ts'
+import { canDepositForPerson, canStoreItemsIn, isValidatedUser } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import type { FieldErrors } from '../../../ui/form.tsx'
 import { formValue, parseForm } from '../../../validation.ts'
@@ -54,6 +55,7 @@ export default createController(routes.items.create, {
         quantity: '1',
         categoryId: 'other',
         owner: 'me',
+        ownerEmail: '',
         locationId,
       })
     },
@@ -67,18 +69,32 @@ export default createController(routes.items.create, {
       // To put an item in a location you must manage it (ADR 0009): refused, not ignored.
       const location = await findLocationById(db, formValue(formData, 'locationId'))
       if (location === null || !canStoreItemsIn(actor, location)) return forbidden(context)
-      const owner = parseItemOwner(formValue(formData, 'owner'), actor)
-      if (owner === null) return forbidden(context)
+      const ownerChoice = formValue(formData, 'owner')
+      const errors: FieldErrors = {}
+      let owner: ItemOwner | null = null
+      if (ownerChoice === 'person') {
+        // US-0.5.2: only into a collectif's location the actor manages, for a validated account.
+        if (!canDepositForPerson(actor, location)) return forbidden(context)
+        const person = await findUserByEmail(db, normalizeEmail(formValue(formData, 'ownerEmail')))
+        if (person?.status === 'active') owner = { userId: person.id }
+        else errors.ownerEmail = 'Aucun compte validé avec cette adresse.'
+      } else {
+        owner = parseItemOwner(ownerChoice, actor)
+        if (owner === null) return forbidden(context)
+      }
 
       const parsed = parseForm(itemFieldsSchema, formData)
       const categoryIds = new Set((await listCategories(db)).map((c) => c.id))
-      const errors: FieldErrors = parsed.ok ? {} : { ...parsed.errors }
+      if (!parsed.ok) Object.assign(errors, parsed.errors)
       if (parsed.ok && !categoryIds.has(parsed.value.categoryId)) {
         errors.categoryId = 'Catégorie inconnue.'
       }
-      if (!parsed.ok || Object.keys(errors).length > 0) {
+      if (!parsed.ok || owner === null || Object.keys(errors).length > 0) {
         const values = Object.fromEntries(
-          [...itemFieldNames, 'owner', 'locationId'].map((n) => [n, formValue(formData, n)]),
+          [...itemFieldNames, 'owner', 'locationId', 'ownerEmail'].map((n) => [
+            n,
+            formValue(formData, n),
+          ]),
         )
         return renderForm(context, actor, values as AddItemPageProps['values'], errors)
       }
