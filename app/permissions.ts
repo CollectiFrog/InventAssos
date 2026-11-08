@@ -49,3 +49,9 @@ export function canRequestResponsibility(actor: Actor, collectifId: string): boo
 export function canManageResponsibles(actor: Actor): boolean {
   return isActiveAdmin(actor)
 }
+
+/** "Edit C's profile": platform admin, or an active responsible of C. */
+export function canEditCollectif(actor: Actor, collectifId: string): boolean {
+  if (!isValidatedUser(actor)) return false
+  return actor.isAdmin || actor.managedCollectifIds.has(collectifId)
+}

@@ -14,3 +14,9 @@ téléphone (facultatif).
 
 Le téléphone est **visible par tous les utilisateurs validés** de la plateforme : c'est ainsi qu'ils
 vous contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
+
+## Modifier la présentation d'un collectif
+
+Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y
+changer la description et le téléphone de contact, visibles par les utilisateurs validés. Pour
+changer le nom, contactez un administrateur.

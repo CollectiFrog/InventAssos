@@ -4,6 +4,7 @@ import { describe, it } from 'remix/test'
 import type { CurrentUser } from './middleware/current-user.ts'
 import {
   canDisableAccount,
+  canEditCollectif,
   canEditOwnProfile,
   canManageResponsibles,
   canRequestCollectif,
@@ -76,5 +77,13 @@ describe('permissions: accounts', () => {
     assert.equal(canManageResponsibles(user({ isAdmin: true })), true)
     assert.equal(canManageResponsibles(user({ managedCollectifIds: new Set(['c1']) })), false)
     assert.equal(canManageResponsibles(null), false)
+  })
+
+  it('"Edit C\'s profile": admin yes, responsible of C yes, others no', () => {
+    assert.equal(canEditCollectif(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canEditCollectif(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canEditCollectif(user({ managedCollectifIds: new Set(['c2']) }), 'c1'), false)
+    assert.equal(canEditCollectif(user(), 'c1'), false)
+    assert.equal(canEditCollectif(null, 'c1'), false)
   })
 })

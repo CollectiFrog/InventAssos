@@ -15,13 +15,15 @@ export interface CollectifPageProps {
   collectif: Collectif
   responsibleNames: string[]
   membership: Membership
+  canEdit: boolean
   notice?: string
 }
 
 /** Public profile of an active collectif. */
 export function CollectifPage(handle: Handle<CollectifPageProps>) {
   return () => {
-    const { viewer, csrfToken, collectif, responsibleNames, membership, notice } = handle.props
+    const { viewer, csrfToken, collectif, responsibleNames, membership, canEdit, notice } =
+      handle.props
     const slug = collectif.slug
     return (
       <Layout title={collectif.name} viewer={viewer}>
@@ -29,6 +31,13 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}
+          </p>
+        ) : null}
+        {canEdit ? (
+          <p>
+            <a class="button secondary" href={routes.collectifs.edit.index.href({ slug })}>
+              Modifier la présentation
+            </a>
           </p>
         ) : null}
         {collectif.description ? <p class="prose">{collectif.description}</p> : null}

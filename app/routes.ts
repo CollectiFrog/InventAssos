@@ -22,6 +22,7 @@ export const routes = route({
     index: get('/collectifs'),
     request: form('/collectifs/nouveau'),
     show: get('/collectifs/:slug'),
+    edit: form('/collectifs/:slug/modifier'),
     requestResponsibility: post('/collectifs/:slug/devenir-responsable'),
   },
   admin: {
