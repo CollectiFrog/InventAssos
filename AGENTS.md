@@ -71,6 +71,7 @@ The CI calls the same targets as you. Run them before opening a PR.
 | `db/migrations/`     | SQL migrations, applied at startup                          |
 | `public/`            | static files served as is                                   |
 | `test/`              | shared test helpers (test database, requests)               |
+| `Dockerfile`         | production image, published on GHCR by `release.yml`        |
 
 Project-specific rules go below this line, kept short.
 

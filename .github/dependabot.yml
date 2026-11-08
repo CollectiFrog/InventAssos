@@ -1,4 +1,4 @@
-# Weekly update PRs for CI actions, the app and the docs site.
+# Weekly update PRs for CI actions, the app, its base image and the docs site.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -13,6 +13,10 @@ updates:
     commit-message: { prefix: build, include: scope }
     groups:
       remix: { patterns: ['remix', '@remix-run/*'] }
+    ignore:
+      # Types must match the Node major in .nvmrc and the Dockerfile; bump them together by hand.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: npm
     directory: /docs/site
     target-branch: dev
@@ -20,3 +24,12 @@ updates:
     commit-message: { prefix: build, include: scope }
     groups:
       docs-site: { patterns: ['*'] }
+  - package-ecosystem: docker
+    directory: /
+    target-branch: dev
+    schedule: { interval: weekly }
+    commit-message: { prefix: build }
+    ignore:
+      # Node majors move with .nvmrc and @types/node, by hand.
+      - dependency-name: node
+        update-types: ['version-update:semver-major']

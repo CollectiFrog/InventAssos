@@ -25,7 +25,7 @@ jobs:
           POSTGRES_DB: inventassos_test
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U inventassos"
+          --health-cmd "pg_isready -U inventassos -d inventassos_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -42,6 +42,20 @@ jobs:
       - run: make typecheck
       - run: make test
       - run: make build
+
+  image:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      # Same Dockerfile as release.yml, built but not pushed.
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   docs:
     name: Docs build
