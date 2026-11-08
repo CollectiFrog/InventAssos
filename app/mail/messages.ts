@@ -23,14 +23,26 @@ export function signUpReceivedMail(to: string, appUrl: string): Mail {
   }
 }
 
+/** To a user who asked to sign in: the single-use link. */
+export function signInLinkMail(to: string, linkUrl: string): Mail {
+  return {
+    to,
+    subject: 'Votre lien de connexion InventAssos',
+    text:
+      `Bonjour,\n\nPour vous connecter, ouvrez ce lien dans les 15 minutes :\n${linkUrl}\n\n` +
+      'Il ne fonctionne qu’une fois. Si vous n’avez rien demandé, ignorez ce message : ' +
+      `personne ne peut se connecter sans ce lien.${signature}`,
+  }
+}
+
 /** To an address that already has an account: someone tried to sign up again with it. */
-export function alreadyRegisteredMail(to: string, appUrl: string): Mail {
+export function alreadyRegisteredMail(to: string, signInUrl: string): Mail {
   return {
     to,
     subject: 'Vous avez déjà un compte InventAssos',
     text:
       'Bonjour,\n\nQuelqu’un (sans doute vous) a demandé à créer un compte avec cette adresse, ' +
       'mais elle en a déjà un : aucun nouveau compte n’a été créé. ' +
-      `Si ce n’était pas vous, ignorez ce message.\n\n${appUrl}${signature}`,
+      `Pour vous connecter :\n${signInUrl}\n\nSi ce n’était pas vous, ignorez ce message.${signature}`,
   }
 }

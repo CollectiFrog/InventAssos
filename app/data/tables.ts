@@ -33,3 +33,15 @@ export const sessions = table({
     created_at: c.timestamp({ withTimezone: true }),
   },
 })
+
+export const signInTokens = table({
+  name: 'sign_in_tokens',
+  primaryKey: 'token_hash',
+  columns: {
+    token_hash: c.text(),
+    user_id: c.uuid(),
+    expires_at: c.timestamp({ withTimezone: true }),
+    used_at: c.timestamp({ withTimezone: true }).nullable(),
+    created_at: c.timestamp({ withTimezone: true }),
+  },
+})

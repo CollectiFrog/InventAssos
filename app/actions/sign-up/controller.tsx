@@ -57,7 +57,10 @@ export const signUpFormController = createController(routes.signUp.form, {
           await sendSafely(mailer, newAccountRequestMail(admins, settings.appUrl))
       } else {
         // Same answer as a new sign-up, so the form never reveals which e-mails have an account.
-        await sendSafely(mailer, alreadyRegisteredMail(email, settings.appUrl))
+        await sendSafely(
+          mailer,
+          alreadyRegisteredMail(email, settings.appUrl + routes.signIn.form.index.href()),
+        )
       }
 
       return redirect(routes.signUp.sent.href(), 303)
