@@ -119,3 +119,16 @@ export async function findLocationWithOwner(
     ownerSlug: row.owner_slug == null ? null : String(row.owner_slug),
   }
 }
+
+/** Every location with its owner's name; for platform admins, who may store items anywhere. */
+export async function listAllLocations(db: Database): Promise<LocationWithOwner[]> {
+  const result = await db.exec(sql`
+    select l.id::text, coalesce(c.name, u.name) as owner_name
+    from locations l
+    left join collectifs c on c.id = l.collectif_id
+    left join users u on u.id = l.user_id
+  `)
+  const owners = new Map((result.rows ?? []).map((r) => [String(r.id), String(r.owner_name)]))
+  const rows = await db.findMany(locations, { orderBy: ['name', 'asc'] })
+  return rows.map((row) => ({ ...row, ownerName: owners.get(row.id) ?? '' }))
+}

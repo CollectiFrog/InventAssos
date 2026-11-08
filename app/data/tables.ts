@@ -116,3 +116,49 @@ export const locations = table({
 })
 
 export type Location = TableRow<typeof locations>
+
+export const categories = table({
+  name: 'categories',
+  columns: {
+    id: c.text(),
+    name: c.text(),
+    parent_id: c.text().nullable(),
+    position: c.integer(),
+  },
+})
+
+export type Category = TableRow<typeof categories>
+
+/** Item conditions, stored in English, shown in French (`conditionLabels`). */
+export const itemConditions = ['new', 'good', 'worn', 'repair', 'broken'] as const
+export type ItemCondition = (typeof itemConditions)[number]
+
+/** Why an item left the inventory (US-0.5.5). */
+export const archiveReasons = ['sold', 'lost', 'broken', 'other'] as const
+export type ArchiveReason = (typeof archiveReasons)[number]
+
+export const items = table({
+  name: 'items',
+  columns: {
+    id: c.uuid(),
+    name: c.text(),
+    description: c.text().nullable(),
+    category_id: c.text(),
+    brand: c.text().nullable(),
+    model: c.text().nullable(),
+    serial_number: c.text().nullable(),
+    quantity: c.integer(),
+    condition: c.enum(itemConditions).nullable(),
+    estimated_value: c.decimal(10, 2).nullable(),
+    location_id: c.uuid(),
+    owner_collectif_id: c.uuid().nullable(),
+    owner_user_id: c.uuid().nullable(),
+    archived_at: c.timestamp({ withTimezone: true }).nullable(),
+    archive_reason: c.enum(archiveReasons).nullable(),
+    created_by: c.uuid().nullable(),
+    created_at: c.timestamp({ withTimezone: true }),
+    updated_at: c.timestamp({ withTimezone: true }),
+  },
+})
+
+export type Item = TableRow<typeof items>

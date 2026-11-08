@@ -35,6 +35,7 @@ export function Layout(handle: Handle<LayoutProps>) {
             <nav aria-label="Compte" class="account-nav">
               {viewer ? (
                 <>
+                  <a href={routes.items.index.href()}>Mon matériel</a>
                   <a href={routes.collectifs.index.href()}>Collectifs</a>
                   <a href={routes.locations.index.href()}>Mes lieux</a>
                   {viewer.isAdmin ? <a href={routes.admin.index.href()}>Administration</a> : null}

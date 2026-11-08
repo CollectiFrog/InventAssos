@@ -89,3 +89,21 @@ export function canSeeFullAddress(
 ): boolean {
   return isActiveAdmin(actor) || canManageLocation(actor, location)
 }
+
+/** "Add an item to a location" / "Move an item to a location": admin, or a manager of it. */
+export function canStoreItemsIn(
+  actor: Actor,
+  location: { collectif_id: string | null; user_id: string | null },
+): boolean {
+  return isValidatedUser(actor) && (actor.isAdmin || canManageLocation(actor, location))
+}
+
+/** May the actor own an item as this owner: themselves, or a collectif they manage. */
+export function canAssignItemOwner(
+  actor: Actor,
+  owner: { collectifId: string } | { userId: string },
+): boolean {
+  if (!isValidatedUser(actor)) return false
+  if ('userId' in owner) return owner.userId === actor.id
+  return actor.isAdmin || actor.managedCollectifIds.has(owner.collectifId)
+}
