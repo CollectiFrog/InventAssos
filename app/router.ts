@@ -10,6 +10,7 @@ import editCollectifController from './actions/collectifs/edit/controller.tsx'
 import requestCollectifController from './actions/collectifs/request/controller.tsx'
 import controller from './actions/controller.tsx'
 import healthController from './actions/health/controller.ts'
+import inventoryController from './actions/inventory/controller.tsx'
 import archiveItemController from './actions/items/archive/controller.tsx'
 import itemsController from './actions/items/controller.tsx'
 import createItemController from './actions/items/create/controller.tsx'
@@ -39,6 +40,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.collectifs.request, requestCollectifController)
   router.map(routes.collectifs.edit, editCollectifController)
   router.map(routes.health, healthController)
+  router.map(routes.inventory, inventoryController)
   router.map(routes.items, itemsController)
   router.map(routes.items.create, createItemController)
   router.map(routes.items.edit, editItemController)

@@ -7,6 +7,12 @@ sidebar:
 
 <!-- Une section par tâche, dans l'ordre où on la rencontre. Chaque version ajoute ses sections. -->
 
+## Parcourir l'inventaire
+
+**Inventaire**, en haut de la page, liste tout le matériel actif de la plateforme, 24 objets par
+page : nom, quantité, catégorie, ville et propriétaire. Cliquez sur un objet pour voir sa page.
+Les adresses des lieux n'y apparaissent jamais, seulement la ville.
+
 ## Modifier mon profil
 
 Cliquez sur votre nom en haut de la page. Vous pouvez y changer votre nom et indiquer un numéro de
