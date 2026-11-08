@@ -58,3 +58,87 @@ a {
 .status {
   color: var(--muted);
 }
+
+h1 {
+  line-height: 1.2;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  width: 100%;
+}
+.stack {
+  display: grid;
+  gap: 1rem;
+  max-width: 32rem;
+}
+.field {
+  display: grid;
+  gap: 0.25rem;
+}
+.field label {
+  font-weight: 600;
+}
+.optional,
+.hint {
+  color: var(--muted);
+  font-weight: 400;
+}
+.hint,
+.error {
+  margin: 0;
+  font-size: 0.9rem;
+}
+.error {
+  color: var(--danger);
+}
+.field-invalid input,
+.field-invalid textarea,
+.field-invalid select {
+  border-color: var(--danger);
+}
+
+button,
+.button {
+  display: inline-block;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
+  cursor: pointer;
+  justify-self: start;
+}
+button.secondary,
+.button.secondary {
+  background: transparent;
+  color: var(--accent);
+}
+button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.notice {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.notice-error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.notice-success {
+  border-color: var(--accent);
+}
