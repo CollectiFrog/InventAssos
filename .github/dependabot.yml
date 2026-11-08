@@ -29,3 +29,7 @@ updates:
     target-branch: dev
     schedule: { interval: weekly }
     commit-message: { prefix: build }
+    ignore:
+      # Node majors move with .nvmrc and @types/node, by hand.
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
