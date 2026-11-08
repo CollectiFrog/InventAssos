@@ -5,6 +5,7 @@ import type { CurrentUser } from './middleware/current-user.ts'
 import {
   canDisableAccount,
   canEditOwnProfile,
+  canManageResponsibles,
   canRequestCollectif,
   canRequestResponsibility,
   canReviewAccounts,
@@ -69,5 +70,11 @@ describe('permissions: accounts', () => {
     )
     assert.equal(canRequestResponsibility(user({ status: 'pending' }), 'c1'), false)
     assert.equal(canRequestResponsibility(null, 'c1'), false)
+  })
+
+  it('"Approve, reject or remove a responsible of C": admin only, not a responsible of C', () => {
+    assert.equal(canManageResponsibles(user({ isAdmin: true })), true)
+    assert.equal(canManageResponsibles(user({ managedCollectifIds: new Set(['c1']) })), false)
+    assert.equal(canManageResponsibles(null), false)
   })
 })

@@ -1,6 +1,7 @@
 import type { Handle } from 'remix/component'
 
 import type { PendingCollectif } from '../../data/collectifs.ts'
+import type { PendingResponsible } from '../../data/responsibles.ts'
 import type { User } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
@@ -14,6 +15,7 @@ export interface AccountsPageProps {
   csrfToken: string
   pending: User[]
   pendingCollectifs: PendingCollectif[]
+  pendingResponsibles: PendingResponsible[]
   active: User[]
   /** The admin viewing the page: they cannot disable themselves. */
   selfId: string
@@ -23,7 +25,16 @@ export interface AccountsPageProps {
 /** Pending accounts with accept and reject buttons (US-0.2.4). */
 export function AccountsPage(handle: Handle<AccountsPageProps>) {
   return () => {
-    const { viewer, csrfToken, pending, pendingCollectifs, active, selfId, notice } = handle.props
+    const {
+      viewer,
+      csrfToken,
+      pending,
+      pendingCollectifs,
+      pendingResponsibles,
+      active,
+      selfId,
+      notice,
+    } = handle.props
     return (
       <Layout title="Administration" viewer={viewer}>
         <h1>Administration</h1>
@@ -112,6 +123,36 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
                 </div>
               </li>
             ))}
+          </ul>
+        )}
+        <h2>Responsables à valider</h2>
+        {pendingResponsibles.length === 0 ? (
+          <p>Aucune demande de responsable.</p>
+        ) : (
+          <ul class="cards">
+            {pendingResponsibles.map((r) => {
+              const ids = { collectifId: r.collectifId, userId: r.userId }
+              return (
+                <li key={`${r.collectifId}-${r.userId}`} class="card row">
+                  <span>
+                    <strong>{r.userName}</strong> ({r.userEmail}) veut gérer{' '}
+                    <strong>{r.collectifName}</strong>
+                  </span>
+                  <span class="actions">
+                    <form method="post" action={routes.admin.responsibles.approve.href(ids)}>
+                      <CsrfField token={csrfToken} />
+                      <button type="submit">Accepter</button>
+                    </form>
+                    <form method="post" action={routes.admin.responsibles.reject.href(ids)}>
+                      <CsrfField token={csrfToken} />
+                      <button type="submit" class="danger">
+                        Refuser
+                      </button>
+                    </form>
+                  </span>
+                </li>
+              )
+            })}
           </ul>
         )}
         <h2>Comptes actifs</h2>

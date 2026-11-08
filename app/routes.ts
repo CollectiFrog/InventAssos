@@ -33,6 +33,10 @@ export const routes = route({
       approve: post('/admin/collectifs/:collectifId/accepter'),
       reject: post('/admin/collectifs/:collectifId/refuser'),
     },
+    responsibles: {
+      approve: post('/admin/collectifs/:collectifId/responsables/:userId/accepter'),
+      reject: post('/admin/collectifs/:collectifId/responsables/:userId/refuser'),
+    },
   },
   signUp: {
     form: form('/inscription'),

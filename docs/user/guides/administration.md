@@ -30,6 +30,12 @@ bien partie.
 - **Accepter** inscrit le collectif ; la personne qui l'a demandé en devient **responsable**.
 - **Refuser** libère le nom ; le motif éventuel est envoyé par e-mail à la personne.
 
+## Valider les responsables
+
+Quand une personne demande à **devenir responsable** d'un collectif existant, la demande apparaît
+dans **Administration**, section « Responsables à valider ». Vérifiez auprès des responsables
+actuels si besoin, puis **Accepter** ou **Refuser** ; la personne est prévenue par e-mail.
+
 ## Désactiver un compte
 
 La page **Administration** liste aussi les comptes actifs. **Désactiver** coupe immédiatement
