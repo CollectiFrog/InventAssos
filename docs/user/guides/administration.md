@@ -21,6 +21,15 @@ Chaque nouvelle demande vous est signalée par e-mail. Dans **Administration** :
 Chaque décision est enregistrée dans l'historique de la plateforme (qui a décidé, quand), sans le
 motif ni aucune donnée personnelle.
 
+## Valider les collectifs
+
+Les demandes de collectif apparaissent dans **Administration**, avec le nom de la personne qui les a
+faites. Vérifiez que le collectif n'existe pas déjà sous un autre nom et que la personne en fait
+bien partie.
+
+- **Accepter** inscrit le collectif ; la personne qui l'a demandé en devient **responsable**.
+- **Refuser** libère le nom ; le motif éventuel est envoyé par e-mail à la personne.
+
 ## Désactiver un compte
 
 La page **Administration** liste aussi les comptes actifs. **Désactiver** coupe immédiatement

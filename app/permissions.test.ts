@@ -7,10 +7,19 @@ import {
   canEditOwnProfile,
   canRequestCollectif,
   canReviewAccounts,
+  canReviewCollectifs,
 } from './permissions.ts'
 
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
-  return { id: 'u1', name: 'U', email: 'u@x.org', status: 'active', isAdmin: false, ...overrides }
+  return {
+    id: 'u1',
+    name: 'U',
+    email: 'u@x.org',
+    status: 'active',
+    isAdmin: false,
+    managedCollectifIds: new Set(),
+    ...overrides,
+  }
 }
 
 describe('permissions: accounts', () => {
@@ -39,5 +48,11 @@ describe('permissions: accounts', () => {
     assert.equal(canRequestCollectif(user({ isAdmin: true })), true)
     assert.equal(canRequestCollectif(user({ status: 'pending' })), false)
     assert.equal(canRequestCollectif(null), false)
+  })
+
+  it('"Approve or reject a collectif": admin only', () => {
+    assert.equal(canReviewCollectifs(user({ isAdmin: true })), true)
+    assert.equal(canReviewCollectifs(user({ managedCollectifIds: new Set(['c1']) })), false)
+    assert.equal(canReviewCollectifs(null), false)
   })
 })

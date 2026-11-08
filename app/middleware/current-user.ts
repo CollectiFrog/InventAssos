@@ -1,7 +1,7 @@
 import type { Database } from 'remix/data-table'
 import { createContextKey, type Middleware } from 'remix/router'
 import { Session } from 'remix/session'
-
+import { listManagedCollectifIds } from '../data/responsibles.ts'
 import type { UserStatus } from '../data/tables.ts'
 import { findUserById } from '../data/users.ts'
 
@@ -13,6 +13,8 @@ export interface CurrentUser {
   status: UserStatus
   /** From PLATFORM_ADMIN_EMAILS on every request (US-0.2.5), never from a stale flag alone. */
   isAdmin: boolean
+  /** IDs of the active collectifs this person is an active responsible of. */
+  managedCollectifIds: ReadonlySet<string>
 }
 
 /** Context key; actions read `context.currentUser` (null when nobody is signed in). */
@@ -45,6 +47,9 @@ export function loadCurrentUser(
           email: user.email,
           status: user.status,
           isAdmin: adminEmails.has(user.email),
+          managedCollectifIds: new Set(
+            user.status === 'active' ? await listManagedCollectifIds(db, user.id) : [],
+          ),
         }
       } else {
         session.destroy()

@@ -1,5 +1,5 @@
 // Data access for collectifs: the only module that reads or writes the `collectifs` table.
-import { and, type Database, ne } from 'remix/data-table'
+import { and, type Database, ne, sql } from 'remix/data-table'
 
 import { type Collectif, type CollectifStatus, collectifs } from './tables.ts'
 
@@ -63,4 +63,50 @@ export async function listPendingRequestsBy(db: Database, userId: string): Promi
     where: { requested_by: userId, status: 'pending' },
     orderBy: ['created_at', 'asc'],
   })
+}
+
+/** Marks a pending collectif active or rejected, recording who decided. */
+export async function decideCollectif(
+  db: Database,
+  id: string,
+  decision: { status: 'active' | 'rejected'; adminId: string; rejectionReason?: string | null },
+): Promise<Collectif> {
+  return db.update(collectifs, id, {
+    status: decision.status,
+    validated_by: decision.adminId,
+    validated_at: new Date(),
+    rejection_reason: decision.rejectionReason ?? null,
+    updated_at: new Date(),
+  })
+}
+
+/** A pending collectif with the name and e-mail of whoever asked for it. */
+export interface PendingCollectif {
+  id: string
+  name: string
+  description: string
+  contactPhone: string | null
+  requesterName: string | null
+  requesterEmail: string | null
+  createdAt: Date
+}
+
+/** Pending collectif requests for the admin queue, oldest first. */
+export async function listPendingCollectifs(db: Database): Promise<PendingCollectif[]> {
+  const result = await db.exec(sql`
+    select c.id, c.name, c.description, c.contact_phone, c.created_at,
+           u.name as requester_name, u.email as requester_email
+    from collectifs c left join users u on u.id = c.requested_by
+    where c.status = 'pending'
+    order by c.created_at
+  `)
+  return (result.rows ?? []).map((row) => ({
+    id: String(row.id),
+    name: String(row.name),
+    description: String(row.description),
+    contactPhone: row.contact_phone === null ? null : String(row.contact_phone),
+    requesterName: row.requester_name === null ? null : String(row.requester_name),
+    requesterEmail: row.requester_email === null ? null : String(row.requester_email),
+    createdAt: new Date(String(row.created_at)),
+  }))
 }

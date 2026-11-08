@@ -17,6 +17,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Administration page: admins accept or reject pending accounts, with an optional reason; the person is told by e-mail.
 - Admins can disable an account: the person is signed out at once and can no longer sign in; nothing is deleted.
 - Collectifs page; a validated user can request a new collectif, checked by an admin, with a unique name.
+- Admins accept or reject collectif requests; on acceptance the requester becomes the collectif's responsible.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
 <!-- Compare links, one per release:
