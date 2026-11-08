@@ -42,7 +42,12 @@ export function InventoryPage(handle: Handle<InventoryPageProps>) {
     return (
       <Layout title="Inventaire" viewer={viewer}>
         <h1>Inventaire</h1>
-        <form method="get" action={routes.inventory.index.href()} class="filters" role="search">
+        <form
+          method="get"
+          action={routes.inventory.index.href()}
+          class="filters"
+          aria-label="Rechercher dans l’inventaire"
+        >
           <TextField
             name="q"
             label="Rechercher"
