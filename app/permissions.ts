@@ -24,3 +24,8 @@ export function canReviewAccounts(actor: Actor): boolean {
 export function canEditOwnProfile(actor: Actor): boolean {
   return isValidatedUser(actor)
 }
+
+/** "Disable an account": platform admin only, and never their own account. */
+export function canDisableAccount(actor: Actor, targetUserId: string): boolean {
+  return isActiveAdmin(actor) && actor.id !== targetUserId
+}

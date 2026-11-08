@@ -22,6 +22,7 @@ export const routes = route({
     accounts: get('/admin/comptes'),
     approveAccount: post('/admin/comptes/:userId/accepter'),
     rejectAccount: post('/admin/comptes/:userId/refuser'),
+    disableAccount: post('/admin/comptes/:userId/desactiver'),
   },
   signUp: {
     form: form('/inscription'),

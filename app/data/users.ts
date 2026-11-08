@@ -81,3 +81,8 @@ export async function updateProfile(
 ): Promise<User> {
   return db.update(users, id, { name: profile.name, phone: profile.phone, updated_at: new Date() })
 }
+
+/** Active accounts, by name. */
+export async function listActiveUsers(db: Database): Promise<User[]> {
+  return db.findMany(users, { where: { status: 'active' }, orderBy: ['name', 'asc'] })
+}

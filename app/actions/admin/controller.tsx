@@ -4,10 +4,11 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
-import { findUserById, listPendingUsers, setUserStatus } from '../../data/users.ts'
+import { deleteUserSessions } from '../../data/sessions.ts'
+import { findUserById, listActiveUsers, listPendingUsers, setUserStatus } from '../../data/users.ts'
 import { sendSafely } from '../../mail/mailer.ts'
 import { accountApprovedMail, accountRejectedMail } from '../../mail/messages.ts'
-import { canReviewAccounts } from '../../permissions.ts'
+import { canDisableAccount, canReviewAccounts } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, requireUser } from '../guards.tsx'
@@ -29,6 +30,8 @@ export default createController(routes.admin, {
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
           pending={await listPendingUsers(context.db)}
+          active={await listActiveUsers(context.db)}
+          selfId={actor.id}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
@@ -90,6 +93,33 @@ export default createController(routes.admin, {
       })
       await sendSafely(mailer, accountRejectedMail(user.email, reason))
       session.flash('notice', `Demande de ${user.name} refusée.`)
+      return redirect(routes.admin.accounts.href(), 303)
+    },
+
+    async disableAccount(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      if (!canDisableAccount(actor, context.params.userId)) return forbidden(context)
+
+      const { db, session } = context
+      const user = await findUserById(db, context.params.userId)
+      if (user === null || user.status !== 'active') {
+        session.flash('notice', 'Ce compte n’est pas actif.')
+        return redirect(routes.admin.accounts.href(), 303)
+      }
+
+      await db.transaction(async (tx) => {
+        await setUserStatus(tx, user.id, 'disabled')
+        // Sessions are rows (ADR 0017): deleting them signs the person out everywhere at once.
+        await deleteUserSessions(tx, user.id)
+        await logAction(tx, {
+          actorId: actor.id,
+          action: 'account.disabled',
+          entity: 'user',
+          entityId: user.id,
+        })
+      })
+      session.flash('notice', `Compte de ${user.name} désactivé.`)
       return redirect(routes.admin.accounts.href(), 303)
     },
   },

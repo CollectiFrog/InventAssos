@@ -15,6 +15,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - "Votre compte" page: a pending or rejected person sees where their request stands and can apply again after a rejection.
 - Platform admins are the e-mails listed in `PLATFORM_ADMIN_EMAILS`: their account is created and activated at their first sign-in.
 - Administration page: admins accept or reject pending accounts, with an optional reason; the person is told by e-mail.
+- Admins can disable an account: the person is signed out at once and can no longer sign in; nothing is deleted.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
 <!-- Compare links, one per release:
