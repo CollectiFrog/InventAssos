@@ -49,7 +49,9 @@ export function CollectifsPage(handle: Handle<CollectifsPageProps>) {
           <ul class="cards">
             {active.map((c) => (
               <li key={c.id} class="card">
-                <strong>{c.name}</strong>
+                <a href={routes.collectifs.show.href({ slug: c.slug })}>
+                  <strong>{c.name}</strong>
+                </a>
                 {c.description ? <p>{c.description}</p> : null}
               </li>
             ))}

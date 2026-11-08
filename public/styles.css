@@ -206,3 +206,17 @@ button.danger {
 .card.row form {
   margin: 0;
 }
+.prose {
+  white-space: pre-line;
+}
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+}
+.facts dt {
+  font-weight: 600;
+}
+.facts dd {
+  margin: 0;
+}

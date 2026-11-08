@@ -21,6 +21,8 @@ export const routes = route({
   collectifs: {
     index: get('/collectifs'),
     request: form('/collectifs/nouveau'),
+    show: get('/collectifs/:slug'),
+    requestResponsibility: post('/collectifs/:slug/devenir-responsable'),
   },
   admin: {
     accounts: get('/admin/comptes'),

@@ -46,3 +46,13 @@ export async function listManagedCollectifIds(db: Database, userId: string): Pro
   `)
   return (result.rows ?? []).map((row) => String(row.collectif_id))
 }
+
+/** Names of the active responsibles of a collectif, for display. */
+export async function listResponsibleNames(db: Database, collectifId: string): Promise<string[]> {
+  const result = await db.exec(sql`
+    select u.name from responsibles r join users u on u.id = r.user_id
+    where r.collectif_id = ${collectifId} and r.status = 'active'
+    order by u.name
+  `)
+  return (result.rows ?? []).map((row) => String(row.name))
+}
