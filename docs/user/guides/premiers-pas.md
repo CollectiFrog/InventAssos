@@ -28,6 +28,9 @@ InventAssos n'utilise pas de mot de passe.
 Le lien est valable **15 minutes** et ne sert **qu'une fois**. Vous restez connecté 30 jours sur cet
 appareil. Si le lien a expiré, demandez-en simplement un nouveau.
 
+Sur un appareil partagé, pensez à cliquer sur **Se déconnecter** en haut de la page : la session est
+fermée et ne peut plus être réutilisée.
+
 ## Rejoindre ou créer un collectif
 
 <!-- Rédigé avec la V0.3. -->
