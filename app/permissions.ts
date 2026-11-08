@@ -34,3 +34,8 @@ export function canDisableAccount(actor: Actor, targetUserId: string): boolean {
 export function canRequestCollectif(actor: Actor): boolean {
   return isValidatedUser(actor)
 }
+
+/** "Approve or reject a collectif": platform admin only. */
+export function canReviewCollectifs(actor: Actor): boolean {
+  return isActiveAdmin(actor)
+}

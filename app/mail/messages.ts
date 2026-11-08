@@ -77,3 +77,30 @@ export function newCollectifRequestMail(to: string[], reviewUrl: string): Mail {
     text: `Une nouvelle demande de collectif attend votre validation :\n${reviewUrl}${signature}`,
   }
 }
+
+/** To the requester: their collectif is open and they are its responsible. */
+export function collectifApprovedMail(to: string, collectifName: string, appUrl: string): Mail {
+  return {
+    to,
+    subject: `Collectif « ${collectifName} » validé`,
+    text:
+      `Bonjour,\n\nLe collectif « ${collectifName} » est validé et vous en êtes responsable : ` +
+      `vous pouvez gérer ses informations et, bientôt, son matériel.\n${appUrl}${signature}`,
+  }
+}
+
+/** To the requester: their collectif request was rejected. */
+export function collectifRejectedMail(
+  to: string,
+  collectifName: string,
+  reason: string | null,
+): Mail {
+  return {
+    to,
+    subject: `Demande de collectif « ${collectifName} »`,
+    text:
+      `Bonjour,\n\nVotre demande pour le collectif « ${collectifName} » n’a pas été acceptée.` +
+      (reason ? `\n\nMotif : ${reason}` : '') +
+      signature,
+  }
+}
