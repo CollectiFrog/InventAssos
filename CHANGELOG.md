@@ -12,6 +12,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Sign-up: a visitor asks for an account with their name and e-mail; platform admins are notified by e-mail.
 - Sign-in without password: a single-use link valid 15 minutes is sent by e-mail; sessions last 30 days.
 - Sign-out button in the header; it closes the session on the server.
+- "Votre compte" page: a pending or rejected person sees where their request stands and can apply again after a rejection.
 
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD

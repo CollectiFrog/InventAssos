@@ -13,6 +13,10 @@ export const routes = route({
     link: form('/connexion/lien/:token'),
   },
   signOut: post('/deconnexion'),
+  account: {
+    status: get('/compte/statut'),
+    reapply: post('/compte/statut/redemander'),
+  },
   signUp: {
     form: form('/inscription'),
     sent: get('/inscription/envoyee'),
