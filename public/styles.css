@@ -239,3 +239,13 @@ button.danger {
   gap: 1rem;
   margin-top: 1.5rem;
 }
+.filters {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  align-items: end;
+  margin-bottom: 1rem;
+}
+.filters .actions {
+  align-self: end;
+}
