@@ -15,25 +15,26 @@ const base = site === 'dev' && pagesUrl ? `${basePath}/dev` : basePath || '/';
 
 // Edit these per project.
 const project = {
-  name: 'Project Name',
-  repo: 'https://github.com/OWNER/REPO',
-  lang: 'en', // language of the user documentation
+  name: 'InventAssos',
+  repo: 'https://github.com/CollectiFrog/InventAssos',
+  lang: 'fr', // language of the user documentation
 };
 
 const sites = {
   user: {
     title: project.name,
     sidebar: [
-      { label: 'Get started', items: [{ autogenerate: { directory: 'guides' } }] },
-      { label: 'Reference', items: [{ autogenerate: { directory: 'reference' } }] },
+      { label: 'Démarrer', items: [{ autogenerate: { directory: 'guides' } }] },
+      { label: 'Référence', items: [{ autogenerate: { directory: 'reference' } }] },
     ],
-    otherSite: { label: 'Developer docs', href: `${devUrl}/` },
+    otherSite: { label: 'Docs développeurs', href: `${devUrl}/` },
   },
   dev: {
     title: `${project.name} · Developers`,
     sidebar: [
       { label: 'Overview', link: '/' },
       { label: 'Contribute', items: [{ autogenerate: { directory: 'contribute' } }] },
+      { label: 'Product', items: [{ autogenerate: { directory: 'product' } }] },
       { label: 'Architecture', items: [{ autogenerate: { directory: 'architecture' } }] },
       { label: 'Decisions (ADR)', items: [{ autogenerate: { directory: 'adr' } }] },
     ],

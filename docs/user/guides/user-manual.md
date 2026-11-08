@@ -1,10 +1,8 @@
 ---
-title: User manual
-description: How to use each feature.
+title: Manuel d'utilisation
+description: Comment utiliser chaque fonctionnalité.
 sidebar:
   order: 2
 ---
 
-<!-- One section per task the user wants to do, in the order they meet them. Screenshots welcome. -->
-
-## First steps
+<!-- Une section par tâche, dans l'ordre où on la rencontre. Chaque version ajoute ses sections. -->

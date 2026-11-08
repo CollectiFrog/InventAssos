@@ -70,4 +70,16 @@ Project-specific rules go below this line, kept short.
 
 ## Project-specific rules
 
-<!-- e.g. framework conventions, data rules, modules that must not depend on each other. -->
+- **Remix 3 is not React.** Remix 3 (stable since 2026-10-01) has its own component model and
+  packages; most models were trained before it. Read the official docs
+  (<https://remix.run>, <https://api.remix.run>) before writing code. Never write React, Remix v2
+  or React Router code. See `docs/adr/0006-remix-3-full-stack.md`.
+- **Deny by default.** Every action is checked on the server against
+  `docs/dev/architecture/permissions.md`; the UI is never the only barrier. Each rule has a test.
+- **Data access goes through one module per entity.** No SQL in routes or components.
+- **Audit log stores IDs only**: never a name, e-mail or phone (`docs/adr/0010-personal-data-retention.md`).
+- **Exact addresses never leave the owner.** Other users, exports and APIs get the city only.
+- **Ownership ≠ storage.** An item has one owner (collectif xor person) and one location; never merge
+  the two (`docs/adr/0009-ownership-and-locations.md`).
+- **Specs live in `docs/dev/product/`.** Work on a user story only once it is listed there; if a
+  story is ambiguous, ask instead of guessing.

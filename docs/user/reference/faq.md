@@ -1,6 +1,6 @@
 ---
-title: FAQ
-description: Frequently asked questions.
+title: Questions fréquentes
+description: Les questions qu'on nous pose souvent.
 ---
 
-<!-- Question as a heading, short answer below. -->
+<!-- La question en titre, une réponse courte dessous. -->
