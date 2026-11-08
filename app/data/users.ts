@@ -47,3 +47,23 @@ export async function setUserStatus(
     updated_at: new Date(),
   })
 }
+
+/**
+ * Aligns an account with PLATFORM_ADMIN_EMAILS (US-0.2.5): a listed e-mail becomes an active admin
+ * without approval; an e-mail removed from the list loses the flag. Disabled accounts stay disabled.
+ */
+export async function syncPlatformAdmin(
+  db: Database,
+  user: User,
+  adminEmails: ReadonlySet<string>,
+): Promise<User> {
+  const listed = adminEmails.has(user.email)
+  const activate = listed && (user.status === 'pending' || user.status === 'rejected')
+  if (!activate && user.is_platform_admin === listed) return user
+
+  return db.update(users, user.id, {
+    is_platform_admin: listed,
+    ...(activate ? { status: 'active' as const, rejection_reason: null } : {}),
+    updated_at: new Date(),
+  })
+}
