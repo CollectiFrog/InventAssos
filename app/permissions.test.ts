@@ -7,6 +7,7 @@ import {
   canDepositForPerson,
   canDisableAccount,
   canEditCollectif,
+  canEditItem,
   canEditOwnProfile,
   canManageCollectifLocations,
   canManagePersonalLocations,
@@ -168,5 +169,31 @@ describe('permissions: accounts', () => {
       canDepositForPerson(user({ isAdmin: true }), { collectif_id: null, user_id: 'u1' }),
       false,
     )
+  })
+
+  it('"Edit, move, archive an item": admin, owner, owning collectif, location manager', () => {
+    const item = {
+      owner_collectif_id: 'c1',
+      owner_user_id: null,
+      locationCollectifId: null,
+      locationUserId: 'u5',
+    }
+    assert.equal(canEditItem(user({ isAdmin: true }), item), true)
+    assert.equal(canEditItem(user({ managedCollectifIds: new Set(['c1']) }), item), true)
+    assert.equal(canEditItem(user({ id: 'u5' }), item), true)
+    assert.equal(canEditItem(user({ managedCollectifIds: new Set(['c2']) }), item), false)
+    assert.equal(canEditItem(user(), item), false)
+    const deposit = {
+      owner_collectif_id: null,
+      owner_user_id: 'u1',
+      locationCollectifId: 'c2',
+      locationUserId: null,
+    }
+    assert.equal(canEditItem(user(), deposit), true)
+    assert.equal(
+      canEditItem(user({ id: 'u3', managedCollectifIds: new Set(['c2']) }), deposit),
+      true,
+    )
+    assert.equal(canEditItem(null, deposit), false)
   })
 })

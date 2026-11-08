@@ -1,7 +1,7 @@
 import { createController } from 'remix/router'
 
 import { findItemDetails, listItemsManagedBy } from '../../data/items.ts'
-import { isValidatedUser } from '../../permissions.ts'
+import { canEditItem, isValidatedUser } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
@@ -41,6 +41,7 @@ export default createController(routes.items, {
         <ItemPage
           viewer={viewerOf(context)}
           item={item}
+          canEdit={canEditItem(actor, item)}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )

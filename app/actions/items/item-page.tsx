@@ -9,8 +9,8 @@ import { Layout, type Viewer } from '../../ui/layout.tsx'
 export interface ItemPageProps {
   viewer: Viewer
   item: ItemDetails
-  /** Buttons the viewer may use (edit, move, archive), built by the controller. */
-  actions?: RemixNode
+  /** Whether the viewer may edit, move and archive the item (`canEditItem`). */
+  canEdit?: boolean
   /** History section (US-0.5.6). */
   history?: RemixNode
   notice?: string
@@ -19,7 +19,7 @@ export interface ItemPageProps {
 /** An item: what it is, where it is stored (city), who owns it. */
 export function ItemPage(handle: Handle<ItemPageProps>) {
   return () => {
-    const { viewer, item, actions, history, notice } = handle.props
+    const { viewer, item, canEdit, history, notice } = handle.props
     return (
       <Layout title={item.name} viewer={viewer}>
         <h1>
@@ -81,7 +81,13 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
           </dd>
         </dl>
         {item.description ? <p class="prose">{item.description}</p> : null}
-        {actions}
+        {canEdit ? (
+          <p class="actions">
+            <a class="button secondary" href={routes.items.edit.index.href({ itemId: item.id })}>
+              Modifier
+            </a>
+          </p>
+        ) : null}
         {history}
       </Layout>
     )
