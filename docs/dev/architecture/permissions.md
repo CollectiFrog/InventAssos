@@ -10,6 +10,9 @@ request (`context.currentUser.isAdmin`). A listed e-mail becomes an active accou
 sign-in, without approval; removing it from the list removes the rights at the next request.
 `users.is_platform_admin` only records the last known state.
 
+Each row is a function in `app/permissions.ts`, tested in `app/permissions.test.ts`; controllers
+call it before acting and answer 403 otherwise, with a router test per protected route.
+
 Everything is denied unless a row below allows it. Pending, rejected, disabled and deleted users
 can only see their status page and sign out.
 

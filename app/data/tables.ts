@@ -45,3 +45,16 @@ export const signInTokens = table({
     created_at: c.timestamp({ withTimezone: true }),
   },
 })
+
+export const auditLog = table({
+  name: 'audit_log',
+  columns: {
+    id: c.integer(),
+    actor_id: c.uuid().nullable(),
+    action: c.text(),
+    entity: c.text(),
+    entity_id: c.text(),
+    payload: c.json(),
+    at: c.timestamp({ withTimezone: true }),
+  },
+})

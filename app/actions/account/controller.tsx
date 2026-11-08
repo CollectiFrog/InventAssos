@@ -36,7 +36,10 @@ export default createController(routes.account, {
       await setUserStatus(context.db, current.id, 'pending')
       const admins = [...context.settings.adminEmails]
       if (admins.length > 0) {
-        await sendSafely(context.mailer, newAccountRequestMail(admins, context.settings.appUrl))
+        await sendSafely(
+          context.mailer,
+          newAccountRequestMail(admins, context.settings.appUrl + routes.admin.accounts.href()),
+        )
       }
       return redirect(routes.account.status.href(), 303)
     },
