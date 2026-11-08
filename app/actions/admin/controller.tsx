@@ -15,20 +15,20 @@ import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
-import { AccountsPage } from './accounts-page.tsx'
+import { QueuePage } from './queue-page.tsx'
 
 const rejectSchema = f.object({ reason: f.field(optionalText(500)) })
 
 export default createController(routes.admin, {
   actions: {
-    async accounts(context) {
+    async index(context) {
       const actor = requireUser(context)
       if (actor instanceof Response) return actor
       if (!canReviewAccounts(actor)) return forbidden(context)
 
       const notice = context.session.get('notice')
       return context.render(
-        <AccountsPage
+        <QueuePage
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
           pending={await listPendingUsers(context.db)}
@@ -50,7 +50,7 @@ export default createController(routes.admin, {
       const user = await findUserById(db, context.params.userId)
       if (user === null || user.status !== 'pending') {
         session.flash('notice', 'Cette demande a déjà été traitée.')
-        return redirect(routes.admin.accounts.href(), 303)
+        return redirect(routes.admin.index.href(), 303)
       }
 
       await db.transaction(async (tx) => {
@@ -67,7 +67,7 @@ export default createController(routes.admin, {
         accountApprovedMail(user.email, settings.appUrl + routes.signIn.form.index.href()),
       )
       session.flash('notice', `Compte de ${user.name} accepté.`)
-      return redirect(routes.admin.accounts.href(), 303)
+      return redirect(routes.admin.index.href(), 303)
     },
 
     async rejectAccount(context) {
@@ -81,7 +81,7 @@ export default createController(routes.admin, {
       const user = await findUserById(db, context.params.userId)
       if (user === null || user.status !== 'pending') {
         session.flash('notice', 'Cette demande a déjà été traitée.')
-        return redirect(routes.admin.accounts.href(), 303)
+        return redirect(routes.admin.index.href(), 303)
       }
 
       await db.transaction(async (tx) => {
@@ -97,7 +97,7 @@ export default createController(routes.admin, {
       })
       await sendSafely(mailer, accountRejectedMail(user.email, reason))
       session.flash('notice', `Demande de ${user.name} refusée.`)
-      return redirect(routes.admin.accounts.href(), 303)
+      return redirect(routes.admin.index.href(), 303)
     },
 
     async disableAccount(context) {
@@ -109,7 +109,7 @@ export default createController(routes.admin, {
       const user = await findUserById(db, context.params.userId)
       if (user === null || user.status !== 'active') {
         session.flash('notice', 'Ce compte n’est pas actif.')
-        return redirect(routes.admin.accounts.href(), 303)
+        return redirect(routes.admin.index.href(), 303)
       }
 
       await db.transaction(async (tx) => {
@@ -124,7 +124,7 @@ export default createController(routes.admin, {
         })
       })
       session.flash('notice', `Compte de ${user.name} désactivé.`)
-      return redirect(routes.admin.accounts.href(), 303)
+      return redirect(routes.admin.index.href(), 303)
     },
   },
 })

@@ -10,9 +10,15 @@ configuration (`PLATFORM_ADMIN_EMAILS`). À la première connexion, leur compte 
 automatiquement. Un badge **admin** s'affiche à côté de leur nom et un lien **Administration**
 apparaît en haut de la page.
 
+## La file d'attente
+
+**Administration** (`/admin`) rassemble toutes les demandes en attente : comptes, collectifs et
+responsables, avec leur nombre en haut de la page. Chaque nouvelle demande vous est aussi signalée
+par e-mail, avec un lien vers cette page.
+
 ## Valider les comptes
 
-Chaque nouvelle demande vous est signalée par e-mail. Dans **Administration** :
+Dans la section « Comptes à valider » :
 
 - **Accepter** ouvre le compte ; la personne reçoit un e-mail l'invitant à se connecter.
 - **Refuser** ferme la demande ; vous pouvez indiquer un motif, qui est envoyé à la personne et

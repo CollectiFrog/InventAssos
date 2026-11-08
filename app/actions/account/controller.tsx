@@ -38,7 +38,7 @@ export default createController(routes.account, {
       if (admins.length > 0) {
         await sendSafely(
           context.mailer,
-          newAccountRequestMail(admins, context.settings.appUrl + routes.admin.accounts.href()),
+          newAccountRequestMail(admins, context.settings.appUrl + routes.admin.index.href()),
         )
       }
       return redirect(routes.account.status.href(), 303)

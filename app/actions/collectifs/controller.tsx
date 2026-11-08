@@ -106,7 +106,7 @@ export const collectifsController = createController(routes.collectifs, {
       await setResponsible(db, { userId: actor.id, collectifId: collectif.id, status: 'pending' })
       const admins = [...settings.adminEmails]
       if (admins.length > 0) {
-        const reviewUrl = settings.appUrl + routes.admin.accounts.href()
+        const reviewUrl = settings.appUrl + routes.admin.index.href()
         await sendSafely(mailer, newResponsibleRequestMail(admins, reviewUrl))
       }
       session.flash('notice', 'Demande envoyée : un administrateur va l’examiner.')
@@ -163,7 +163,7 @@ export const requestCollectifController = createController(routes.collectifs.req
       })
       const admins = [...settings.adminEmails]
       if (admins.length > 0) {
-        const reviewUrl = settings.appUrl + routes.admin.accounts.href()
+        const reviewUrl = settings.appUrl + routes.admin.index.href()
         await sendSafely(mailer, newCollectifRequestMail(admins, reviewUrl))
       }
       context.session.flash('notice', 'Demande envoyée : un administrateur va l’examiner.')

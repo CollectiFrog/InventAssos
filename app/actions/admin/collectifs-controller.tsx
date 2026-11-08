@@ -14,7 +14,7 @@ import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, requireUser } from '../guards.tsx'
 
 const rejectSchema = f.object({ reason: f.field(optionalText(500)) })
-const queueUrl = routes.admin.accounts.href()
+const queueUrl = routes.admin.index.href()
 
 /** Accept or reject a collectif request (US-0.3.2). */
 export default createController(routes.admin.collectifs, {
