@@ -9,6 +9,7 @@ import {
   collectifsController,
   requestCollectifController,
 } from './actions/collectifs/controller.tsx'
+import editCollectifController from './actions/collectifs/edit-controller.tsx'
 import controller from './actions/controller.tsx'
 import healthController from './actions/health/controller.ts'
 import {
@@ -31,6 +32,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.admin.responsibles, adminResponsiblesController)
   router.map(routes.collectifs, collectifsController)
   router.map(routes.collectifs.request, requestCollectifController)
+  router.map(routes.collectifs.edit, editCollectifController)
   router.map(routes.health, healthController)
   router.map(routes.signIn, signInController)
   router.map(routes.signIn.form, signInFormController)

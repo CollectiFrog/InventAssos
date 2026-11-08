@@ -15,6 +15,7 @@ import { findResponsible, listResponsibleNames, setResponsible } from '../../dat
 import { sendSafely } from '../../mail/mailer.ts'
 import { newCollectifRequestMail, newResponsibleRequestMail } from '../../mail/messages.ts'
 import {
+  canEditCollectif,
   canRequestCollectif,
   canRequestResponsibility,
   isValidatedUser,
@@ -77,6 +78,7 @@ export const collectifsController = createController(routes.collectifs, {
           collectif={collectif}
           responsibleNames={await listResponsibleNames(db, collectif.id)}
           membership={membership}
+          canEdit={canEditCollectif(actor, collectif.id)}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )

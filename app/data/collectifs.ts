@@ -110,3 +110,16 @@ export async function listPendingCollectifs(db: Database): Promise<PendingCollec
     createdAt: new Date(String(row.created_at)),
   }))
 }
+
+/** Updates the fields a responsible may edit (US-0.3.5); the name stays under admin control. */
+export async function updateCollectifProfile(
+  db: Database,
+  id: string,
+  profile: { description: string; contactPhone: string | null },
+): Promise<Collectif> {
+  return db.update(collectifs, id, {
+    description: profile.description,
+    contact_phone: profile.contactPhone,
+    updated_at: new Date(),
+  })
+}
