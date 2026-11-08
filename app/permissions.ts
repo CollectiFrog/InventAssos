@@ -19,3 +19,8 @@ export function isValidatedUser(actor: Actor): actor is CurrentUser {
 export function canReviewAccounts(actor: Actor): boolean {
   return isActiveAdmin(actor)
 }
+
+/** "Manage own profile" (UC05): any validated user, for their own account only. */
+export function canEditOwnProfile(actor: Actor): boolean {
+  return isValidatedUser(actor)
+}

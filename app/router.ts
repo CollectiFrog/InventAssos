@@ -1,6 +1,7 @@
 import { createRouter } from 'remix/router'
 
 import accountController from './actions/account/controller.tsx'
+import profileController from './actions/account/profile-controller.tsx'
 import adminController from './actions/admin/controller.tsx'
 import controller from './actions/controller.tsx'
 import healthController from './actions/health/controller.ts'
@@ -18,6 +19,7 @@ export function createAppRouter(deps: AppDependencies) {
   const router = createRouter({ middleware: appMiddleware(deps) })
   router.map(routes, controller)
   router.map(routes.account, accountController)
+  router.map(routes.account.profile, profileController)
   router.map(routes.admin, adminController)
   router.map(routes.health, healthController)
   router.map(routes.signIn, signInController)

@@ -38,10 +38,10 @@ export function Layout(handle: Handle<LayoutProps>) {
                   {viewer.isAdmin ? (
                     <a href={routes.admin.accounts.href()}>Administration</a>
                   ) : null}
-                  <span class="viewer">
+                  <a class="viewer" href={routes.account.profile.index.href()}>
                     {viewer.name}
                     {viewer.isAdmin ? <span class="badge">admin</span> : null}
-                  </span>
+                  </a>
                   <form method="post" action={routes.signOut.href()}>
                     <input type="hidden" name="_csrf" value={viewer.csrfToken} />
                     <button type="submit" class="secondary">

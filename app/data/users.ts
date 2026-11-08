@@ -72,3 +72,12 @@ export async function syncPlatformAdmin(
 export async function listPendingUsers(db: Database): Promise<User[]> {
   return db.findMany(users, { where: { status: 'pending' }, orderBy: ['created_at', 'asc'] })
 }
+
+/** Updates the fields a person edits on their profile (US-0.2.6). */
+export async function updateProfile(
+  db: Database,
+  id: string,
+  profile: { name: string; phone: string | null },
+): Promise<User> {
+  return db.update(users, id, { name: profile.name, phone: profile.phone, updated_at: new Date() })
+}
