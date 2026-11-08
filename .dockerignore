@@ -1,0 +1,11 @@
+# Only what the Dockerfile copies is needed; everything else stays out of the build context.
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!server.ts
+!app/**
+!db/migrations/**
+!public/**
+**/*.test.ts
+**/*.test.tsx

@@ -1,4 +1,4 @@
-# Weekly update PRs for CI actions, the app and the docs site.
+# Weekly update PRs for CI actions, the app, its base image and the docs site.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -20,3 +20,8 @@ updates:
     commit-message: { prefix: build, include: scope }
     groups:
       docs-site: { patterns: ['*'] }
+  - package-ecosystem: docker
+    directory: /
+    target-branch: dev
+    schedule: { interval: weekly }
+    commit-message: { prefix: build }
