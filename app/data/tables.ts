@@ -58,3 +58,44 @@ export const auditLog = table({
     at: c.timestamp({ withTimezone: true }),
   },
 })
+
+export const collectifStatuses = ['pending', 'active', 'rejected'] as const
+export type CollectifStatus = (typeof collectifStatuses)[number]
+
+export const collectifs = table({
+  name: 'collectifs',
+  columns: {
+    id: c.uuid(),
+    name: c.text(),
+    slug: c.text(),
+    description: c.text(),
+    contact_phone: c.text().nullable(),
+    status: c.enum(collectifStatuses),
+    requested_by: c.uuid().nullable(),
+    validated_by: c.uuid().nullable(),
+    validated_at: c.timestamp({ withTimezone: true }).nullable(),
+    rejection_reason: c.text().nullable(),
+    created_at: c.timestamp({ withTimezone: true }),
+    updated_at: c.timestamp({ withTimezone: true }),
+  },
+})
+
+export type Collectif = TableRow<typeof collectifs>
+
+export const responsibleStatuses = ['pending', 'active', 'rejected', 'removed'] as const
+export type ResponsibleStatus = (typeof responsibleStatuses)[number]
+
+export const responsibles = table({
+  name: 'responsibles',
+  primaryKey: ['user_id', 'collectif_id'],
+  columns: {
+    user_id: c.uuid(),
+    collectif_id: c.uuid(),
+    status: c.enum(responsibleStatuses),
+    requested_at: c.timestamp({ withTimezone: true }),
+    validated_by: c.uuid().nullable(),
+    validated_at: c.timestamp({ withTimezone: true }).nullable(),
+  },
+})
+
+export type Responsible = TableRow<typeof responsibles>

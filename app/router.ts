@@ -3,6 +3,10 @@ import { createRouter } from 'remix/router'
 import accountController from './actions/account/controller.tsx'
 import profileController from './actions/account/profile-controller.tsx'
 import adminController from './actions/admin/controller.tsx'
+import {
+  collectifsController,
+  requestCollectifController,
+} from './actions/collectifs/controller.tsx'
 import controller from './actions/controller.tsx'
 import healthController from './actions/health/controller.ts'
 import {
@@ -21,6 +25,8 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.account, accountController)
   router.map(routes.account.profile, profileController)
   router.map(routes.admin, adminController)
+  router.map(routes.collectifs, collectifsController)
+  router.map(routes.collectifs.request, requestCollectifController)
   router.map(routes.health, healthController)
   router.map(routes.signIn, signInController)
   router.map(routes.signIn.form, signInFormController)

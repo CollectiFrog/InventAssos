@@ -63,6 +63,57 @@ export function TextField(handle: Handle<TextFieldProps>) {
   }
 }
 
+/** Props of a labelled multi-line text input. */
+export interface TextAreaProps {
+  name: string
+  label: string
+  value?: string | null
+  error?: string
+  hint?: RemixNode
+  required?: boolean
+  maxLength?: number
+}
+
+/** A labelled textarea with its hint and error message. */
+export function TextArea(handle: Handle<TextAreaProps>) {
+  return () => {
+    const p = handle.props
+    const id = `field-${p.name}`
+    const describedBy = [p.hint ? `${id}-hint` : null, p.error ? `${id}-error` : null]
+      .filter(Boolean)
+      .join(' ')
+
+    return (
+      <div class={p.error ? 'field field-invalid' : 'field'}>
+        <label for={id}>
+          {p.label}
+          {p.required ? null : <span class="optional"> (facultatif)</span>}
+        </label>
+        {p.hint ? (
+          <p class="hint" id={`${id}-hint`}>
+            {p.hint}
+          </p>
+        ) : null}
+        <textarea
+          id={id}
+          name={p.name}
+          rows={4}
+          required={p.required}
+          maxLength={p.maxLength}
+          aria-invalid={p.error ? 'true' : undefined}
+          aria-describedby={describedBy || undefined}
+          value={p.value ?? ''}
+        />
+        {p.error ? (
+          <p class="error" id={`${id}-error`}>
+            {p.error}
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+}
+
 /** Banner shown above a form that failed validation. */
 export function ErrorSummary(handle: Handle<{ errors: FieldErrors }>) {
   return () =>
