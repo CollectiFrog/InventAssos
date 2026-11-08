@@ -62,12 +62,19 @@ export function canManageCollectifLocations(actor: Actor, collectifId: string): 
   return actor.isAdmin || actor.managedCollectifIds.has(collectifId)
 }
 
+/** "Create, edit, delete own personal locations": the owner only, admins included for their own. */
+export function canManagePersonalLocations(actor: Actor, ownerUserId: string): boolean {
+  return isValidatedUser(actor) && actor.id === ownerUserId
+}
+
 /** Whoever may edit or delete this location, according to its owner. */
 export function canManageLocation(
   actor: Actor,
   location: { collectif_id: string | null; user_id: string | null },
 ): boolean {
-  if (location.collectif_id !== null)
+  if (location.collectif_id !== null) {
     return canManageCollectifLocations(actor, location.collectif_id)
+  }
+  if (location.user_id !== null) return canManagePersonalLocations(actor, location.user_id)
   return false
 }

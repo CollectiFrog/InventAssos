@@ -7,6 +7,7 @@ import {
   canEditCollectif,
   canEditOwnProfile,
   canManageCollectifLocations,
+  canManagePersonalLocations,
   canManageResponsibles,
   canRequestCollectif,
   canRequestResponsibility,
@@ -100,5 +101,13 @@ describe('permissions: accounts', () => {
     )
     assert.equal(canManageCollectifLocations(user(), 'c1'), false)
     assert.equal(canManageCollectifLocations(null, 'c1'), false)
+  })
+
+  it('"Create, edit, delete own personal locations": the owner only, admins too for their own', () => {
+    assert.equal(canManagePersonalLocations(user(), 'u1'), true)
+    assert.equal(canManagePersonalLocations(user(), 'u2'), false)
+    assert.equal(canManagePersonalLocations(user({ isAdmin: true }), 'u2'), false)
+    assert.equal(canManagePersonalLocations(user({ status: 'pending' }), 'u1'), false)
+    assert.equal(canManagePersonalLocations(null, 'u1'), false)
   })
 })
