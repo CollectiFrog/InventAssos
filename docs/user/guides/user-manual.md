@@ -75,7 +75,9 @@ Un lieu qui contient encore du matériel ne peut pas être supprimé : déplacez
 
 Sur la page d'un objet, **Modifier** est proposé à son propriétaire (vous, ou les responsables du
 collectif propriétaire) et à ceux qui gèrent le lieu où il est rangé. Un objet que vous avez déposé
-au local d'un collectif reste donc modifiable par vous.
+au local d'un collectif reste donc modifiable par vous. Les responsables du collectif peuvent aussi le
+modifier (son état comme ses autres informations), le déplacer vers un autre lieu qu'ils gèrent,
+y compris chez eux, ou l'archiver ; vous en restez le propriétaire.
 
 ## Déplacer du matériel
 
