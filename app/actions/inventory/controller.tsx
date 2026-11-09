@@ -1,6 +1,7 @@
 import { createController } from 'remix/router'
 
 import { listCollectifs } from '../../data/collectifs.ts'
+import { isUuid } from '../../data/ids.ts'
 import {
   type InventoryFilters,
   listCategories,
@@ -13,7 +14,8 @@ import { forbidden, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { InventoryPage } from './inventory-page.tsx'
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+// Far beyond any real inventory; keeps the SQL offset a small number (review F7).
+const maxPage = 10_000
 
 /** Items per page of the inventory. */
 export const pageSize = 24
@@ -27,13 +29,13 @@ export default createController(routes.inventory, {
       if (!isValidatedUser(actor)) return forbidden(context)
 
       const requested = Number.parseInt(context.url.searchParams.get('page') ?? '1', 10)
-      const page = Number.isFinite(requested) && requested > 0 ? requested : 1
+      const page = Number.isFinite(requested) && requested > 0 ? Math.min(requested, maxPage) : 1
       const params = context.url.searchParams
       const read = (name: string) => params.get(name)?.trim().slice(0, 100) || undefined
       const filters: InventoryFilters = {
         query: read('q'),
         categoryId: read('categorie'),
-        collectifId: uuidPattern.test(read('collectif') ?? '') ? read('collectif') : undefined,
+        collectifId: isUuid(read('collectif') ?? '') ? read('collectif') : undefined,
         city: read('ville'),
       }
       const { db } = context

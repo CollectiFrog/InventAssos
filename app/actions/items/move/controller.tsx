@@ -6,7 +6,7 @@ import { createController } from 'remix/router'
 import { logAction } from '../../../data/audit-log.ts'
 import { findItemDetails, type ItemDetails, moveItem } from '../../../data/items.ts'
 import { findLocationById } from '../../../data/locations.ts'
-import { canEditItem, canStoreItemsIn } from '../../../permissions.ts'
+import { canChangeItem, canStoreItemsIn } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, SelectField, type SelectOption } from '../../../ui/form.tsx'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
@@ -60,8 +60,8 @@ export default createController(routes.items.move, {
       const actor = requireUser(context)
       if (actor instanceof Response) return actor
       const item = await findItemDetails(context.db, context.params.itemId)
-      if (item === null) return notFound(context)
-      if (!canEditItem(actor, item)) return forbidden(context)
+      if (item === null || item.archived_at) return notFound(context)
+      if (!canChangeItem(actor, item)) return forbidden(context)
 
       const locations = (await storableLocations(context.db, actor)).filter(
         (option) => option.value !== item.location_id,
@@ -81,9 +81,9 @@ export default createController(routes.items.move, {
       if (actor instanceof Response) return actor
       const { db, formData, session } = context
       const item = await findItemDetails(db, context.params.itemId)
-      if (item === null) return notFound(context)
+      if (item === null || item.archived_at) return notFound(context)
       // Two rules: may edit the item, and may put items in the target location.
-      if (!canEditItem(actor, item)) return forbidden(context)
+      if (!canChangeItem(actor, item)) return forbidden(context)
       const target = await findLocationById(db, formValue(formData, 'locationId'))
       if (target === null || !canStoreItemsIn(actor, target)) return forbidden(context)
       if (target.id === item.location_id) {

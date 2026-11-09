@@ -1,6 +1,7 @@
 // Data access for collectifs: the only module that reads or writes the `collectifs` table.
 import { and, type Database, ne, sql } from 'remix/data-table'
 
+import { isUuid } from './ids.ts'
 import { type Collectif, type CollectifStatus, collectifs } from './tables.ts'
 
 /** URL-safe form of a name; two names with the same slug count as the same collectif. */
@@ -23,7 +24,7 @@ export async function findCollectifHoldingSlug(
 
 /** Finds a collectif by ID, whatever its status. */
 export async function findCollectifById(db: Database, id: string): Promise<Collectif | null> {
-  return db.find(collectifs, id)
+  return isUuid(id) ? db.find(collectifs, id) : null
 }
 
 /** Finds the active collectif with this slug. */

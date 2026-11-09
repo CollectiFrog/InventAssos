@@ -6,7 +6,7 @@ import { createController } from 'remix/router'
 import { logAction } from '../../../data/audit-log.ts'
 import { archiveItem, findItemDetails, type ItemDetails } from '../../../data/items.ts'
 import { archiveReasons } from '../../../data/tables.ts'
-import { canEditItem } from '../../../permissions.ts'
+import { canChangeItem } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, SelectField } from '../../../ui/form.tsx'
 import { archiveReasonLabels } from '../../../ui/labels.ts'
@@ -63,7 +63,7 @@ export default createController(routes.items.archive, {
       if (actor instanceof Response) return actor
       const item = await findItemDetails(context.db, context.params.itemId)
       if (item === null || item.archived_at) return notFound(context)
-      if (!canEditItem(actor, item)) return forbidden(context)
+      if (!canChangeItem(actor, item)) return forbidden(context)
       return context.render(
         <ArchiveItemPage
           viewer={viewerOf(context)}
@@ -79,7 +79,7 @@ export default createController(routes.items.archive, {
       const { db, formData, session } = context
       const item = await findItemDetails(db, context.params.itemId)
       if (item === null || item.archived_at) return notFound(context)
-      if (!canEditItem(actor, item)) return forbidden(context)
+      if (!canChangeItem(actor, item)) return forbidden(context)
 
       const reason = archiveReasons.find((value) => value === formValue(formData, 'reason'))
       if (reason === undefined) {

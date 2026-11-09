@@ -37,6 +37,7 @@ can only see their status page and sign out.
 | Add an item to a location                        | yes            | if C's location                  | if own location              |
 | Edit, move, archive an item                      | yes            | if in C's location or owned by C | if owner, or in own location |
 | Move an item to a location                       | yes            | if C's location                  | if own location              |
+| Edit, move or archive an archived item           | no             | no                               | no                           |
 | See an item, its owner, the city of its location | yes            | yes                              | yes                          |
 | See a location's full address                    | yes            | if C's location                  | if own location              |
 | Import into / export from a location             | yes            | if C's location                  | if own location              |

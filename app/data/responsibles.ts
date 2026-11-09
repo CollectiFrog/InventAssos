@@ -1,6 +1,7 @@
 // Data access for responsibles: the only module that reads or writes `responsibles`.
 import { type Database, sql } from 'remix/data-table'
 
+import { isUuid } from './ids.ts'
 import { type Responsible, type ResponsibleStatus, responsibles } from './tables.ts'
 
 /** The row linking a person to a collectif, whatever its status. */
@@ -9,6 +10,7 @@ export async function findResponsible(
   userId: string,
   collectifId: string,
 ): Promise<Responsible | null> {
+  if (!isUuid(userId) || !isUuid(collectifId)) return null
   return db.findOne(responsibles, { where: { user_id: userId, collectif_id: collectifId } })
 }
 

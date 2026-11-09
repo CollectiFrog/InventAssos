@@ -1,6 +1,7 @@
 // Data access for accounts: the only module that reads or writes the `users` table.
 import type { Database } from 'remix/data-table'
 
+import { isUuid } from './ids.ts'
 import { type User, type UserStatus, users } from './tables.ts'
 
 /** E-mails are compared case-insensitively: store and look them up in this form. */
@@ -15,7 +16,7 @@ export async function findUserByEmail(db: Database, email: string): Promise<User
 
 /** Finds an account by ID. */
 export async function findUserById(db: Database, id: string): Promise<User | null> {
-  return db.find(users, id)
+  return isUuid(id) ? db.find(users, id) : null
 }
 
 /** Creates an account; `pending` unless a status is given (platform admins start `active`). */
