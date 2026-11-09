@@ -42,6 +42,9 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 - Visitors who are not signed in no longer create a stored session: their form token stays in the session cookie, and expired sessions and sign-in links are purged every hour.
 - Signing in now issues a new form (CSRF) token and drops everything kept from before sign-in.
+- E-mail sending is rate-limited: 5 sign-in or sign-up e-mails per address per hour, 20 sign-in or sign-up forms per network in 15 minutes, 10 contact messages and 5 requests to the admins per person per day; admins get at most 5 notifications per hour for each kind of request.
+- Signing in or signing up answers in the same time whether or not the address has an account; the e-mails are sent after the answer.
+- Signing up again with a rejected address no longer puts it back in the admin queue: the person is e-mailed to sign in and re-apply from their account page.
 
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD

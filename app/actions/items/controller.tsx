@@ -13,9 +13,10 @@ import { sendSafely } from '../../mail/mailer.ts'
 import { itemContactMail } from '../../mail/messages.ts'
 import type { CurrentUser } from '../../middleware/current-user.ts'
 import { canEditItem, isValidatedUser } from '../../permissions.ts'
+import { hitContact } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
-import { forbidden, notFound, requireUser } from '../guards.tsx'
+import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { storableLocations } from './choices.ts'
 import { ItemHistory } from './history.tsx'
@@ -91,6 +92,8 @@ export default createController(routes.items, {
       if (item === null || item.archived_at) return notFound(context)
       const showUrl = routes.items.show.href({ itemId: item.id })
       if (ownsItem(actor, item)) return redirect(showUrl, 303)
+      const limit = await hitContact(db, settings, actor.id)
+      if (!limit.allowed) return tooManyRequests(context, limit.retryAfterSeconds)
 
       const parsed = parseForm(contactSchema, context.formData)
       if (!parsed.ok || parsed.value.message === null) {

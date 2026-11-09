@@ -8,7 +8,7 @@ export function newAccountRequestMail(to: string[], reviewUrl: string): Mail {
   return {
     to,
     subject: 'Nouvelle demande de compte',
-    text: `Une nouvelle demande de compte attend votre validation :\n${reviewUrl}${signature}`,
+    text: `Au moins une nouvelle demande de compte attend votre validation :\n${reviewUrl}${signature}`,
   }
 }
 
@@ -47,6 +47,19 @@ export function alreadyRegisteredMail(to: string, signInUrl: string): Mail {
   }
 }
 
+/** To a rejected address that signed up again: only its owner may re-apply, once signed in. */
+export function reapplyBySignInMail(to: string, signInUrl: string): Mail {
+  return {
+    to,
+    subject: 'Votre demande de compte InventAssos',
+    text:
+      'Bonjour,\n\nQuelqu’un (sans doute vous) a demandé un compte avec cette adresse. Une ' +
+      'demande précédente n’avait pas été acceptée. Pour en refaire une, connectez-vous avec ' +
+      `cette adresse puis choisissez « Refaire une demande » :\n${signInUrl}\n\n` +
+      `Si ce n’était pas vous, ignorez ce message.${signature}`,
+  }
+}
+
 /** To the person: their account is open. */
 export function accountApprovedMail(to: string, signInUrl: string): Mail {
   return {
@@ -74,7 +87,7 @@ export function newCollectifRequestMail(to: string[], reviewUrl: string): Mail {
   return {
     to,
     subject: 'Nouvelle demande de collectif',
-    text: `Une nouvelle demande de collectif attend votre validation :\n${reviewUrl}${signature}`,
+    text: `Au moins une nouvelle demande de collectif attend votre validation :\n${reviewUrl}${signature}`,
   }
 }
 
@@ -110,7 +123,7 @@ export function newResponsibleRequestMail(to: string[], reviewUrl: string): Mail
   return {
     to,
     subject: 'Nouvelle demande de responsable',
-    text: `Une personne demande à devenir responsable d’un collectif :\n${reviewUrl}${signature}`,
+    text: `Au moins une personne demande à devenir responsable d’un collectif :\n${reviewUrl}${signature}`,
   }
 }
 
