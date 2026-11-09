@@ -10,36 +10,37 @@ per story when its version is planned; the issue links back here.
 
 ## Use cases
 
-| ID   | Use case                                       | Main actor                  | Version |
-|------|------------------------------------------------|-----------------------------|---------|
-| UC01 | Deploy a new version                           | Maintainer                  | V0.1    |
-| UC02 | Sign up                                        | Visitor                     | V0.2    |
-| UC03 | Sign in with an e-mail link                    | User                        | V0.2    |
-| UC04 | Approve or reject an account                   | Admin                       | V0.2    |
-| UC05 | Manage own profile (name, optional phone)      | Validated user              | V0.2    |
-| UC06 | Disable an account                             | Admin                       | V0.2    |
-| UC07 | Request a new collectif                        | Validated user              | V0.3    |
-| UC08 | Request to become responsible of a collectif   | Validated user              | V0.3    |
-| UC09 | Approve or reject a collectif or a responsible | Admin                       | V0.3    |
-| UC10 | Edit a collectif's profile                     | Responsible                 | V0.3    |
-| UC11 | Remove a responsible                           | Admin                       | V0.3    |
-| UC12 | Manage a collectif's locations                 | Responsible                 | V0.4    |
-| UC13 | Manage own personal locations                  | Validated user              | V0.4    |
-| UC14 | Add an item                                    | Validated user, responsible | V0.5    |
-| UC15 | Edit or move an item                           | Owner, location manager     | V0.5    |
-| UC16 | Archive an item                                | Owner, location manager     | V0.5    |
-| UC17 | See an item's history                          | Validated user              | V0.5    |
-| UC18 | Browse and search the inventory                | Validated user              | V0.6    |
-| UC19 | See an item and contact its owner              | Validated user              | V0.6    |
-| UC20 | Add or change an item's photo                  | Owner, location manager     | V0.9    |
-| UC21 | Import a CSV or Excel inventory                | Responsible, validated user | V0.10   |
-| UC22 | Export an inventory                            | Responsible, validated user | V0.10   |
-| UC23 | Export own data or delete own account          | Validated user              | V1.0    |
-| UC24 | Purge data 2 to 3 months after deletion        | System                      | V1.0    |
-| UC25 | Find the way on a phone or a computer          | Validated user              | V0.7    |
-| UC26 | Name or remove a moderator                     | Admin                       | V0.8    |
-| UC27 | Ask to join a collectif                        | Validated user              | V0.8    |
-| UC28 | Accept, reject or remove a member              | Responsible                 | V0.8    |
+| ID   | Use case                                        | Main actor                    | Version |
+|------|-------------------------------------------------|-------------------------------|---------|
+| UC01 | Deploy a new version                            | Maintainer                    | V0.1    |
+| UC02 | Sign up                                         | Visitor                       | V0.2    |
+| UC03 | Sign in with an e-mail link                     | User                          | V0.2    |
+| UC04 | Approve or reject an account                    | Admin                         | V0.2    |
+| UC05 | Manage own profile (name, optional phone)       | Validated user                | V0.2    |
+| UC06 | Disable an account                              | Admin                         | V0.2    |
+| UC07 | Request a new collectif                         | Validated user                | V0.3    |
+| UC08 | Request to become responsible of a collectif    | Validated user                | V0.3    |
+| UC09 | Approve or reject a collectif or a responsible  | Admin                         | V0.3    |
+| UC10 | Edit a collectif's profile                      | Responsible                   | V0.3    |
+| UC11 | Remove a responsible                            | Admin                         | V0.3    |
+| UC12 | Manage a collectif's locations                  | Responsible                   | V0.4    |
+| UC13 | Manage own personal locations                   | Validated user                | V0.4    |
+| UC14 | Add an item                                     | Validated user, responsible   | V0.5    |
+| UC15 | Edit or move an item                            | Owner, location manager       | V0.5    |
+| UC16 | Archive an item                                 | Owner, location manager       | V0.5    |
+| UC17 | See an item's history                           | Validated user                | V0.5    |
+| UC18 | Browse and search the inventory                 | Validated user                | V0.6    |
+| UC19 | See an item and contact its owner               | Validated user                | V0.6    |
+| UC20 | Add or change an item's photo                   | Owner, location manager       | V0.9    |
+| UC21 | Import a CSV or Excel inventory                 | Responsible, validated user   | V0.10   |
+| UC22 | Export an inventory                             | Responsible, validated user   | V0.10   |
+| UC23 | Export own data or delete own account           | Validated user                | V1.0    |
+| UC24 | Purge data 2 to 3 months after deletion         | System                        | V1.0    |
+| UC25 | Find the way on a phone or a computer           | Validated user                | V0.7    |
+| UC26 | Name or remove a moderator                      | Admin                         | V0.8    |
+| UC27 | Ask to join a collectif                         | Validated user                | V0.8    |
+| UC28 | Accept, reject or remove a member               | Responsible                   | V0.8    |
+| UC29 | Make a member responsible, remove a responsible | Responsible, admin, moderator | V0.8    |
 
 ## V0.1 — Foundations
 
@@ -205,7 +206,11 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
 - **US-0.8.5 Member rights.** As a member of a collectif, I want to add, edit, move and archive
   its items and see the full address of its locations, so that I keep its inventory up to date.
     - Locations, members and the collectif's profile stay with its responsibles.
-- **US-0.8.6 Members tab.** As a responsible, I want a Membres tab on my collectif's page with the
+- **US-0.8.6 Name a responsible.** As a responsible, I want to make a member of my collectif
+  responsible, or remove a responsible, so that the collectif runs without waiting for the platform.
+    - Admins and moderators can do the same for any collectif, so that a collectif is never left
+      without a responsible.
+- **US-0.8.7 Members tab.** As a responsible, I want a Membres tab on my collectif's page with the
   pending requests first, so that nobody waits.
 
 ## V0.9 — Photos
@@ -252,14 +257,13 @@ These stories complement the [GDPR checklist](../gdpr-checklist/).
 
 ## Open points
 
-| Story     | Question                                                   | Proposal                                                                                                           |
-|-----------|------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
-| US-1.0.4  | What happens to a leaving person's items?                  | items stored at a collectif go to the collectif; others archived then purged                                       |
-| US-0.6.3  | Contact when there is no phone?                            | a form that e-mails the owner without revealing their address                                                      |
-| US-0.2.4  | Can a rejected account apply again?                        | yes                                                                                                                |
-| US-0.2.2  | Link and session duration?                                 | link 15 min, single use; session 30 days                                                                           |
-| US-0.5.5  | Archive only, or also hard delete?                         | archive only in V0.x                                                                                               |
-| US-0.10.1 | One file per location, or a location column?               | optional location column; otherwise the chosen location                                                            |
-| US-0.8.4  | Who approves a new responsible once members exist?         | the collectif's responsibles promote a member; admins and moderators only for a collectif left without responsible |
-| US-0.8.5  | Can a member delete an item, or only archive it?           | archive only, like responsibles                                                                                    |
-| —         | Categories fixed by the admin, or created by responsibles? | fixed list managed by the admin                                                                                    |
+| Story     | Question                                                   | Proposal                                                                     |
+|-----------|------------------------------------------------------------|------------------------------------------------------------------------------|
+| US-1.0.4  | What happens to a leaving person's items?                  | items stored at a collectif go to the collectif; others archived then purged |
+| US-0.6.3  | Contact when there is no phone?                            | a form that e-mails the owner without revealing their address                |
+| US-0.2.4  | Can a rejected account apply again?                        | yes                                                                          |
+| US-0.2.2  | Link and session duration?                                 | link 15 min, single use; session 30 days                                     |
+| US-0.5.5  | Archive only, or also hard delete?                         | archive only in V0.x                                                         |
+| US-0.10.1 | One file per location, or a location column?               | optional location column; otherwise the chosen location                      |
+| US-0.8.5  | Can a member delete an item, or only archive it?           | archive only, like responsibles                                              |
+| —         | Categories fixed by the admin, or created by responsibles? | fixed list managed by the admin                                              |

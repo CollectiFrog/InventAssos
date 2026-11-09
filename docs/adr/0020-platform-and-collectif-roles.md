@@ -28,12 +28,13 @@ responsible (and manage locations and people) or cannot edit anything.
 
 **Collectif roles**, per collectif:
 
-| Role        | Can                                                                                                   |
-|-------------|-------------------------------------------------------------------------------------------------------|
-| Responsible | everything a member can, plus the collectif's profile, locations and members (accept, reject, remove) |
-| Member      | add, edit, move and archive the collectif's items; see the full address of its locations              |
+| Role        | Can                                                                                                                     |
+|-------------|-------------------------------------------------------------------------------------------------------------------------|
+| Responsible | everything a member can, plus the collectif's profile, locations and members (accept, reject, remove, make responsible) |
+| Member      | add, edit, move and archive the collectif's items; see the full address of its locations                                |
 
 - A request to join a collectif is approved by its responsibles, not by the platform.
+- A responsible is added or removed by a responsible of the same collectif, an admin or a moderator.
 - New accounts and new collectifs are still approved centrally, by admins and moderators.
 - Responsibles may change the condition, the location and every property of the items they manage.
 - Every rule is in [Permissions](../../architecture/permissions/) with a test, as before.
@@ -52,5 +53,4 @@ responsible (and manage locations and people) or cannot edit anything.
 - V0.8 adds a `role` for moderators and a collectif membership with a role (`responsible` or
   `member`); the data model and the permissions matrix change in that version.
 - The admin queue becomes the moderation queue; each collectif page gets a Membres tab.
-- Who approves a new responsible once members exist is an open point of US-0.8.4.
 - Fine-grained visibility (V1.1) can build on collectif membership.
