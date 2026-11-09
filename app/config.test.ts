@@ -16,18 +16,18 @@ describe('configuration', () => {
     assert.equal(config.smtpUrl, null)
   })
 
+  it('trusts forwarded client addresses only when TRUST_PROXY is true', () => {
+    assert.equal(loadConfig(base).trustProxy, false)
+    assert.equal(loadConfig({ ...base, TRUST_PROXY: 'true' }).trustProxy, true)
+    assert.throws(() => loadConfig({ ...base, TRUST_PROXY: 'yes' }), /TRUST_PROXY/)
+  })
+
   it('requires APP_URL and SMTP_URL in production', () => {
     assert.throws(() => loadConfig({ ...base, NODE_ENV: 'production' }), /APP_URL.*SMTP_URL/)
   })
 
   it('refuses a short session secret', () => {
     assert.throws(() => loadConfig({ ...base, SESSION_SECRET: 'short' }), /SESSION_SECRET/)
-  })
-
-  it('trusts forwarded client addresses only when TRUST_PROXY is true', () => {
-    assert.equal(loadConfig(base).trustProxy, false)
-    assert.equal(loadConfig({ ...base, TRUST_PROXY: 'true' }).trustProxy, true)
-    assert.throws(() => loadConfig({ ...base, TRUST_PROXY: 'yes' }), /TRUST_PROXY/)
   })
 
   it('parses admin e-mails, ignoring case and blanks', () => {
