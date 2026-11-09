@@ -5,10 +5,12 @@ sidebar:
   order: 3
 ---
 
-**Platform admin** means: the account's e-mail is listed in `PLATFORM_ADMIN_EMAILS`, read on every
-request (`context.currentUser.isAdmin`). A listed e-mail becomes an active account at its first
-sign-in, without approval; removing it from the list removes the rights at the next request.
-`users.is_platform_admin` only records the last known state.
+**Platform admin** means: the account's e-mail is listed in `PLATFORM_ADMIN_EMAILS`. The variable
+is read once at startup (`loadConfig()`), and every request checks the signed-in e-mail against
+that list (`context.currentUser.isAdmin`). A listed e-mail becomes an active account at its first
+sign-in, without approval. Adding or removing an e-mail takes effect when the app restarts, which
+is how a changed environment variable reaches a container anyway; from then on, a removed e-mail
+loses the rights at its next request. `users.is_platform_admin` only records the last known state.
 
 Each row is a function in `app/permissions.ts`, tested in `app/permissions.test.ts`; controllers
 call it before acting and answer 403 otherwise. `app/permissions.matrix.test.ts` then plays every

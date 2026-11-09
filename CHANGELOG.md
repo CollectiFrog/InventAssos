@@ -38,6 +38,11 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
+### Security
+
+- Every response carries browser security headers: a script-free Content-Security-Policy that forbids framing, nosniff, a same-origin referrer policy, and HSTS when the app is served over https.
+- The application refuses to start in production with the example session secret from `.env.example`.
+
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z

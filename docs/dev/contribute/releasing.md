@@ -53,14 +53,19 @@ ingress, the container itself speaks plain HTTP on `PORT`.
 | `DATABASE_URL`          | V0.1 | yes    | `postgres://user:password@host:5432/inventassos`                                 |
 | `PORT`                  | V0.1 | no     | container port, default `3000`                                                   |
 | `APP_URL`               | V0.2 | no     | public origin used in e-mail links: `https://inv.collecti-frog.fr`               |
-| `SESSION_SECRET`        | V0.2 | yes    | ≥ 32 random characters (`openssl rand -base64 48`)                               |
-| `PLATFORM_ADMIN_EMAILS` | V0.2 | no     | comma-separated e-mails that become admin at first sign-in                       |
+| `SESSION_SECRET`        | V0.2 | yes    | ≥ 32 random characters (`openssl rand -base64 48`); the example value is refused |
+| `PLATFORM_ADMIN_EMAILS` | V0.2 | no     | comma-separated e-mails that become admin at first sign-in; read at startup      |
 | `SMTP_URL`              | V0.2 | yes    | Zimbra SMTP, e.g. `smtps://noreply%40collecti-frog.fr:password@mail.example:465` |
 | `MAIL_FROM`             | V0.2 | no     | `InventAssos <noreply@collecti-frog.fr>`                                         |
 
 `.env.example` is the reference list; a missing required variable stops the container at startup
 with a message naming it. Secrets go in a Kubernetes `Secret`, never in the infra repository in
 clear.
+
+The app sets its own browser security headers on every response: `Content-Security-Policy` (no
+script, `frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+`Referrer-Policy: same-origin`, and `Strict-Transport-Security` when `APP_URL` is https. The
+ingress does not need to add them; if it does, check that its values are not weaker.
 
 ### Probes
 

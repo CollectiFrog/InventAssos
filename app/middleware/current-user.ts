@@ -11,7 +11,7 @@ export interface CurrentUser {
   name: string
   email: string
   status: UserStatus
-  /** From PLATFORM_ADMIN_EMAILS on every request (US-0.2.5), never from a stale flag alone. */
+  /** Checked against PLATFORM_ADMIN_EMAILS (read at startup) on every request, never a stored flag. */
   isAdmin: boolean
   /** IDs of the active collectifs this person is an active responsible of. */
   managedCollectifIds: ReadonlySet<string>
