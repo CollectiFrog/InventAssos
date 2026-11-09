@@ -26,7 +26,9 @@ export default createController(routes.signIn.link, {
         return context.render(<SignInLinkInvalidPage />, { status: 400 })
       }
 
-      // New session ID on sign-in, old one deleted: prevents session fixation.
+      // Nothing from before sign-in survives: new ID (old row deleted) against session fixation,
+      // and a new CSRF token at the next form, so a planted token is useless.
+      for (const key of Object.keys(session.data[0])) session.unset(key)
       session.regenerateId(true)
       session.set(sessionUserKey, user.id)
       return redirect(routes.home.href(), 303)

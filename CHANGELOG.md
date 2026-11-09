@@ -38,6 +38,11 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
+### Security
+
+- Visitors who are not signed in no longer create a stored session: their form token stays in the session cookie, and expired sessions and sign-in links are purged every hour.
+- Signing in now issues a new form (CSRF) token and drops everything kept from before sign-in.
+
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
