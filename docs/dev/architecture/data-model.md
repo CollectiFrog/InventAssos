@@ -34,8 +34,9 @@ erDiagram
 
 `audit_log` actions so far: `account.approved|rejected|disabled`, `collectif.approved|rejected|updated`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
-`item.created|updated|moved|archived`. Payloads hold IDs, enum values and field names only;
-`readHistory()` resolves names at display time.
+`item.created|updated|moved|archived|contacted`. Payloads hold IDs, enum values and field names
+only; `readHistory()` resolves names at display time. The item page shows an allow-list
+(`itemHistoryActions`): `item.contacted` stays in the log for admins and is never displayed.
 
 Added later:
 

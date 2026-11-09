@@ -9,6 +9,7 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createTestItem } from '../../../test/items.ts'
 import { createTestLocation } from '../../../test/locations.ts'
 import { createActiveUser } from '../../../test/users.ts'
+import { setResponsible } from '../../data/responsibles.ts'
 import type { Item } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 
@@ -77,7 +78,7 @@ describe('item page and contact (US-0.6.3)', () => {
     })
     assert.equal(response.location, routes.items.show.href({ itemId: personItem.id }))
     const [mail] = app.mailer.outbox
-    assert.deepEqual(mail?.to, ['max.secret@example.org'])
+    assert.equal(mail?.to, 'max.secret@example.org')
     assert.equal(mail?.replyTo, 'lou@example.org')
     assert.match(mail?.text ?? '', /samedi/)
     assert.match(await page(personItem), /Message envoyé/)
@@ -91,7 +92,32 @@ describe('item page and contact (US-0.6.3)', () => {
 
   it("writes to the collectif's active responsibles when the collectif has no phone", async () => {
     await lou.post(routes.items.contact.href({ itemId: collectifItem.id }), { message: 'Bonjour' })
-    assert.deepEqual(app.mailer.outbox[0]?.to, ['rita@example.org'])
+    assert.deepEqual(
+      app.mailer.outbox.map((mail) => mail.to),
+      ['rita@example.org'],
+    )
+  })
+
+  it('sends one e-mail per responsible, so they never see each other’s address', async () => {
+    const sam = await createActiveUser(db, 'Sam', 'sam@example.org')
+    await setResponsible(db, {
+      userId: sam.id,
+      collectifId: String(collectifItem.owner_collectif_id),
+      status: 'active',
+    })
+    await lou.post(routes.items.contact.href({ itemId: collectifItem.id }), { message: 'Bonjour' })
+    const recipients = app.mailer.outbox.map((mail) => mail.to).sort()
+    assert.deepEqual(recipients, ['rita@example.org', 'sam@example.org'])
+  })
+
+  it('no longer shows the phone of an owner whose account is disabled', async () => {
+    await db.exec(
+      sql`update users set phone = '06 07 08 09 10' where email = 'max.secret@example.org'`,
+    )
+    await db.exec(sql`update users set status = 'disabled' where email = 'max.secret@example.org'`)
+    const html = await page(personItem)
+    assert.doesNotMatch(html, /06 07 08 09 10/)
+    assert.match(html, /Pas de téléphone renseigné/)
   })
 
   it('sends nothing for an empty message', async () => {
