@@ -91,5 +91,7 @@ Project-specific rules go below this line, kept short.
   pass every location through `redactLocation(location, canSeeFullAddress(actor, location))`.
 - **Ownership ≠ storage.** An item has one owner (collectif xor person) and one location; never merge
   the two (`docs/adr/0009-ownership-and-locations.md`).
+- **One responsive interface.** Pages follow `docs/dev/architecture/ui.md` and reuse the shared pieces
+  in `app/ui/`; no separate mobile UI (`docs/adr/0019-interface-conventions.md`).
 - **Specs live in `docs/dev/product/`.** Work on a user story only once it is listed there; if a
   story is ambiguous, ask instead of guessing.

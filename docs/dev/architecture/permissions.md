@@ -16,7 +16,7 @@ implemented row through the real router for six actors (admin, responsible of C,
 another collectif, validated user, pending user, visitor) and checks the effect happened or not.
 A new row in this table needs a new entry in that matrix.
 
-"Import into / export from a location" arrives with V0.8 and is not implemented yet.
+"Import into / export from a location" arrives with V0.10 and is not implemented yet.
 
 Everything is denied unless a row below allows it. Pending, rejected, disabled and deleted users
 can only see their status page and sign out.
