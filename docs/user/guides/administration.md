@@ -53,4 +53,12 @@ d'un utilisateur validé qui le remplace. La personne retirée est prévenue par
 
 La page **Administration** liste aussi les comptes actifs. **Désactiver** coupe immédiatement
 l'accès de la personne : elle est déconnectée partout et ne peut plus recevoir de lien de connexion.
-Rien n'est supprimé, et son matériel reste visible. Vous ne pouvez pas désactiver votre propre compte.
+Rien n'est supprimé, et son matériel reste visible. Vous ne pouvez pas désactiver votre propre compte,
+ni celui d'un autre administrateur de la plateforme (marqué « administrateur ») : pour retirer ses
+droits, l'hébergeur le retire de `PLATFORM_ADMIN_EMAILS`.
+
+## Réactiver un compte
+
+La section **Comptes désactivés** de la page **Administration** liste les comptes désactivés.
+**Réactiver** rend à la personne ses accès : elle peut de nouveau demander un lien de connexion.
+La réactivation est enregistrée dans l'historique de la plateforme.

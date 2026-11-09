@@ -32,7 +32,7 @@ erDiagram
 | `sign_in_tokens` | token_hash, user_id, expires_at, used_at, created_at                                                                                                                                                                   | only the SHA-256 of the token is stored; 15 min, single use                                                                                                                                       |
 | `audit_log`      | id, actor_id, action, entity, entity_id, payload (jsonb), at                                                                                                                                                           | append only; IDs only, no personal data (ADR 0010)                                                                                                                                                |
 
-`audit_log` actions so far: `account.approved|rejected|disabled`, `collectif.approved|rejected|updated`,
+`audit_log` actions so far: `account.approved|rejected|disabled|enabled`, `collectif.approved|rejected|updated`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
 `item.created|updated|moved|archived`. Payloads hold IDs, enum values and field names only;
 `readHistory()` resolves names at display time.

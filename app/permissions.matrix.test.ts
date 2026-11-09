@@ -16,7 +16,7 @@ import { findCollectifById } from './data/collectifs.ts'
 import { archiveItem, findItemById } from './data/items.ts'
 import { findLocationById } from './data/locations.ts'
 import { findResponsible, setResponsible } from './data/responsibles.ts'
-import { createUser, findUserById } from './data/users.ts'
+import { createUser, findUserById, setUserStatus } from './data/users.ts'
 import { routes } from './routes.ts'
 
 type Actor = 'admin' | 'responsibleOfC' | 'responsibleOfD' | 'validated' | 'pending' | 'visitor'
@@ -37,6 +37,9 @@ const emails: Record<Exclude<Actor, 'visitor'>, string> = {
   pending: 'pat@example.org',
 }
 
+/** A second platform admin, listed in PLATFORM_ADMIN_EMAILS but not one of the six actors. */
+const coAdminEmail = 'ada@example.org'
+
 /** The world every case starts from. */
 async function seed(db: Database) {
   const rita = await createActiveUser(db, 'Rita', emails.responsibleOfC)
@@ -45,6 +48,9 @@ async function seed(db: Database) {
   await createUser(db, { name: 'Pat', email: emails.pending })
   const target = await createUser(db, { name: 'Tess', email: 'tess@example.org' })
   const zed = await createActiveUser(db, 'Zed', 'zed@example.org')
+  const coAdmin = await createActiveUser(db, 'Ada', coAdminEmail)
+  const gone = await createActiveUser(db, 'Gus', 'gus@example.org')
+  await setUserStatus(db, gone.id, 'disabled')
   const c = await createActiveCollectif(db, 'Collectif C', rita.id)
   await createActiveCollectif(db, 'Collectif D', otto.id)
   const pendingCollectif = await createPendingCollectif(db, 'Collectif E', zed.id)
@@ -81,6 +87,8 @@ async function seed(db: Database) {
   })
   await archiveItem(db, archived.id, 'sold')
   return {
+    coAdmin,
+    gone,
     archived,
     rita,
     otto,
@@ -127,6 +135,19 @@ const rules: Rule[] = [
     allowed: ['admin'],
     act: (c, w) => c.post(routes.admin.disableAccount.href({ userId: w.zed.id })),
     happened: async (db, w) => (await findUserById(db, w.zed.id))?.status === 'disabled',
+  },
+  {
+    // One admin must not lock the others out (review F12).
+    row: 'Disable an account (another listed admin)',
+    allowed: [],
+    act: (c, w) => c.post(routes.admin.disableAccount.href({ userId: w.coAdmin.id })),
+    happened: async (db, w) => (await findUserById(db, w.coAdmin.id))?.status === 'disabled',
+  },
+  {
+    row: 'Re-enable a disabled account',
+    allowed: ['admin'],
+    act: (c, w) => c.post(routes.admin.enableAccount.href({ userId: w.gone.id })),
+    happened: async (db, w) => (await findUserById(db, w.gone.id))?.status === 'active',
   },
   {
     row: 'Edit own profile (name, phone)',
@@ -401,7 +422,7 @@ describe('permissions matrix (US-0.5.7)', () => {
   beforeEach(async () => {
     await resetDatabase(db)
     world = await seed(db)
-    app = createTestApp(db, { adminEmails: [emails.admin] })
+    app = createTestApp(db, { adminEmails: [emails.admin, coAdminEmail] })
   })
   after(async () => {
     await db.close()

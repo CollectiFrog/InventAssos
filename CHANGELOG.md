@@ -37,9 +37,11 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Personal storage locations: every validated user lists the places where they keep equipment.
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
 - Profile page: edit your name and an optional phone number, shown to validated users.
+- Admins can re-enable a disabled account from the administration page.
 
 ### Fixed
 
+- An admin can no longer disable another platform admin listed in `PLATFORM_ADMIN_EMAILS`.
 - An archived item can no longer be edited or moved, even by a direct request.
 - A malformed link (an ID that does not exist in any form) or a huge page number now shows "Page introuvable" or the last page instead of a server error.
 

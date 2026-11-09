@@ -7,10 +7,21 @@ import { logAction } from '../../data/audit-log.ts'
 import { listPendingCollectifs } from '../../data/collectifs.ts'
 import { listPendingResponsibles } from '../../data/responsibles.ts'
 import { deleteUserSessions } from '../../data/sessions.ts'
-import { findUserById, listActiveUsers, listPendingUsers, setUserStatus } from '../../data/users.ts'
+import {
+  findUserById,
+  listActiveUsers,
+  listDisabledUsers,
+  listPendingUsers,
+  setUserStatus,
+} from '../../data/users.ts'
 import { sendSafely } from '../../mail/mailer.ts'
 import { accountApprovedMail, accountRejectedMail } from '../../mail/messages.ts'
-import { canDisableAccount, canReviewAccounts } from '../../permissions.ts'
+import {
+  canDisableAccount,
+  canEnableAccount,
+  canReviewAccounts,
+  isActiveAdmin,
+} from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, requireUser } from '../guards.tsx'
@@ -35,7 +46,9 @@ export default createController(routes.admin, {
           pendingCollectifs={await listPendingCollectifs(context.db)}
           pendingResponsibles={await listPendingResponsibles(context.db)}
           active={await listActiveUsers(context.db)}
+          disabled={await listDisabledUsers(context.db)}
           selfId={actor.id}
+          adminEmails={context.settings.adminEmails}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
@@ -103,10 +116,12 @@ export default createController(routes.admin, {
     async disableAccount(context) {
       const actor = requireUser(context)
       if (actor instanceof Response) return actor
-      if (!canDisableAccount(actor, context.params.userId)) return forbidden(context)
+      if (!isActiveAdmin(actor)) return forbidden(context)
 
-      const { db, session } = context
+      const { db, session, settings } = context
       const user = await findUserById(db, context.params.userId)
+      const target = user && { id: user.id, isListedAdmin: settings.adminEmails.has(user.email) }
+      if (target !== null && !canDisableAccount(actor, target)) return forbidden(context)
       if (user === null || user.status !== 'active') {
         session.flash('notice', 'Ce compte n’est pas actif.')
         return redirect(routes.admin.index.href(), 303)
@@ -124,6 +139,32 @@ export default createController(routes.admin, {
         })
       })
       session.flash('notice', `Compte de ${user.name} désactivé.`)
+      return redirect(routes.admin.index.href(), 303)
+    },
+
+    // US-0.6.5: the way back from a disable, so no admin is ever locked out for good.
+    async enableAccount(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      if (!canEnableAccount(actor)) return forbidden(context)
+
+      const { db, session } = context
+      const user = await findUserById(db, context.params.userId)
+      if (user === null || user.status !== 'disabled') {
+        session.flash('notice', 'Ce compte n’est pas désactivé.')
+        return redirect(routes.admin.index.href(), 303)
+      }
+
+      await db.transaction(async (tx) => {
+        await setUserStatus(tx, user.id, 'active')
+        await logAction(tx, {
+          actorId: actor.id,
+          action: 'account.enabled',
+          entity: 'user',
+          entityId: user.id,
+        })
+      })
+      session.flash('notice', `Compte de ${user.name} réactivé.`)
       return redirect(routes.admin.index.href(), 303)
     },
   },

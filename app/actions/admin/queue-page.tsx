@@ -17,8 +17,11 @@ export interface QueuePageProps {
   pendingCollectifs: PendingCollectif[]
   pendingResponsibles: PendingResponsible[]
   active: User[]
+  disabled: User[]
   /** The admin viewing the page: they cannot disable themselves. */
   selfId: string
+  /** Listed platform admins cannot be disabled from here (permissions.md). */
+  adminEmails: ReadonlySet<string>
   notice?: string
 }
 
@@ -32,7 +35,9 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
       pendingCollectifs,
       pendingResponsibles,
       active,
+      disabled,
       selfId,
+      adminEmails,
       notice,
     } = handle.props
     return (
@@ -181,6 +186,8 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
               </span>
               {user.id === selfId ? (
                 <span class="status">vous</span>
+              ) : adminEmails.has(user.email) ? (
+                <span class="status">administrateur</span>
               ) : (
                 <form method="post" action={routes.admin.disableAccount.href({ userId: user.id })}>
                   <CsrfField token={csrfToken} />
@@ -192,6 +199,30 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
             </li>
           ))}
         </ul>
+        <h2 id="comptes-desactives">Comptes désactivés</h2>
+        {disabled.length === 0 ? (
+          <p>Aucun compte désactivé.</p>
+        ) : (
+          <>
+            <p>
+              Réactiver un compte rend à la personne ses accès : elle peut de nouveau demander un
+              lien de connexion.
+            </p>
+            <ul class="cards">
+              {disabled.map((user) => (
+                <li key={user.id} class="card row">
+                  <span>
+                    <strong>{user.name}</strong> · {user.email}
+                  </span>
+                  <form method="post" action={routes.admin.enableAccount.href({ userId: user.id })}>
+                    <CsrfField token={csrfToken} />
+                    <button type="submit">Réactiver</button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </Layout>
     )
   }
