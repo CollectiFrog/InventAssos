@@ -18,6 +18,7 @@ Everything after is a future feature.
 | V0.5     | Items: owner, location, quantity, category, contact phone; audit log                                                       | an item is created, edited, moved, and its history shows it            |
 | V0.6     | Browse: list, search and filters (category, collectif, city) over the whole inventory                                      | you find another collectif's item and know whom to call                |
 | V0.6.1   | Security fixes from the V0.6 review                                                                                        | the review's findings are closed                                       |
+| V0.6.2   | Containerised development environment: the app runs in Compose next to PostgreSQL and Mailpit, plus a Dev Container        | a contributor runs and tests the app with only Docker installed        |
 | V0.7     | Interface: one responsive UI, four-entry navigation, dashboard, empty states, accessibility ([UI](../../architecture/ui/)) | the five key journeys work on a phone without help                     |
 | V0.8     | Roles: platform moderators, collectif members approved by responsibles                                                     | a responsible accepts a member who then adds the collectif's equipment |
 | V0.9     | Photos: one photo per item, stored in MinIO                                                                                | item pages show their photo                                            |

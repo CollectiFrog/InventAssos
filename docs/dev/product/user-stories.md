@@ -150,6 +150,15 @@ per story when its version is planned; the issue links back here.
 - **US-0.6.4 Collectif and person pages.** As a validated user, I want to see all equipment of a
   collectif or a person, so that I know what they can lend.
 
+## V0.6.2 — Development environment
+
+- **US-0.6.6 Docker only.** As a contributor, I want to run the app, its tests and the checks with
+  only Docker installed, so that I do not install Node, PostgreSQL or a mail server myself.
+    - `compose.yaml` gains an `app` service (Node ≥ 24.3, source mounted, reload on change) next to
+      `db` and `mail`; `make dev`, `make test` and `make check` work in it.
+    - A Dev Container (`.devcontainer/`) reuses the same Compose file for VS Code and Codespaces.
+    - The current way (Node on the host, `make db`) keeps working.
+
 ## V0.7 — Interface
 
 The pages, navigation and journeys are described in [UI](../../architecture/ui/); the conventions
