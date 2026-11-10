@@ -7,10 +7,16 @@ sidebar:
 
 ## Requirements
 
-- Node.js ≥ 24.3 (required by Remix 3).
-- Docker with Compose, to run PostgreSQL locally (`compose.yaml`).
-- Git, with symlinks enabled on Windows: `git config --global core.symlinks true`
-  (and Developer Mode on), so `.claude/skills` resolves.
+Pick one of three ways; all run the same Makefile targets against the same Compose services.
+
+| Way                                   | You install                      | Best for                        |
+|---------------------------------------|----------------------------------|---------------------------------|
+| [Dev Container](#dev-container)       | Docker, VS Code + Dev Containers | VS Code users, Codespaces       |
+| [Docker only](#docker-only)           | Docker with Compose              | any editor, no Node on the host |
+| [Node on the host](#node-on-the-host) | Node.js ≥ 24.3, Docker, `make`   | fastest reload, native tools    |
+
+In every case: Git, with symlinks enabled on Windows: `git config --global core.symlinks true`
+(and Developer Mode on), so `.claude/skills` resolves.
 
 ## Get the code
 
@@ -19,7 +25,42 @@ git clone <repo-url> && cd <repo>
 git switch dev
 ```
 
-## Run the app
+## Dev Container
+
+Open the folder in VS Code and choose **Reopen in Container** (Dev Containers extension), or open
+the repository in a Codespace. `.devcontainer/` reuses the `app` service of `compose.yaml`, so
+PostgreSQL and Mailpit start next to it and `npm ci` runs once in the container.
+
+In the VS Code terminal, which runs inside the container:
+
+```sh
+make dev     # the app on http://localhost:3000, restarted when a file changes
+make check   # lint, typecheck, test, build: the same as CI
+```
+
+E-mails land in Mailpit on http://localhost:8025. Ports are forwarded by VS Code.
+
+## Docker only
+
+```sh
+docker compose up app                     # db, mail, then the app on http://localhost:3000
+docker compose run --rm app make check    # or make test, in a throwaway container
+docker compose exec app make test         # same, in the running app container
+```
+
+The `app` service mounts the source and restarts the server when a file changes. It runs
+`make deps` at start, which runs `npm ci` only when `package-lock.json` changed. Dependencies live in
+the `node-modules` volume, apart from the host's `node_modules`, so the two ways never mix Linux and
+host binaries. Compose sets `DATABASE_URL`, `TEST_DATABASE_URL`, `SMTP_URL` (Mailpit) and a
+development `SESSION_SECRET`; they win over `.env`, which is optional here. Sign in as
+`admin@example.org` to be platform admin.
+
+> **Windows and macOS:** file change events from a folder of the host may not reach the container,
+> so the server does not restart on save. Clone the repository inside WSL 2 (Windows) or use the Dev
+> Container's **Clone Repository in Container Volume**; otherwise restart with
+> `docker compose restart app`.
+
+## Node on the host
 
 ```sh
 nvm use               # Node version from .nvmrc
@@ -29,8 +70,12 @@ make dev              # starts PostgreSQL in Docker, then the app on http://loca
 ```
 
 `make dev` restarts the server when a file changes. Without `SMTP_URL`, e-mails (sign-in links)
-are printed in the terminal; with `SMTP_URL=smtp://localhost:1025` they land in Mailpit. Migrations in `db/migrations/` are applied at
-startup. Useful commands:
+are printed in the terminal; with `SMTP_URL=smtp://localhost:1025` they land in Mailpit. Do not run
+it while the `app` service is up: both listen on port 3000.
+
+## Useful commands
+
+Migrations in `db/migrations/` are applied at startup.
 
 | Command                                                  | Does                                             |
 |----------------------------------------------------------|--------------------------------------------------|
@@ -47,7 +92,8 @@ reversible). Never edit an applied one (ADR 0013).
 make check   # lint, typecheck, test, build: the same as CI
 ```
 
-Tests use the `inventassos_test` database created by `make db`. Point `TEST_DATABASE_URL` elsewhere
+Tests use the `inventassos_test` database that PostgreSQL creates at its first start
+(`db/init/`). Point `TEST_DATABASE_URL` elsewhere
 if your PostgreSQL is not the Compose one.
 
 ## Preview the documentation
