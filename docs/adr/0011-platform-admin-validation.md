@@ -3,9 +3,9 @@ title: "0011: Platform admin validates every request until V1.0"
 description: Accounts, collectifs and responsibles are all approved centrally at first.
 ---
 
-| Status   | Date       | Deciders   |
-|----------|------------|------------|
-| Accepted | 2026-11-06 | @tritriper |
+| Status             | Date       | Deciders   |
+|--------------------|------------|------------|
+| Superseded by 0020 | 2026-11-06 | @tritriper |
 
 ## Context
 

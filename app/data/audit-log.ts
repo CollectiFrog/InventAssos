@@ -1,5 +1,5 @@
 // Append-only audit log (ADR 0010): the only module that writes `audit_log`.
-import { type Database, rawSql } from 'remix/data-table'
+import { and, type Database, inList, rawSql } from 'remix/data-table'
 
 import { auditLog } from './tables.ts'
 
@@ -29,10 +29,16 @@ export async function logAction(db: Database, entry: AuditEntry): Promise<void> 
   })
 }
 
-/** Entries about one object, oldest first. */
-export async function listEntityHistory(db: Database, entity: string, entityId: string) {
+/** Entries about one object, oldest first; `actions` keeps only those actions when given. */
+export async function listEntityHistory(
+  db: Database,
+  entity: string,
+  entityId: string,
+  actions?: readonly string[],
+) {
+  const about = { entity, entity_id: entityId }
   return db.findMany(auditLog, {
-    where: { entity, entity_id: entityId },
+    where: actions === undefined ? about : and(about, inList(auditLog.action, actions)),
     orderBy: [
       ['at', 'asc'],
       ['id', 'asc'],
@@ -58,8 +64,9 @@ export async function readHistory(
   db: Database,
   entity: string,
   entityId: string,
+  actions?: readonly string[],
 ): Promise<HistoryEntry[]> {
-  const entries = await listEntityHistory(db, entity, entityId)
+  const entries = await listEntityHistory(db, entity, entityId, actions)
   const payloads = entries.map((entry) =>
     typeof entry.payload === 'string' ? JSON.parse(entry.payload) : (entry.payload ?? {}),
   ) as Record<string, unknown>[]

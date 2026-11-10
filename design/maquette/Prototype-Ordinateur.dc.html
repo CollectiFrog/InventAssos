@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Prototype ordinateur</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.s-BureauAccueil a{color:#1f6f43}
+.s-BureauAccueil a:hover{color:#174f31}
+.s-BureauAccueil .nav{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:10px;color:#3f4943;text-decoration:none;font-weight:500}
+.s-BureauAccueil .nav:hover{background:#eef1ee;color:#1b1f1c}
+.s-BureauAccueil .nav.on{background:#e8f2ec;color:#1f6f43;font-weight:600}
+.s-BureauAccueil .row{display:flex;align-items:center;gap:12px;padding:12px 16px;text-decoration:none;color:#1b1f1c;border-top:1px solid #e3e7e3;min-height:44px}
+.s-BureauAccueil .row:first-child{border-top:0}
+.s-BureauAccueil .row:hover{background:#f6f7f5}
+.s-BureauAccueil .card{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid #e3e7e3;border-radius:12px;background:#ffffff;text-decoration:none;color:#1b1f1c}
+.s-BureauAccueil .card:hover{border-color:#1f6f43}
+.s-BureauAccueil .h2{margin:0;font-size:13px;font-weight:600;color:#57615b;text-transform:uppercase;letter-spacing:.04em}
+.s-BureauAccueil a:focus-visible,.s-BureauAccueil button:focus-visible{outline:3px solid #1f6f43;outline-offset:2px}
+.s-BureauRecherche a{color:#1f6f43}
+.s-BureauRecherche a:hover{color:#174f31}
+.s-BureauRecherche .nav{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:10px;color:#3f4943;text-decoration:none;font-weight:500}
+.s-BureauRecherche .nav:hover{background:#eef1ee;color:#1b1f1c}
+.s-BureauRecherche .nav.on{background:#e8f2ec;color:#1f6f43;font-weight:600}
+.s-BureauRecherche .cat{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:40px;padding:0 12px;border:0;border-radius:8px;background:transparent;font:inherit;font-size:14px;color:#1b1f1c;cursor:pointer;text-align:left}
+.s-BureauRecherche .cat:hover{background:#eef1ee}
+.s-BureauRecherche .cat.on{background:#e8f2ec;color:#1f6f43;font-weight:600}
+.s-BureauRecherche .card{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid #e3e7e3;border-radius:12px;background:#ffffff;text-decoration:none;color:#1b1f1c}
+.s-BureauRecherche .card:hover{border-color:#1f6f43}
+.s-BureauRecherche .lab{font-size:13px;font-weight:600;color:#57615b}
+.s-BureauRecherche .sel{min-height:44px;padding:0 10px;border:1.5px solid #c9d0ca;border-radius:10px;font:inherit;font-size:14px;background:#ffffff;width:100%}
+.s-BureauRecherche a:focus-visible,.s-BureauRecherche button:focus-visible,.s-BureauRecherche input:focus-visible,.s-BureauRecherche select:focus-visible{outline:3px solid #1f6f43;outline-offset:2px}
+.s-BureauFiche a{color:#1f6f43}
+.s-BureauFiche a:hover{color:#174f31}
+.s-BureauFiche .nav{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:10px;color:#3f4943;text-decoration:none;font-weight:500}
+.s-BureauFiche .nav:hover{background:#eef1ee;color:#1b1f1c}
+.s-BureauFiche .nav.on{background:#e8f2ec;color:#1f6f43;font-weight:600}
+.s-BureauFiche .act{min-height:48px;padding:0 20px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;font:inherit;font-weight:600;cursor:pointer}
+.s-BureauFiche dt{font-size:13px;color:#57615b}
+.s-BureauFiche dd{margin:0 0 12px}
+.s-BureauFiche .h2{margin:0 0 10px;font-size:13px;font-weight:600;color:#57615b;text-transform:uppercase;letter-spacing:.04em}
+.s-BureauFiche a:focus-visible,.s-BureauFiche button:focus-visible,.s-BureauFiche summary:focus-visible{outline:3px solid #1f6f43;outline-offset:2px}
+.s-BureauMonMateriel a{color:#1f6f43}
+.s-BureauMonMateriel a:hover{color:#174f31}
+.s-BureauMonMateriel .nav{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:10px;color:#3f4943;text-decoration:none;font-weight:500}
+.s-BureauMonMateriel .nav:hover{background:#eef1ee;color:#1b1f1c}
+.s-BureauMonMateriel .nav.on{background:#e8f2ec;color:#1f6f43;font-weight:600}
+.s-BureauMonMateriel .seg{min-height:44px;padding:0 16px;border:0;background:transparent;font:inherit;font-weight:500;color:#57615b;border-bottom:2.5px solid transparent;cursor:pointer}
+.s-BureauMonMateriel .seg.on{color:#1f6f43;font-weight:600;border-bottom-color:#1f6f43}
+.s-BureauMonMateriel .h2{margin:0;font-size:13px;font-weight:600;color:#57615b;text-transform:uppercase;letter-spacing:.04em}
+.s-BureauMonMateriel .box{border:1px solid #e3e7e3;border-radius:12px;background:#ffffff;overflow-x:auto}
+.s-BureauMonMateriel table{width:100%;border-collapse:collapse;font-size:14px}
+.s-BureauMonMateriel th{text-align:left;font-size:12.5px;font-weight:600;color:#57615b;padding:10px 16px;border-bottom:1px solid #e3e7e3}
+.s-BureauMonMateriel td{padding:12px 16px;border-top:1px solid #eef1ee}
+.s-BureauMonMateriel tr:first-child td{border-top:0}
+.s-BureauMonMateriel .place{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border:1px solid #e3e7e3;border-radius:12px;background:#ffffff}
+.s-BureauMonMateriel a:focus-visible,.s-BureauMonMateriel button:focus-visible{outline:3px solid #1f6f43;outline-offset:2px}
+.s-BureauCollectif a{color:#1f6f43}
+.s-BureauCollectif a:hover{color:#174f31}
+.s-BureauCollectif .nav{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:10px;color:#3f4943;text-decoration:none;font-weight:500}
+.s-BureauCollectif .nav:hover{background:#eef1ee;color:#1b1f1c}
+.s-BureauCollectif .nav.on{background:#e8f2ec;color:#1f6f43;font-weight:600}
+.s-BureauCollectif .seg{min-height:44px;padding:0 16px;border:0;background:transparent;font:inherit;font-weight:500;color:#57615b;border-bottom:2.5px solid transparent;cursor:pointer}
+.s-BureauCollectif .seg.on{color:#1f6f43;font-weight:600;border-bottom-color:#1f6f43}
+.s-BureauCollectif .box{border:1px solid #e3e7e3;border-radius:12px;background:#ffffff;overflow-x:auto}
+.s-BureauCollectif table{width:100%;border-collapse:collapse;font-size:14px}
+.s-BureauCollectif th{text-align:left;font-size:12.5px;font-weight:600;color:#57615b;padding:10px 16px;border-bottom:1px solid #e3e7e3}
+.s-BureauCollectif td{padding:12px 16px;border-top:1px solid #eef1ee}
+.s-BureauCollectif tr:first-child td{border-top:0}
+.s-BureauCollectif .ok{min-height:40px;padding:0 14px;border:0;border-radius:10px;background:#1f6f43;color:#ffffff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.s-BureauCollectif .no{min-height:40px;padding:0 14px;border:1.5px solid #b42318;border-radius:10px;background:#ffffff;color:#b42318;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.s-BureauCollectif a:focus-visible,.s-BureauCollectif button:focus-visible,.s-BureauCollectif input:focus-visible{outline:3px solid #1f6f43;outline-offset:2px}
+.s-Ajouter a{color:#1f6f43}
+.s-Ajouter a:hover{color:#174f31}
+.s-Ajouter .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;font-size:11.5px;font-weight:500;color:#57615b;text-decoration:none}
+.s-Ajouter .tab.on{color:#1f6f43;font-weight:600}
+.s-Ajouter .f{display:flex;flex-direction:column;gap:6px}
+.s-Ajouter .lab{font-weight:600;font-size:14px}
+.s-Ajouter .hint{font-size:12.5px;color:#57615b}
+.s-Ajouter .in{min-height:48px;padding:0 12px;border:1.5px solid #c9d0ca;border-radius:10px;font:inherit;font-size:16px;color:#1b1f1c;background:#ffffff;box-sizing:border-box;width:100%}
+.s-Ajouter .opt{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-top:1px solid #e3e7e3;cursor:pointer}
+.s-Ajouter .opt:first-child{border-top:0}
+.s-Ajouter .link{align-self:flex-start;min-height:40px;padding:0;border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:#1f6f43;cursor:pointer;text-decoration:underline}
+.s-Ajouter a:focus-visible,.s-Ajouter button:focus-visible,.s-Ajouter input:focus-visible,.s-Ajouter select:focus-visible,.s-Ajouter textarea:focus-visible{outline:3px solid #1f6f43;outline-offset:2px}
+.s-Admin a{color:#1f6f43}
+.s-Admin a:hover{color:#174f31}
+.s-Admin .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;font-size:11.5px;font-weight:500;color:#57615b;text-decoration:none}
+.s-Admin .tab.on{color:#1f6f43;font-weight:600}
+.s-Admin .h2{margin:0;font-size:13px;font-weight:600;color:#57615b;text-transform:uppercase;letter-spacing:.04em}
+.s-Admin .ok{flex:1;min-height:44px;border:0;border-radius:10px;background:#1f6f43;color:#ffffff;font:inherit;font-weight:600;cursor:pointer}
+.s-Admin .no{flex:1;min-height:44px;border:1.5px solid #b42318;border-radius:10px;background:#ffffff;color:#b42318;font:inherit;font-weight:600;cursor:pointer}
+.s-Admin .undo{min-height:40px;padding:0 4px;border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:#1f6f43;text-decoration:underline;cursor:pointer}
+.s-Admin a:focus-visible,.s-Admin button:focus-visible{outline:3px solid #1f6f43;outline-offset:2px}
+.s-BureauMonMateriel .tip{position:relative}
+.s-BureauMonMateriel .tip summary{list-style:none;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:16px;color:#57615b;cursor:pointer}
+.s-BureauMonMateriel .tip summary::-webkit-details-marker{display:none}
+.s-BureauMonMateriel .tip summary:hover,.s-BureauMonMateriel .tip[open] summary{background:#eef1ee;color:#1f6f43}
+.s-BureauMonMateriel .tip .bubble{position:absolute;left:0;top:34px;z-index:5;width:240px;padding:10px 12px;border-radius:10px;background:#1b1f1c;color:#ffffff;font-size:13px;line-height:1.4;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+</style>
+</helmet>
+<div style="min-height: 900px; background: #f6f7f5; font-family: Inter, system-ui, sans-serif; color: #1b1f1c">
+<sc-if value="{{is.BureauAccueil}}" hint-placeholder-val="{{true}}">
+<div class="s-BureauAccueil">
+<div style="min-height: 900px; background: #f6f7f5; color: #1b1f1c; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <header style="background: #ffffff; border-bottom: 1px solid #e3e7e3">
+    <div style="max-width: 1040px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px">
+      <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">InventAssos</span>
+      <nav aria-label="Navigation principale" style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1">
+        <a href="Bureau-Accueil.dc.html" onClick="{{to.BureauAccueil}}" class="nav on" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"></path></svg>Accueil</a>
+        <a href="Bureau-Recherche.dc.html" onClick="{{to.BureauRecherche}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>Rechercher</a>
+        <a href="Bureau-MonMateriel.dc.html" onClick="{{to.BureauMonMateriel}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>Mon matériel</a>
+        <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5"></path></svg>Collectifs</a>
+      </nav>
+      <a href="Admin.dc.html" onClick="{{to.Admin}}" class="nav" style="font-size: 14px">Administration <span style="min-width: 22px; height: 22px; border-radius: 11px; background: #1f6f43; color: #ffffff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">4</span></a>
+      <a href="#compte" aria-label="Mon compte" style="width: 36px; height: 36px; border-radius: 18px; background: #e8f2ec; color: #1f6f43; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; text-decoration: none">CM</a>
+    </div>
+  </header>
+  <main style="max-width: 1040px; margin: 0 auto; padding: 32px 24px 48px; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.01em">Bonjour Camille</h1>
+      <a href="Bureau-Recherche.dc.html" onClick="{{to.BureauRecherche}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 18px; border: 1.5px solid #c9d0ca; border-radius: 12px; color: #57615b; text-decoration: none; background: #ffffff; font-size: 16px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <span>Chercher du matériel, une ville, un collectif…</span>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 24px; min-width: 0">
+        <a href="Admin.dc.html" onClick="{{to.Admin}}" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 12px; background: #e8f2ec; border: 1.5px solid #1f6f43; color: #1b1f1c; text-decoration: none">
+          <span style="min-width: 40px; height: 40px; border-radius: 20px; background: #1f6f43; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700">4</span>
+          <span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Demandes à valider</span><span style="font-size: 13px; color: #3f4943">2 comptes · 1 collectif · 1 responsable</span></span>
+        </a>
+        <section style="display: flex; flex-direction: column; gap: 8px">
+          <h2 class="h2">Mes collectifs</h2>
+          <div style="border: 1px solid #e3e7e3; border-radius: 12px; overflow: hidden; background: #ffffff">
+            <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" class="row"><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Collecti'FROG</span><span style="font-size: 13px; color: #57615b">Rennes · tu es responsable</span></span><span style="font-size: 13px; color: #57615b">42 objets</span></a>
+            <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" class="row"><span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600">Ondes Courtes</span><span style="font-size: 13px; color: #57615b">Saint-Malo · tu es responsable</span></span><span style="font-size: 13px; color: #57615b">5 objets</span></a>
+          </div>
+        </section>
+        <div style="display: flex; gap: 10px">
+          <a href="Ajouter.dc.html" onClick="{{to.Ajouter}}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 12px; background: #1f6f43; color: #ffffff; text-decoration: none; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter du matériel</a>
+          <a href="Bureau-MonMateriel.dc.html" onClick="{{to.BureauMonMateriel}}" style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; border: 1.5px solid #1f6f43; color: #1f6f43; text-decoration: none; font-weight: 600; background: #ffffff">Mon matériel</a>
+        </div>
+      </div>
+
+      <section style="flex: 999 1 520px; display: flex; flex-direction: column; gap: 8px; min-width: 0">
+        <h2 class="h2">Ajouté récemment</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px">
+          <a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" class="card"><span style="height: 110px; border-radius: 8px; background: #eef1ee"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Projecteur PAR LED 18×10 W</span><span style="font-size: 13px; color: #57615b">×6 · Lumière</span><span style="font-size: 13px">Collecti'FROG · Rennes</span></span></a>
+          <a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" class="card"><span style="height: 110px; border-radius: 8px; background: #eef1ee"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Table de mixage 12 voies</span><span style="font-size: 13px; color: #57615b">Son</span><span style="font-size: 13px">La Fabrique à Décors · Vitré</span></span></a>
+          <a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" class="card"><span style="height: 110px; border-radius: 8px; background: #eef1ee"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Praticable 2×1 m</span><span style="font-size: 13px; color: #57615b">×8 · Structure</span><span style="font-size: 13px">Ondes Courtes · Saint-Malo</span></span></a>
+          <a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" class="card"><span style="height: 110px; border-radius: 8px; background: #eef1ee"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Vidéoprojecteur 5000 lumens</span><span style="font-size: 13px; color: #57615b">Vidéo</span><span style="font-size: 13px">Ondes Courtes · Saint-Malo</span></span></a>
+          <a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" class="card"><span style="height: 110px; border-radius: 8px; background: #eef1ee"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Câble DMX 10 m</span><span style="font-size: 13px; color: #57615b">×12 · Câblage</span><span style="font-size: 13px">Collecti'FROG · Rennes</span></span></a>
+          <a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" class="card"><span style="height: 110px; border-radius: 8px; background: #eef1ee"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Pied de projecteur 3 m</span><span style="font-size: 13px; color: #57615b">×8 · Structure</span><span style="font-size: 13px">Collecti'FROG · Rennes</span></span></a>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{is.BureauRecherche}}" hint-placeholder-val="{{false}}">
+<div class="s-BureauRecherche">
+<div style="min-height: 960px; background: #f6f7f5; color: #1b1f1c; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <header style="background: #ffffff; border-bottom: 1px solid #e3e7e3">
+    <div style="max-width: 1040px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px">
+      <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">InventAssos</span>
+      <nav aria-label="Navigation principale" style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1">
+        <a href="Bureau-Accueil.dc.html" onClick="{{to.BureauAccueil}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"></path></svg>Accueil</a>
+        <a href="Bureau-Recherche.dc.html" onClick="{{to.BureauRecherche}}" class="nav on" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>Rechercher</a>
+        <a href="Bureau-MonMateriel.dc.html" onClick="{{to.BureauMonMateriel}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>Mon matériel</a>
+        <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5"></path></svg>Collectifs</a>
+      </nav>
+      <a href="Admin.dc.html" onClick="{{to.Admin}}" class="nav" style="font-size: 14px">Administration <span style="min-width: 22px; height: 22px; border-radius: 11px; background: #1f6f43; color: #ffffff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">4</span></a>
+      <a href="#compte" aria-label="Mon compte" style="width: 36px; height: 36px; border-radius: 18px; background: #e8f2ec; color: #1f6f43; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; text-decoration: none">CM</a>
+    </div>
+  </header>
+  <main style="max-width: 1040px; margin: 0 auto; padding: 28px 24px 48px; display: flex; flex-direction: column; gap: 20px">
+    <h1 style="margin: 0; font-size: 26px; font-weight: 700">Rechercher</h1>
+    <label style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border: 1.5px solid #1f6f43; border-radius: 12px; background: #ffffff">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#57615b" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Rechercher</span>
+      <input type="search" value="projecteur" readonly="readonly" style="flex: 1; border: 0; outline: none; font: inherit; font-size: 16px; background: transparent">
+      <span style="font-size: 13px; color: #57615b">Nom, marque, modèle ou description</span>
+    </label>
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <aside aria-label="Filtres" style="flex: 1 1 220px; max-width: 260px; display: flex; flex-direction: column; gap: 18px; padding: 16px; border: 1px solid #e3e7e3; border-radius: 12px; background: #ffffff; box-sizing: border-box">
+        <div role="group" aria-label="Catégorie" style="display: flex; flex-direction: column; gap: 2px">
+          <span class="lab" style="margin-bottom: 6px">Catégorie</span>
+          <sc-for list="{{BureauRecherche.cats}}" as="c" hint-placeholder-count="7">
+            <button type="button" class="{{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}"><span>{{c.label}}</span><span style="font-size: 12.5px; color: #57615b">{{c.count}}</span></button>
+          </sc-for>
+        </div>
+        <label style="display: flex; flex-direction: column; gap: 6px"><span class="lab">Ville</span><select class="sel"><option>Toutes</option><option>Rennes</option><option>Vitré</option><option>Saint-Malo</option><option>Chartres-de-Bretagne</option></select></label>
+        <label style="display: flex; flex-direction: column; gap: 6px"><span class="lab">Collectif</span><select class="sel"><option>Tous</option><option>Collecti'FROG</option><option>La Fabrique à Décors</option><option>Ondes Courtes</option></select></label>
+      </aside>
+      <section style="flex: 999 1 480px; display: flex; flex-direction: column; gap: 12px; min-width: 0">
+        <p style="margin: 0; font-size: 14px; color: #57615b">{{BureauRecherche.countText}}</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px">
+          <sc-for list="{{BureauRecherche.results}}" as="r" hint-placeholder-count="5">
+            <a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" class="card">
+              <span style="height: 120px; border-radius: 8px; background: #eef1ee; display: flex; align-items: center; justify-content: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8a948d" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg></span>
+              <span style="display: flex; flex-direction: column; gap: 2px">
+                <span style="font-weight: 600">{{r.name}}</span>
+                <span style="font-size: 13px; color: #57615b">{{r.meta}}</span>
+                <span style="font-size: 13px">{{r.where}}</span>
+              </span>
+            </a>
+          </sc-for>
+        </div>
+        <sc-if value="{{BureauRecherche.empty}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 48px 16px; border: 1px dashed #c9d0ca; border-radius: 12px; background: #ffffff">
+            <p style="margin: 0; font-weight: 600">{{BureauRecherche.emptyTitle}}</p>
+            <p style="margin: 0; font-size: 14px; color: #57615b">Essaie une autre catégorie, ou cherche dans tout l'inventaire.</p>
+            <button type="button" onClick="{{BureauRecherche.reset}}" style="min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1.5px solid #1f6f43; background: #ffffff; color: #1f6f43; font: inherit; font-weight: 600; cursor: pointer">Retirer le filtre</button>
+          </div>
+        </sc-if>
+      </section>
+    </div>
+  </main>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{is.BureauFiche}}" hint-placeholder-val="{{false}}">
+<div class="s-BureauFiche">
+<div style="min-height: 860px; background: #f6f7f5; color: #1b1f1c; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <header style="background: #ffffff; border-bottom: 1px solid #e3e7e3">
+    <div style="max-width: 1040px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px">
+      <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">InventAssos</span>
+      <nav aria-label="Navigation principale" style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1">
+        <a href="Bureau-Accueil.dc.html" onClick="{{to.BureauAccueil}}" class="{{tabs.Main}}" aria-current="{{cur.Main}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"></path></svg>Accueil</a>
+        <a href="Bureau-Recherche.dc.html" onClick="{{to.BureauRecherche}}" class="{{tabs.Recherche}}" aria-current="{{cur.Recherche}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>Rechercher</a>
+        <a href="Bureau-MonMateriel.dc.html" onClick="{{to.BureauMonMateriel}}" class="{{tabs.MonMateriel}}" aria-current="{{cur.MonMateriel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>Mon matériel</a>
+        <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" class="{{tabs.Collectif}}" aria-current="{{cur.Collectif}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5"></path></svg>Collectifs</a>
+      </nav>
+      <a href="Admin.dc.html" onClick="{{to.Admin}}" class="nav" style="font-size: 14px">Administration <span style="min-width: 22px; height: 22px; border-radius: 11px; background: #1f6f43; color: #ffffff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">4</span></a>
+      <a href="#compte" aria-label="Mon compte" style="width: 36px; height: 36px; border-radius: 18px; background: #e8f2ec; color: #1f6f43; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; text-decoration: none">CM</a>
+    </div>
+  </header>
+  <main style="max-width: 1040px; margin: 0 auto; padding: 20px 24px 48px; display: flex; flex-direction: column; gap: 16px">
+    <a onClick="{{to.back}}" href="Bureau-Recherche.dc.html" style="align-self: flex-start; display: flex; align-items: center; gap: 4px; min-height: 40px; text-decoration: none; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Retour</a>
+    <div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+      <div style="flex: 1 1 360px; min-width: 0; aspect-ratio: 4 / 3; border-radius: 16px; background: #e9ece8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #57615b; font-size: 14px">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#8a948d" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="12" cy="12" r="3.5"></circle><path d="M8 5l1.5-2h5L16 5"></path></svg>
+        <span>Photo de l'objet (V0.9)</span>
+      </div>
+      <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700; line-height: 1.2">Projecteur PAR LED 18×10 W</h1>
+            <a href="Ajouter.dc.html" onClick="{{to.Ajouter}}" style="flex: none; min-height: 40px; display: flex; align-items: center; padding: 0 14px; border: 1px solid #c9d0ca; border-radius: 10px; color: #1b1f1c; text-decoration: none; font-size: 14px; background: #ffffff">Modifier</a>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <span style="padding: 3px 10px; border-radius: 12px; background: #e9ece8; font-size: 13px; font-weight: 500">Lumière</span>
+            <span style="padding: 3px 10px; border-radius: 12px; background: #e9ece8; font-size: 13px; font-weight: 500">×6</span>
+            <span style="padding: 3px 10px; border-radius: 12px; background: #e8f2ec; color: #1f6f43; font-size: 13px; font-weight: 600">Bon état</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #e3e7e3; border-radius: 12px; background: #ffffff">
+          <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" style="display: flex; flex-direction: column; padding: 12px 14px; text-decoration: none; color: #1b1f1c"><span style="font-size: 13px; color: #57615b">Appartient à</span><span style="font-weight: 600; color: #1f6f43">Collecti'FROG</span></a>
+          <div style="display: flex; flex-direction: column; padding: 12px 14px; border-left: 1px solid #e3e7e3"><span style="font-size: 13px; color: #57615b">Rangé à</span><span style="font-weight: 600">Rennes</span></div>
+          <div style="display: flex; flex-direction: column; padding: 12px 14px; border-left: 1px solid #e3e7e3"><span style="font-size: 13px; color: #57615b">À contacter</span><span style="font-weight: 600">Léa, responsable</span></div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+          <span style="display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border-radius: 12px; background: #1f6f43; color: #ffffff; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"></path></svg>06 12 34 56 78</span>
+          <button type="button" class="act" onClick="{{BureauFiche.mail}}" style="background: #ffffff; color: #1f6f43; border: 1.5px solid #1f6f43">Écrire à Léa</button>
+        </div>
+        <p style="margin: -8px 0 0; font-size: 13px; color: #57615b">Sur ordinateur, le numéro est affiché en clair ; sur téléphone, ce sont les boutons Appeler et SMS.</p>
+        <sc-if value="{{BureauFiche.sent}}" hint-placeholder-val="{{false}}">
+          <p role="status" style="margin: 0; padding: 10px 14px; border-radius: 10px; background: #e8f2ec; color: #1f6f43; font-weight: 600">Dans l'app, ce bouton ouvre un message à Léa, envoyé par la plateforme.</p>
+        </sc-if>
+        <section>
+          <h2 class="h2">Détails</h2>
+          <dl style="margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 12px">
+            <div><dt>Marque</dt><dd>Stairville</dd></div>
+            <div><dt>Modèle</dt><dd>LED Par 64</dd></div>
+            <div><dt>Valeur estimée</dt><dd>90 € pièce</dd></div>
+            <div><dt>N° de série</dt><dd>—</dd></div>
+          </dl>
+          <p style="margin: 0">Lot de 6, câbles d'alimentation et DMX fournis. Rangés dans un flight case gris.</p>
+        </section>
+        <details style="border-top: 1px solid #e3e7e3; padding-top: 6px">
+          <summary style="min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer">Historique</summary>
+          <ul style="margin: 0; padding-left: 18px; font-size: 14px; color: #3f4943">
+            <li>3 nov. 2026 — déplacé vers Local · Rennes</li>
+            <li>12 oct. 2026 — ajouté par Léa</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{is.BureauMonMateriel}}" hint-placeholder-val="{{false}}">
+<div class="s-BureauMonMateriel">
+<div style="min-height: 960px; background: #f6f7f5; color: #1b1f1c; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <header style="background: #ffffff; border-bottom: 1px solid #e3e7e3">
+    <div style="max-width: 1040px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px">
+      <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">InventAssos</span>
+      <nav aria-label="Navigation principale" style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1">
+        <a href="Bureau-Accueil.dc.html" onClick="{{to.BureauAccueil}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"></path></svg>Accueil</a>
+        <a href="Bureau-Recherche.dc.html" onClick="{{to.BureauRecherche}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>Rechercher</a>
+        <a href="Bureau-MonMateriel.dc.html" onClick="{{to.BureauMonMateriel}}" class="nav on" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>Mon matériel</a>
+        <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5"></path></svg>Collectifs</a>
+      </nav>
+      <a href="Admin.dc.html" onClick="{{to.Admin}}" class="nav" style="font-size: 14px">Administration <span style="min-width: 22px; height: 22px; border-radius: 11px; background: #1f6f43; color: #ffffff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">4</span></a>
+      <a href="#compte" aria-label="Mon compte" style="width: 36px; height: 36px; border-radius: 18px; background: #e8f2ec; color: #1f6f43; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; text-decoration: none">CM</a>
+    </div>
+  </header>
+  <main style="max-width: 1040px; margin: 0 auto; padding: 28px 24px 48px; display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+      <h1 style="margin: 0; font-size: 26px; font-weight: 700">Mon matériel</h1>
+      <a href="Ajouter.dc.html" onClick="{{to.Ajouter}}" style="display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 10px; background: #1f6f43; color: #ffffff; text-decoration: none; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter du matériel</a>
+    </div>
+    <div role="tablist" style="display: flex; border-bottom: 1px solid #e3e7e3">
+      <button type="button" role="tab" class="{{BureauMonMateriel.segItems}}" aria-selected="{{BureauMonMateriel.selItems}}" onClick="{{BureauMonMateriel.showItems}}">Matériel · 5</button>
+      <button type="button" role="tab" class="{{BureauMonMateriel.segPlaces}}" aria-selected="{{BureauMonMateriel.selPlaces}}" onClick="{{BureauMonMateriel.showPlaces}}">Lieux · 2</button>
+    </div>
+    <sc-if value="{{BureauMonMateriel.items}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; gap: 24px">
+        <p style="margin: 0; font-size: 14px; color: #3f4943">Le matos rangé dans tes lieux en ce moment.</p>
+        <section style="display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; align-items: center; gap: 4px"><h2 class="h2">À moi · 2</h2><details class="tip"><summary aria-label="À quoi correspond « À moi » ?"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></summary><span class="bubble" role="note">Tes objets, chez toi.</span></details></div>
+          <div class="box"><table>
+            <thead><tr><th>Nom</th><th>Catégorie</th><th>Qté</th><th>Appartient à</th><th>Rangé à</th></tr></thead>
+            <tbody>
+              <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Projecteur de chantier LED 50 W</a></td><td>Électricité</td><td>4</td><td>Moi</td><td>Garage</td></tr>
+              <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Enrouleur 25 m</a></td><td>Électricité</td><td>1</td><td>Moi</td><td>Garage</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; align-items: center; gap: 4px"><h2 class="h2">Stocké pour mes collectifs · 2</h2><details class="tip"><summary aria-label="À quoi correspond « Stocké pour mes collectifs » ?"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></summary><span class="bubble" role="note">Matos de tes collectifs rangé chez toi.</span></details></div>
+          <div class="box"><table>
+            <thead><tr><th>Nom</th><th>Catégorie</th><th>Qté</th><th>Appartient à</th><th>Rangé à</th></tr></thead>
+            <tbody>
+              <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Console lumière 24 circuits</a></td><td>Lumière</td><td>1</td><td>Collecti'FROG</td><td>Garage</td></tr>
+              <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Machine à fumée</a></td><td>Lumière</td><td>1</td><td>Ondes Courtes</td><td>Cave</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; align-items: center; gap: 4px"><h2 class="h2">Emprunté · 1</h2><details class="tip"><summary aria-label="À quoi correspond « Emprunté » ?"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></summary><span class="bubble" role="note">Matos d'autres assos ou personnes, rangé chez toi pour l'instant.</span></details></div>
+          <div class="box"><table>
+            <thead><tr><th>Nom</th><th>Catégorie</th><th>Qté</th><th>Appartient à</th><th>Rangé à</th></tr></thead>
+            <tbody>
+              <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Table de mixage 12 voies</a></td><td>Son</td><td>1</td><td>La Fabrique à Décors</td><td>Garage</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+      </div>
+    </sc-if>
+    <sc-if value="{{BureauMonMateriel.places}}" hint-placeholder-val="{{false}}">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px">
+        <div class="place"><span style="font-weight: 600">Garage</span><span style="font-size: 13px; color: #57615b">Chartres-de-Bretagne · 4 objets</span><span style="font-size: 12.5px; color: #57615b">Adresse visible par toi seulement</span></div>
+        <div class="place"><span style="font-weight: 600">Cave</span><span style="font-size: 13px; color: #57615b">Chartres-de-Bretagne · 1 objet</span></div>
+        <a href="#nouveau-lieu" style="display: flex; align-items: center; justify-content: center; min-height: 96px; border: 1.5px dashed #c9d0ca; border-radius: 12px; text-decoration: none; font-weight: 600">Nouveau lieu</a>
+      </div>
+      <p style="margin: 12px 0 0; font-size: 13px; color: #57615b">Les lieux de tes collectifs sont sur la page de chaque collectif.</p>
+    </sc-if>
+  </main>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{is.BureauCollectif}}" hint-placeholder-val="{{false}}">
+<div class="s-BureauCollectif">
+<div style="min-height: 900px; background: #f6f7f5; color: #1b1f1c; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <header style="background: #ffffff; border-bottom: 1px solid #e3e7e3">
+    <div style="max-width: 1040px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px">
+      <span style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">InventAssos</span>
+      <nav aria-label="Navigation principale" style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1">
+        <a href="Bureau-Accueil.dc.html" onClick="{{to.BureauAccueil}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"></path></svg>Accueil</a>
+        <a href="Bureau-Recherche.dc.html" onClick="{{to.BureauRecherche}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>Rechercher</a>
+        <a href="Bureau-MonMateriel.dc.html" onClick="{{to.BureauMonMateriel}}" class="nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg>Mon matériel</a>
+        <a href="Bureau-Collectif.dc.html" onClick="{{to.BureauCollectif}}" class="nav on" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5"></path></svg>Collectifs</a>
+      </nav>
+      <a href="Admin.dc.html" onClick="{{to.Admin}}" class="nav" style="font-size: 14px">Administration <span style="min-width: 22px; height: 22px; border-radius: 11px; background: #1f6f43; color: #ffffff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">4</span></a>
+      <a href="#compte" aria-label="Mon compte" style="width: 36px; height: 36px; border-radius: 18px; background: #e8f2ec; color: #1f6f43; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; text-decoration: none">CM</a>
+    </div>
+  </header>
+  <main style="max-width: 1040px; margin: 0 auto; padding: 24px 24px 48px; display: flex; flex-direction: column; gap: 18px">
+    <span style="font-size: 14px; color: #57615b"><a href="#collectifs">Collectifs</a> › Collecti'FROG</span>
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 700">Collecti'FROG</h1>
+        <span style="color: #57615b">Rennes · 3 responsables · 6 membres</span>
+        <span style="align-self: flex-start; margin-top: 4px; padding: 3px 10px; border-radius: 12px; background: #e8f2ec; color: #1f6f43; font-size: 13px; font-weight: 600">Tu es responsable</span>
+      </div>
+      <div style="display: flex; gap: 10px">
+        <a href="#modifier" style="display: flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid #c9d0ca; border-radius: 10px; color: #1b1f1c; text-decoration: none; background: #ffffff">Modifier la fiche</a>
+        <a href="Ajouter.dc.html" onClick="{{to.Ajouter}}" style="display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 10px; background: #1f6f43; color: #ffffff; text-decoration: none; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter du matériel</a>
+      </div>
+    </div>
+    <div role="tablist" style="display: flex; flex-wrap: wrap; border-bottom: 1px solid #e3e7e3">
+      <sc-for list="{{BureauCollectif.tabs}}" as="t" hint-placeholder-count="4">
+        <button type="button" role="tab" class="{{t.cls}}" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}</button>
+      </sc-for>
+    </div>
+    <sc-if value="{{BureauCollectif.showItems}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <label style="display: flex; align-items: center; gap: 8px; max-width: 420px; min-height: 44px; padding: 0 12px; border: 1.5px solid #c9d0ca; border-radius: 10px; background: #ffffff">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#57615b" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Chercher dans le matériel du collectif</span>
+          <input type="search" placeholder="Chercher dans les 42 objets" style="flex: 1; border: 0; outline: none; font: inherit; background: transparent">
+        </label>
+        <div class="box"><table>
+          <thead><tr><th>Nom</th><th>Catégorie</th><th>Qté</th><th>Rangé à</th><th>État</th></tr></thead>
+          <tbody>
+            <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Projecteur PAR LED 18×10 W</a></td><td>Lumière</td><td>6</td><td>Local</td><td>Bon état</td></tr>
+            <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Pied de projecteur 3 m</a></td><td>Structure</td><td>8</td><td>Camion</td><td>Usé</td></tr>
+            <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Console lumière 24 circuits</a></td><td>Lumière</td><td>1</td><td>Local</td><td>Bon état</td></tr>
+            <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Câble DMX 10 m</a></td><td>Câblage</td><td>12</td><td>Local</td><td>—</td></tr>
+            <tr><td><a href="Bureau-Fiche.dc.html" onClick="{{to.BureauFiche}}" style="font-weight: 600">Micro SM58</a> <span style="font-size: 12.5px; color: #57615b">à Camille Martin, en dépôt</span></td><td>Son</td><td>1</td><td>Local</td><td>Bon état</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{BureauCollectif.showPlaces}}" hint-placeholder-val="{{false}}">
+      <div class="box"><table>
+        <thead><tr><th>Lieu</th><th>Ville</th><th>Adresse</th><th>Objets</th><th></th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight: 600">Local</td><td>Rennes</td><td>visible par les responsables et les membres</td><td>38</td><td><a href="#modifier">Modifier</a></td></tr>
+          <tr><td style="font-weight: 600">Camion</td><td>Rennes</td><td>—</td><td>5</td><td><a href="#modifier">Modifier</a></td></tr>
+        </tbody>
+      </table></div>
+    </sc-if>
+    <sc-if value="{{BureauCollectif.showMembers}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <sc-if value="{{BureauCollectif.pending}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid #1f6f43; border-radius: 12px; background: #e8f2ec">
+            <span style="flex: 1; min-width: 220px"><strong>Nina Robert</strong> demande à rejoindre le collectif · 8 nov.</span>
+            <button type="button" class="ok" onClick="{{BureauCollectif.accept}}">Accepter</button>
+            <button type="button" class="no" onClick="{{BureauCollectif.refuse}}">Refuser</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{BureauCollectif.decided}}" hint-placeholder-val="{{false}}">
+          <p role="status" style="margin: 0; padding: 12px 16px; border-radius: 12px; background: #ffffff; border: 1px solid #e3e7e3">{{BureauCollectif.decision}}</p>
+        </sc-if>
+        <div class="box"><table>
+          <thead><tr><th>Nom</th><th>Rôle</th><th>Téléphone</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight: 600">Léa Moreau</td><td>Responsable</td><td>06 12 34 56 78</td></tr>
+            <tr><td style="font-weight: 600">Camille Martin (toi)</td><td>Responsable</td><td>—</td></tr>
+            <tr><td style="font-weight: 600">Hugo Lefèvre</td><td>Responsable</td><td>06 98 76 54 32</td></tr>
+            <tr><td style="font-weight: 600">Sami Diallo</td><td>Membre</td><td>—</td></tr>
+          </tbody>
+        </table></div>
+        <p style="margin: 0; font-size: 13px; color: #57615b">Les membres gèrent le matériel du collectif ; les responsables gèrent aussi la fiche, les lieux et les membres (V0.8).</p>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{is.Ajouter}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 16px 48px">
+<p style="margin: 0; font-size: 13px; color: #57615b">Sur ordinateur, ce formulaire garde la même mise en page, centrée.</p>
+<div class="s-Ajouter">
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #ffffff; color: #1b1f1c; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45; box-sizing: border-box">
+  <header style="display: flex; align-items: center; gap: 4px; padding: 10px 8px; border-bottom: 1px solid #e3e7e3">
+    <a onClick="{{to.back}}" href="MonMateriel.dc.html" aria-label="Retour" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 style="margin: 0; font-size: 18px; font-weight: 700">Ajouter du matériel</h1>
+  </header>
+  <main style="flex: 1; overflow-y: auto; padding: 16px 16px 24px">
+    <form style="display: flex; flex-direction: column; gap: 18px">
+      <label class="f"><span class="lab">Nom</span><input class="in" type="text" placeholder="Ex. : Projecteur PAR LED"></label>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <label class="f"><span class="lab">Catégorie</span><select class="in"><option>Lumière</option><option>Son</option><option>Vidéo</option><option>Structure</option><option>Décor</option><option>Électricité</option><option>Câblage</option><option>Autre</option></select></label>
+        <label class="f"><span class="lab">Quantité</span><input class="in" type="number" min="1" placeholder="1"></label>
+      </div>
+
+      <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 6px">
+        <legend class="lab" style="padding: 0; margin-bottom: 6px">Propriétaire</legend>
+        <div style="border: 1.5px solid #c9d0ca; border-radius: 10px; overflow: hidden">
+          <sc-for list="{{Ajouter.owners}}" as="o" hint-placeholder-count="4">
+            <label class="opt"><input type="radio" name="owner" checked="{{o.checked}}" onChange="{{o.pick}}" style="width: 20px; height: 20px; accent-color: #1f6f43; margin: 0"><span>{{o.label}}</span></label>
+          </sc-for>
+        </div>
+      </fieldset>
+
+      <div class="f">
+        <label class="f"><span class="lab">Rangé à</span>
+          <select class="in"><option>Garage · Chartres-de-Bretagne</option><option>Local · Rennes (Collecti'FROG)</option><option>Camion · Rennes (Collecti'FROG)</option><option>Hangar · Saint-Malo (Ondes Courtes)</option></select>
+        </label>
+        <span class="hint">Les autres ne verront que la ville.</span>
+        <sc-if value="{{Ajouter.showPlaceLink}}" hint-placeholder-val="{{true}}">
+          <button type="button" class="link" onClick="{{Ajouter.openPlace}}">Pas le bon lieu ? En créer un</button>
+        </sc-if>
+        <sc-if value="{{Ajouter.placeOpen}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; background: #f4f6f3">
+            <span style="font-weight: 600">Nouveau lieu</span>
+            <label class="f"><span class="lab">Nom du lieu</span><input class="in" type="text" placeholder="Ex. : Cave, Atelier"></label>
+            <label class="f"><span class="lab">Ville</span><input class="in" type="text" placeholder="Ex. : Rennes"></label>
+            <label class="f"><span class="lab">Adresse <span style="font-weight: 400; color: #57615b">(facultatif)</span></span><input class="in" type="text"><span class="hint">Visible par toi seulement.</span></label>
+            <div style="display: flex; gap: 8px">
+              <button type="button" onClick="{{Ajouter.createPlace}}" style="flex: 1; min-height: 44px; border: 0; border-radius: 10px; background: #1f6f43; color: #ffffff; font: inherit; font-weight: 600; cursor: pointer">Créer le lieu</button>
+              <button type="button" onClick="{{Ajouter.closePlace}}" style="min-height: 44px; padding: 0 14px; border: 1.5px solid #c9d0ca; border-radius: 10px; background: #ffffff; font: inherit; cursor: pointer">Annuler</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{Ajouter.placeDone}}" hint-placeholder-val="{{false}}">
+          <span role="status" style="font-size: 14px; color: #1f6f43; font-weight: 600">Lieu créé et choisi pour cet objet.</span>
+        </sc-if>
+      </div>
+
+      <button type="button" class="link" onClick="{{Ajouter.toggleMore}}" aria-expanded="{{Ajouter.moreAria}}">{{Ajouter.moreLabel}}</button>
+      <sc-if value="{{Ajouter.more}}" hint-placeholder-val="{{false}}">
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: -6px">
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+            <label class="f"><span class="lab">Marque</span><input class="in" type="text"></label>
+            <label class="f"><span class="lab">Modèle</span><input class="in" type="text"></label>
+            <label class="f"><span class="lab">État</span><select class="in"><option>—</option><option>Neuf</option><option>Bon état</option><option>Usé</option><option>À réparer</option><option>Hors service</option></select></label>
+            <label class="f"><span class="lab">Valeur (€)</span><input class="in" type="text" inputmode="decimal"></label>
+          </div>
+          <label class="f"><span class="lab">N° de série</span><input class="in" type="text"></label>
+          <label class="f"><span class="lab">Description</span><textarea class="in" rows="3" style="padding: 10px 12px; min-height: 88px" placeholder="Accessoires, câbles fournis, précautions…"></textarea></label>
+        </div>
+      </sc-if>
+
+      <div style="padding: 12px 14px; border-radius: 12px; background: #e8f2ec; font-size: 14px">{{Ajouter.recap}}</div>
+      <a href="Fiche.dc.html" onClick="{{to.Fiche}}" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #1f6f43; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px">Enregistrer</a>
+    </form>
+  </main>
+  <nav aria-label="Navigation principale" style="display: flex; border-top: 1px solid #e3e7e3; background: #ffffff; padding: 4px 4px 12px">
+    <a href="Main.dc.html" onClick="{{to.Main}}" class="{{mtabs.Main}}" aria-current="{{cur.Main}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"></path></svg><span>Accueil</span></a>
+    <a href="Recherche.dc.html" onClick="{{to.Recherche}}" class="{{mtabs.Recherche}}" aria-current="{{cur.Recherche}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span>Rechercher</span></a>
+    <a href="MonMateriel.dc.html" onClick="{{to.MonMateriel}}" class="{{mtabs.MonMateriel}}" aria-current="{{cur.MonMateriel}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg><span>Mon matériel</span></a>
+    <a href="Collectif.dc.html" onClick="{{to.Collectif}}" class="{{mtabs.Collectif}}" aria-current="{{cur.Collectif}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5"></path></svg><span>Collectifs</span></a>
+  </nav>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{is.Admin}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 16px 48px">
+<p style="margin: 0; font-size: 13px; color: #57615b">Sur ordinateur, la file d'attente garde la même mise en page, centrée.</p>
+<div class="s-Admin">
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #ffffff; color: #1b1f1c; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45; box-sizing: border-box">
+  <header style="display: flex; align-items: center; gap: 4px; padding: 10px 8px; border-bottom: 1px solid #e3e7e3">
+    <a onClick="{{to.back}}" href="Main.dc.html" aria-label="Retour" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+    <h1 style="margin: 0; font-size: 18px; font-weight: 700; flex: 1">À valider</h1>
+    <span style="margin-right: 12px; padding: 3px 10px; border-radius: 12px; background: #e8f2ec; color: #1f6f43; font-size: 13px; font-weight: 600">{{Admin.left}}</span>
+  </header>
+  <main style="flex: 1; overflow-y: auto; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 22px">
+    <sc-for list="{{Admin.groups}}" as="g" hint-placeholder-count="3">
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <h2 class="h2">{{g.title}}</h2>
+        <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="2">
+          <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid #e3e7e3; border-radius: 12px">
+            <div style="display: flex; flex-direction: column">
+              <span style="font-weight: 600">{{r.name}}</span>
+              <span style="font-size: 13px; color: #57615b">{{r.detail}}</span>
+            </div>
+            <sc-if value="{{r.pending}}" hint-placeholder-val="{{true}}">
+              <div style="display: flex; gap: 8px">
+                <button type="button" class="ok" onClick="{{r.accept}}">Accepter</button>
+                <button type="button" class="no" onClick="{{r.refuse}}">Refuser</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{r.decided}}" hint-placeholder-val="{{false}}">
+              <div role="status" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 12px; border-radius: 10px; background: #f4f6f3">
+                <span style="font-weight: 600">{{r.outcome}}</span>
+                <button type="button" class="undo" onClick="{{r.undo}}">Annuler</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </section>
+    </sc-for>
+    <p style="margin: 0; font-size: 13px; color: #57615b">Chaque décision envoie un e-mail à la personne concernée.</p>
+  </main>
+  <nav aria-label="Navigation principale" style="display: flex; border-top: 1px solid #e3e7e3; background: #ffffff; padding: 4px 4px 12px">
+    <a href="Main.dc.html" onClick="{{to.Main}}" class="{{mtabs.Main}}" aria-current="{{cur.Main}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z"></path></svg><span>Accueil</span></a>
+    <a href="Recherche.dc.html" onClick="{{to.Recherche}}" class="{{mtabs.Recherche}}" aria-current="{{cur.Recherche}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span>Rechercher</span></a>
+    <a href="MonMateriel.dc.html" onClick="{{to.MonMateriel}}" class="{{mtabs.MonMateriel}}" aria-current="{{cur.MonMateriel}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"></path><path d="M3 8l9 5 9-5M12 13v8"></path></svg><span>Mon matériel</span></a>
+    <a href="Collectif.dc.html" onClick="{{to.Collectif}}" class="{{mtabs.Collectif}}" aria-current="{{cur.Collectif}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5"></path></svg><span>Collectifs</span></a>
+  </nav>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  svBureauAccueil() { return {};
+  }
+  svBureauRecherche() {
+    const cat = (this.state && this.state.cat) || 'all';
+    const items = [
+      { name: 'Projecteur PAR LED 18×10 W', cat: 'Lumière', qty: 6, owner: 'Collecti’FROG', city: 'Rennes' },
+      { name: 'Projecteur découpe 750 W', cat: 'Lumière', qty: 2, owner: 'La Fabrique à Décors', city: 'Vitré' },
+      { name: 'Vidéoprojecteur 5000 lumens', cat: 'Vidéo', qty: 1, owner: 'Ondes Courtes', city: 'Saint-Malo' },
+      { name: 'Projecteur de chantier LED 50 W', cat: 'Électricité', qty: 4, owner: 'Camille Martin', city: 'Chartres-de-Bretagne' },
+      { name: 'Pied de projecteur 3 m', cat: 'Structure', qty: 8, owner: 'Collecti’FROG', city: 'Rennes' }
+    ];
+    const labels = ['Toutes', 'Son', 'Lumière', 'Vidéo', 'Structure', 'Électricité', 'Câblage'];
+    const cats = labels.map((label) => {
+      const key = label === 'Toutes' ? 'all' : label;
+      const on = key === cat;
+      const n = key === 'all' ? items.length : items.filter((i) => i.cat === key).length;
+      return { label, count: String(n), on: on ? 'true' : 'false', cls: on ? 'cat on' : 'cat', pick: () => this.setState({ cat: key }) };
+    });
+    const results = items
+      .filter((i) => cat === 'all' || i.cat === cat)
+      .map((i) => ({ name: i.name, meta: (i.qty > 1 ? '×' + i.qty + ' · ' : '') + i.cat, where: i.owner + ' · ' + i.city }));
+    const n = results.length;
+    return {
+      cats,
+      results,
+      empty: n === 0,
+      emptyTitle: 'Aucun projecteur en « ' + cat + ' »',
+      countText: n === 0 ? '' : n + (n > 1 ? ' résultats' : ' résultat') + ' pour « projecteur »' + (cat === 'all' ? '' : ' en ' + cat),
+      reset: () => this.setState({ cat: 'all' })
+    };
+  }
+  svBureauFiche() {
+    return {
+      sent: Boolean(this.state && this.state.sent),
+      mail: () => this.setState({ sent: true })
+    };
+  }
+  svBureauMonMateriel() {
+    const places = Boolean(this.state && this.state.places);
+    return {
+      items: !places,
+      places,
+      segItems: places ? 'seg' : 'seg on',
+      segPlaces: places ? 'seg on' : 'seg',
+      selItems: places ? 'false' : 'true',
+      selPlaces: places ? 'true' : 'false',
+      showItems: () => this.setState({ places: false }),
+      showPlaces: () => this.setState({ places: true })
+    };
+  }
+  svBureauCollectif() {
+    const s = this.state || {};
+    const cur = s.tab || 'items';
+    const defs = [
+      { id: 'items', label: 'Matériel · 42' },
+      { id: 'places', label: 'Lieux · 2' },
+      { id: 'members', label: 'Membres · 9' }
+    ];
+    return {
+      tabs: defs.map((d) => ({ label: d.label, cls: d.id === cur ? 'seg on' : 'seg', sel: d.id === cur ? 'true' : 'false', pick: () => this.setState({ tab: d.id }) })),
+      showItems: cur === 'items',
+      showPlaces: cur === 'places',
+      showMembers: cur === 'members',
+      pending: !s.decision,
+      decided: Boolean(s.decision),
+      decision: s.decision === 'ok' ? 'Nina Robert est maintenant membre ; elle a reçu un e-mail.' : 'Demande refusée ; Nina Robert a reçu un e-mail.',
+      accept: () => this.setState({ decision: 'ok' }),
+      refuse: () => this.setState({ decision: 'no' })
+    };
+  }
+  svAjouter() {
+    const s = this.state || {};
+    const owner = s.owner || 'me';
+    const list = [
+      { id: 'me', label: 'Moi', recap: 'toi' },
+      { id: 'frog', label: 'Collecti’FROG', recap: 'Collecti’FROG' },
+      { id: 'oc', label: 'Ondes Courtes', recap: 'Ondes Courtes' },
+      { id: 'person', label: 'Une autre personne (dépôt au local)', recap: 'la personne que tu choisiras' }
+    ];
+    const current = list.find((o) => o.id === owner);
+    const place = s.placeDone ? 'ton nouveau lieu' : 'Garage (Chartres-de-Bretagne)';
+    return {
+      owners: list.map((o) => ({ label: o.label, checked: o.id === owner, pick: () => this.setState({ owner: o.id }) })),
+      recap: 'Sera enregistré au nom de ' + current.recap + ', rangé à ' + place + '.',
+      showPlaceLink: !s.placeOpen && !s.placeDone,
+      placeOpen: Boolean(s.placeOpen),
+      placeDone: Boolean(s.placeDone),
+      openPlace: () => this.setState({ placeOpen: true }),
+      closePlace: () => this.setState({ placeOpen: false }),
+      createPlace: () => this.setState({ placeOpen: false, placeDone: true }),
+      more: Boolean(s.more),
+      moreAria: s.more ? 'true' : 'false',
+      moreLabel: s.more ? 'Masquer les détails' : 'Plus de détails (facultatif)',
+      toggleMore: () => this.setState({ more: !s.more })
+    };
+  }
+  svAdmin() {
+    const done = (this.state && this.state.done) || {};
+    const set = (id, v) => () => this.setState({ done: Object.assign({}, done, { [id]: v }) });
+    const row = (id, name, detail) => {
+      const v = done[id];
+      return {
+        name, detail,
+        pending: !v,
+        decided: Boolean(v),
+        outcome: v === 'ok' ? 'Accepté' : 'Refusé',
+        accept: set(id, 'ok'),
+        refuse: set(id, 'no'),
+        undo: set(id, null)
+      };
+    };
+    const groups = [
+      { title: 'Comptes · 2', rows: [
+        row('a1', 'Nina Robert', 'Inscrite le 8 nov. · « Je gère le son à Ondes Courtes »'),
+        row('a2', 'Yanis Bernard', 'Inscrit le 9 nov. · pas de message')
+      ] },
+      { title: 'Collectifs · 1', rows: [
+        row('c1', 'La Fabrique à Décors', 'Vitré · demandé par Paul Girard')
+      ] },
+      { title: 'Responsables · 1', rows: [
+        row('r1', 'Hugo Lefèvre → Collecti’FROG', 'Demandé le 7 nov.')
+      ] }
+    ];
+    const n = ['a1', 'a2', 'c1', 'r1'].filter((id) => !done[id]).length;
+    return { groups, left: n === 0 ? 'Tout est traité' : n + ' en attente' };
+  }
+  renderVals() {
+    const screens = ['BureauAccueil', 'BureauRecherche', 'BureauFiche', 'BureauMonMateriel', 'BureauCollectif', 'Ajouter', 'Admin'];
+    const alias = { Main: 'BureauAccueil', Recherche: 'BureauRecherche', Fiche: 'BureauFiche', MonMateriel: 'BureauMonMateriel', Collectif: 'BureauCollectif' };
+    const sections = { BureauAccueil: 'Main', BureauRecherche: 'Recherche', BureauMonMateriel: 'MonMateriel', BureauCollectif: 'Collectif' };
+    const stack = (this.state && this.state.stack) || ['BureauAccueil'];
+    const current = stack[stack.length - 1];
+    const go = (name) => {
+      if (name === 'back') {
+        if (stack.length > 1) this.setState({ stack: stack.slice(0, -1) });
+        return;
+      }
+      const target = alias[name] || name;
+      if (screens.indexOf(target) < 0 || target === current) return;
+      this.setState({ stack: stack.concat([target]) });
+    };
+    const to = {};
+    ['Main', 'Recherche', 'Fiche', 'MonMateriel', 'Ajouter', 'Collectif', 'Admin', 'BureauAccueil', 'BureauRecherche', 'BureauFiche', 'BureauMonMateriel', 'BureauCollectif'].forEach((n) => { to[n] = (e) => { if (e && e.preventDefault) e.preventDefault(); go(n); }; });
+    to.back = (e) => { if (e && e.preventDefault) e.preventDefault(); go('back'); };
+    let section = 'Main';
+    for (let i = stack.length - 1; i >= 0; i -= 1) { if (sections[stack[i]]) { section = sections[stack[i]]; break; } }
+    const tabs = {}, mtabs = {}, cur = {};
+    ['Main', 'Recherche', 'MonMateriel', 'Collectif'].forEach((k) => { tabs[k] = k === section ? 'nav on' : 'nav'; mtabs[k] = k === section ? 'tab on' : 'tab'; cur[k] = k === section ? 'page' : 'false'; });
+    const is = {};
+    screens.forEach((s) => { is[s] = s === current; });
+    return {
+      is, to, tabs, mtabs, cur,
+      BureauAccueil: this.svBureauAccueil(),
+      BureauRecherche: this.svBureauRecherche(),
+      BureauFiche: this.svBureauFiche(),
+      BureauMonMateriel: this.svBureauMonMateriel(),
+      BureauCollectif: this.svBureauCollectif(),
+      Ajouter: this.svAjouter(),
+      Admin: this.svAdmin()
+    };
+  }
+}
+</script>
+</body>
+</html>
