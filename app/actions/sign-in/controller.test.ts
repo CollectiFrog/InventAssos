@@ -2,7 +2,7 @@ import * as assert from 'remix/assert'
 import { type Database, sql } from 'remix/data-table'
 import { after, before, beforeEach, describe, it } from 'remix/test'
 
-import { createTestApp } from '../../../test/app.ts'
+import { createTestApp, testOrigin } from '../../../test/app.ts'
 import { lastSignInToken, signIn } from '../../../test/auth.ts'
 import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createUser, setUserStatus } from '../../data/users.ts'
@@ -90,6 +90,40 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     const again = await app.client().post(routes.signIn.link.action.href({ token }))
     assert.equal(again.status, 400)
     assert.match(again.text, /Ce lien ne fonctionne plus/)
+  })
+
+  it('gives a new CSRF token at sign-in: the token from before no longer works', async () => {
+    const app = createTestApp(db)
+    const client = app.client()
+    const form = await client.get(requestUrl)
+    const before = /name="_csrf" value="([^"]+)"/.exec(form.text)?.[1] ?? ''
+    await client.post(requestUrl, { email: 'camille@example.org' })
+    const token = lastSignInToken(app, 'camille@example.org') ?? ''
+    await client.post(routes.signIn.link.action.href({ token }))
+
+    const home = await client.get(routes.home.href())
+    const now = /name="_csrf" value="([^"]+)"/.exec(home.text)?.[1] ?? ''
+    assert.ok(before !== '' && now !== '')
+    assert.notEqual(now, before)
+    const body = new FormData()
+    body.set('_csrf', before)
+    const stale = await app.router.fetch(
+      new Request(new URL(routes.signOut.href(), testOrigin), {
+        method: 'POST',
+        body,
+        headers: { Cookie: client.cookieHeader(), Origin: testOrigin },
+      }),
+    )
+    assert.equal(stale.status, 403)
+  })
+
+  it('creates no session row for visitors, however many forms they open', async () => {
+    const app = createTestApp(db)
+    for (let i = 0; i < 20; i++) await app.client().get(requestUrl)
+    await app.client().get(routes.signUp.form.index.href())
+
+    const rows = await db.exec(sql`select count(*)::int as n from sessions`)
+    assert.equal(rows.rows?.[0]?.n, 0)
   })
 
   it('refuses an expired link', async () => {

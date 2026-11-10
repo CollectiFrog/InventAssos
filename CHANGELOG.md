@@ -40,6 +40,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ### Security
 
+- Visitors who are not signed in no longer create a stored session: their form token stays in the session cookie, and expired sessions and sign-in links are purged every hour.
+- Signing in now issues a new form (CSRF) token and drops everything kept from before sign-in.
 - Every response carries browser security headers: a script-free Content-Security-Policy that forbids framing, nosniff, a same-origin referrer policy, and HSTS when the app is served over https.
 - The application refuses to start in production with the example session secret from `.env.example`.
 - The item history no longer shows who wrote to the owner through the contact form.

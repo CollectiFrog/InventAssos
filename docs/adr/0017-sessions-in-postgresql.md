@@ -18,9 +18,14 @@ the session server side. Remix 3 ships cookie, file, memory, Redis and Memcache 
   random session ID (`Secure` when `APP_URL` is https).
 - A custom `SessionStorage` (`app/data/sessions.ts`) keeps the data in a `sessions` table, with
   the user's ID in its own column, so `deleteUserSessions()` closes them all.
-- Sessions last 30 days (open point US-0.2.2); expired rows are purged at startup.
+- Only signed-in sessions get a row. A visitor's session (CSRF token, flash messages) is kept in
+  the signed cookie itself, so anonymous traffic never grows the table; a cookie that claims a
+  user ID is ignored, since identity must stay revocable.
+- Sessions last 30 days (open point US-0.2.2); expired rows are purged at startup and then every
+  hour (`app/maintenance.ts`), with used or expired sign-in tokens.
 - CSRF tokens (`remix/middleware/csrf`) live in the session and are checked on every unsafe
-  request; GET requests do not create a session unless the page shows a form.
+  request; GET requests do not create a session unless the page shows a form. Signing in clears
+  the session data, so the CSRF token changes along with the session ID.
 
 ## Alternatives
 
@@ -32,5 +37,5 @@ the session server side. Remix 3 ships cookie, file, memory, Redis and Memcache 
 
 ## Consequences
 
-- One small query per request that carries a session cookie.
+- One small query per request that carries a signed-in session cookie; none for visitors.
 - Session data is personal data: it is deleted with the account (`on delete cascade`).
