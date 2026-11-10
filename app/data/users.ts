@@ -83,6 +83,11 @@ export async function updateProfile(
   return db.update(users, id, { name: profile.name, phone: profile.phone, updated_at: new Date() })
 }
 
+/** Disabled accounts, by name, for the admin who may re-enable them (US-0.6.5). */
+export async function listDisabledUsers(db: Database): Promise<User[]> {
+  return db.findMany(users, { where: { status: 'disabled' }, orderBy: ['name', 'asc'] })
+}
+
 /** Active accounts, by name. */
 export async function listActiveUsers(db: Database): Promise<User[]> {
   return db.findMany(users, { where: { status: 'active' }, orderBy: ['name', 'asc'] })

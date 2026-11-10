@@ -28,6 +28,7 @@ can only see their status page and sign out.
 |--------------------------------------------------|----------------|----------------------------------|------------------------------|
 | Approve or reject an account                     | yes            | no                               | no                           |
 | Disable an account                               | yes            | no                               | no                           |
+| Re-enable a disabled account                     | yes            | no                               | no                           |
 | Edit own profile (name, phone)                   | yes            | yes                              | yes                          |
 | Request a new collectif                          | yes            | yes                              | yes                          |
 | Approve or reject a collectif                    | yes            | no                               | no                           |
@@ -44,7 +45,8 @@ can only see their status page and sign out.
 | See a location's full address                    | yes            | if C's location                  | if own location              |
 | Import into / export from a location             | yes            | if C's location                  | if own location              |
 
-An admin can never disable their own account. A location's notes follow the full-address rule
+An admin can never disable their own account, nor the account of another admin listed in
+`PLATFORM_ADMIN_EMAILS` (one admin must not lock the others out; remove them from the list instead). A location's notes follow the full-address rule
 (they often hold access codes): `redactLocation()` blanks both before rendering.
 
 Rules from ADR 0009: the owner of an item stored in a collectif's location may edit it without

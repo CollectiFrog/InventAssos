@@ -52,6 +52,7 @@ export const routes = route({
     approveAccount: post('/admin/comptes/:userId/accepter'),
     rejectAccount: post('/admin/comptes/:userId/refuser'),
     disableAccount: post('/admin/comptes/:userId/desactiver'),
+    enableAccount: post('/admin/comptes/:userId/reactiver'),
     collectifs: {
       approve: post('/admin/collectifs/:collectifId/accepter'),
       reject: post('/admin/collectifs/:collectifId/refuser'),

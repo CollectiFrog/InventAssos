@@ -25,9 +25,20 @@ export function canEditOwnProfile(actor: Actor): boolean {
   return isValidatedUser(actor)
 }
 
-/** "Disable an account": platform admin only, and never their own account. */
-export function canDisableAccount(actor: Actor, targetUserId: string): boolean {
-  return isActiveAdmin(actor) && actor.id !== targetUserId
+/**
+ * "Disable an account": platform admin only; never their own account, nor another listed admin
+ * (one admin must not lock the others out; they leave PLATFORM_ADMIN_EMAILS instead).
+ */
+export function canDisableAccount(
+  actor: Actor,
+  target: { id: string; isListedAdmin: boolean },
+): boolean {
+  return isActiveAdmin(actor) && actor.id !== target.id && !target.isListedAdmin
+}
+
+/** "Re-enable a disabled account": platform admin only (US-0.6.5). */
+export function canEnableAccount(actor: Actor): boolean {
+  return isActiveAdmin(actor)
 }
 
 /** "Request a new collectif": any validated user (admins and responsibles included). */

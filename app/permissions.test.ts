@@ -10,6 +10,7 @@ import {
   canEditCollectif,
   canEditItem,
   canEditOwnProfile,
+  canEnableAccount,
   canManageCollectifLocations,
   canManagePersonalLocations,
   canManageResponsibles,
@@ -47,11 +48,23 @@ describe('permissions: accounts', () => {
     assert.equal(canEditOwnProfile(null), false)
   })
 
-  it('"Disable an account": admin only, never their own account', () => {
-    assert.equal(canDisableAccount(user({ isAdmin: true }), 'u2'), true)
-    assert.equal(canDisableAccount(user({ isAdmin: true }), 'u1'), false)
-    assert.equal(canDisableAccount(user(), 'u2'), false)
-    assert.equal(canDisableAccount(null, 'u2'), false)
+  it('"Disable an account": admin only, never their own account nor a listed admin', () => {
+    const member = { id: 'u2', isListedAdmin: false }
+    assert.equal(canDisableAccount(user({ isAdmin: true }), member), true)
+    assert.equal(canDisableAccount(user({ isAdmin: true }), { ...member, id: 'u1' }), false)
+    assert.equal(
+      canDisableAccount(user({ isAdmin: true }), { ...member, isListedAdmin: true }),
+      false,
+    )
+    assert.equal(canDisableAccount(user(), member), false)
+    assert.equal(canDisableAccount(null, member), false)
+  })
+
+  it('"Re-enable a disabled account": admin only', () => {
+    assert.equal(canEnableAccount(user({ isAdmin: true })), true)
+    assert.equal(canEnableAccount(user({ isAdmin: true, status: 'pending' })), false)
+    assert.equal(canEnableAccount(user({ managedCollectifIds: new Set(['c1']) })), false)
+    assert.equal(canEnableAccount(null), false)
   })
 
   it('"Request a new collectif": any validated user, admin included', () => {

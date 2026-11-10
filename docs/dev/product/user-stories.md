@@ -149,6 +149,10 @@ per story when its version is planned; the issue links back here.
     - Without a phone, the page says so (fallback contact: open point).
 - **US-0.6.4 Collectif and person pages.** As a validated user, I want to see all equipment of a
   collectif or a person, so that I know what they can lend.
+- **US-0.6.5 Re-enable an account** (patch, security review). As an admin, I want to re-enable a
+  disabled account, so that a mistaken or temporary disable can be undone without SQL.
+    - The person can sign in again; the action is logged. An admin listed in
+      `PLATFORM_ADMIN_EMAILS` cannot be disabled from the app.
 
 ## V0.6.2 — Development environment
 
