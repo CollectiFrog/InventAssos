@@ -18,7 +18,7 @@ import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { storableLocations } from './choices.ts'
-import { ItemHistory } from './history.tsx'
+import { ItemHistory, itemHistoryActions } from './history.tsx'
 import { ItemPage } from './item-page.tsx'
 import { MyItemsPage } from './items-pages.tsx'
 
@@ -74,7 +74,11 @@ export default createController(routes.items, {
                   sent: context.session.get('contactSent') === true,
                 }
           }
-          history={<ItemHistory entries={await readHistory(context.db, 'item', item.id)} />}
+          history={
+            <ItemHistory
+              entries={await readHistory(context.db, 'item', item.id, itemHistoryActions)}
+            />
+          }
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
@@ -97,12 +101,12 @@ export default createController(routes.items, {
         session.flash('notice', 'Écrivez un message avant d’envoyer.')
         return redirect(showUrl, 303)
       }
-      const recipients = await listOwnerContactEmails(db, item)
-      if (recipients.length > 0) {
+      // One e-mail per responsible: co-responsibles never see each other's address.
+      for (const to of await listOwnerContactEmails(db, item)) {
         await sendSafely(
           mailer,
           itemContactMail({
-            to: recipients,
+            to,
             senderName: actor.name,
             senderEmail: actor.email,
             itemName: item.name,
@@ -111,7 +115,7 @@ export default createController(routes.items, {
           }),
         )
       }
-      // Who wrote about what, IDs only: lets an admin spot abuse without storing the message.
+      // Who wrote about what, IDs only, for an admin reading the log; never shown on the item page.
       await logAction(db, {
         actorId: actor.id,
         action: 'item.contacted',

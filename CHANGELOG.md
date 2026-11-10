@@ -38,6 +38,12 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
+### Security
+
+- The item history no longer shows who wrote to the owner through the contact form.
+- A message to a collectif is e-mailed to each responsible separately, so they no longer see each other's address.
+- The phone of a person whose account is disabled is no longer shown on their items.
+
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
