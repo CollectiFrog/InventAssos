@@ -46,7 +46,7 @@ controller action matched in `app/routes.ts` → a `Response`. `createAppRouter(
 services (database, mailer, settings, session secret), so tests build the same router with test
 doubles (`test/app.ts`).
 
-Middleware order: static files → database, mailer, settings on the context → session
+Middleware order: security headers and CSP → static files → database, mailer, settings on the context → session
 (PostgreSQL, ADR 0017) → current user (`context.currentUser`) → form data → CSRF check on unsafe
 methods → renderer.
 

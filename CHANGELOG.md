@@ -40,6 +40,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ### Security
 
+- Every response carries browser security headers: a script-free Content-Security-Policy that forbids framing, nosniff, a same-origin referrer policy, and HSTS when the app is served over https.
+- The application refuses to start in production with the example session secret from `.env.example`.
 - The item history no longer shows who wrote to the owner through the contact form.
 - A message to a collectif is e-mailed to each responsible separately, so they no longer see each other's address.
 - The phone of a person whose account is disabled is no longer shown on their items.
