@@ -21,4 +21,4 @@ inspired by both.
 | French pooling initiatives   | Matosthèque, DAMME (Grenoble), La Caverne (Rennes), Ressourcerie culturelle, Ressourcerie du Spectacle (Dolibarr), Entrasso | mostly central stocks; Matosthèque the only tool-backed shared model                            |
 
 Feature ideas kept: kits, quantities for cables, QR codes, holder approval, audit trail, reminders.
-Lesson kept from the Matosthèque: the hardest part is the initial inventory, hence import (V0.8).
+Lesson kept from the Matosthèque: the hardest part is the initial inventory, hence import (V0.10).
