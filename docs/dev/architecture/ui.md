@@ -126,14 +126,15 @@ URLs are a contract: V0.7 changes what the pages show and how they are reached, 
 
 Every page is built from a few shared pieces in `app/ui/`, styled by `public/styles.css`:
 
-| Piece       | Rule                                                                       |
-|-------------|----------------------------------------------------------------------------|
-| Button      | one primary per screen; 44 px high at least; a verb ("Enregistrer")        |
-| Field       | visible label, hint under it, error in French under it, `aria-describedby` |
-| Item card   | name, quantity, category, owner · city; the whole card is the link         |
-| Tabs        | links to distinct URLs, current one marked                                 |
-| Empty state | says why it is empty and offers the next action                            |
-| Notice      | confirmation after every action (flash message), `role="status"`           |
+| Piece       | Rule                                                                                                                          |
+|-------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Button      | one primary per screen; 44 px high at least; a verb ("Enregistrer")                                                           |
+| Field       | visible label, hint under it, error in French under it, `aria-describedby`                                                    |
+| Item card   | name, quantity, category, owner · city; the whole card is the link                                                            |
+| Tabs        | links to distinct URLs, current one marked                                                                                    |
+| Empty state | says why it is empty and offers the next action                                                                               |
+| Notice      | confirmation after every action (flash message), `role="status"`                                                              |
+| Info bubble | secondary explanations behind an ⓘ next to a heading; `<details>`/`<summary>`, so it opens on tap or click without JavaScript |
 
 ## Lessons from the Matosthèque audit
 
