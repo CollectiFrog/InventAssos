@@ -163,6 +163,17 @@ per story when its version is planned; the issue links back here.
     - A Dev Container (`.devcontainer/`) reuses the same Compose file for VS Code and Codespaces.
     - The current way (Node on the host, `make db`) keeps working.
 
+## V0.6.3 — Categories
+
+Decided in #69: admins (and moderators from V0.8) manage the category list in the app.
+
+- **US-0.6.7 Manage categories.** As a platform admin, I want to add a category, rename it and
+  change the order of the list, so that the categories fit what associations really own without a
+  new release.
+    - A category has a fixed key and a French name; names are unique.
+    - A category used by an item cannot be deleted; an unused one can.
+    - Changes show at once in the add form and the search filters; each change is logged (IDs only).
+
 ## V0.7 — Interface
 
 The pages, navigation and journeys are described in [UI](../../architecture/ui/); the conventions
@@ -210,7 +221,8 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
   users, so that I share the approval work.
     - Admins still come only from `PLATFORM_ADMIN_EMAILS`.
 - **US-0.8.2 Moderate.** As a moderator, I want to handle the approval queue, disable or re-enable
-  an account and archive an abusive item, so that the platform stays clean.
+  an account, archive an abusive item and manage categories (US-0.6.7), so that the platform stays
+  clean.
     - A moderator cannot act on an admin or another moderator, nor name moderators.
 - **US-0.8.3 Join a collectif.** As a validated user, I want to ask to join a collectif from its
   page, so that I help keep its inventory.
@@ -272,13 +284,12 @@ These stories complement the [GDPR checklist](../gdpr-checklist/).
 
 ## Open points
 
-| Story     | Question                                                   | Proposal                                                                     |
-|-----------|------------------------------------------------------------|------------------------------------------------------------------------------|
-| US-1.0.4  | What happens to a leaving person's items?                  | items stored at a collectif go to the collectif; others archived then purged |
-| US-0.6.3  | Contact when there is no phone?                            | a form that e-mails the owner without revealing their address                |
-| US-0.2.4  | Can a rejected account apply again?                        | yes                                                                          |
-| US-0.2.2  | Link and session duration?                                 | link 15 min, single use; session 30 days                                     |
-| US-0.5.5  | Archive only, or also hard delete?                         | archive only in V0.x                                                         |
-| US-0.10.1 | One file per location, or a location column?               | optional location column; otherwise the chosen location                      |
-| US-0.8.5  | Can a member delete an item, or only archive it?           | archive only, like responsibles                                              |
-| —         | Categories fixed by the admin, or created by responsibles? | fixed list managed by the admin                                              |
+| Story     | Question                                         | Proposal                                                                     |
+|-----------|--------------------------------------------------|------------------------------------------------------------------------------|
+| US-1.0.4  | What happens to a leaving person's items?        | items stored at a collectif go to the collectif; others archived then purged |
+| US-0.6.3  | Contact when there is no phone?                  | a form that e-mails the owner without revealing their address                |
+| US-0.2.4  | Can a rejected account apply again?              | yes                                                                          |
+| US-0.2.2  | Link and session duration?                       | link 15 min, single use; session 30 days                                     |
+| US-0.5.5  | Archive only, or also hard delete?               | archive only in V0.x                                                         |
+| US-0.10.1 | One file per location, or a location column?     | optional location column; otherwise the chosen location                      |
+| US-0.8.5  | Can a member delete an item, or only archive it? | archive only, like responsibles                                              |
