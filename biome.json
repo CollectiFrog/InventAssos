@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!docs/site", "!**/*.md", "!**/*.mdx", "!**/*.yml", "!**/*.yaml"]
+    "includes": ["**", "!docs/site", "!design", "!**/*.md", "!**/*.mdx", "!**/*.yml", "!**/*.yaml"]
   },
   "formatter": {
     "enabled": true,

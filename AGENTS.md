@@ -64,6 +64,7 @@ The CI calls the same targets as you. Run them before opening a PR.
 | `docs/dev/`          | developer docs → published from `dev` at `/dev/`            |
 | `docs/adr/`          | architecture decision records → published with the dev docs |
 | `docs/site/`         | the Starlight app that renders both sites                   |
+| `design/maquette/`   | V0.7 clickable mock-up sources (claude.ai Design canvas)    |
 | `.github/workflows/` | CI (PR checks), PR title, docs, release                     |
 | `CHANGELOG.md`       | user-visible changes, Keep a Changelog format               |
 | `server.ts`          | entry point: config, migrations, HTTP server                |
@@ -91,5 +92,7 @@ Project-specific rules go below this line, kept short.
   pass every location through `redactLocation(location, canSeeFullAddress(actor, location))`.
 - **Ownership ≠ storage.** An item has one owner (collectif xor person) and one location; never merge
   the two (`docs/adr/0009-ownership-and-locations.md`).
+- **One responsive interface.** Pages follow `docs/dev/architecture/ui.md` and reuse the shared pieces
+  in `app/ui/`; no separate mobile UI (`docs/adr/0019-interface-conventions.md`).
 - **Specs live in `docs/dev/product/`.** Work on a user story only once it is listed there; if a
   story is ambiguous, ask instead of guessing.
