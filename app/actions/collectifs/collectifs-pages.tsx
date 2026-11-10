@@ -18,7 +18,7 @@ export function CollectifsPage(handle: Handle<CollectifsPageProps>) {
   return () => {
     const { viewer, active, myRequests, notice } = handle.props
     return (
-      <Layout title="Collectifs" viewer={viewer}>
+      <Layout title="Collectifs" viewer={viewer} section="collectifs">
         <h1>Collectifs</h1>
         {notice ? (
           <p class="notice notice-success" role="status">
@@ -75,7 +75,7 @@ export function RequestCollectifPage(handle: Handle<RequestCollectifPageProps>) 
   return () => {
     const { viewer, csrfToken, values, errors = {} } = handle.props
     return (
-      <Layout title="Déclarer un collectif" viewer={viewer}>
+      <Layout title="Déclarer un collectif" viewer={viewer} section="collectifs">
         <h1>Déclarer un collectif</h1>
         <p>
           Un administrateur de la plateforme vérifie chaque demande. Une fois le collectif validé,

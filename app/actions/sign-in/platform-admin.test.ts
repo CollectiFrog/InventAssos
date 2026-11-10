@@ -8,7 +8,8 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createUser, findUserByEmail, setUserStatus } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
 
-const adminBadge = /<span class="badge">admin<\/span>/
+// Only platform admins get the Administration link in the header (US-0.7.1).
+const adminBadge = /<a href="\/admin"[^>]*>Administration<\/a>/
 
 describe('platform admins from PLATFORM_ADMIN_EMAILS (US-0.2.5)', () => {
   let db: Database

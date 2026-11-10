@@ -41,7 +41,7 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
       notice,
     } = handle.props
     return (
-      <Layout title="Administration" viewer={viewer}>
+      <Layout title="Administration" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
         {notice ? (
           <p class="notice notice-success" role="status">

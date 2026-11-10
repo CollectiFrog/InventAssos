@@ -16,7 +16,7 @@ export function LocationPage(handle: Handle<LocationPageProps>) {
   return () => {
     const { viewer, location, canManage } = handle.props
     return (
-      <Layout title={location.name} viewer={viewer}>
+      <Layout title={location.name} viewer={viewer} section="mine">
         <h1>{location.name}</h1>
         <dl class="facts">
           <dt>Ville</dt>

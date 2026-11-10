@@ -7,5 +7,10 @@ import type { Viewer } from '../ui/layout.tsx'
 export function viewerOf(context: AppContext): Viewer {
   const user = context.currentUser
   if (user === null) return null
-  return { name: user.name, isAdmin: user.isAdmin, csrfToken: getCsrfToken(context) }
+  return {
+    name: user.name,
+    isAdmin: user.isAdmin,
+    isActive: user.status === 'active',
+    csrfToken: getCsrfToken(context),
+  }
 }

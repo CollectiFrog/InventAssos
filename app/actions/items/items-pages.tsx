@@ -21,7 +21,7 @@ export function MyItemsPage(
   return () => {
     const { viewer, items, canAdd, notice } = handle.props
     return (
-      <Layout title="Mon matériel" viewer={viewer}>
+      <Layout title="Mon matériel" viewer={viewer} section="mine">
         <h1>Mon matériel</h1>
         {notice ? (
           <p class="notice notice-success" role="status">
@@ -29,9 +29,12 @@ export function MyItemsPage(
           </p>
         ) : null}
         {canAdd ? (
-          <p>
+          <p class="actions">
             <a class="button" href={routes.items.create.index.href()}>
               Ajouter du matériel
+            </a>
+            <a class="button secondary" href={routes.locations.index.href()}>
+              Mes lieux
             </a>
           </p>
         ) : (
@@ -82,7 +85,7 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
   return () => {
     const { viewer, csrfToken, values, errors = {}, categories, locations, owners } = handle.props
     return (
-      <Layout title="Ajouter du matériel" viewer={viewer}>
+      <Layout title="Ajouter du matériel" viewer={viewer} section="mine">
         <h1>Ajouter du matériel</h1>
         <ErrorSummary errors={errors} />
         <form method="post" action={routes.items.create.action.href()} class="stack">

@@ -2,7 +2,7 @@ import type { Handle } from 'remix/component'
 
 import { routes } from '../../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../../ui/form.tsx'
-import { Layout, type Viewer } from '../../../ui/layout.tsx'
+import { Layout, SignOutButton, type Viewer } from '../../../ui/layout.tsx'
 
 /** Props of the profile page. */
 export interface ProfilePageProps {
@@ -19,7 +19,7 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
   return () => {
     const { viewer, csrfToken, email, values, errors = {}, saved } = handle.props
     return (
-      <Layout title="Mon profil" viewer={viewer}>
+      <Layout title="Mon profil" viewer={viewer} headerLink="account">
         <h1>Mon profil</h1>
         {saved ? (
           <p class="notice notice-success" role="status">
@@ -53,6 +53,9 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
           />
           <button type="submit">Enregistrer</button>
         </form>
+        <h2>Session</h2>
+        <p>Sur un appareil partagé, déconnectez-vous en partant.</p>
+        <SignOutButton csrfToken={csrfToken} />
       </Layout>
     )
   }

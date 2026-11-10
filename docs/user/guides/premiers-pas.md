@@ -39,12 +39,13 @@ heure : si vous n'en recevez plus, attendez un peu (et vérifiez vos indésirabl
 nombre de demandes depuis le même réseau, la page affiche « Trop de demandes » : réessayez un peu
 plus tard.
 
-Sur un appareil partagé, pensez à cliquer sur **Se déconnecter** en haut de la page : la session est
-fermée et ne peut plus être réutilisée.
+Sur un appareil partagé, pensez à vous déconnecter : touchez le rond avec vos initiales, en haut à
+droite, puis **Se déconnecter**. La session est fermée et ne peut plus être réutilisée.
 
 ## Rejoindre ou créer un collectif
 
-Une fois votre compte validé, ouvrez **Collectifs** en haut de la page.
+Une fois votre compte validé, ouvrez **Collectifs** dans la barre de navigation (en bas de l'écran
+sur un téléphone, en haut sur un ordinateur).
 
 - Votre association n'est pas encore inscrite : **Déclarer un collectif**, avec son nom, une
   description et éventuellement un téléphone de contact. Un administrateur vérifie la demande ;

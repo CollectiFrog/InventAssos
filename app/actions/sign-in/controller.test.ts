@@ -101,8 +101,8 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     const token = lastSignInToken(app, 'camille@example.org') ?? ''
     await client.post(routes.signIn.link.action.href({ token }))
 
-    const home = await client.get(routes.home.href())
-    const now = /name="_csrf" value="([^"]+)"/.exec(home.text)?.[1] ?? ''
+    const profile = await client.get(routes.account.profile.index.href())
+    const now = /name="_csrf" value="([^"]+)"/.exec(profile.text)?.[1] ?? ''
     assert.ok(before !== '' && now !== '')
     assert.notEqual(now, before)
     const body = new FormData()
