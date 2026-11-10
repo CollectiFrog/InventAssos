@@ -21,9 +21,11 @@ En haut de la liste, **Rechercher** cherche dans le nom, la marque, le modèle e
 
 La page d'un objet indique à qui il appartient, la ville où il est rangé et un **téléphone** : celui
 du collectif, ou celui de la personne si elle l'a renseigné dans son profil. Sans téléphone, un
-formulaire permet d'écrire au propriétaire (pour un collectif, à ses responsables) : son adresse
-e-mail reste cachée, la vôtre lui est transmise pour qu'il puisse vous répondre. Le prêt, la
-location ou l'échange s'organisent ensuite directement entre vous.
+formulaire permet d'écrire au propriétaire (pour un collectif, à chacun de ses responsables, dans
+un e-mail séparé) : son adresse e-mail reste cachée, la vôtre lui est transmise pour qu'il puisse
+vous répondre. Le prêt, la location ou l'échange s'organisent ensuite directement entre vous.
+L'envoi d'un message n'apparaît pas dans l'historique de l'objet. Le téléphone d'une personne dont
+le compte est désactivé n'est plus affiché.
 
 ## Modifier mon profil
 

@@ -10,7 +10,6 @@ import {
 import { listItemsOwnedBy } from '../../data/items.ts'
 import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
 import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/responsibles.ts'
-import { sendSafely } from '../../mail/mailer.ts'
 import { newResponsibleRequestMail } from '../../mail/messages.ts'
 import {
   canEditCollectif,
@@ -20,8 +19,9 @@ import {
   canSeeFullAddress,
   isValidatedUser,
 } from '../../permissions.ts'
+import { hitUserRequest, notifyAdmins } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
-import { forbidden, notFound, requireUser } from '../guards.tsx'
+import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { CollectifPage, type Membership } from './collectif-page.tsx'
 import { CollectifsPage } from './collectifs-pages.tsx'
@@ -94,12 +94,14 @@ export default createController(routes.collectifs, {
         return redirect(showUrl, 303)
       }
 
+      const limit = await hitUserRequest(db, settings, actor.id)
+      if (!limit.allowed) return tooManyRequests(context, limit.retryAfterSeconds)
+
       await setResponsible(db, { userId: actor.id, collectifId: collectif.id, status: 'pending' })
-      const admins = [...settings.adminEmails]
-      if (admins.length > 0) {
-        const reviewUrl = settings.appUrl + routes.admin.index.href()
-        await sendSafely(mailer, newResponsibleRequestMail(admins, reviewUrl))
-      }
+      const reviewUrl = settings.appUrl + routes.admin.index.href()
+      await notifyAdmins(db, mailer, settings, 'responsible', (admins) =>
+        newResponsibleRequestMail(admins, reviewUrl),
+      )
       session.flash('notice', 'Demande envoyée : un administrateur va l’examiner.')
       return redirect(showUrl, 303)
     },

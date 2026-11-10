@@ -37,3 +37,20 @@ export function notFound(context: AppContext): Response | Promise<Response> {
     { status: 404 },
   )
 }
+
+/** 429 page when a rate limit is reached (ADR 0018); says nothing about why or whom. */
+export function tooManyRequests(
+  context: AppContext,
+  retryAfterSeconds: number,
+): Response | Promise<Response> {
+  return context.render(
+    <Layout title="Trop de demandes" viewer={viewerOf(context)}>
+      <h1>Trop de demandes</h1>
+      <p>Vous avez fait beaucoup de demandes en peu de temps. Réessayez un peu plus tard.</p>
+      <p>
+        <a href={routes.home.href()}>Retour à l’accueil</a>
+      </p>
+    </Layout>,
+    { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } },
+  )
+}

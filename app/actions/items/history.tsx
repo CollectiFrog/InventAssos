@@ -21,6 +21,17 @@ const fieldLabels: Record<string, string> = {
   description: 'description',
 }
 
+/**
+ * What the item page shows (US-0.5.6). An allow-list: other item actions in the log, such as
+ * `item.contacted`, say who talks to whom and stay out of the page.
+ */
+export const itemHistoryActions = [
+  'item.created',
+  'item.updated',
+  'item.moved',
+  'item.archived',
+] as const
+
 function place(name: string | null | undefined): string {
   return name ? `« ${name} »` : 'un lieu supprimé'
 }

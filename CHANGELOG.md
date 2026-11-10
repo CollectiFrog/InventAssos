@@ -38,6 +38,19 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
+### Security
+
+- Visitors who are not signed in no longer create a stored session: their form token stays in the session cookie, and expired sessions and sign-in links are purged every hour.
+- Signing in now issues a new form (CSRF) token and drops everything kept from before sign-in.
+- E-mail sending is rate-limited: 5 sign-in or sign-up e-mails per address per hour, 20 sign-in or sign-up forms per network in 15 minutes, 10 contact messages and 5 requests to the admins per person per day; admins get at most 5 notifications per hour for each kind of request.
+- Signing in or signing up answers in the same time whether or not the address has an account; the e-mails are sent after the answer.
+- Signing up again with a rejected address no longer puts it back in the admin queue: the person is e-mailed to sign in and re-apply from their account page.
+- Every response carries browser security headers: a script-free Content-Security-Policy that forbids framing, nosniff, a same-origin referrer policy, and HSTS when the app is served over https.
+- The application refuses to start in production with the example session secret from `.env.example`.
+- The item history no longer shows who wrote to the owner through the contact form.
+- A message to a collectif is e-mailed to each responsible separately, so they no longer see each other's address.
+- The phone of a person whose account is disabled is no longer shown on their items.
+
 <!-- Compare links, one per release:
 [Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.Z...HEAD
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z

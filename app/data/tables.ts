@@ -34,6 +34,16 @@ export const sessions = table({
   },
 })
 
+export const rateLimits = table({
+  name: 'rate_limits',
+  primaryKey: 'key_hash',
+  columns: {
+    key_hash: c.text(),
+    hits: c.integer(),
+    reset_at: c.timestamp({ withTimezone: true }),
+  },
+})
+
 export const signInTokens = table({
   name: 'sign_in_tokens',
   primaryKey: 'token_hash',

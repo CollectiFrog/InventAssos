@@ -1,0 +1,89 @@
+// Limits on everything that sends e-mail on someone's request (ADR 0018, issue #70).
+import type { Database } from 'remix/data-table'
+
+import { hitRateLimit, type RateLimit, type RateLimitResult } from './data/rate-limits.ts'
+import { type Mail, type Mailer, sendSafely } from './mail/mailer.ts'
+import type { AppSettings } from './middleware/services.ts'
+
+/** Every limit the app applies; tests may pass their own. */
+export interface RateLimits {
+  /** Sign-in links and sign-up answers e-mailed to one address. */
+  mailsPerAddress: RateLimit
+  /** Sign-in and sign-up forms posted from one client address. */
+  formsPerClient: RateLimit
+  /** New-collectif, responsibility and re-application requests by one user. */
+  requestsPerUser: RateLimit
+  /** Contact messages sent by one user (US-0.6.3). */
+  contactsPerUser: RateLimit
+  /** "New request" e-mails to the admins, per kind; the admin queue lists every request anyway. */
+  adminNotifications: RateLimit
+}
+
+const hour = 60 * 60
+const day = 24 * hour
+
+/** Production limits (ADR 0018). */
+export const defaultRateLimits: RateLimits = {
+  mailsPerAddress: { limit: 5, windowSeconds: hour },
+  formsPerClient: { limit: 20, windowSeconds: 15 * 60 },
+  requestsPerUser: { limit: 5, windowSeconds: day },
+  contactsPerUser: { limit: 10, windowSeconds: day },
+  adminNotifications: { limit: 5, windowSeconds: hour },
+}
+
+function limits(settings: AppSettings): RateLimits {
+  return settings.rateLimits ?? defaultRateLimits
+}
+
+/** One sign-in or sign-up form posted by a visitor, counted per client address. */
+export function hitFormFromClient(
+  db: Database,
+  settings: AppSettings,
+  clientAddress: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `form:${clientAddress}`, limits(settings).formsPerClient)
+}
+
+/** One e-mail to an address that asked for a link or an account, whether it has one or not. */
+export async function mayMailAddress(
+  db: Database,
+  settings: AppSettings,
+  email: string,
+): Promise<boolean> {
+  return (await hitRateLimit(db, `mail:${email}`, limits(settings).mailsPerAddress)).allowed
+}
+
+/** One request that notifies the admins (new collectif, responsibility, re-application). */
+export function hitUserRequest(
+  db: Database,
+  settings: AppSettings,
+  userId: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `request:${userId}`, limits(settings).requestsPerUser)
+}
+
+/** One contact message sent by a user. */
+export function hitContact(
+  db: Database,
+  settings: AppSettings,
+  userId: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `contact:${userId}`, limits(settings).contactsPerUser)
+}
+
+/** Kinds of request the admins are told about. */
+export type AdminNotice = 'account' | 'collectif' | 'responsible'
+
+/** E-mails the admins about a new request, unless they were told about this kind recently. */
+export async function notifyAdmins(
+  db: Database,
+  mailer: Mailer,
+  settings: AppSettings,
+  kind: AdminNotice,
+  mail: (admins: string[]) => Mail,
+): Promise<void> {
+  const admins = [...settings.adminEmails]
+  if (admins.length === 0) return
+  const { allowed } = await hitRateLimit(db, `admins:${kind}`, limits(settings).adminNotifications)
+  if (allowed) await sendSafely(mailer, mail(admins))
+}

@@ -32,7 +32,9 @@ describe('PostgreSQL session storage', () => {
 
   it('stores values and reads them back by ID', async () => {
     const storage = createPostgresSessionStorage(db)
+    const alice = await createUser(db, { name: 'Alice', email: 'alice@example.org' })
     const session = await storage.read(null)
+    session.set('userId', alice.id)
     session.set('answer', 42)
     const cookie = await storage.save(session)
 
@@ -45,7 +47,9 @@ describe('PostgreSQL session storage', () => {
 
   it('forgets a destroyed session', async () => {
     const storage = createPostgresSessionStorage(db)
+    const alice = await createUser(db, { name: 'Alice', email: 'alice@example.org' })
     const session = await storage.read(null)
+    session.set('userId', alice.id)
     session.set('answer', 42)
     const cookie = await storage.save(session)
 
@@ -55,9 +59,35 @@ describe('PostgreSQL session storage', () => {
     assert.equal((await storage.read(cookie)).get('answer'), undefined)
   })
 
-  it('ignores and purges expired sessions', async () => {
+  it('keeps a visitor session in the cookie: no row until someone signs in', async () => {
     const storage = createPostgresSessionStorage(db)
     const session = await storage.read(null)
+    session.set('_csrf', 'token')
+    const cookie = await storage.save(session)
+
+    assert.equal((await storage.read(cookie)).get('_csrf'), 'token')
+    const rows = await db.exec(sql`select count(*)::int as n from sessions`)
+    assert.equal(rows.rows?.[0]?.n, 0)
+  })
+
+  it('stores a signed-in session as a row, and never trusts a user ID found in a cookie', async () => {
+    const storage = createPostgresSessionStorage(db)
+    const alice = await createUser(db, { name: 'Alice', email: 'alice@example.org' })
+    const session = await storage.read(null)
+    session.set('userId', alice.id)
+    const cookie = await storage.save(session)
+
+    assert.equal(cookie, session.id)
+    assert.equal((await storage.read(cookie)).get('userId'), alice.id)
+    const forged = JSON.stringify({ i: 'x', d: [{ userId: alice.id }, {}] })
+    assert.equal((await storage.read(forged)).get('userId'), undefined)
+  })
+
+  it('ignores and purges expired sessions', async () => {
+    const storage = createPostgresSessionStorage(db)
+    const alice = await createUser(db, { name: 'Alice', email: 'alice@example.org' })
+    const session = await storage.read(null)
+    session.set('userId', alice.id)
     session.set('answer', 42)
     const cookie = await storage.save(session)
     await db.exec(sql`update sessions set expires_at = now() - interval '1 second'`)

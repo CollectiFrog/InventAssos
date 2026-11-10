@@ -5,13 +5,15 @@ import { render } from 'remix/middleware/render'
 import { session } from 'remix/middleware/session'
 import { staticFiles } from 'remix/middleware/static'
 import { createMiddleware, type MiddlewareContext } from 'remix/router'
-
+import { type BackgroundTasks, createBackgroundTasks } from '../background.ts'
 import { createPostgresSessionStorage, sessionMaxAgeSeconds } from '../data/sessions.ts'
 import type { Mailer } from '../mail/mailer.ts'
 import { gateInactiveAccounts } from './account-gate.ts'
+import { provideBackground } from './background.ts'
 import { checkCsrf } from './csrf.ts'
 import { loadCurrentUser } from './current-user.ts'
 import { provideDatabase } from './database.ts'
+import { contentSecurityPolicy, securityHeaders } from './security-headers.ts'
 import { type AppSettings, provideMailer, provideSettings } from './services.ts'
 
 /** Services the router needs; tests pass their own. */
@@ -20,6 +22,8 @@ export interface AppDependencies {
   mailer: Mailer
   settings: AppSettings
   sessionSecret: string
+  /** Work done after the response, e.g. e-mails; `server.ts` waits for it on shutdown. */
+  background?: BackgroundTasks
 }
 
 /** The router middleware chain, in order. Kept apart from the router so its type has no cycle. */
@@ -36,10 +40,13 @@ export function appMiddleware(deps: AppDependencies) {
   })
 
   return createMiddleware(
+    securityHeaders({ https: appUrl.protocol === 'https:' }),
+    contentSecurityPolicy(),
     staticFiles('./public', { index: false }),
     provideDatabase(deps.db),
     provideMailer(deps.mailer),
     provideSettings(deps.settings),
+    provideBackground(deps.background ?? createBackgroundTasks()),
     session(sessionCookie, createPostgresSessionStorage(deps.db)),
     loadCurrentUser(deps.db, deps.settings.adminEmails),
     gateInactiveAccounts(),

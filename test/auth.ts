@@ -18,4 +18,7 @@ export async function signIn(app: TestApp, client: TestClient, email: string): P
   assert.ok(token, `expected a sign-in e-mail for ${email}`)
   const response = await client.post(`/connexion/lien/${token}`)
   assert.equal(response.status, 303, 'sign-in link should redirect')
+  // Follow the redirects like a browser: the CSRF token changes at sign-in.
+  let next = response.location
+  for (let hop = 0; next !== null && hop < 3; hop++) next = (await client.get(next)).location
 }

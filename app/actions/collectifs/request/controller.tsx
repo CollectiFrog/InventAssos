@@ -8,9 +8,9 @@ import {
   findCollectifHoldingSlug,
   slugify,
 } from '../../../data/collectifs.ts'
-import { sendSafely } from '../../../mail/mailer.ts'
 import { newCollectifRequestMail } from '../../../mail/messages.ts'
 import { canRequestCollectif } from '../../../permissions.ts'
+import { hitUserRequest, notifyAdmins } from '../../../rate-limits.ts'
 import { routes } from '../../../routes.ts'
 import {
   formValue,
@@ -19,7 +19,7 @@ import {
   parseForm,
   requiredText,
 } from '../../../validation.ts'
-import { forbidden, requireUser } from '../../guards.tsx'
+import { forbidden, requireUser, tooManyRequests } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 import { RequestCollectifPage } from '../collectifs-pages.tsx'
 
@@ -68,17 +68,19 @@ export default createController(routes.collectifs.request, {
         )
       }
 
+      const limit = await hitUserRequest(db, settings, actor.id)
+      if (!limit.allowed) return tooManyRequests(context, limit.retryAfterSeconds)
+
       await createCollectifRequest(db, {
         name: parsed.value.name,
         description: parsed.value.description ?? '',
         contactPhone: parsed.value.contactPhone,
         requestedBy: actor.id,
       })
-      const admins = [...settings.adminEmails]
-      if (admins.length > 0) {
-        const reviewUrl = settings.appUrl + routes.admin.index.href()
-        await sendSafely(mailer, newCollectifRequestMail(admins, reviewUrl))
-      }
+      const reviewUrl = settings.appUrl + routes.admin.index.href()
+      await notifyAdmins(db, mailer, settings, 'collectif', (admins) =>
+        newCollectifRequestMail(admins, reviewUrl),
+      )
       context.session.flash('notice', 'Demande envoyée : un administrateur va l’examiner.')
       return redirect(routes.collectifs.index.href(), 303)
     },
