@@ -6,6 +6,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-10
+
 ### Added
 
 - First page of the application, in French, served from a Remix 3 + PostgreSQL skeleton.
@@ -45,10 +47,6 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - An archived item can no longer be edited or moved, even by a direct request.
 - A malformed link (an ID that does not exist in any form) or a huge page number now shows "Page introuvable" or the last page instead of a server error.
 
-### Fixed
-
-- An archived item can no longer be edited or moved, even by a direct request.
-- A malformed link (an ID that does not exist in any form) or a huge page number now shows "Page introuvable" or the last page instead of a server error.
 ### Security
 
 - Visitors who are not signed in no longer create a stored session: their form token stays in the session cookie, and expired sessions and sign-in links are purged every hour.
@@ -67,4 +65,5 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/commits/dev
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/CollectiFrog/InventAssos/releases/tag/v0.6.1
