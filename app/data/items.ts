@@ -1,6 +1,7 @@
 // Data access for items and categories: the only module that reads or writes them.
 import { type Database, sql } from 'remix/data-table'
 
+import { isUuid } from './ids.ts'
 import { type Category, categories, type Item, items } from './tables.ts'
 
 /** Owner of an item: a collectif or a person, never both (ADR 0009). */
@@ -58,7 +59,7 @@ export async function createItem(
 
 /** Finds an item by ID, archived or not. */
 export async function findItemById(db: Database, id: string): Promise<Item | null> {
-  return db.find(items, id)
+  return isUuid(id) ? db.find(items, id) : null
 }
 
 /** An item with the names needed to display it. */

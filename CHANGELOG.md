@@ -38,6 +38,10 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Admins remove a responsible; the last one can only be removed by naming a replacement.
 - Profile page: edit your name and an optional phone number, shown to validated users.
 
+### Fixed
+
+- An archived item can no longer be edited or moved, even by a direct request.
+- A malformed link (an ID that does not exist in any form) or a huge page number now shows "Page introuvable" or the last page instead of a server error.
 ### Security
 
 - Visitors who are not signed in no longer create a stored session: their form token stays in the session cookie, and expired sessions and sign-in links are purged every hour.

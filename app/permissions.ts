@@ -144,3 +144,11 @@ export function canEditItem(actor: Actor, item: ItemAccess): boolean {
     user_id: item.locationUserId,
   })
 }
+
+/**
+ * "Edit, move or archive an archived item": nobody. An archived item has left the inventory
+ * (US-0.5.5); its managers still see its page and history, but it no longer changes.
+ */
+export function canChangeItem(actor: Actor, item: ItemAccess & { archived_at: unknown }): boolean {
+  return item.archived_at == null && canEditItem(actor, item)
+}

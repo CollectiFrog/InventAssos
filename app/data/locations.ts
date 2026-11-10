@@ -1,6 +1,7 @@
 // Data access for storage locations: the only module that reads or writes `locations`.
 import { type Database, inList, or, sql } from 'remix/data-table'
 
+import { isUuid } from './ids.ts'
 import { type Location, locations } from './tables.ts'
 
 /** Who owns a location: a collectif or a person, never both (ADR 0009). */
@@ -16,7 +17,7 @@ export interface LocationFields {
 
 /** Finds a location by ID. */
 export async function findLocationById(db: Database, id: string): Promise<Location | null> {
-  return db.find(locations, id)
+  return isUuid(id) ? db.find(locations, id) : null
 }
 
 /** Creates a location for its owner. */
@@ -102,6 +103,7 @@ export async function findLocationWithOwner(
   db: Database,
   id: string,
 ): Promise<(Location & { ownerName: string; ownerSlug: string | null }) | null> {
+  if (!isUuid(id)) return null
   const result = await db.exec(sql`
     select l.*, coalesce(c.name, u.name) as owner_name, c.slug as owner_slug
     from locations l

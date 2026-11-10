@@ -4,6 +4,7 @@ import { describe, it } from 'remix/test'
 import type { CurrentUser } from './middleware/current-user.ts'
 import {
   canAssignItemOwner,
+  canChangeItem,
   canDepositForPerson,
   canDisableAccount,
   canEditCollectif,
@@ -195,5 +196,20 @@ describe('permissions: accounts', () => {
       true,
     )
     assert.equal(canEditItem(null, deposit), false)
+  })
+
+  it('"Edit, move or archive an archived item": nobody, not even the admin', () => {
+    const item = {
+      owner_collectif_id: null,
+      owner_user_id: 'u1',
+      locationCollectifId: null,
+      locationUserId: 'u1',
+      archived_at: null,
+    }
+    assert.equal(canChangeItem(user(), item), true)
+    const archived = { ...item, archived_at: new Date() }
+    assert.equal(canChangeItem(user(), archived), false)
+    assert.equal(canChangeItem(user({ isAdmin: true }), archived), false)
+    assert.equal(canChangeItem(user({ id: 'u2' }), item), false)
   })
 })

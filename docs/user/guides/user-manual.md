@@ -92,7 +92,8 @@ déplacement est noté dans l'historique de l'objet.
 
 Un objet vendu, perdu ou cassé s'**archive** depuis sa page (même droits que pour le modifier) :
 choisissez la raison. Il disparaît de l'inventaire et des listes, mais n'est pas supprimé : sa page
-et son historique restent consultables par ceux qui le gèrent.
+et son historique restent consultables par ceux qui le gèrent. Un objet archivé ne peut plus être
+modifié ni déplacé.
 
 ## Historique d'un objet
 

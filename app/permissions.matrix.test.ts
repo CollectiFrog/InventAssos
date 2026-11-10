@@ -13,7 +13,7 @@ import { createTestItem, itemFormFields } from '../test/items.ts'
 import { createTestLocation } from '../test/locations.ts'
 import { createActiveUser } from '../test/users.ts'
 import { findCollectifById } from './data/collectifs.ts'
-import { findItemById } from './data/items.ts'
+import { archiveItem, findItemById } from './data/items.ts'
 import { findLocationById } from './data/locations.ts'
 import { findResponsible, setResponsible } from './data/responsibles.ts'
 import { createUser, findUserById } from './data/users.ts'
@@ -73,7 +73,15 @@ async function seed(db: Database) {
     createdBy: val.id,
     name: 'Pied de C',
   })
+  const archived = await createTestItem(db, {
+    locationId: local.id,
+    owner: { collectifId: c.id },
+    createdBy: rita.id,
+    name: 'Console archivée',
+  })
+  await archiveItem(db, archived.id, 'sold')
   return {
+    archived,
     rita,
     otto,
     val,
@@ -299,6 +307,24 @@ const rules: Rule[] = [
     act: (c, w) =>
       c.post(routes.items.archive.action.href({ itemId: w.item.id }), { reason: 'sold' }),
     happened: async (db, w) => (await findItemById(db, w.item.id))?.archived_at != null,
+  },
+  {
+    // US-0.5.5: an archived item has left the inventory; nobody changes it any more (review F6).
+    row: 'Edit, move or archive an archived item (edit)',
+    allowed: [],
+    act: (c, w) =>
+      c.post(
+        routes.items.edit.action.href({ itemId: w.archived.id }),
+        itemFormFields({ name: 'Ressuscitée' }),
+      ),
+    happened: async (db, w) => (await findItemById(db, w.archived.id))?.name === 'Ressuscitée',
+  },
+  {
+    row: 'Edit, move or archive an archived item (move)',
+    allowed: [],
+    act: (c, w) =>
+      c.post(routes.items.move.action.href({ itemId: w.archived.id }), { locationId: w.annex.id }),
+    happened: async (db, w) => (await findItemById(db, w.archived.id))?.location_id === w.annex.id,
   },
   {
     // Val owns it; C's responsible manages where it is stored (ADR 0009).
