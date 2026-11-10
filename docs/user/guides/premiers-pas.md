@@ -1,0 +1,56 @@
+---
+title: Premiers pas
+description: Créer son compte et trouver du matériel.
+sidebar:
+  order: 1
+---
+
+InventAssos est un service en ligne : rien à installer, un navigateur suffit.
+
+## Créer son compte
+
+1. Sur la page d'accueil, choisissez **Créer un compte**.
+2. Indiquez votre nom et votre adresse e-mail, puis **Demander un compte**.
+3. Vous recevez un e-mail de confirmation. Un administrateur de la plateforme examine votre demande
+   et vous écrit quand votre compte est validé.
+
+Si l'adresse a déjà un compte, aucun nouveau compte n'est créé : vous recevez un e-mail qui vous le
+signale.
+
+Tant que votre compte n'est pas validé, vous pouvez vous connecter mais vous voyez seulement la page
+**Votre compte**, qui indique où en est votre demande. Si elle a été refusée, cette page affiche le
+motif éventuel et un bouton **Refaire une demande**, qui renvoie la demande en examen. Une nouvelle
+inscription avec la même adresse ne la relance pas : vous recevez un e-mail qui vous invite à vous
+connecter pour utiliser ce bouton, afin que seul le titulaire de l'adresse puisse le faire.
+
+## Se connecter
+
+InventAssos n'utilise pas de mot de passe.
+
+1. Choisissez **Se connecter** et indiquez votre adresse e-mail.
+2. Ouvrez l'e-mail « Votre lien de connexion InventAssos » et cliquez sur le lien.
+3. Sur la page qui s'ouvre, cliquez sur **Me connecter**.
+
+Le lien est valable **15 minutes** et ne sert **qu'une fois**. Vous restez connecté 30 jours sur cet
+appareil. Si le lien a expiré, demandez-en simplement un nouveau.
+
+Pour éviter les abus, une même adresse reçoit au plus 5 e-mails de connexion ou d'inscription par
+heure : si vous n'en recevez plus, attendez un peu (et vérifiez vos indésirables). Après un trop grand
+nombre de demandes depuis le même réseau, la page affiche « Trop de demandes » : réessayez un peu
+plus tard.
+
+Sur un appareil partagé, pensez à cliquer sur **Se déconnecter** en haut de la page : la session est
+fermée et ne peut plus être réutilisée.
+
+## Rejoindre ou créer un collectif
+
+Une fois votre compte validé, ouvrez **Collectifs** en haut de la page.
+
+- Votre association n'est pas encore inscrite : **Déclarer un collectif**, avec son nom, une
+  description et éventuellement un téléphone de contact. Un administrateur vérifie la demande ;
+  une fois validée, vous devenez **responsable** du collectif.
+- Votre association est déjà inscrite : ouvrez sa page et choisissez **Devenir responsable**. Un
+  administrateur valide la demande. Une seule demande à la fois par collectif ; si elle est
+  refusée, vous pouvez la refaire.
+- Deux collectifs ne peuvent pas porter le même nom (les accents, majuscules et la ponctuation ne
+  comptent pas).

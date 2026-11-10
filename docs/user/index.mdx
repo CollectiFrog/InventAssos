@@ -1,33 +1,31 @@
 ---
-title: Project Name
-description: One sentence saying what this does for its users.
+title: InventAssos
+description: L'inventaire de matériel partagé entre associations de scénographie, son, lumière et événementiel.
 template: splash
 hero:
-  tagline: One sentence saying what this does for its users.
+  tagline: Chaque collectif référence son matériel ; les autres le trouvent et contactent son propriétaire.
   actions:
-    - text: Install
-      link: guides/installation/
+    - text: Premiers pas
+      link: guides/premiers-pas/
       icon: right-arrow
-    - text: User manual
+    - text: Manuel d'utilisation
       link: guides/user-manual/
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-{/* TEMPLATE: user docs are written in the project language (see .ia/context/project.md). */}
-
 <CardGrid>
-  <Card title="Install" icon="download">
-    Get it running in a few minutes. [Installation guide](guides/installation/)
+  <Card title="Commencer" icon="rocket">
+    Créer son compte et rejoindre son collectif. [Premiers pas](guides/premiers-pas/)
   </Card>
-  <Card title="Use it" icon="open-book">
-    Every feature, step by step. [User manual](guides/user-manual/)
+  <Card title="Utiliser" icon="open-book">
+    Chaque fonctionnalité, pas à pas. [Manuel d'utilisation](guides/user-manual/)
   </Card>
-  <Card title="Get help" icon="information">
-    [FAQ](reference/faq/) and [troubleshooting](reference/troubleshooting/).
+  <Card title="Obtenir de l'aide" icon="information">
+    [Questions fréquentes](reference/faq/) et [dépannage](reference/troubleshooting/).
   </Card>
-  <Card title="Advanced mode" icon="seti:config">
-    Contributing or self-hosting? [Developer documentation](dev/)
+  <Card title="Contribuer" icon="seti:config">
+    Développer ou héberger InventAssos ? [Documentation développeurs](dev/)
   </Card>
 </CardGrid>

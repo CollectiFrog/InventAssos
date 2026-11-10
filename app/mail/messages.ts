@@ -1,0 +1,176 @@
+// Texts of the e-mails the app sends, in French (the users' language).
+import type { Mail } from './mailer.ts'
+
+const signature = "\n\n— InventAssos, l'inventaire partagé entre associations"
+
+/** To the platform admins: a new account waits for approval. */
+export function newAccountRequestMail(to: string[], reviewUrl: string): Mail {
+  return {
+    to,
+    subject: 'Nouvelle demande de compte',
+    text: `Au moins une nouvelle demande de compte attend votre validation :\n${reviewUrl}${signature}`,
+  }
+}
+
+/** To the person who signed up: the request is recorded. */
+export function signUpReceivedMail(to: string, appUrl: string): Mail {
+  return {
+    to,
+    subject: 'Votre demande de compte InventAssos',
+    text:
+      'Bonjour,\n\nVotre demande de compte est enregistrée. Un administrateur va l’examiner ; ' +
+      `vous recevrez un e-mail quand ce sera fait.\n\n${appUrl}${signature}`,
+  }
+}
+
+/** To a user who asked to sign in: the single-use link. */
+export function signInLinkMail(to: string, linkUrl: string): Mail {
+  return {
+    to,
+    subject: 'Votre lien de connexion InventAssos',
+    text:
+      `Bonjour,\n\nPour vous connecter, ouvrez ce lien dans les 15 minutes :\n${linkUrl}\n\n` +
+      'Il ne fonctionne qu’une fois. Si vous n’avez rien demandé, ignorez ce message : ' +
+      `personne ne peut se connecter sans ce lien.${signature}`,
+  }
+}
+
+/** To an address that already has an account: someone tried to sign up again with it. */
+export function alreadyRegisteredMail(to: string, signInUrl: string): Mail {
+  return {
+    to,
+    subject: 'Vous avez déjà un compte InventAssos',
+    text:
+      'Bonjour,\n\nQuelqu’un (sans doute vous) a demandé à créer un compte avec cette adresse, ' +
+      'mais elle en a déjà un : aucun nouveau compte n’a été créé. ' +
+      `Pour vous connecter :\n${signInUrl}\n\nSi ce n’était pas vous, ignorez ce message.${signature}`,
+  }
+}
+
+/** To a rejected address that signed up again: only its owner may re-apply, once signed in. */
+export function reapplyBySignInMail(to: string, signInUrl: string): Mail {
+  return {
+    to,
+    subject: 'Votre demande de compte InventAssos',
+    text:
+      'Bonjour,\n\nQuelqu’un (sans doute vous) a demandé un compte avec cette adresse. Une ' +
+      'demande précédente n’avait pas été acceptée. Pour en refaire une, connectez-vous avec ' +
+      `cette adresse puis choisissez « Refaire une demande » :\n${signInUrl}\n\n` +
+      `Si ce n’était pas vous, ignorez ce message.${signature}`,
+  }
+}
+
+/** To the person: their account is open. */
+export function accountApprovedMail(to: string, signInUrl: string): Mail {
+  return {
+    to,
+    subject: 'Votre compte InventAssos est validé',
+    text: `Bonjour,\n\nVotre compte est validé : vous pouvez vous connecter.\n${signInUrl}${signature}`,
+  }
+}
+
+/** To the person: their request was rejected, with the admin's reason if any. */
+export function accountRejectedMail(to: string, reason: string | null): Mail {
+  return {
+    to,
+    subject: 'Votre demande de compte InventAssos',
+    text:
+      'Bonjour,\n\nVotre demande de compte n’a pas été acceptée.' +
+      (reason ? `\n\nMotif : ${reason}` : '') +
+      '\n\nSi la situation change, vous pouvez refaire une demande en vous connectant.' +
+      signature,
+  }
+}
+
+/** To the platform admins: a collectif or a responsible request waits for a decision. */
+export function newCollectifRequestMail(to: string[], reviewUrl: string): Mail {
+  return {
+    to,
+    subject: 'Nouvelle demande de collectif',
+    text: `Au moins une nouvelle demande de collectif attend votre validation :\n${reviewUrl}${signature}`,
+  }
+}
+
+/** To the requester: their collectif is open and they are its responsible. */
+export function collectifApprovedMail(to: string, collectifName: string, appUrl: string): Mail {
+  return {
+    to,
+    subject: `Collectif « ${collectifName} » validé`,
+    text:
+      `Bonjour,\n\nLe collectif « ${collectifName} » est validé et vous en êtes responsable : ` +
+      `vous pouvez gérer ses informations et, bientôt, son matériel.\n${appUrl}${signature}`,
+  }
+}
+
+/** To the requester: their collectif request was rejected. */
+export function collectifRejectedMail(
+  to: string,
+  collectifName: string,
+  reason: string | null,
+): Mail {
+  return {
+    to,
+    subject: `Demande de collectif « ${collectifName} »`,
+    text:
+      `Bonjour,\n\nVotre demande pour le collectif « ${collectifName} » n’a pas été acceptée.` +
+      (reason ? `\n\nMotif : ${reason}` : '') +
+      signature,
+  }
+}
+
+/** To the platform admins: someone asks to manage a collectif. */
+export function newResponsibleRequestMail(to: string[], reviewUrl: string): Mail {
+  return {
+    to,
+    subject: 'Nouvelle demande de responsable',
+    text: `Au moins une personne demande à devenir responsable d’un collectif :\n${reviewUrl}${signature}`,
+  }
+}
+
+/** To the person: they now manage the collectif. */
+export function responsibleApprovedMail(to: string, collectifName: string, appUrl: string): Mail {
+  return {
+    to,
+    subject: `Vous êtes responsable de « ${collectifName} »`,
+    text: `Bonjour,\n\nVotre demande est acceptée : vous êtes responsable du collectif « ${collectifName} ».\n${appUrl}${signature}`,
+  }
+}
+
+/** To the person: their request to manage the collectif was rejected. */
+export function responsibleRejectedMail(to: string, collectifName: string): Mail {
+  return {
+    to,
+    subject: `Demande de responsable pour « ${collectifName} »`,
+    text: `Bonjour,\n\nVotre demande pour devenir responsable du collectif « ${collectifName} » n’a pas été acceptée.${signature}`,
+  }
+}
+
+/** To the person: they no longer manage the collectif. */
+export function responsibleRemovedMail(to: string, collectifName: string): Mail {
+  return {
+    to,
+    subject: `Vous n’êtes plus responsable de « ${collectifName} »`,
+    text: `Bonjour,\n\nUn administrateur vous a retiré du rôle de responsable du collectif « ${collectifName} ».${signature}`,
+  }
+}
+
+/** To an item's owner: a validated user writes about it through the contact form (US-0.6.3). */
+export function itemContactMail(input: {
+  to: string
+  senderName: string
+  senderEmail: string
+  itemName: string
+  itemUrl: string
+  message: string
+}): Mail {
+  return {
+    to: input.to,
+    replyTo: input.senderEmail,
+    subject: `À propos de « ${input.itemName} »`,
+    text:
+      `Bonjour,\n\n${input.senderName} (${input.senderEmail}) vous écrit au sujet de ` +
+      `« ${input.itemName} » :\n${input.itemUrl}\n\n---\n${input.message}\n---\n\n` +
+      'Répondez directement à cet e-mail pour lui écrire.' +
+      signature,
+  }
+}

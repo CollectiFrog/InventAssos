@@ -1,5 +1,4 @@
-# Checks every pull request. The Makefile targets are the contract: replace their placeholders,
-# and add the language setup step below (setup-node, setup-python, …).
+# Checks every pull request with the same Makefile targets contributors run locally.
 name: CI
 
 on:
@@ -17,16 +16,46 @@ jobs:
   check:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: inventassos
+          POSTGRES_PASSWORD: inventassos
+          POSTGRES_DB: inventassos_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U inventassos -d inventassos_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://inventassos:inventassos@localhost:5432/inventassos_test
     steps:
       - uses: actions/checkout@v7
-      # TEMPLATE: language setup, e.g.
-      # - uses: actions/setup-node@v7
-      #   with: { node-version-file: .nvmrc, cache: npm }
-      # - run: npm ci
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
       - run: make lint
       - run: make typecheck
       - run: make test
       - run: make build
+
+  image:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      # Same Dockerfile as release.yml, built but not pushed.
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   docs:
     name: Docs build

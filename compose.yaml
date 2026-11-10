@@ -1,0 +1,27 @@
+# Local development services. Start with `docker compose up -d`.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: inventassos
+      POSTGRES_PASSWORD: inventassos
+      POSTGRES_DB: inventassos
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventassos"]
+      interval: 5s
+      retries: 10
+
+  # Catches every e-mail in development: web UI on http://localhost:8025.
+  mail:
+    image: axllent/mailpit:v1.29
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+volumes:
+  db-data:
