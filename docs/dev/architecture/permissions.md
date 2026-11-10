@@ -27,6 +27,7 @@ can only see their status page and sign out.
 | Action                                           | Platform admin | Responsible of C                 | Validated user               |
 |--------------------------------------------------|----------------|----------------------------------|------------------------------|
 | Approve or reject an account                     | yes            | no                               | no                           |
+| Add, rename, reorder, delete an unused category  | yes            | no                               | no                           |
 | Disable an account                               | yes            | no                               | no                           |
 | Re-enable a disabled account                     | yes            | no                               | no                           |
 | Edit own profile (name, phone)                   | yes            | yes                              | yes                          |
