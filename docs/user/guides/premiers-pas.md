@@ -19,8 +19,9 @@ signale.
 
 Tant que votre compte n'est pas validé, vous pouvez vous connecter mais vous voyez seulement la page
 **Votre compte**, qui indique où en est votre demande. Si elle a été refusée, cette page affiche le
-motif éventuel et un bouton **Refaire une demande** ; vous pouvez aussi refaire une inscription
-avec la même adresse. Dans les deux cas, la demande repart en examen.
+motif éventuel et un bouton **Refaire une demande**, qui renvoie la demande en examen. Une nouvelle
+inscription avec la même adresse ne la relance pas : vous recevez un e-mail qui vous invite à vous
+connecter pour utiliser ce bouton, afin que seul le titulaire de l'adresse puisse le faire.
 
 ## Se connecter
 
@@ -32,6 +33,11 @@ InventAssos n'utilise pas de mot de passe.
 
 Le lien est valable **15 minutes** et ne sert **qu'une fois**. Vous restez connecté 30 jours sur cet
 appareil. Si le lien a expiré, demandez-en simplement un nouveau.
+
+Pour éviter les abus, une même adresse reçoit au plus 5 e-mails de connexion ou d'inscription par
+heure : si vous n'en recevez plus, attendez un peu (et vérifiez vos indésirables). Après un trop grand
+nombre de demandes depuis le même réseau, la page affiche « Trop de demandes » : réessayez un peu
+plus tard.
 
 Sur un appareil partagé, pensez à cliquer sur **Se déconnecter** en haut de la page : la session est
 fermée et ne peut plus être réutilisée.

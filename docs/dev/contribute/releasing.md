@@ -57,6 +57,7 @@ ingress, the container itself speaks plain HTTP on `PORT`.
 | `PLATFORM_ADMIN_EMAILS` | V0.2 | no     | comma-separated e-mails that become admin at first sign-in; read at startup      |
 | `SMTP_URL`              | V0.2 | yes    | Zimbra SMTP, e.g. `smtps://noreply%40collecti-frog.fr:password@mail.example:465` |
 | `MAIL_FROM`             | V0.2 | no     | `InventAssos <noreply@collecti-frog.fr>`                                         |
+| `TRUST_PROXY`           | V0.6 | no     | `true` behind the ingress, so rate limits see the visitor's address (ADR 0018)   |
 
 `.env.example` is the reference list; a missing required variable stops the container at startup
 with a message naming it. Secrets go in a Kubernetes `Secret`, never in the infra repository in

@@ -68,7 +68,7 @@ describe('sign-up (US-0.2.1)', () => {
     assert.match(app.mailer.outbox[0]?.subject ?? '', /déjà un compte/)
   })
 
-  it('puts a rejected account back in the queue when the person signs up again', async () => {
+  it('leaves a rejected account rejected: only its owner may re-apply, once signed in', async () => {
     const rejected = await createUser(db, { name: 'Camille', email: 'camille@example.org' })
     await setUserStatus(db, rejected.id, 'rejected', 'Inconnu')
     const app = createTestApp(db, { adminEmails: ['admin@example.org'] })
@@ -76,9 +76,13 @@ describe('sign-up (US-0.2.1)', () => {
     await app.client().post(signUpUrl, { name: 'Camille', email: 'camille@example.org' })
 
     const user = await findUserByEmail(db, 'camille@example.org')
-    assert.equal(user?.status, 'pending')
-    assert.equal(user?.rejection_reason, null)
-    assert.equal(app.mailer.outbox.length, 2)
+    assert.equal(user?.status, 'rejected')
+    assert.equal(user?.rejection_reason, 'Inconnu')
+    assert.deepEqual(
+      app.mailer.outbox.map((mail) => mail.to),
+      ['camille@example.org'],
+    )
+    assert.match(app.mailer.outbox[0]?.text ?? '', /connectez-vous[\s\S]*\/connexion/)
   })
 
   it('shows French errors for invalid input and creates nothing', async () => {

@@ -13,6 +13,8 @@ export interface Config {
   /** SMTP connection URL; without it outside production, e-mails are written to the log. */
   smtpUrl: string | null
   mailFrom: string
+  /** Take the client address from X-Forwarded-For / Forwarded: only behind a proxy that sets it. */
+  trustProxy: boolean
 }
 
 /** Reads and validates the configuration; throws with every missing or invalid variable listed. */
@@ -41,6 +43,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 
   const mailFrom = env.MAIL_FROM?.trim() || 'InventAssos <noreply@collecti-frog.fr>'
 
+  const trustProxy = (env.TRUST_PROXY ?? '').trim().toLowerCase()
+  if (!['', 'true', 'false'].includes(trustProxy)) errors.push('TRUST_PROXY must be true or false')
+
   if (errors.length > 0) throw new Error(`Invalid configuration: ${errors.join('; ')}`)
 
   return {
@@ -52,6 +57,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     adminEmails: parseEmailList(env.PLATFORM_ADMIN_EMAILS),
     smtpUrl,
     mailFrom,
+    trustProxy: trustProxy === 'true',
   }
 }
 
