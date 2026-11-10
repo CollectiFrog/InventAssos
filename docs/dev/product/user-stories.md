@@ -163,9 +163,11 @@ computers.
 - **US-0.7.2 Dashboard.** As a validated user, I want a home page with search first, my
   collectifs and recently added equipment, so that every task starts from one place.
     - Admins (and moderators from V0.8) see the number of pending requests, linked to the queue.
-- **US-0.7.3 My equipment.** As a validated user, I want "Mon matériel" with two tabs, Matériel and
-  Lieux, so that I see everything I manage in one place.
-    - My own items first, then one section per collectif I manage, each linking to the collectif.
+- **US-0.7.3 What I hold.** As a validated user, I want "Mon matériel" to list the equipment stored
+  in my locations right now, so that I know what I am holding and for whom.
+    - Three sections by owner: mine, my collectifs' (stored at my place), others' (borrowed: owned by
+      someone else, stored at my place). Equipment I own but stored elsewhere is not listed here.
+    - Tab Lieux lists my own locations; a collectif's locations are on the collectif's page.
 - **US-0.7.4 Create a location while adding.** As a validated user, I want to create a location
   from the add form, so that I am not blocked when I have none.
 - **US-0.7.5 Collectif page.** As a validated user, I want a collectif's page in tabs (Matériel,

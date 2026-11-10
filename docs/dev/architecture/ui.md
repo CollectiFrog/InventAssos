@@ -57,7 +57,7 @@ flowchart TB
 |--------------|----------------------------|----------------------------------------------------------------------------|
 | Accueil      | `/`                        | search field, pending requests (admins, moderators), my collectifs, recent |
 | Rechercher   | `/inventaire`              | text search, filters (category, collectif, city), results                  |
-| Mon matériel | `/materiel`, tab `/lieux`  | my items, then one section per collectif I manage; tab Lieux               |
+| Mon matériel | `/materiel`, tab `/lieux`  | what is stored in my locations: mine, my collectifs', borrowed; tab Lieux  |
 | Collectifs   | `/collectifs`              | list of collectifs, request a new one; each collectif page has tabs        |
 | *Header*     | `/compte/profil`, `/admin` | account (initials), administration for admins and moderators               |
 
