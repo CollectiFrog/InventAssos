@@ -2,7 +2,7 @@
 // next to `db` and `mail`. Run `make dev`, `make test` or `make check` in the integrated terminal.
 {
   "name": "InventAssos",
-  "dockerComposeFile": "../compose.yaml",
+  "dockerComposeFile": ["../compose.yaml", "compose.yaml"],
   "service": "app",
   "runServices": ["db", "mail", "app"],
   "workspaceFolder": "/workspace",
@@ -10,6 +10,11 @@
   "overrideCommand": true,
   // The repository is mounted from the host and owned by another user id.
   "postCreateCommand": "git config --global --add safe.directory /workspace && make deps",
+  // Claude Code and the GitHub CLI, for agents working inside the container (sign-ins kept in volumes).
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
   "forwardPorts": [3000, 8025],
   "portsAttributes": {
     "3000": { "label": "App" },
@@ -17,7 +22,7 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["biomejs.biome", "EditorConfig.EditorConfig"],
+      "extensions": ["biomejs.biome", "EditorConfig.EditorConfig", "anthropic.claude-code"],
       "settings": {
         "editor.defaultFormatter": "biomejs.biome",
         "terminal.integrated.defaultProfile.linux": "bash"
