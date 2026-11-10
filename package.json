@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development node --env-file-if-exists=.env --watch --import remix/node-tsx server.ts",
+    "dev:poll": "NODE_ENV=development node scripts/dev-poll.ts",
     "start": "node --import remix/node-tsx server.ts",
     "test": "NODE_ENV=test remix test",
     "typecheck": "tsc --noEmit",

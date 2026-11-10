@@ -36,8 +36,13 @@ else
 	docker compose up -d --wait db mail
 endif
 
+# DEV_POLL (set by compose.yaml) polls for changes: file events from the host do not reach a container.
 dev: db
+ifdef DEV_POLL
+	npm run dev:poll
+else
 	npm run dev
+endif
 
 docs:
 	cd docs/site && npm ci && npm run build

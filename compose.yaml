@@ -39,6 +39,8 @@ services:
       SMTP_URL: smtp://mail:1025
       SESSION_SECRET: dev-only-change-me-dev-only-change-me
       PLATFORM_ADMIN_EMAILS: admin@example.org
+      # `make dev` restarts on change by polling (scripts/dev-poll.ts).
+      DEV_POLL: "1"
     ports:
       - "3000:3000"
     volumes:

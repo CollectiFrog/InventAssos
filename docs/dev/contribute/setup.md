@@ -55,10 +55,9 @@ host binaries. Compose sets `DATABASE_URL`, `TEST_DATABASE_URL`, `SMTP_URL` (Mai
 development `SESSION_SECRET`; they win over `.env`, which is optional here. Sign in as
 `admin@example.org` to be platform admin.
 
-> **Windows and macOS:** file change events from a folder of the host may not reach the container,
-> so the server does not restart on save. Clone the repository inside WSL 2 (Windows) or use the Dev
-> Container's **Clone Repository in Container Volume**; otherwise restart with
-> `docker compose restart app`.
+In the container, `make dev` restarts the server by polling modification times every second
+(`scripts/dev-poll.ts`, `DEV_POLL` in `compose.yaml`): file change events from a Windows or macOS
+host folder do not reach a container. On the host, `make dev` keeps Node's own `--watch`.
 
 ## Node on the host
 
