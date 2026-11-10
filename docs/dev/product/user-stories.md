@@ -30,6 +30,7 @@ per story when its version is planned; the issue links back here.
 | UC16 | Archive an item                                 | Owner, location manager       | V0.5    |
 | UC17 | See an item's history                           | Validated user                | V0.5    |
 | UC18 | Browse and search the inventory                 | Validated user                | V0.6    |
+| UC30 | Browse the collectifs directory                 | Validated user                | V0.7    |
 | UC19 | See an item and contact its owner               | Validated user                | V0.6    |
 | UC20 | Add or change an item's photo                   | Owner, location manager       | V0.9    |
 | UC21 | Import a CSV or Excel inventory                 | Responsible, validated user   | V0.10   |
@@ -78,7 +79,8 @@ per story when its version is planned; the issue links back here.
   to become admin at first sign-in, so that the platform can start.
 - **US-0.2.6 Profile.** As a validated user, I want to edit my name and optional phone, so that I
   can be reached.
-    - A notice says the phone is visible to validated users.
+    - A notice says who sees the phone: validated users in V0.6, from V0.7 the people who share a
+      collectif with me (ADR 0021).
 - **US-0.2.7 Disable.** As an admin, I want to disable an account, so that I cut access without
   losing data.
     - Its sessions are closed; its items stay visible.
@@ -140,6 +142,10 @@ per story when its version is planned; the issue links back here.
 
 ## V0.6 — Browse
 
+Built as a shared catalogue: every validated user sees every item. From V0.7 the inventory is seen
+only within collectifs ([ADR 0021](../../adr/0021-inventory-within-collectifs/), US-0.7.11); the
+stories below keep their wording as they shipped.
+
 - **US-0.6.1 Browse.** As a validated user, I want to browse the whole inventory in a paginated
   list, so that I discover available equipment.
 - **US-0.6.2 Search and filter.** As a validated user, I want text search (name, brand, model,
@@ -174,7 +180,9 @@ computers.
     - A tab bar at the bottom of the screen on a phone, a top bar on a computer; account and
       administration are reached from the header.
 - **US-0.7.2 Dashboard.** As a validated user, I want a home page with search first, my
-  collectifs and recently added equipment, so that every task starts from one place.
+  collectifs and the equipment recently added to them, so that every task starts from one place.
+    - Without any collectif, the dashboard proposes the collectifs directory and "Demander un
+      collectif" instead of an empty list.
     - Admins (and moderators from V0.8) see the number of pending requests, linked to the queue.
 - **US-0.7.3 What I hold.** As a validated user, I want "Mon matériel" to list the equipment stored
   in my locations right now, so that I know what I am holding and for whom.
@@ -183,12 +191,14 @@ computers.
     - Tab Lieux lists my own locations; a collectif's locations are on the collectif's page.
 - **US-0.7.4 Create a location while adding.** As a validated user, I want to create a location
   from the add form, so that I am not blocked when I have none.
-- **US-0.7.5 Collectif page.** As a validated user, I want a collectif's page in tabs (Matériel,
+- **US-0.7.5 Collectif page.** As a person of a collectif, I want its page in tabs (Matériel,
   Lieux, Responsables), with "Ajouter du matériel" first for its responsibles, so that its
   management is grouped.
-- **US-0.7.6 Item page.** As a validated user, I want the owner and the city at the top of an
-  item's page and Appeler / SMS / Écrire buttons within reach of the thumb, so that contacting
-  the owner takes one tap.
+    - Someone outside the collectif sees its name, city and description only, with "Demander à
+      devenir responsable" (and "Demander à rejoindre" from V0.8).
+- **US-0.7.6 Item page.** As a person who sees an item, I want the owner and the city at the top of
+  its page and Appeler / SMS / Écrire buttons within reach of the thumb, so that reaching whoever
+  keeps it takes one tap.
     - From the dashboard to the owner's phone in three taps at most.
 - **US-0.7.7 Clear feedback.** As a user, I want a confirmation after every action, an error in
   French under each wrong field and an empty state that proposes the next action, so that I
@@ -207,6 +217,20 @@ computers.
     - A category still used by items cannot be deleted: its items are first moved to another
       category; an unused one can be deleted.
     - Changes show at once in the add form and the search filters; each change is logged (IDs only).
+- **US-0.7.11 Inventory within collectifs.** As a collectif, I want our equipment seen only by our
+  responsibles and members, so that we keep our inventory among ourselves until we choose to share
+  it ([ADR 0021](../../adr/0021-inventory-within-collectifs/)).
+    - I see an item when it is owned by a collectif I belong to, by me or by a person of one of my
+      collectifs, or when it is stored in a location I manage; admins keep today's access.
+    - Dashboard, search, filters (collectif filter limited to mine), collectif and person pages,
+      history and contact only cover those items; an item or person page I may not see answers 404.
+    - A person's page and phone are shown only to people who share a collectif with them.
+    - The rule is one function (`canSeeItem`) mirrored in SQL by every listing, with matrix tests
+      for a non-member; the user manual and the profile notice say who sees what.
+- **US-0.7.12 Collectifs directory.** As a validated user, I want the list of collectifs with their
+  name, city and description, so that I find mine and ask to manage or join it.
+    - "Mes collectifs" first, then all collectifs, with a search by name or city; no item, location
+      or member of a collectif I do not belong to is shown.
 
 ## V0.8 — Roles
 
@@ -220,14 +244,16 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
   an account, archive an abusive item and manage categories (US-0.7.10), so that the platform stays
   clean.
     - A moderator cannot act on an admin or another moderator, nor name moderators.
-- **US-0.8.3 Join a collectif.** As a validated user, I want to ask to join a collectif from its
-  page, so that I help keep its inventory.
+- **US-0.8.3 Join a collectif.** As a validated user, I want to ask to join a collectif from the
+  directory or its page, so that I see and help keep its inventory.
+    - Until accepted, I see only its name, city and description (ADR 0021).
     - One open request per person and collectif; its responsibles are e-mailed.
 - **US-0.8.4 Accept a member.** As a responsible, I want to accept or reject membership requests
   and remove members, so that I control who manages our equipment.
     - The person is e-mailed either way; the action is logged (IDs only).
-- **US-0.8.5 Member rights.** As a member of a collectif, I want to add, edit, move and archive
-  its items and see the full address of its locations, so that I keep its inventory up to date.
+- **US-0.8.5 Member rights.** As a member of a collectif, I want to see its inventory, add, edit,
+  move and archive its items and see the full address of its locations, so that I keep its
+  inventory up to date.
     - Locations, members and the collectif's profile stay with its responsibles.
 - **US-0.8.6 Name a responsible.** As a responsible, I want to make a member of my collectif
   responsible, or remove a responsible, so that the collectif runs without waiting for the platform.
@@ -256,6 +282,7 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
     - Adds `items.ref`, unique per owner.
 - **US-0.10.4 Export.** As a responsible or validated user, I want to export the equipment I manage
   as CSV or Excel, in the import format, so that I can work in a spreadsheet.
+    - An export never holds an item its author may not see (ADR 0021).
 - **US-0.10.5 Import for myself.** As a validated user, I want to import into my personal
   locations, so that I list my own equipment at once.
 
@@ -289,3 +316,5 @@ These stories complement the [GDPR checklist](../gdpr-checklist/).
 | US-0.5.5  | Archive only, or also hard delete?               | archive only in V0.x                                                         |
 | US-0.10.1 | One file per location, or a location column?     | optional location column; otherwise the chosen location                      |
 | US-0.8.5  | Can a member delete an item, or only archive it? | archive only, like responsibles                                              |
+| US-0.7.11 | Do admins and moderators see every inventory?    | to decide; today admins see everything                                       |
+| US-0.8.3  | Could responsibles approve new accounts alone?   | later, maybe: admins and moderators approve accounts for now                 |
