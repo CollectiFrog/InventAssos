@@ -15,8 +15,9 @@ loses the rights at its next request. `users.is_platform_admin` only records the
 Each row is a function in `app/permissions.ts`, tested in `app/permissions.test.ts`; controllers
 call it before acting and answer 403 otherwise. `app/permissions.matrix.test.ts` then plays every
 implemented row through the real router for six actors (admin, responsible of C, responsible of
-another collectif, validated user, pending user, visitor) and checks the effect happened or not.
-A new row in this table needs a new entry in that matrix.
+another collectif, validated user, pending user, visitor) and checks the effect happened or not:
+each verb of a row ("create, edit, delete"), and each "if …" branch of the responsible and
+validated-user columns, is a separate case. A new row, verb or branch needs a new matrix entry.
 
 "Import into / export from a location" arrives with V0.10 and is not implemented yet.
 
@@ -47,3 +48,9 @@ An admin can never disable their own account. A location's notes follow the full
 
 Rules from ADR 0009: the owner of an item stored in a collectif's location may edit it without
 being responsible of that collectif; to put an item in a location, you must manage that location.
+
+What "edit, move, archive" covers: whoever may edit an item may change **every** property of it
+(name, category, quantity, condition, value, description…), archive it, and move it to **any**
+location they manage. So a responsible of C may change the condition of a person's item deposited
+in C's location, or move it to another of C's locations or to their own home; the person stays the
+owner, and still sees and edits the item. Only the owner never changes.
