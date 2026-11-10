@@ -3,9 +3,10 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { findUserById, setUserStatus } from '../../data/users.ts'
-import { sendSafely } from '../../mail/mailer.ts'
 import { newAccountRequestMail } from '../../mail/messages.ts'
+import { hitUserRequest, notifyAdmins } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
+import { tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { StatusPage } from './status-page.tsx'
 
@@ -33,14 +34,15 @@ export default createController(routes.account, {
       if (current === null) return redirect(routes.signIn.form.index.href(), 303)
       if (current.status !== 'rejected') return redirect(routes.account.status.href(), 303)
 
-      await setUserStatus(context.db, current.id, 'pending')
-      const admins = [...context.settings.adminEmails]
-      if (admins.length > 0) {
-        await sendSafely(
-          context.mailer,
-          newAccountRequestMail(admins, context.settings.appUrl + routes.admin.index.href()),
-        )
-      }
+      const { db, mailer, settings } = context
+      const limit = await hitUserRequest(db, settings, current.id)
+      if (!limit.allowed) return tooManyRequests(context, limit.retryAfterSeconds)
+
+      await setUserStatus(db, current.id, 'pending')
+      const reviewUrl = settings.appUrl + routes.admin.index.href()
+      await notifyAdmins(db, mailer, settings, 'account', (admins) =>
+        newAccountRequestMail(admins, reviewUrl),
+      )
       return redirect(routes.account.status.href(), 303)
     },
   },

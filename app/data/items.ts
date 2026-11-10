@@ -135,7 +135,7 @@ export interface ItemDetails extends Item {
   ownerSlug: string | null
   /** Set when a person owns the item, to link to their page. */
   ownerUserId: string | null
-  /** The collectif's contact phone, or the owner's phone; null when none is shared. */
+  /** The collectif's contact phone, or the owner's phone while their account is active. */
   contactPhone: string | null
 }
 
@@ -147,8 +147,8 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
     select cat.name as category_name, l.name as location_name, l.city,
            l.collectif_id as location_collectif_id, l.user_id as location_user_id,
            coalesce(oc.name, ou.name) as owner_name, oc.slug as owner_slug,
-           case when i.owner_collectif_id is not null then oc.contact_phone else ou.phone end
-             as contact_phone
+           case when i.owner_collectif_id is not null then oc.contact_phone
+                when ou.status = 'active' then ou.phone end as contact_phone
     from items i ${summaryJoins}
     where i.id = ${id}
   `)

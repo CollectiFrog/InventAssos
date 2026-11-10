@@ -2,9 +2,10 @@ import { createContextKey, type Middleware } from 'remix/router'
 
 import type { Config } from '../config.ts'
 import type { Mailer } from '../mail/mailer.ts'
+import type { RateLimits } from '../rate-limits.ts'
 
-/** The part of the configuration actions may read. */
-export type AppSettings = Pick<Config, 'appUrl' | 'adminEmails'>
+/** The part of the configuration actions may read; `rateLimits` defaults to production values. */
+export type AppSettings = Pick<Config, 'appUrl' | 'adminEmails'> & { rateLimits?: RateLimits }
 
 /** Context key for the mailer; actions read it as `context.mailer`. */
 export const MailerKey = createContextKey<Mailer>()

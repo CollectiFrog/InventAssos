@@ -28,22 +28,25 @@ erDiagram
 | `locations`      | id, name, city, address, notes, collectif_id, user_id                                                                                                                                                                  | exactly one of collectif_id / user_id                                                                                                                                                             |
 | `categories`     | id (text key), name (French), parent_id, position                                                                                                                                                                      | fixed list seeded by migration 0007: sound, lighting, video, structure, scenery, power, cabling, other                                                                                            |
 | `items`          | id, name, description, category_id, brand, model, serial_number, quantity, condition, estimated_value, location_id, owner_collectif_id, owner_user_id, archived_at, archive_reason, created_by, created_at, updated_at | quantity ≥ 1; location_id required, `ON DELETE RESTRICT`; exactly one owner; condition ∈ new, good, worn, repair, broken; archive_reason set iff archived_at                                      |
-| `sessions`       | id, user_id, data (jsonb), expires_at, created_at                                                                                                                                                                      | user_id → users, deleted with the user (ADR 0017)                                                                                                                                                 |
+| `sessions`       | id, user_id, data (jsonb), expires_at, created_at                                                                                                                                                                      | signed-in sessions only (visitors' stay in the cookie); user_id → users, deleted with the user; expired rows purged hourly (ADR 0017)                                                             |
 | `sign_in_tokens` | token_hash, user_id, expires_at, used_at, created_at                                                                                                                                                                   | only the SHA-256 of the token is stored; 15 min, single use                                                                                                                                       |
+| `rate_limits`    | key_hash, hits, reset_at                                                                                                                                                                                               | key_hash is a SHA-256 of the limited key (no address stored); purged hourly once reset_at passed (ADR 0018)                                                                                       |
 | `audit_log`      | id, actor_id, action, entity, entity_id, payload (jsonb), at                                                                                                                                                           | append only; IDs only, no personal data (ADR 0010)                                                                                                                                                |
 
 `audit_log` actions so far: `account.approved|rejected|disabled|enabled`, `collectif.approved|rejected|updated`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
-`item.created|updated|moved|archived`. Payloads hold IDs, enum values and field names only;
-`readHistory()` resolves names at display time.
+`item.created|updated|moved|archived|contacted`. Payloads hold IDs, enum values and field names
+only; `readHistory()` resolves names at display time. The item page shows an allow-list
+(`itemHistoryActions`): `item.contacted` stays in the log for admins and is never displayed.
 
 Added later:
 
-| Version | Change                                                                              |
-|---------|-------------------------------------------------------------------------------------|
-| V0.7    | `items.photo_key` (MinIO object key)                                                |
-| V0.8    | `items.ref`, unique per owner, for re-import without duplicates; `import_templates` |
-| V1.1    | visibility tables (defaults per collectif, circles, per-item overrides)             |
+| Version | Change                                                                                                                                         |
+|---------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| V0.8    | `users.role` (`member` or `moderator`); `collectif_members` (user, collectif, role `responsible` or `member`, status) replacing `responsibles` |
+| V0.9    | `items.photo_key` (MinIO object key)                                                                                                           |
+| V0.10   | `items.ref`, unique per owner, for re-import without duplicates; `import_templates`                                                            |
+| V1.1    | visibility tables (defaults per collectif, circles, per-item overrides)                                                                        |
 
 "Exactly one" rules are written as `CHECK (num_nonnulls(a, b) = 1)` in the migration, not only in
 code.
