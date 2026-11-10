@@ -5,7 +5,7 @@ import { after, before, beforeEach, describe, it } from 'remix/test'
 import { createTestApp } from '../../../test/app.ts'
 import { signIn } from '../../../test/auth.ts'
 import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
-import { itemFormFields } from '../../../test/items.ts'
+import { createTestItem, itemFormFields } from '../../../test/items.ts'
 import { createTestLocation } from '../../../test/locations.ts'
 import { createActiveUser } from '../../../test/users.ts'
 import { routes } from '../../routes.ts'
@@ -77,5 +77,30 @@ describe('item history (US-0.5.6)', () => {
     )
     assert.ok((rows.rows?.length ?? 0) >= 2)
     assert.doesNotMatch(JSON.stringify(rows.rows), /Zébulon|zebulon|example\.org|Rennes/i)
+  })
+
+  it('never shows who contacted the owner, to anyone; the log keeps the IDs', async () => {
+    const max = await createActiveUser(db, 'Max', 'max@example.org')
+    await createActiveUser(db, 'Alice Contacteuse', 'alice@example.org')
+    await createActiveUser(db, 'Bob', 'bob@example.org')
+    const garage = await createTestLocation(db, { userId: max.id }, 'Garage')
+    const item = await createTestItem(db, {
+      locationId: garage.id,
+      owner: { userId: max.id },
+      createdBy: max.id,
+    })
+    const app = createTestApp(db, { adminEmails: ['admin@example.org'] })
+    const alice = app.client()
+    await signIn(app, alice, 'alice@example.org')
+    await alice.post(routes.items.contact.href({ itemId: item.id }), { message: 'Dispo samedi ?' })
+
+    for (const email of ['bob@example.org', 'max@example.org', 'admin@example.org']) {
+      const client = app.client()
+      await signIn(app, client, email)
+      const page = (await client.get(routes.items.show.href({ itemId: item.id }))).text
+      assert.doesNotMatch(page, /item\.contacted|Alice/, `${email} sees the contact`)
+    }
+    const log = await db.exec(sql`select 1 from audit_log where action = 'item.contacted'`)
+    assert.equal(log.rows?.length, 1)
   })
 })

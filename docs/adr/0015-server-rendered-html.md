@@ -28,5 +28,5 @@ browser bundle; styles are one static file, `public/styles.css`.
 ## Consequences
 
 - Works without JavaScript, on any phone; nothing to compile.
-- Interactive widgets (photo preview in V0.7, import mapping in V0.8) may bring the asset server
+- Interactive widgets (photo preview in V0.9, import mapping in V0.10) may bring the asset server
   back; that is a new ADR superseding this one.

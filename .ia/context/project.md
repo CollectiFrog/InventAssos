@@ -9,13 +9,15 @@ rental or swap directly with the owner. Open source (MIT), self-hosted.
 
 ## Users
 
-| Actor          | Situation                                                                   |
-|----------------|-----------------------------------------------------------------------------|
-| Visitor        | not signed in; can sign up and read the legal pages                         |
-| Pending user   | signed up, waiting for platform-admin approval                              |
-| Validated user | browses the whole inventory, manages their own locations and equipment      |
-| Responsible    | validated user who manages one or more collectifs (the only collectif role) |
-| Platform admin | approves accounts, collectifs and responsibles; listed in an env variable   |
+| Actor            | Situation                                                                      |
+|------------------|--------------------------------------------------------------------------------|
+| Visitor          | not signed in; can sign up and read the legal pages                            |
+| Pending user     | signed up, waiting for platform-admin approval                                 |
+| Validated user   | browses the whole inventory, manages their own locations and equipment         |
+| Collectif member | validated user who keeps a collectif's equipment (from V0.8)                   |
+| Responsible      | validated user who manages one or more collectifs, their locations and members |
+| Moderator        | handles the approval queue and moderation; named by an admin (from V0.8)       |
+| Platform admin   | approves accounts and collectifs, names moderators; listed in an env variable  |
 
 ## Languages
 
@@ -27,9 +29,10 @@ rental or swap directly with the owner. Open source (MIT), self-hosted.
 ## Stack
 
 - Remix 3 for UI and server, Node ≥ 24.3: [ADR 0006](../../docs/adr/0006-remix-3-full-stack.md).
+- One responsive interface, rules in `docs/dev/architecture/ui.md`: [ADR 0019](../../docs/adr/0019-interface-conventions.md).
 - PostgreSQL: [ADR 0007](../../docs/adr/0007-postgresql.md).
 - Accounts managed by the app, sign-in by e-mail link: [ADR 0008](../../docs/adr/0008-app-managed-accounts.md).
-- Photos in MinIO (S3) from V0.7. E-mail through the Collecti'FROG Zimbra SMTP (`noreply@collecti-frog.fr`).
+- Photos in MinIO (S3) from V0.9. E-mail through the Collecti'FROG Zimbra SMTP (`noreply@collecti-frog.fr`).
 
 ## Deployment
 
@@ -48,11 +51,13 @@ rental or swap directly with the owner. Open source (MIT), self-hosted.
 
 ## Glossary
 
-| Term           | Meaning                                                                      |
-|----------------|------------------------------------------------------------------------------|
-| Collectif      | an association registered on the platform                                    |
-| Responsible    | user allowed to manage a collectif, its locations and its equipment          |
-| Location       | a place where equipment is stored, owned by a collectif or by a person       |
-| Item           | one piece of equipment, or a batch of identical ones (`quantity` ≥ 1)        |
-| Owner          | the collectif or the person an item belongs to; may differ from the location |
-| Platform admin | person approving every request until V1.0                                    |
+| Term           | Meaning                                                                                                               |
+|----------------|-----------------------------------------------------------------------------------------------------------------------|
+| Collectif      | an association registered on the platform                                                                             |
+| Responsible    | user allowed to manage a collectif, its locations and its equipment                                                   |
+| Location       | a place where equipment is stored, owned by a collectif or by a person                                                |
+| Item           | one piece of equipment, or a batch of identical ones (`quantity` ≥ 1)                                                 |
+| Owner          | the collectif or the person an item belongs to; may differ from the location                                          |
+| Platform admin | listed in `PLATFORM_ADMIN_EMAILS`; names moderators ([ADR 0020](../../docs/adr/0020-platform-and-collectif-roles.md)) |
+| Moderator      | approves accounts and collectifs, moderates content (from V0.8)                                                       |
+| Member         | of a collectif: keeps its equipment, approved by its responsibles (from V0.8)                                         |
