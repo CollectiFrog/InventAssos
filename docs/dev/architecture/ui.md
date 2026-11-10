@@ -65,6 +65,10 @@ flowchart TB
 - **Computer (≥ 720 px):** the same four entries in the top bar, next to the name; content
   centred, at most 60 rem wide; lists become two- or three-column grids of cards.
 - The current entry carries `aria-current="page"`; the bar is a `<nav aria-label>`.
+- The back link of a page returns to where the user came from (search results with their query,
+  Mon matériel, a collectif page), and the navigation highlights that section. The origin travels in
+  a `retour` query parameter checked against a list of internal paths, so it works without
+  JavaScript and cannot redirect off the site.
 - Tabs inside a page (Mon matériel: Matériel, Lieux; collectif: Matériel, Lieux, Responsables,
   Membres from V0.8) are links to distinct URLs, so they work without JavaScript and can be shared.
 
