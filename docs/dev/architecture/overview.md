@@ -81,4 +81,5 @@ session secret, `PLATFORM_ADMIN_EMAILS`, S3 (from V0.9). No deployment value liv
 | Server-rendered HTML    | [0015](../../adr/0015-server-rendered-html/)                 |
 | E-mail                  | [0016](../../adr/0016-mail-through-nodemailer/)              |
 | Sessions                | [0017](../../adr/0017-sessions-in-postgresql/)               |
+| Rate limits             | [0018](../../adr/0018-rate-limits-in-postgresql/)            |
 | Interface               | [0019](../../adr/0019-interface-conventions/) · [UI](../ui/) |
