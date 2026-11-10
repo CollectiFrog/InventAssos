@@ -163,17 +163,6 @@ per story when its version is planned; the issue links back here.
     - A Dev Container (`.devcontainer/`) reuses the same Compose file for VS Code and Codespaces.
     - The current way (Node on the host, `make db`) keeps working.
 
-## V0.6.3 — Categories
-
-Decided in #69: admins (and moderators from V0.8) manage the category list in the app.
-
-- **US-0.6.7 Manage categories.** As a platform admin, I want to add a category, rename it and
-  change the order of the list, so that the categories fit what associations really own without a
-  new release.
-    - A category has a fixed key and a French name; names are unique.
-    - A category used by an item cannot be deleted; an unused one can.
-    - Changes show at once in the add form and the search filters; each change is logged (IDs only).
-
 ## V0.7 — Interface
 
 The pages, navigation and journeys are described in [UI](../../architecture/ui/); the conventions
@@ -211,6 +200,13 @@ computers.
   and labelled controls, so that the app works in a dark storage room, in the sun and with
   assistive technologies.
     - An automated accessibility check runs in CI on the key pages.
+- **US-0.7.10 Manage categories.** As a platform admin, I want to add a category, rename it and
+  change the order of the list, so that the categories fit what associations really own without a
+  new release (decided in #69).
+    - A category has a fixed key and a French name; names are unique.
+    - A category still used by items cannot be deleted: its items are first moved to another
+      category; an unused one can be deleted.
+    - Changes show at once in the add form and the search filters; each change is logged (IDs only).
 
 ## V0.8 — Roles
 
@@ -221,7 +217,7 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
   users, so that I share the approval work.
     - Admins still come only from `PLATFORM_ADMIN_EMAILS`.
 - **US-0.8.2 Moderate.** As a moderator, I want to handle the approval queue, disable or re-enable
-  an account, archive an abusive item and manage categories (US-0.6.7), so that the platform stays
+  an account, archive an abusive item and manage categories (US-0.7.10), so that the platform stays
   clean.
     - A moderator cannot act on an admin or another moderator, nor name moderators.
 - **US-0.8.3 Join a collectif.** As a validated user, I want to ask to join a collectif from its
