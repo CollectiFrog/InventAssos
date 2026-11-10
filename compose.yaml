@@ -1,4 +1,5 @@
-# Local development services. Start with `docker compose up -d`.
+# Local development services (docs/dev/contribute/setup.md).
+# Node on the host: `make db` starts db and mail only. Docker only: `docker compose up app`.
 services:
   db:
     image: postgres:17-alpine
@@ -23,5 +24,32 @@ services:
       - '1025:1025'
       - '8025:8025'
 
+  # The app with reload on change, for contributors with only Docker (US-0.6.6) and for the Dev
+  # Container (.devcontainer/). `docker compose run --rm app make check` runs the CI checks.
+  app:
+    build: .devcontainer
+    command: sh -c 'make deps && make dev'
+    depends_on:
+      db: { condition: service_healthy }
+      mail: { condition: service_started }
+    environment:
+      # Compose values win over .env (node --env-file never overrides a set variable).
+      DATABASE_URL: postgres://inventassos:inventassos@db:5432/inventassos
+      TEST_DATABASE_URL: postgres://inventassos:inventassos@db:5432/inventassos_test
+      SMTP_URL: smtp://mail:1025
+      SESSION_SECRET: dev-only-change-me-dev-only-change-me
+      PLATFORM_ADMIN_EMAILS: admin@example.org
+      # `make dev` restarts on change by polling (scripts/dev-poll.ts).
+      DEV_POLL: "1"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace
+      # Linux dependencies stay in volumes, apart from the host's node_modules.
+      - node-modules:/workspace/node_modules
+      - docs-node-modules:/workspace/docs/site/node_modules
+
 volumes:
   db-data:
+  node-modules:
+  docs-node-modules:

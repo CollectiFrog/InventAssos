@@ -6,6 +6,10 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+### Added
+
+- Contributors can run the app, its tests and the checks with only Docker installed, or in a VS Code Dev Container.
+
 ## [0.6.1] - 2026-11-10
 
 ### Added

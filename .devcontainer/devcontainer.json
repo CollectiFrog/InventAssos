@@ -1,0 +1,32 @@
+// VS Code Dev Container and GitHub Codespaces (US-0.6.6): reuses the `app` service of compose.yaml,
+// next to `db` and `mail`. Run `make dev`, `make test` or `make check` in the integrated terminal.
+{
+  "name": "InventAssos",
+  "dockerComposeFile": ["../compose.yaml", "compose.yaml"],
+  "service": "app",
+  "runServices": ["db", "mail", "app"],
+  "workspaceFolder": "/workspace",
+  // Keep the container idle instead of starting the app: `make dev` runs it in a terminal.
+  "overrideCommand": true,
+  // The repository is mounted from the host and owned by another user id.
+  "postCreateCommand": "git config --global --add safe.directory /workspace && make deps",
+  // Claude Code and the GitHub CLI, for agents working inside the container (sign-ins kept in volumes).
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "forwardPorts": [3000, 8025],
+  "portsAttributes": {
+    "3000": { "label": "App" },
+    "8025": { "label": "Mailpit" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["biomejs.biome", "EditorConfig.EditorConfig", "anthropic.claude-code"],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

@@ -51,6 +51,9 @@ The CI calls the same targets as you. Run them before opening a PR.
 | `make db`        | start PostgreSQL (Docker)        |
 | `make dev`       | `make db`, then the app on :3000 |
 
+Without Node or `make` on the host, run any target in the app container:
+`docker compose run --rm app make check` (see `docs/dev/contribute/setup.md`).
+
 ## Repository map
 
 | Path                 | Contains                                                    |
@@ -73,6 +76,8 @@ The CI calls the same targets as you. Run them before opening a PR.
 | `public/`            | static files served as is                                   |
 | `test/`              | shared test helpers (test database, requests)               |
 | `Dockerfile`         | production image, published on GHCR by `release.yml`        |
+| `compose.yaml`       | dev services: `db`, `mail`, `app` (Docker-only development) |
+| `.devcontainer/`     | VS Code Dev Container on the `app` service                  |
 
 Project-specific rules go below this line, kept short.
 
