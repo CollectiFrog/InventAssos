@@ -35,16 +35,18 @@ erDiagram
 
 `audit_log` actions so far: `account.approved|rejected|disabled`, `collectif.approved|rejected|updated`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
-`item.created|updated|moved|archived`. Payloads hold IDs, enum values and field names only;
-`readHistory()` resolves names at display time.
+`item.created|updated|moved|archived|contacted`. Payloads hold IDs, enum values and field names
+only; `readHistory()` resolves names at display time. The item page shows an allow-list
+(`itemHistoryActions`): `item.contacted` stays in the log for admins and is never displayed.
 
 Added later:
 
-| Version | Change                                                                              |
-|---------|-------------------------------------------------------------------------------------|
-| V0.7    | `items.photo_key` (MinIO object key)                                                |
-| V0.8    | `items.ref`, unique per owner, for re-import without duplicates; `import_templates` |
-| V1.1    | visibility tables (defaults per collectif, circles, per-item overrides)             |
+| Version | Change                                                                                                                                         |
+|---------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| V0.8    | `users.role` (`member` or `moderator`); `collectif_members` (user, collectif, role `responsible` or `member`, status) replacing `responsibles` |
+| V0.9    | `items.photo_key` (MinIO object key)                                                                                                           |
+| V0.10   | `items.ref`, unique per owner, for re-import without duplicates; `import_templates`                                                            |
+| V1.1    | visibility tables (defaults per collectif, circles, per-item overrides)                                                                        |
 
 "Exactly one" rules are written as `CHECK (num_nonnulls(a, b) = 1)` in the migration, not only in
 code.

@@ -30,6 +30,19 @@ describe('configuration', () => {
     assert.throws(() => loadConfig({ ...base, SESSION_SECRET: 'short' }), /SESSION_SECRET/)
   })
 
+  it('refuses the .env.example session secret in production only', () => {
+    const production = {
+      ...base,
+      NODE_ENV: 'production',
+      APP_URL: 'https://inv.example.org',
+      SMTP_URL: 'smtp://mail.example.org',
+    }
+    const example = 'dev-only-change-me-dev-only-change-me'
+    assert.throws(() => loadConfig({ ...production, SESSION_SECRET: example }), /SESSION_SECRET/)
+    assert.equal(loadConfig({ ...base, SESSION_SECRET: example }).sessionSecret, example)
+    assert.equal(loadConfig(production).production, true)
+  })
+
   it('parses admin e-mails, ignoring case and blanks', () => {
     assert.deepEqual([...parseEmailList(' A@x.org, ,b@X.org ')], ['a@x.org', 'b@x.org'])
   })

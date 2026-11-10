@@ -13,6 +13,7 @@ import { provideBackground } from './background.ts'
 import { checkCsrf } from './csrf.ts'
 import { loadCurrentUser } from './current-user.ts'
 import { provideDatabase } from './database.ts'
+import { contentSecurityPolicy, securityHeaders } from './security-headers.ts'
 import { type AppSettings, provideMailer, provideSettings } from './services.ts'
 
 /** Services the router needs; tests pass their own. */
@@ -39,6 +40,8 @@ export function appMiddleware(deps: AppDependencies) {
   })
 
   return createMiddleware(
+    securityHeaders({ https: appUrl.protocol === 'https:' }),
+    contentSecurityPolicy(),
     staticFiles('./public', { index: false }),
     provideDatabase(deps.db),
     provideMailer(deps.mailer),

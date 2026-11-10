@@ -156,7 +156,7 @@ export function responsibleRemovedMail(to: string, collectifName: string): Mail 
 
 /** To an item's owner: a validated user writes about it through the contact form (US-0.6.3). */
 export function itemContactMail(input: {
-  to: string[]
+  to: string
   senderName: string
   senderEmail: string
   itemName: string

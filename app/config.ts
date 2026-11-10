@@ -8,7 +8,7 @@ export interface Config {
   /** Public origin, used in e-mail links and to check the Origin of form posts. */
   appUrl: string
   sessionSecret: string
-  /** Lower-cased e-mails that are platform admins (US-0.2.5). */
+  /** Lower-cased e-mails that are platform admins (US-0.2.5); a change needs a restart. */
   adminEmails: ReadonlySet<string>
   /** SMTP connection URL; without it outside production, e-mails are written to the log. */
   smtpUrl: string | null
@@ -33,6 +33,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 
   const sessionSecret = env.SESSION_SECRET ?? ''
   if (sessionSecret.length < 32) errors.push('SESSION_SECRET must be at least 32 characters')
+  // The .env.example placeholder is long enough: refuse it, or any copy of it, in production.
+  if (production && /change-?me/i.test(sessionSecret)) {
+    errors.push('SESSION_SECRET is the example value: generate one (openssl rand -base64 48)')
+  }
 
   const smtpUrl = env.SMTP_URL?.trim() || null
   if (production && smtpUrl === null) errors.push('SMTP_URL is required in production')
