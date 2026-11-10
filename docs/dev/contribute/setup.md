@@ -42,7 +42,8 @@ E-mails land in Mailpit on http://localhost:8025. Ports are forwarded by VS Code
 
 The container also has Claude Code (`claude`) and the GitHub CLI (`gh`). Sign in once with
 `claude` and `gh auth login`; `.devcontainer/compose.yaml` keeps both sign-ins in volumes across
-rebuilds. Git pushes use VS Code's forwarded credentials.
+rebuilds. Git pushes use VS Code's forwarded credentials. `.devcontainer/devcontainer-lock.json` pins the
+feature versions: commit it when a rebuild updates it.
 
 ## Docker only
 
