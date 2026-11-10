@@ -41,6 +41,8 @@ per story when its version is planned; the issue links back here.
 | UC27 | Ask to join a collectif                         | Validated user                | V0.8    |
 | UC28 | Accept, reject or remove a member               | Responsible                   | V0.8    |
 | UC29 | Make a member responsible, remove a responsible | Responsible, admin, moderator | V0.8    |
+| UC30 | Leave a collectif                               | Member, responsible           | V0.8    |
+| UC31 | Delete an item, or ask to delete it             | Responsible, owner, member    | V0.8    |
 
 ## V0.1 — Foundations
 
@@ -207,6 +209,7 @@ computers.
     - A category still used by items cannot be deleted: its items are first moved to another
       category; an unused one can be deleted.
     - Changes show at once in the add form and the search filters; each change is logged (IDs only).
+    - One level for now; the data model keeps `parent_id` so that sub-categories can follow.
 
 ## V0.8 — Roles
 
@@ -220,6 +223,7 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
   an account, archive an abusive item and manage categories (US-0.7.10), so that the platform stays
   clean.
     - A moderator cannot act on an admin or another moderator, nor name moderators.
+    - The owner of an item archived by a moderator is e-mailed with the reason.
 - **US-0.8.3 Join a collectif.** As a validated user, I want to ask to join a collectif from its
   page, so that I help keep its inventory.
     - One open request per person and collectif; its responsibles are e-mailed.
@@ -233,8 +237,25 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
   responsible, or remove a responsible, so that the collectif runs without waiting for the platform.
     - Admins and moderators can do the same for any collectif, so that a collectif is never left
       without a responsible.
+    - A removed responsible stays a member of the collectif.
 - **US-0.8.7 Members tab.** As a responsible, I want a Membres tab on my collectif's page with the
   pending requests first, so that nobody waits.
+- **US-0.8.8 Leave a collectif.** As a member or a responsible, I want to leave a collectif, so
+  that I am no longer listed once I stop helping.
+    - The last responsible cannot leave without naming a member as responsible first.
+- **US-0.8.9 Delete an item.** As a responsible of its owning collectif, its personal owner, an
+  admin or a moderator, I want to delete an item entered by mistake, so that the inventory holds
+  only real equipment.
+    - Deletion is final: the item and its history are erased; the audit log keeps the IDs only
+      ([ADR 0010](../../adr/0010-personal-data-retention/)).
+    - Archiving stays for equipment sold, lost or broken, whose history is worth keeping.
+- **US-0.8.10 Ask to delete an item.** As a member of a collectif, I want to ask its responsibles
+  to delete one of its items, so that a mistake is fixed without giving me final powers.
+    - The request shows in the Membres tab next to membership requests; no e-mail is sent.
+    - One open request per item; a responsible accepts (the item is deleted) or rejects it.
+- **US-0.8.11 Deployment guide.** As the maintainer, I want the instructions to deploy a version on
+  Kubernetes (image, environment, secrets, probes, migrations, first admin), so that V0.8 can be
+  put in production from the docs alone.
 
 ## V0.9 — Photos
 
@@ -286,6 +307,6 @@ These stories complement the [GDPR checklist](../gdpr-checklist/).
 | US-0.6.3  | Contact when there is no phone?                  | a form that e-mails the owner without revealing their address                |
 | US-0.2.4  | Can a rejected account apply again?              | yes                                                                          |
 | US-0.2.2  | Link and session duration?                       | link 15 min, single use; session 30 days                                     |
-| US-0.5.5  | Archive only, or also hard delete?               | archive only in V0.x                                                         |
+| US-0.5.5  | Archive only, or also hard delete?               | decided: archive until V0.7; final deletion from V0.8 (US-0.8.9, US-0.8.10)  |
 | US-0.10.1 | One file per location, or a location column?     | optional location column; otherwise the chosen location                      |
-| US-0.8.5  | Can a member delete an item, or only archive it? | archive only, like responsibles                                              |
+| US-0.8.5  | Can a member delete an item, or only archive it? | decided: a member archives, and asks a responsible to delete (US-0.8.10)     |

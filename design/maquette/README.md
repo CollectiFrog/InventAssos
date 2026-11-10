@@ -22,3 +22,8 @@ How a prototype file is built:
 Rules: copy in French, fictional data only, the two devices kept in sync, accessible markup (real
 links, buttons and labels). The app itself follows [UI](../../docs/dev/architecture/ui.md); this
 mock-up is a reference, not code to ship.
+
+The mock-up is incomplete and temporary. It has no administration screens (queue, categories,
+moderators, members): those follow [UI](../../docs/dev/architecture/ui.md) and reuse the shared
+pieces. A professional design system will replace its look later, through the CSS custom properties
+of [ADR 0019](../../docs/adr/0019-interface-conventions.md).
