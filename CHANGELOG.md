@@ -19,6 +19,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - An item's page shows its owner and city at the top with « Appeler », « SMS » and « Écrire » buttons; writing is offered even when a phone is known.
 - After signing in from a link to a page of the app, you land on that page instead of the home page.
 - Admins manage the categories: add, rename, reorder, and delete one after moving its equipment to another.
+- Clearer feedback: a message after signing out and after moving a category, the contact form's error under its field, empty searches that propose what to do, and the add form recalls location and owner right above « Ajouter ».
 
 ### Changed
 

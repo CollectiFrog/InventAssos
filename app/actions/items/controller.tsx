@@ -40,6 +40,11 @@ function shownTo(actor: CurrentUser, item: ItemDetails): ItemDetails {
   return canSeePerson(actor, person) ? item : { ...item, ownerUserId: null, contactPhone: null }
 }
 
+/** A flash value when it is text. */
+function stringOrUndefined(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined
+}
+
 /** "Mon matériel", the item page and its contact form. */
 export default createController(routes.items, {
   actions: {
@@ -86,6 +91,7 @@ export default createController(routes.items, {
               : {
                   csrfToken: getCsrfToken(context),
                   sent: context.session.get('contactSent') === true,
+                  error: stringOrUndefined(context.session.get('contactError')),
                 }
           }
           history={
@@ -114,8 +120,9 @@ export default createController(routes.items, {
 
       const parsed = parseForm(contactSchema, context.formData)
       if (!parsed.ok || parsed.value.message === null) {
-        session.flash('notice', 'Écrivez un message avant d’envoyer.')
-        return redirect(showUrl, 303)
+        // Shown under the message field, like every field error (US-0.7.7).
+        session.flash('contactError', 'Écrivez un message avant d’envoyer.')
+        return redirect(`${showUrl}#ecrire`, 303)
       }
       // One e-mail per responsible: co-responsibles never see each other's address.
       for (const to of await listOwnerContactEmails(db, item)) {
@@ -139,7 +146,7 @@ export default createController(routes.items, {
         entityId: item.id,
       })
       session.flash('contactSent', true)
-      return redirect(showUrl, 303)
+      return redirect(`${showUrl}#ecrire`, 303)
     },
   },
 })

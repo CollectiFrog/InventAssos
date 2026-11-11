@@ -179,7 +179,7 @@ async function move(context: AppContext, categoryId: string, direction: -1 | 1) 
   const category = await findCategory(context.db, categoryId)
   if (category === null) return notFound(context)
 
-  await context.db.transaction(async (tx) => {
+  const moved = await context.db.transaction(async (tx) => {
     if (await moveCategory(tx, category.id, direction)) {
       await logAction(tx, {
         actorId: actor.id,
@@ -188,7 +188,13 @@ async function move(context: AppContext, categoryId: string, direction: -1 | 1) 
         entityId: category.id,
         payload: { direction: direction < 0 ? 'up' : 'down' },
       })
+      return true
     }
+    return false
   })
+  if (moved) {
+    const where = direction < 0 ? 'monte' : 'descend'
+    context.session.flash('notice', `« ${category.name} » ${where} d’une place.`)
+  }
   return redirect(`${listUrl}#categorie-${category.id}`, 303)
 }

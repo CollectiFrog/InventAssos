@@ -176,8 +176,14 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                       rows={4}
                       maxLength={2000}
                       required
+                      aria-invalid={contact.error ? 'true' : undefined}
+                      aria-describedby={contact.error ? 'field-message-error' : undefined}
                     />
-                    {contact.error ? <p class="error">{contact.error}</p> : null}
+                    {contact.error ? (
+                      <p class="error" id="field-message-error">
+                        {contact.error}
+                      </p>
+                    ) : null}
                   </div>
                   <p class="hint">
                     Son adresse reste cachée ; la vôtre lui est transmise pour qu’il puisse vous
