@@ -20,16 +20,64 @@ export interface ItemPageProps {
   notice?: string
 }
 
-/** An item: what it is, where it is stored (city), who owns it. */
+/** Digits and "+" only, for tel: and sms: links. */
+function dialable(phone: string): string {
+  return phone.replace(/[^0-9+]/g, '')
+}
+
+/** Who owns the item, linked to their page when the viewer may open it. */
+function OwnerLink(handle: Handle<{ item: ItemDetails }>) {
+  return () => {
+    const { item } = handle.props
+    if (item.ownerSlug) {
+      return <a href={routes.collectifs.show.href({ slug: item.ownerSlug })}>{item.ownerName}</a>
+    }
+    if (item.ownerUserId) {
+      return <a href={routes.people.show.href({ userId: item.ownerUserId })}>{item.ownerName}</a>
+    }
+    return <>{item.ownerName}</>
+  }
+}
+
+/**
+ * An item (US-0.7.6, detail template): owner and city at the top with Appeler / SMS / Écrire,
+ * then its description beside a side panel (where it is, writing to its owner, managing it).
+ */
 export function ItemPage(handle: Handle<ItemPageProps>) {
   return () => {
     const { viewer, item, canEdit, contact, history, notice } = handle.props
+    const reachable = contact !== undefined && !item.archived_at
+    const phone = reachable ? item.contactPhone : null
     return (
       <Layout title={item.name} viewer={viewer}>
-        <h1>
-          {item.name}
-          {item.quantity > 1 ? ` × ${item.quantity}` : null}
-        </h1>
+        <div class="page-head item-head">
+          <div>
+            <h1>
+              {item.name}
+              {item.quantity > 1 ? ` × ${item.quantity}` : null}
+            </h1>
+            <p class="status">
+              À <OwnerLink item={item} /> · rangé à {item.city}
+            </p>
+          </div>
+          {reachable ? (
+            <p class="actions contact-buttons">
+              {phone ? (
+                <>
+                  <a class="button" href={`tel:${dialable(phone)}`}>
+                    Appeler
+                  </a>
+                  <a class="button secondary" href={`sms:${dialable(phone)}`}>
+                    SMS
+                  </a>
+                </>
+              ) : null}
+              <a class={phone ? 'button secondary' : 'button'} href="#ecrire">
+                Écrire
+              </a>
+            </p>
+          ) : null}
+        </div>
         {item.archived_at && item.archive_reason ? (
           <p class="notice">
             Archivé le {dateFormat.format(new Date(String(item.archived_at)))} :{' '}
@@ -42,69 +90,73 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
             {notice}
           </p>
         ) : null}
-        <dl class="facts">
-          <dt>Catégorie</dt>
-          <dd>{item.categoryName}</dd>
-          {item.brand ? (
-            <>
-              <dt>Marque</dt>
-              <dd>{item.brand}</dd>
-            </>
-          ) : null}
-          {item.model ? (
-            <>
-              <dt>Modèle</dt>
-              <dd>{item.model}</dd>
-            </>
-          ) : null}
-          {item.serial_number ? (
-            <>
-              <dt>Numéro de série</dt>
-              <dd>{item.serial_number}</dd>
-            </>
-          ) : null}
-          {item.condition ? (
-            <>
-              <dt>État</dt>
-              <dd>{conditionLabels[item.condition]}</dd>
-            </>
-          ) : null}
-          {item.estimated_value !== null ? (
-            <>
-              <dt>Valeur estimée</dt>
-              <dd>{formatEuros(item.estimated_value)}</dd>
-            </>
-          ) : null}
-          <dt>Rangé à</dt>
-          <dd>
-            <a href={routes.locations.show.href({ locationId: item.location_id })}>
-              {item.locationName}
-            </a>{' '}
-            · {item.city}
-          </dd>
-          <dt>Appartient à</dt>
-          <dd>
-            {item.ownerSlug ? (
-              <a href={routes.collectifs.show.href({ slug: item.ownerSlug })}>{item.ownerName}</a>
-            ) : item.ownerUserId ? (
-              <a href={routes.people.show.href({ userId: item.ownerUserId })}>{item.ownerName}</a>
-            ) : (
-              item.ownerName
-            )}
-          </dd>
-        </dl>
-        {item.description ? <p class="prose">{item.description}</p> : null}
-        {contact && !item.archived_at ? (
-          <section class="contact">
-            <h2>Contacter {item.ownerName}</h2>
-            {item.contactPhone ? (
-              <p>
-                Téléphone :{' '}
-                <a href={`tel:${item.contactPhone.replace(/[^0-9+]/g, '')}`}>{item.contactPhone}</a>
-              </p>
-            ) : (
-              <>
-                <p>Pas de téléphone renseigné. Écrivez-lui via la plateforme :</p>
+        <div class="detail">
+          <div class="detail-main">
+            <dl class="facts">
+              <dt>Catégorie</dt>
+              <dd>{item.categoryName}</dd>
+              {item.brand ? (
+                <>
+                  <dt>Marque</dt>
+                  <dd>{item.brand}</dd>
+                </>
+              ) : null}
+              {item.model ? (
+                <>
+                  <dt>Modèle</dt>
+                  <dd>{item.model}</dd>
+                </>
+              ) : null}
+              {item.serial_number ? (
+                <>
+                  <dt>Numéro de série</dt>
+                  <dd>{item.serial_number}</dd>
+                </>
+              ) : null}
+              {item.condition ? (
+                <>
+                  <dt>État</dt>
+                  <dd>{conditionLabels[item.condition]}</dd>
+                </>
+              ) : null}
+              {item.estimated_value !== null ? (
+                <>
+                  <dt>Valeur estimée</dt>
+                  <dd>{formatEuros(item.estimated_value)}</dd>
+                </>
+              ) : null}
+            </dl>
+            {item.description ? <p class="prose">{item.description}</p> : null}
+            {history}
+          </div>
+          <aside class="detail-side" aria-label="Où le trouver">
+            <div class="card">
+              <dl class="facts">
+                <dt>Appartient à</dt>
+                <dd>
+                  <OwnerLink item={item} />
+                </dd>
+                <dt>Rangé à</dt>
+                <dd>
+                  <a href={routes.locations.show.href({ locationId: item.location_id })}>
+                    {item.locationName}
+                  </a>{' '}
+                  · {item.city}
+                </dd>
+                {phone ? (
+                  <>
+                    <dt>Téléphone</dt>
+                    <dd>
+                      <a href={`tel:${dialable(phone)}`}>{phone}</a>
+                    </dd>
+                  </>
+                ) : null}
+              </dl>
+            </div>
+            {reachable && contact ? (
+              <section id="ecrire" class="card contact" aria-labelledby="ecrire-titre">
+                <h2 id="ecrire-titre">Écrire à {item.ownerName}</h2>
+                {phone ? null : <p>Pas de téléphone renseigné : écrivez-lui via la plateforme.</p>}
                 {contact.sent ? (
                   <p class="notice notice-success" role="status">
                     Message envoyé. La réponse arrivera dans votre boîte e-mail.
@@ -133,24 +185,34 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                   </p>
                   <button type="submit">Envoyer</button>
                 </form>
-              </>
-            )}
-          </section>
-        ) : null}
-        {canEdit && !item.archived_at ? (
-          <p class="actions">
-            <a class="button secondary" href={routes.items.edit.index.href({ itemId: item.id })}>
-              Modifier
-            </a>
-            <a class="button secondary" href={routes.items.move.index.href({ itemId: item.id })}>
-              Déplacer
-            </a>
-            <a class="button secondary" href={routes.items.archive.index.href({ itemId: item.id })}>
-              Archiver
-            </a>
-          </p>
-        ) : null}
-        {history}
+              </section>
+            ) : null}
+            {canEdit && !item.archived_at ? (
+              <div class="card">
+                <p class="actions">
+                  <a
+                    class="button secondary"
+                    href={routes.items.edit.index.href({ itemId: item.id })}
+                  >
+                    Modifier
+                  </a>
+                  <a
+                    class="button secondary"
+                    href={routes.items.move.index.href({ itemId: item.id })}
+                  >
+                    Déplacer
+                  </a>
+                  <a
+                    class="button secondary"
+                    href={routes.items.archive.index.href({ itemId: item.id })}
+                  >
+                    Archiver
+                  </a>
+                </p>
+              </div>
+            ) : null}
+          </aside>
+        </div>
       </Layout>
     )
   }

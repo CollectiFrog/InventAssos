@@ -669,3 +669,44 @@ button.danger {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* Detail template (ADR 0022): content, then a side panel that sticks beside it when wide. */
+.detail {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+.detail-side {
+  display: grid;
+  gap: 1rem;
+}
+.detail-side h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+@container main (min-width: 52rem) {
+  .detail {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  }
+  .detail-side {
+    position: sticky;
+    top: 5rem;
+  }
+}
+/* Appeler / SMS / Écrire (US-0.7.6): big enough for a thumb, first thing under the title. */
+.contact-buttons {
+  margin: 0;
+}
+.contact-buttons .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6.5rem;
+  min-height: var(--touch);
+}
+.item-head h1 {
+  margin-bottom: 0.25rem;
+}
+.item-head p.status {
+  margin: 0;
+}
