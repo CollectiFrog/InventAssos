@@ -76,7 +76,11 @@ flowchart TB
   the shell; components adapt to their container (`@container`, `auto-fill`).
 - **Breadcrumb** above the page title on computers (Collectifs › Collecti'FROG › item); « Retour »
   on phones.
-- The current entry carries `aria-current="page"`; the bar is a `<nav aria-label>`.
+- The current entry carries `aria-current="page"`; the bar is a `<nav aria-label>`. It is one
+  `<nav>`, which CSS turns into the bottom tab bar, the rail or the sidebar; each page passes its
+  `section` to `Layout` (detail pages reached from several sections pass none).
+- The account link shows the initials; « Se déconnecter » is on the account page. Pending and
+  rejected accounts have no navigation, only « Se déconnecter » in the top bar.
 - Detail pages have one link labelled « Retour » that goes back one page. The server builds it from
   the `Referer` header (sent for same-origin navigation, `Referrer-Policy: same-origin`) when it is
   an internal path, and falls back to the section's list page otherwise; no JavaScript, and it can

@@ -24,13 +24,13 @@ describe('sign-out (US-0.2.8)', () => {
     await db.close()
   })
 
-  it('shows a sign-out button to a signed-in user', async () => {
+  it('shows a sign-out button on the account page (US-0.7.1)', async () => {
     const app = createTestApp(db)
     const client = app.client()
     await signIn(app, client, 'camille@example.org')
 
-    const home = await client.get(routes.home.href())
-    assert.match(home.text, /Se déconnecter/)
+    const profile = await client.get(routes.account.profile.index.href())
+    assert.match(profile.text, /<form method="post" action="\/deconnexion"[^>]*>.*Se déconnecter/s)
   })
 
   it('ends the session server side: the old cookie no longer authenticates', async () => {

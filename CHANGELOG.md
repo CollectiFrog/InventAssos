@@ -9,6 +9,13 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 ### Added
 
 - Contributors can run the app, its tests and the checks with only Docker installed, or in a VS Code Dev Container.
+- Navigation with four entries (Accueil, Rechercher, Mon matériel, Collectifs): a tab bar at the bottom of the screen on a phone, a sidebar with your collectifs on a computer.
+- On a computer, every page has a search field and an « Ajouter du matériel » button at the top.
+
+### Changed
+
+- The account is reached from a round button with your initials; « Se déconnecter » moved to the account page.
+- Pages use the whole width of a computer screen instead of a narrow centred column.
 
 ## [0.6.1] - 2026-11-10
 

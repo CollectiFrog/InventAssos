@@ -7,8 +7,8 @@ sidebar:
 
 Les administrateurs de la plateforme sont les adresses e-mail listées par l'hébergeur dans la
 configuration (`PLATFORM_ADMIN_EMAILS`). À la première connexion, leur compte est créé et validé
-automatiquement. Un badge **admin** s'affiche à côté de leur nom et un lien **Administration**
-apparaît en haut de la page. La liste est lue au démarrage de l'application : un ajout ou un retrait
+automatiquement. Un lien **Administration** apparaît en bas de la colonne de gauche sur un
+ordinateur, en haut de la page sur un téléphone. La liste est lue au démarrage de l'application : un ajout ou un retrait
 prend effet après son redémarrage.
 
 ## La file d'attente

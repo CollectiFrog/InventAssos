@@ -7,9 +7,23 @@ sidebar:
 
 <!-- Une section par tâche, dans l'ordre où on la rencontre. Chaque version ajoute ses sections. -->
 
+## Se repérer
+
+Quatre entrées mènent partout : **Accueil**, **Rechercher**, **Mon matériel** et **Collectifs**.
+Sur un téléphone, elles sont dans la barre en bas de l'écran ; sur un ordinateur, dans la colonne à
+gauche (réduite à des icônes sur un écran étroit). L'entrée de la section où vous êtes est mise en
+évidence.
+
+Sur un ordinateur, la colonne de gauche liste aussi **Mes collectifs** (les cinq premiers, puis
+**Tous**) et, en bas, **Administration** pour les administrateurs. La barre du haut garde sur
+chaque page un champ de **recherche** et le bouton **Ajouter du matériel**.
+
+En haut à droite, le rond avec vos initiales ouvre **votre compte**. Sur un téléphone, les
+administrateurs trouvent le lien **Administration** à côté.
+
 ## Parcourir l'inventaire
 
-**Inventaire**, en haut de la page, liste tout le matériel actif de la plateforme, 24 objets par
+**Rechercher** liste tout le matériel actif de la plateforme, 24 objets par
 page : nom, quantité, catégorie, ville et propriétaire. Cliquez sur un objet pour voir sa page.
 Les adresses des lieux n'y apparaissent jamais, seulement la ville.
 
@@ -29,8 +43,8 @@ le compte est désactivé n'est plus affiché.
 
 ## Modifier mon profil
 
-Cliquez sur votre nom en haut de la page. Vous pouvez y changer votre nom et indiquer un numéro de
-téléphone (facultatif).
+Touchez le rond avec vos initiales, en haut à droite. Vous pouvez y changer votre nom et indiquer un
+numéro de téléphone (facultatif), et vous déconnecter.
 
 Le téléphone est **visible par tous les utilisateurs validés** de la plateforme : c'est ainsi qu'ils
 vous contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
@@ -45,7 +59,7 @@ changer le nom, contactez un administrateur.
 
 Un **lieu** est un endroit où du matériel est rangé : le local d'un collectif, votre garage…
 Tout utilisateur validé peut déclarer ses propres lieux ; personne d'autre ne peut les modifier. Ouvrez
-**Mes lieux** en haut de la page.
+**Mon matériel**, puis **Mes lieux**.
 
 - **Ajouter un lieu** : choisissez à qui il appartient — vous-même (« Moi (lieu personnel) ») ou
   un collectif dont vous êtes responsable — puis indiquez son nom, sa ville, son adresse et des notes (accès, code…).

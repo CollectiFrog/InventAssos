@@ -40,7 +40,7 @@ export function InventoryPage(handle: Handle<InventoryPageProps>) {
       filters.query || filters.categoryId || filters.collectifId || filters.city,
     )
     return (
-      <Layout title="Inventaire" viewer={viewer}>
+      <Layout title="Inventaire" viewer={viewer} section="search">
         <h1>Inventaire</h1>
         <form
           method="get"

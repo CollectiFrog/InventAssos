@@ -8,7 +8,7 @@ export function HomePage(handle: Handle<{ databaseOk: boolean; viewer: Viewer }>
   return () => {
     const { databaseOk, viewer } = handle.props
     return (
-      <Layout title="Accueil" viewer={viewer}>
+      <Layout title="Accueil" viewer={viewer} section="home">
         <h1>{viewer ? `Bonjour ${viewer.name}` : 'InventAssos'}</h1>
         <p>
           Inventaire de matériel partagé entre associations : chaque collectif référence son

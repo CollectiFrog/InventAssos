@@ -39,14 +39,29 @@ export async function setResponsible(
     )
 }
 
-/** IDs of the active collectifs a person is an active responsible of. */
-export async function listManagedCollectifIds(db: Database, userId: string): Promise<string[]> {
+/** A collectif as the navigation shows it. */
+export interface CollectifLink {
+  id: string
+  name: string
+  slug: string
+}
+
+/** Active collectifs a person is an active responsible of, by name. */
+export async function listManagedCollectifs(
+  db: Database,
+  userId: string,
+): Promise<CollectifLink[]> {
   const result = await db.exec(sql`
-    select r.collectif_id from responsibles r
+    select c.id, c.name, c.slug from responsibles r
     join collectifs c on c.id = r.collectif_id
     where r.user_id = ${userId} and r.status = 'active' and c.status = 'active'
+    order by lower(c.name), c.id
   `)
-  return (result.rows ?? []).map((row) => String(row.collectif_id))
+  return (result.rows ?? []).map((row) => ({
+    id: String(row.id),
+    name: String(row.name),
+    slug: String(row.slug),
+  }))
 }
 
 /** Active responsibles of a collectif (ID and name), for display. */

@@ -26,7 +26,7 @@ export function EditCollectifPage(handle: Handle<EditCollectifPageProps>) {
     const { viewer, csrfToken, collectif, values, errors = {} } = handle.props
     const slug = collectif.slug
     return (
-      <Layout title={`Modifier ${collectif.name}`} viewer={viewer}>
+      <Layout title={`Modifier ${collectif.name}`} viewer={viewer} section="collectifs">
         <h1>Modifier « {collectif.name} »</h1>
         <p class="status">
           Pour changer le nom du collectif, contactez un administrateur de la plateforme.

@@ -44,7 +44,7 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
     } = handle.props
     const slug = collectif.slug
     return (
-      <Layout title={collectif.name} viewer={viewer}>
+      <Layout title={collectif.name} viewer={viewer} section="collectifs">
         <h1>{collectif.name}</h1>
         {notice ? (
           <p class="notice notice-success" role="status">

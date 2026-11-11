@@ -21,7 +21,7 @@ export function LocationsPage(handle: Handle<LocationsPageProps>) {
   return () => {
     const { viewer, csrfToken, locations, canCreate, notice } = handle.props
     return (
-      <Layout title="Mes lieux" viewer={viewer}>
+      <Layout title="Mes lieux" viewer={viewer} section="mine">
         <h1>Mes lieux de stockage</h1>
         {notice ? (
           <p class="notice notice-success" role="status">
@@ -93,7 +93,7 @@ export function LocationEditorPage(handle: Handle<LocationEditorPageProps>) {
   return () => {
     const { viewer, title, ...form } = handle.props
     return (
-      <Layout title={title} viewer={viewer}>
+      <Layout title={title} viewer={viewer} section="mine">
         <h1>{title}</h1>
         <LocationForm {...form} />
         <p>
