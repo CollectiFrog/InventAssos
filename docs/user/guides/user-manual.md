@@ -21,6 +21,14 @@ chaque page un champ de **recherche** et le bouton **Ajouter du matériel**.
 En haut à droite, le rond avec vos initiales ouvre **votre compte**. Sur un téléphone, les
 administrateurs trouvent le lien **Administration** à côté.
 
+## L'accueil
+
+**Accueil** commence par un champ de recherche dans le matériel de vos collectifs. Dessous, le
+matériel **ajouté récemment** que vous pouvez voir, et **vos collectifs** avec leur ville et leur
+nombre d'objets. Si vous ne faites partie d'aucun collectif, l'accueil vous propose l'annuaire des
+collectifs ou d'en déclarer un. Les administrateurs y voient aussi le nombre de **demandes à
+valider**, qui mène à la file d'attente.
+
 ## Qui voit quoi
 
 Chaque collectif garde son inventaire pour lui. Vous voyez un objet quand :

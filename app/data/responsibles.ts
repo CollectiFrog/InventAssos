@@ -44,6 +44,7 @@ export interface CollectifLink {
   id: string
   name: string
   slug: string
+  city: string
 }
 
 /** Active collectifs a person is an active responsible of, by name. */
@@ -52,7 +53,7 @@ export async function listManagedCollectifs(
   userId: string,
 ): Promise<CollectifLink[]> {
   const result = await db.exec(sql`
-    select c.id, c.name, c.slug from responsibles r
+    select c.id, c.name, c.slug, c.city from responsibles r
     join collectifs c on c.id = r.collectif_id
     where r.user_id = ${userId} and r.status = 'active' and c.status = 'active'
     order by lower(c.name), c.id
@@ -61,6 +62,7 @@ export async function listManagedCollectifs(
     id: String(row.id),
     name: String(row.name),
     slug: String(row.slug),
+    city: String(row.city),
   }))
 }
 
