@@ -16,6 +16,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Dashboard on the home page: search first, equipment recently added to your collectifs, your collectifs, and the pending requests for admins.
 - A location can be created from the « Ajouter du matériel » form, so having no location yet no longer blocks you.
 - A collectif's page has tabs Matériel, Lieux and Responsables, with « Ajouter du matériel » first for its responsibles; deposits in its locations are listed apart.
+- An item's page shows its owner and city at the top with « Appeler », « SMS » and « Écrire » buttons; writing is offered even when a phone is known.
 
 ### Changed
 

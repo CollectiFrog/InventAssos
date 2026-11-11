@@ -53,14 +53,17 @@ vos collectifs) et **Ville** se combinent entre eux et avec la recherche ; **Tou
 
 ## Contacter le propriétaire d'un objet
 
-La page d'un objet indique à qui il appartient, la ville où il est rangé et un **téléphone** : celui
-du collectif, ou celui de la personne si elle l'a renseigné dans son profil et que vous partagez un
-collectif avec elle. Sans téléphone, un
-formulaire permet d'écrire au propriétaire (pour un collectif, à chacun de ses responsables, dans
-un e-mail séparé) : son adresse e-mail reste cachée, la vôtre lui est transmise pour qu'il puisse
-vous répondre. Le prêt, la location ou l'échange s'organisent ensuite directement entre vous.
-L'envoi d'un message n'apparaît pas dans l'historique de l'objet. Le téléphone d'une personne dont
-le compte est désactivé n'est plus affiché.
+En haut de la page d'un objet : à qui il appartient, la ville où il est rangé et, juste dessous,
+les boutons **Appeler**, **SMS** et **Écrire**. Le téléphone est celui du collectif, ou celui de la
+personne si elle l'a renseigné dans son profil et que vous partagez un collectif avec elle ; sans
+téléphone, seul **Écrire** est proposé.
+
+**Écrire** mène au formulaire à côté de l'objet (en dessous sur un téléphone) : le message part par
+e-mail au propriétaire (pour un collectif, à chacun de ses responsables, dans un e-mail séparé). Son
+adresse e-mail reste cachée, la vôtre lui est transmise pour qu'il puisse vous répondre. Le prêt,
+la location ou l'échange s'organisent ensuite directement entre vous. L'envoi d'un message
+n'apparaît pas dans l'historique de l'objet. Le téléphone d'une personne dont le compte est
+désactivé n'est plus affiché.
 
 ## Modifier mon profil
 

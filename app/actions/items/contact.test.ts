@@ -66,15 +66,27 @@ describe('item page and contact (US-0.6.3)', () => {
     )
 
     const collectifPage = await page(collectifItem)
-    assert.match(collectifPage, /Téléphone : <a href="tel:0102030405">01 02 03 04 05<\/a>/)
-    assert.match(collectifPage, /Rennes/)
-    assert.doesNotMatch(collectifPage, /Votre message/)
+    assert.match(
+      collectifPage,
+      /<dt>Téléphone<\/dt><dd><a href="tel:0102030405">01 02 03 04 05<\/a>/,
+    )
+    assert.match(collectifPage, /rangé à Rennes/)
+    // US-0.7.6: Appeler, SMS and Écrire right under the title.
+    const head = /<div class="page-head item-head">(.*?)<div class="detail">/s.exec(
+      collectifPage,
+    )?.[1]
+    assert.match(head ?? '', /<a href="tel:0102030405" class="button">Appeler<\/a>/)
+    assert.match(head ?? '', /<a href="sms:0102030405" class="button secondary">SMS<\/a>/)
+    assert.match(head ?? '', /<a href="#ecrire" class="button secondary">Écrire<\/a>/)
+    assert.match(collectifPage, /<section id="ecrire"/)
     assert.match(await page(personItem), /06 07 08 09 10/)
   })
 
   it('without a phone, says so and e-mails the owner without revealing their address', async () => {
     const html = await page(personItem)
     assert.match(html, /Pas de téléphone renseigné/)
+    assert.doesNotMatch(html, /Appeler|href="sms:/)
+    assert.match(html, /<a href="#ecrire" class="button">Écrire<\/a>/)
     assert.doesNotMatch(html, /max\.secret@example\.org/)
 
     const response = await lou.post(routes.items.contact.href({ itemId: personItem.id }), {
@@ -174,6 +186,16 @@ describe('item page and contact (US-0.6.3)', () => {
   it('shows no contact section to the owner', async () => {
     const max = app.client()
     await signIn(app, max, 'max.secret@example.org')
-    assert.doesNotMatch(await page(personItem, max), /Contacter/)
+    assert.doesNotMatch(await page(personItem, max), /Appeler|>Écrire<|id="ecrire"/)
+  })
+
+  it('reaches the phone in two taps from the dashboard (US-0.7.6)', async () => {
+    await db.exec(sql`update collectifs set contact_phone = '01 02 03 04 05'`)
+    const home = (await lou.get(routes.home.href())).text
+    const href = new RegExp(`href="(${routes.items.show.href({ itemId: collectifItem.id })})"`)
+    const link = href.exec(home)?.[1]
+    assert.ok(link, 'the dashboard lists the item')
+    const item = (await lou.get(link)).text
+    assert.match(item, /<a href="tel:0102030405" class="button">Appeler<\/a>/)
   })
 })
