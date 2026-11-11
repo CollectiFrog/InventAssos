@@ -36,6 +36,7 @@ In the VS Code terminal, which runs inside the container:
 ```sh
 make dev     # the app on http://localhost:3000, restarted when a file changes
 make check   # lint, typecheck, test, build: the same as CI
+make a11y    # accessibility of the key pages in Chromium (ADR 0024), also in CI
 ```
 
 E-mails land in Mailpit on http://localhost:8025. Ports are forwarded by VS Code.
@@ -94,7 +95,11 @@ reversible). Never edit an applied one (ADR 0013).
 
 ```sh
 make check   # lint, typecheck, test, build: the same as CI
+make a11y    # accessibility of the key pages in Chromium (ADR 0024), also in CI
 ```
+
+`make a11y` downloads Chromium on its first run. Outside the dev container, Chromium also needs
+system libraries: `npx playwright install --with-deps chromium` (root on Linux).
 
 Tests use the `inventassos_test` database that PostgreSQL creates at its first start
 (`db/init/`). Point `TEST_DATABASE_URL` elsewhere

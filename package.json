@@ -8,6 +8,7 @@
     "dev:poll": "NODE_ENV=development node scripts/dev-poll.ts",
     "start": "node --import remix/node-tsx server.ts",
     "test": "NODE_ENV=test remix test",
+    "test:a11y": "NODE_ENV=test remix test --type e2e",
     "typecheck": "tsc --noEmit",
     "lint": "biome check . && remix doctor"
   },
@@ -24,6 +25,8 @@
     "@types/node": "24.19.2",
     "@types/nodemailer": "8.0.2",
     "@types/pg": "8.23.1",
+    "axe-core": "4.14.0",
+    "playwright": "1.65.0",
     "typescript": "7.0.2"
   }
 }

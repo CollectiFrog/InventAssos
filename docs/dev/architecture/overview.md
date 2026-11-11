@@ -40,6 +40,7 @@ flowchart LR
 | Static files    | stylesheet, favicon                                                               | `public/`                                                      |
 | Health probes   | `/healthz` (process), `/readyz` (database)                                        | `app/actions/health/`                                          |
 | Tests           | router tests against PostgreSQL (ADR 0012)                                        | `**/*.test.ts` next to the code, `test/`                       |
+| Accessibility   | axe-core audit of the key pages in Chromium (ADR 0024)                            | `app/accessibility.test.e2e.ts`, `test/browser.ts`             |
 
 A request goes `server.ts` → `router.fetch` → middleware (`app/middleware/index.ts`) → the
 controller action matched in `app/routes.ts` → a `Response`. `createAppRouter(deps)` receives its
@@ -77,6 +78,7 @@ session secret, `PLATFORM_ADMIN_EMAILS`, S3 (from V0.9). No deployment value liv
 | Inventory visibility    | [0021](../../adr/0021-inventory-within-collectifs/), [0023](../../adr/0023-collectif-city/)                           |
 | Deployment              | [0005](../../adr/0005-deployment/)                                                                                    |
 | Tests                   | [0012](../../adr/0012-testing-with-remix-test/)                                                                       |
+| Accessibility check     | [0024](../../adr/0024-accessibility-check-with-axe/)                                                                  |
 | Migrations              | [0013](../../adr/0013-sql-migrations-at-startup/)                                                                     |
 | Lint and format         | [0014](../../adr/0014-lint-and-format-with-biome/)                                                                    |
 | Server-rendered HTML    | [0015](../../adr/0015-server-rendered-html/)                                                                          |

@@ -47,6 +47,7 @@ The CI calls the same targets as you. Run them before opening a PR.
 | `make test`      | tests, against PostgreSQL        |
 | `make build`     | load the production module graph |
 | `make check`     | all four, in that order          |
+| `make a11y`      | accessibility audit in Chromium  |
 | `make docs`      | build both documentation sites   |
 | `make db`        | start PostgreSQL (Docker)        |
 | `make dev`       | `make db`, then the app on :3000 |
