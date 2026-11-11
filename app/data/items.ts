@@ -73,6 +73,10 @@ export interface ItemSummary {
   locationName: string
   city: string
   ownerName: string
+  /** Set when a person owns the item. */
+  ownerUserId: string | null
+  /** Set when a collectif owns the item. */
+  ownerCollectifId: string | null
   archivedAt: Date | null
 }
 
@@ -86,12 +90,14 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
     locationName: String(row.location_name),
     city: String(row.city),
     ownerName: String(row.owner_name ?? ''),
+    ownerUserId: row.owner_user_id == null ? null : String(row.owner_user_id),
+    ownerCollectifId: row.owner_collectif_id == null ? null : String(row.owner_collectif_id),
     archivedAt: row.archived_at == null ? null : new Date(String(row.archived_at)),
   }
 }
 
 const summaryColumns = sql`
-  i.id, i.name, i.quantity, i.location_id, i.archived_at,
+  i.id, i.name, i.quantity, i.location_id, i.archived_at, i.owner_user_id, i.owner_collectif_id,
   cat.name as category_name, l.name as location_name, l.city,
   coalesce(oc.name, ou.name) as owner_name
 `
@@ -132,25 +138,15 @@ function idList(value: unknown): string[] {
   return typeof value === 'string' && value !== '' ? value.split(',') : []
 }
 
-/**
- * Active items a person deals with: owned by them or by a collectif they manage, or stored in a
- * location they or those collectifs own.
- */
-export async function listItemsManagedBy(
+/** Active items stored right now in a person's own locations, by name (US-0.7.3). */
+export async function listItemsStoredAtHomeOf(
   db: Database,
   userId: string,
-  collectifIds: readonly string[],
 ): Promise<ItemSummary[]> {
-  const ids = [...collectifIds]
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins}
-    where i.archived_at is null and (
-      i.owner_user_id = ${userId}
-      or i.owner_collectif_id = any(${ids}::uuid[])
-      or l.user_id = ${userId}
-      or l.collectif_id = any(${ids}::uuid[])
-    )
-    order by i.name
+    where i.archived_at is null and l.user_id = ${userId}
+    order by lower(i.name), i.id
   `)
   return (result.rows ?? []).map(toSummary)
 }

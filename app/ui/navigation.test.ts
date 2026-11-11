@@ -88,24 +88,18 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     }
   })
 
-  it('keeps "Mes lieux" one tap away from Mon matériel, which replaced it in the bar', async () => {
+  it('gives Mon matériel two tabs, Matériel and Lieux, each marked on its page', async () => {
     const app = createTestApp(db)
     const client = app.client()
     await signIn(app, client, 'camille@example.org')
 
-    // Without a location yet, the page explains why; with one, it links next to "Ajouter".
-    assert.match(
-      (await client.get(routes.items.index.href())).text,
-      /<a href="\/lieux"[^>]*>Mes lieux<\/a>/,
-    )
-    await client.post(routes.locations.create.action.href(), {
-      owner: 'me',
-      name: 'Garage',
-      city: 'Rennes',
-    })
-    const mine = (await client.get(routes.items.index.href())).text
-    assert.match(mine, /Ajouter du matériel/)
-    assert.match(mine, /<a [^>]*href="\/lieux"[^>]*>Mes lieux<\/a>/)
+    const tabs = (html: string) =>
+      /<nav aria-label="Mon matériel" class="tabs">(.*?)<\/nav>/s.exec(html)?.[1] ?? ''
+    const items = tabs((await client.get(routes.items.index.href())).text)
+    assert.match(items, /<a href="\/materiel" aria-current="page">Matériel<\/a>/)
+    assert.match(items, /<a href="\/lieux">Lieux<\/a>/)
+    const places = tabs((await client.get(routes.locations.index.href())).text)
+    assert.match(places, /<a href="\/lieux" aria-current="page">Lieux<\/a>/)
   })
 
   it('puts the account in the header with initials, and marks it on the profile page', async () => {

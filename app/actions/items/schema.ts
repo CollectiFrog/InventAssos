@@ -53,3 +53,12 @@ export const itemFieldNames = [
 
 /** Raw submitted values, keyed by field name. */
 export type ItemFormValues = Record<(typeof itemFieldNames)[number], string>
+
+/** Value of « Rangé dans » that asks for a new location, described in the same form (US-0.7.4). */
+export const newLocationChoice = 'nouveau'
+
+/** The new location's fields in the add form; address and notes are added later on its page. */
+export const newLocationSchema = f.object({
+  newLocationName: f.field(requiredText(120)),
+  newLocationCity: f.field(requiredText(120)),
+})

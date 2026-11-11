@@ -625,3 +625,47 @@ button.danger {
 .empty-state p {
   margin-top: 0;
 }
+
+/* Tabs inside a page: links to distinct URLs, the current one underlined. */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+}
+.tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 1rem;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tabs a[aria-current="page"] {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* « Créer un nouveau lieu » inside the add form (US-0.7.4). */
+.new-location {
+  display: grid;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+.new-location[open] {
+  padding-bottom: 1rem;
+}
+.new-location summary {
+  min-height: var(--touch);
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+}

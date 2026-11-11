@@ -61,10 +61,14 @@ describe("a collectif's locations (US-0.4.1)", () => {
       owner: `collectif:${grenouilles.id}`,
       ...fields,
     })
-    assert.equal(created.location, routes.locations.index.href())
+    // A collectif's locations live on its page, not in Mon matériel › Lieux (US-0.7.3).
+    assert.equal(created.location, routes.collectifs.show.href({ slug: grenouilles.slug }))
     const [location] = await listCollectifLocations(db, grenouilles.id)
     assert.equal(location?.name, 'Local Dupont')
-    assert.match((await client.get(routes.locations.index.href())).text, /Local Dupont/)
+    assert.doesNotMatch(
+      (await client.get(routes.locations.index.href())).text,
+      /<strong>Local Dupont<\/strong>/,
+    )
     const page = await client.get(routes.collectifs.show.href({ slug: grenouilles.slug }))
     assert.match(page.text, /Local Dupont<\/a> · Rennes/)
 
