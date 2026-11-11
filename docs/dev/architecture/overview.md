@@ -66,21 +66,21 @@ session secret, `PLATFORM_ADMIN_EMAILS`, S3 (from V0.9). No deployment value liv
 
 ## Decisions
 
-| Topic                   | ADR                                                          |
-|-------------------------|--------------------------------------------------------------|
-| Framework               | [0006](../../adr/0006-remix-3-full-stack/)                   |
-| Database                | [0007](../../adr/0007-postgresql/)                           |
-| Accounts and sign-in    | [0008](../../adr/0008-app-managed-accounts/)                 |
-| Ownership and locations | [0009](../../adr/0009-ownership-and-locations/)              |
-| Personal data retention | [0010](../../adr/0010-personal-data-retention/)              |
-| Roles                   | [0020](../../adr/0020-platform-and-collectif-roles/)         |
-| Inventory visibility    | [0021](../../adr/0021-inventory-within-collectifs/)          |
-| Deployment              | [0005](../../adr/0005-deployment/)                           |
-| Tests                   | [0012](../../adr/0012-testing-with-remix-test/)              |
-| Migrations              | [0013](../../adr/0013-sql-migrations-at-startup/)            |
-| Lint and format         | [0014](../../adr/0014-lint-and-format-with-biome/)           |
-| Server-rendered HTML    | [0015](../../adr/0015-server-rendered-html/)                 |
-| E-mail                  | [0016](../../adr/0016-mail-through-nodemailer/)              |
-| Sessions                | [0017](../../adr/0017-sessions-in-postgresql/)               |
-| Rate limits             | [0018](../../adr/0018-rate-limits-in-postgresql/)            |
-| Interface               | [0019](../../adr/0019-interface-conventions/) · [UI](../ui/) |
+| Topic                   | ADR                                                                                                                   |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| Framework               | [0006](../../adr/0006-remix-3-full-stack/)                                                                            |
+| Database                | [0007](../../adr/0007-postgresql/)                                                                                    |
+| Accounts and sign-in    | [0008](../../adr/0008-app-managed-accounts/)                                                                          |
+| Ownership and locations | [0009](../../adr/0009-ownership-and-locations/)                                                                       |
+| Personal data retention | [0010](../../adr/0010-personal-data-retention/)                                                                       |
+| Roles                   | [0020](../../adr/0020-platform-and-collectif-roles/)                                                                  |
+| Inventory visibility    | [0021](../../adr/0021-inventory-within-collectifs/)                                                                   |
+| Deployment              | [0005](../../adr/0005-deployment/)                                                                                    |
+| Tests                   | [0012](../../adr/0012-testing-with-remix-test/)                                                                       |
+| Migrations              | [0013](../../adr/0013-sql-migrations-at-startup/)                                                                     |
+| Lint and format         | [0014](../../adr/0014-lint-and-format-with-biome/)                                                                    |
+| Server-rendered HTML    | [0015](../../adr/0015-server-rendered-html/)                                                                          |
+| E-mail                  | [0016](../../adr/0016-mail-through-nodemailer/)                                                                       |
+| Sessions                | [0017](../../adr/0017-sessions-in-postgresql/)                                                                        |
+| Rate limits             | [0018](../../adr/0018-rate-limits-in-postgresql/)                                                                     |
+| Interface               | [0019](../../adr/0019-interface-conventions/), [0022](../../adr/0022-sidebar-navigation-on-computers/) · [UI](../ui/) |

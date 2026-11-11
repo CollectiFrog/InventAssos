@@ -177,8 +177,9 @@ computers.
 
 - **US-0.7.1 Navigation.** As a validated user, I want four entries (Accueil, Rechercher, Mon
   matériel, Collectifs), so that I always know where to go.
-    - A tab bar at the bottom of the screen on a phone, a top bar on a computer; account and
-      administration are reached from the header.
+    - A tab bar at the bottom of the screen on a phone; on a computer a left rail (720–1099 px)
+      then a sidebar with my collectifs and Administration (ADR 0022). A top bar holds the search
+      field, "Ajouter du matériel" and the account.
 - **US-0.7.2 Dashboard.** As a validated user, I want a home page with search first, my
   collectifs and the equipment recently added to them, so that every task starts from one place.
     - Without any collectif, the dashboard proposes the collectifs directory and "Demander un
@@ -231,6 +232,15 @@ computers.
   name, city and description, so that I find mine and ask to manage or join it.
     - "Mes collectifs" first, then all collectifs, with a search by name or city; no item, location
       or member of a collectif I do not belong to is shown.
+- **US-0.7.13 Use the whole screen.** As a user on a computer, I want pages that use the full
+  width of my window, so that I see more of my inventory at once and manage it faster (ADR 0022).
+    - No page-wide maximum width up to 2000 px; four templates (index, detail, settings, wizard),
+      no phone-sized frame on any page.
+    - Rechercher and a collectif's equipment are dense tables by default, sortable, with filters
+      on the left and active filters removable; `?vue=grille` shows cards.
+    - Mon compte is a settings page in sections; deleting the account goes through
+      `/compte/supprimer`. Administration sections have their own URLs.
+    - Nothing changes below 720 px.
 
 ## V0.8 — Roles
 
