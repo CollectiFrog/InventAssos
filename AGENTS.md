@@ -67,7 +67,7 @@ Without Node or `make` on the host, run any target in the app container:
 | `docs/dev/`          | developer docs → published from `dev` at `/dev/`            |
 | `docs/adr/`          | architecture decision records → published with the dev docs |
 | `docs/site/`         | the Starlight app that renders both sites                   |
-| `design/maquette/`   | V0.7 clickable mock-up sources (claude.ai Design canvas)    |
+| `design/maquette/`   | clickable mock-up up to V1.0 (claude.ai Design canvas)      |
 | `.github/workflows/` | CI (PR checks), PR title, docs, release                     |
 | `CHANGELOG.md`       | user-visible changes, Keep a Changelog format               |
 | `server.ts`          | entry point: config, migrations, HTTP server                |
