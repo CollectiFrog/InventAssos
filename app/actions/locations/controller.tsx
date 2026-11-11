@@ -19,6 +19,7 @@ import {
   itemScopeOf,
 } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
+import { backHref } from '../back-link.ts'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { LocationPage } from './location-page.tsx'
@@ -62,6 +63,12 @@ export default createController(routes.locations, {
           viewer={viewerOf(context)}
           location={redactLocation(location, canSeeFullAddress(actor, location))}
           canManage={canManageLocation(actor, location)}
+          back={backHref(
+            context,
+            location.ownerSlug
+              ? routes.collectifs.places.href({ slug: location.ownerSlug })
+              : routes.locations.index.href(),
+          )}
         />,
       )
     },

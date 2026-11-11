@@ -76,9 +76,11 @@ export class TestClient {
     this.#address = address
   }
 
-  /** GET a path; HTML bodies are read so their CSRF token is remembered. */
-  async get(path: string): Promise<TestResponse> {
-    return this.#send(new Request(new URL(path, testOrigin), { headers: this.#headers() }))
+  /** GET a path, with extra headers if given; HTML bodies are read so their CSRF token is remembered. */
+  async get(path: string, extra: Record<string, string> = {}): Promise<TestResponse> {
+    const headers = this.#headers()
+    for (const [name, value] of Object.entries(extra)) headers.set(name, value)
+    return this.#send(new Request(new URL(path, testOrigin), { headers }))
   }
 
   /** POST a form with the remembered CSRF token (fetching one from `csrfFrom` if needed). */

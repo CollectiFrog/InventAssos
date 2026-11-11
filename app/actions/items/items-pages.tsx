@@ -160,7 +160,7 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
       <Layout title="Ajouter du matériel" viewer={viewer} section="mine">
         <h1>Ajouter du matériel</h1>
         <ErrorSummary errors={errors} />
-        <form method="post" action={routes.items.create.action.href()} class="stack">
+        <form method="post" action={routes.items.create.action.href()} class="stack form-wide">
           <CsrfField token={csrfToken} />
           <ItemFields values={values} errors={errors} categories={categories} />
           {/* US-0.7.7: where it goes and whose it is, last, right above the button. */}

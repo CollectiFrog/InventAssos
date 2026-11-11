@@ -23,6 +23,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Rechercher and a collectif's equipment show as a sortable table on a computer (cards with « Grille »), with filters on the left, counts per category and city, and removable active filters.
 - Administration is split into tabs at their own addresses: Demandes, Comptes, Collectifs (new overview of validated collectifs) and Catégories.
 - « Mon compte » is a settings page in sections (profile, collectifs, session, about, delete) with contents; « Supprimer mon compte » explains what deletion will do in V1.0.
+- Detail pages show a breadcrumb on a computer and a « Retour » link on a phone; the item forms use the width of a computer screen, two fields per row.
 
 ### Changed
 

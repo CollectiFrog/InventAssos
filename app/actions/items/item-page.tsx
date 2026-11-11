@@ -17,6 +17,8 @@ export interface ItemPageProps {
   contact?: { csrfToken: string; sent?: boolean; error?: string }
   /** History section (US-0.5.6). */
   history?: RemixNode
+  /** « Retour » on phones (`backHref`). */
+  back?: string
   notice?: string
 }
 
@@ -45,11 +47,19 @@ function OwnerLink(handle: Handle<{ item: ItemDetails }>) {
  */
 export function ItemPage(handle: Handle<ItemPageProps>) {
   return () => {
-    const { viewer, item, canEdit, contact, history, notice } = handle.props
+    const { viewer, item, canEdit, contact, history, notice, back } = handle.props
+    // An item has no section of its own: the trail follows its owning collectif, else Rechercher.
+    const trail = item.ownerSlug
+      ? [
+          { label: 'Collectifs', href: routes.collectifs.index.href() },
+          { label: item.ownerName, href: routes.collectifs.show.href({ slug: item.ownerSlug }) },
+          { label: item.name },
+        ]
+      : [{ label: 'Rechercher', href: routes.inventory.index.href() }, { label: item.name }]
     const reachable = contact !== undefined && !item.archived_at
     const phone = reachable ? item.contactPhone : null
     return (
-      <Layout title={item.name} viewer={viewer}>
+      <Layout title={item.name} viewer={viewer} trail={trail} back={back ?? trail.at(-2)?.href}>
         <div class="page-head item-head">
           <div>
             <h1>

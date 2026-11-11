@@ -971,3 +971,63 @@ button:disabled {
     border-top: 0;
   }
 }
+
+/* Breadcrumb on computers, « Retour » on phones (ADR 0022, ui.md). */
+.page-nav {
+  margin-bottom: 0.5rem;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  font-weight: 600;
+  text-decoration: none;
+}
+.breadcrumb {
+  display: none;
+}
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.breadcrumb li + li::before {
+  content: "›";
+  margin-right: 0.35rem;
+}
+.crumb-link {
+  color: var(--muted);
+}
+@media (min-width: 720px) {
+  .back-link {
+    display: none;
+  }
+  .breadcrumb {
+    display: block;
+  }
+}
+
+/* Wizard template (ADR 0022): wide forms with two fields per row, the long text across. */
+.stack.form-wide {
+  max-width: 56rem;
+}
+.field-grid {
+  display: grid;
+  gap: 1rem 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+.field-grid .field:has(textarea) {
+  grid-column: 1 / -1;
+}
+.recap {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+.recap legend,
+.recap .new-location {
+  grid-column: 1 / -1;
+}

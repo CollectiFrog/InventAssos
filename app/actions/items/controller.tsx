@@ -17,6 +17,7 @@ import { canEditItem, canSeeItem, canSeePerson, isValidatedUser } from '../../pe
 import { hitContact } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
+import { backHref } from '../back-link.ts'
 import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { ItemHistory, itemHistoryActions } from './history.tsx'
@@ -84,6 +85,12 @@ export default createController(routes.items, {
         <ItemPage
           viewer={viewerOf(context)}
           item={shownTo(actor, item)}
+          back={backHref(
+            context,
+            item.ownerSlug
+              ? routes.collectifs.show.href({ slug: item.ownerSlug })
+              : routes.inventory.index.href(),
+          )}
           canEdit={canEditItem(actor, item)}
           contact={
             ownsItem(actor, item)

@@ -18,6 +18,10 @@ Sur un ordinateur, la colonne de gauche liste aussi **Mes collectifs** (les cinq
 **Tous**) et, en bas, **Administration** pour les administrateurs. La barre du haut garde sur
 chaque page un champ de **recherche** et le bouton **Ajouter du matériel**.
 
+Sur la page d'un objet, d'un collectif, d'un lieu ou d'une personne, un **fil d'Ariane** au-dessus
+du titre montre où vous êtes (Collectifs › Collecti'FROG › Console) sur un ordinateur ; sur un
+téléphone, **Retour** ramène à la page précédente.
+
 En haut à droite, le rond avec vos initiales ouvre **votre compte**. Sur un téléphone, les
 administrateurs trouvent le lien **Administration** à côté.
 
