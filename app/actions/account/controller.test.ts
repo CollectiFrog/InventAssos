@@ -46,7 +46,7 @@ describe('account under review (US-0.2.3)', () => {
     await signIn(app, client, 'pat@example.org')
 
     const response = await client.post(routes.signOut.href())
-    assert.equal(response.location, routes.home.href())
+    assert.equal(response.location, `${routes.home.href()}?deconnexion=ok`)
     assert.equal((await client.get(routes.home.href())).status, 200)
   })
 

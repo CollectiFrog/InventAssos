@@ -37,13 +37,19 @@ export default createController(routes, {
       }
       const databaseOk = dashboard ? true : await pingDatabase(db)
       return context.render(
-        <HomePage databaseOk={databaseOk} viewer={viewerOf(context)} dashboard={dashboard} />,
+        <HomePage
+          databaseOk={databaseOk}
+          viewer={viewerOf(context)}
+          dashboard={dashboard}
+          signedOut={context.url.searchParams.get('deconnexion') === 'ok' && actor === null}
+        />,
       )
     },
     // US-0.2.8: deletes the session row, so the old cookie is worthless even if it was copied.
     signOut(context) {
       context.session.destroy()
-      return redirect(routes.home.href(), 303)
+      // The session is gone, so no flash message: the home page reads this flag (US-0.7.7).
+      return redirect(`${routes.home.href()}?deconnexion=ok`, 303)
     },
   },
 })

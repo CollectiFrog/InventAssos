@@ -162,66 +162,70 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
         <ErrorSummary errors={errors} />
         <form method="post" action={routes.items.create.action.href()} class="stack">
           <CsrfField token={csrfToken} />
-          <SelectField
-            name="locationId"
-            label="Rangé dans"
-            options={locations}
-            value={values.locationId}
-            error={errors.locationId}
-            required
-          />
-          <details class="new-location" open={describesNewLocation}>
-            <summary>Créer un nouveau lieu</summary>
-            <p class="hint">
-              Choisissez « Un nouveau lieu » ci-dessus, puis décrivez-le. L’adresse et les notes se
-              complètent ensuite depuis la page du lieu.
-            </p>
+          <ItemFields values={values} errors={errors} categories={categories} />
+          {/* US-0.7.7: where it goes and whose it is, last, right above the button. */}
+          <fieldset class="recap">
+            <legend>Vérifiez avant d’ajouter</legend>
             <SelectField
-              name="newLocationOwner"
-              label="Lieu de"
-              options={locationOwners}
-              value={values.newLocationOwner}
-              error={errors.newLocationOwner}
+              name="locationId"
+              label="Rangé dans"
+              options={locations}
+              value={values.locationId}
+              error={errors.locationId}
+              required
+            />
+            <details class="new-location" open={describesNewLocation}>
+              <summary>Créer un nouveau lieu</summary>
+              <p class="hint">
+                Choisissez « Un nouveau lieu » ci-dessus, puis décrivez-le. L’adresse et les notes
+                se complètent ensuite depuis la page du lieu.
+              </p>
+              <SelectField
+                name="newLocationOwner"
+                label="Lieu de"
+                options={locationOwners}
+                value={values.newLocationOwner}
+                error={errors.newLocationOwner}
+                required
+              />
+              <TextField
+                name="newLocationName"
+                label="Nom du lieu"
+                value={values.newLocationName}
+                error={errors.newLocationName}
+                requiredIfUsed
+                maxLength={120}
+                hint="Garage, cave, local de répétition…"
+              />
+              <TextField
+                name="newLocationCity"
+                label="Ville"
+                value={values.newLocationCity}
+                error={errors.newLocationCity}
+                requiredIfUsed
+                maxLength={120}
+                autoComplete="address-level2"
+                hint="La seule information du lieu visible par les autres."
+              />
+            </details>
+            <SelectField
+              name="owner"
+              label="Appartient à"
+              options={owners}
+              value={values.owner}
+              error={errors.owner}
               required
             />
             <TextField
-              name="newLocationName"
-              label="Nom du lieu"
-              value={values.newLocationName}
-              error={errors.newLocationName}
-              requiredIfUsed
-              maxLength={120}
-              hint="Garage, cave, local de répétition…"
+              name="ownerEmail"
+              label="E-mail de la personne propriétaire"
+              type="email"
+              value={values.ownerEmail}
+              error={errors.ownerEmail}
+              maxLength={254}
+              hint="Seulement si « Une autre personne » : son compte doit être validé. Le matériel doit être rangé dans un lieu de votre collectif ; la personne pourra ensuite le modifier."
             />
-            <TextField
-              name="newLocationCity"
-              label="Ville"
-              value={values.newLocationCity}
-              error={errors.newLocationCity}
-              requiredIfUsed
-              maxLength={120}
-              autoComplete="address-level2"
-              hint="La seule information du lieu visible par les autres."
-            />
-          </details>
-          <SelectField
-            name="owner"
-            label="Appartient à"
-            options={owners}
-            value={values.owner}
-            error={errors.owner}
-            required
-          />
-          <TextField
-            name="ownerEmail"
-            label="E-mail de la personne propriétaire"
-            type="email"
-            value={values.ownerEmail}
-            error={errors.ownerEmail}
-            maxLength={254}
-            hint="Seulement si « Une autre personne » : son compte doit être validé. Le matériel doit être rangé dans un lieu de votre collectif ; la personne pourra ensuite le modifier."
-          />
-          <ItemFields values={values} errors={errors} categories={categories} />
+          </fieldset>
           <button type="submit">Ajouter</button>
         </form>
       </Layout>

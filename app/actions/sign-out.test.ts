@@ -41,7 +41,7 @@ describe('sign-out (US-0.2.8)', () => {
 
     const response = await client.post(routes.signOut.href())
     assert.equal(response.status, 303)
-    assert.equal(response.location, routes.home.href())
+    assert.equal(response.location, `${routes.home.href()}?deconnexion=ok`)
 
     const replay = await app.router.fetch(get(routes.home.href(), { Cookie: oldCookie }))
     assert.doesNotMatch(await replay.text(), /Bonjour Camille/)

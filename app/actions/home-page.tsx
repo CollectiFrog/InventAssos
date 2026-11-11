@@ -20,10 +20,16 @@ function plural(n: number, one: string, many: string): string {
 
 /** Home page: the dashboard for validated users, a presentation for everyone else. */
 export function HomePage(
-  handle: Handle<{ databaseOk: boolean; viewer: Viewer; dashboard?: Dashboard }>,
+  handle: Handle<{
+    databaseOk: boolean
+    viewer: Viewer
+    dashboard?: Dashboard
+    /** Just signed out: say so (US-0.7.7). */
+    signedOut?: boolean
+  }>,
 ) {
   return () => {
-    const { databaseOk, viewer, dashboard } = handle.props
+    const { databaseOk, viewer, dashboard, signedOut } = handle.props
     if (viewer && dashboard) {
       return (
         <Layout title="Accueil" viewer={viewer} section="home">
@@ -35,6 +41,11 @@ export function HomePage(
     return (
       <Layout title="Accueil" viewer={viewer} section="home">
         <h1>InventAssos</h1>
+        {signedOut ? (
+          <p class="notice notice-success" role="status">
+            Vous êtes déconnecté. À bientôt !
+          </p>
+        ) : null}
         <p>
           Inventaire de matériel partagé entre associations : chaque collectif référence son
           matériel, ses membres le trouvent et contactent qui le garde.

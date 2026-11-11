@@ -92,7 +92,7 @@ describe('item page and contact (US-0.6.3)', () => {
     const response = await lou.post(routes.items.contact.href({ itemId: personItem.id }), {
       message: 'Je peux l’emprunter samedi ?',
     })
-    assert.equal(response.location, routes.items.show.href({ itemId: personItem.id }))
+    assert.equal(response.location, `${routes.items.show.href({ itemId: personItem.id })}#ecrire`)
     const [mail] = app.mailer.outbox
     assert.equal(mail?.to, 'max.secret@example.org')
     assert.equal(mail?.replyTo, 'lou@example.org')
@@ -136,9 +136,15 @@ describe('item page and contact (US-0.6.3)', () => {
     assert.match(html, /Pas de téléphone renseigné/)
   })
 
-  it('sends nothing for an empty message', async () => {
+  it('sends nothing for an empty message, and says so under the field', async () => {
     await lou.post(routes.items.contact.href({ itemId: personItem.id }), { message: '   ' })
     assert.equal(app.mailer.outbox.length, 0)
+    const html = await page(personItem)
+    assert.match(html, /<textarea [^>]*aria-invalid="true" aria-describedby="field-message-error"/)
+    assert.match(
+      html,
+      /<p id="field-message-error" class="error">Écrivez un message avant d’envoyer\.<\/p>/,
+    )
   })
 
   it("shows a person's phone and page only to who shares a collectif with them", async () => {

@@ -114,6 +114,8 @@ sur la page du lieu ; l'adresse et les notes restent réservées aux personnes q
 ## Ajouter du matériel
 
 **Ajouter du matériel** est en haut de chaque page sur un ordinateur, et dans **Mon matériel**.
+Le formulaire décrit d'abord l'objet, puis rappelle, juste au-dessus du bouton **Ajouter**, où il
+sera rangé et à qui il appartient : vérifiez ces deux choix avant d'enregistrer.
 
 - **Rangé dans** : un lieu que vous gérez (le vôtre, ou celui d'un collectif dont vous êtes
   responsable), ou **Un nouveau lieu** : décrivez-le dans **Créer un nouveau lieu** (à qui il est,

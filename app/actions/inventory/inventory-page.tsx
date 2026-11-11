@@ -90,7 +90,31 @@ export function InventoryPage(handle: Handle<InventoryPageProps>) {
         <p class="status">
           {total} {total > 1 ? 'objets' : 'objet'}
         </p>
-        {items.length === 0 ? <p>Aucun matériel.</p> : <ItemList items={items} />}
+        {items.length > 0 ? (
+          <ItemList items={items} />
+        ) : filtered ? (
+          <div class="card empty-state">
+            <p>Aucun objet ne correspond à cette recherche.</p>
+            <a class="button secondary" href={routes.inventory.index.href()}>
+              Tout afficher
+            </a>
+          </div>
+        ) : (
+          <div class="card empty-state">
+            <p>
+              Rien à afficher pour l’instant : vous voyez le matériel de vos collectifs, le vôtre et
+              celui rangé chez vous.
+            </p>
+            <p class="actions">
+              <a class="button" href={routes.items.create.index.href()}>
+                Ajouter du matériel
+              </a>
+              <a class="button secondary" href={routes.collectifs.index.href()}>
+                Voir les collectifs
+              </a>
+            </p>
+          </div>
+        )}
         <Pagination page={page} pageCount={pageCount} hrefFor={hrefFor} />
       </Layout>
     )

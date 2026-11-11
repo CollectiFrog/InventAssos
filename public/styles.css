@@ -737,3 +737,18 @@ button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* « Vérifiez avant d’ajouter » (US-0.7.7): owner and location grouped above the button. */
+.recap {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent-soft);
+}
+.recap legend {
+  padding: 0 0.35rem;
+  font-weight: 700;
+}
