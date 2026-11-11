@@ -31,6 +31,7 @@ export default createController(routes.account.profile, {
           csrfToken={getCsrfToken(context)}
           email={user.email}
           values={{ name: user.name, phone: user.phone ?? '' }}
+          collectifs={actor.collectifs}
           saved={context.session.get('profileSaved') === true}
         />,
       )
@@ -52,6 +53,7 @@ export default createController(routes.account.profile, {
               name: formValue(context.formData, 'name'),
               phone: formValue(context.formData, 'phone'),
             }}
+            collectifs={actor.collectifs}
             errors={parsed.errors}
           />,
           { status: 400 },

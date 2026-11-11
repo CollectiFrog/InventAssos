@@ -4,14 +4,24 @@ import { createController } from 'remix/router'
 
 import { findUserById, setUserStatus } from '../../data/users.ts'
 import { newAccountRequestMail } from '../../mail/messages.ts'
+import { canEditOwnProfile } from '../../permissions.ts'
 import { hitUserRequest, notifyAdmins } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
-import { tooManyRequests } from '../guards.tsx'
+import { forbidden, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
+import { DeleteAccountPage } from './profile/profile-page.tsx'
 import { StatusPage } from './status-page.tsx'
 
 export default createController(routes.account, {
   actions: {
+    // US-0.7.13: the page exists; deleting itself comes with US-1.0.4 (V1.0).
+    deletion(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      if (!canEditOwnProfile(actor)) return forbidden(context)
+      return context.render(<DeleteAccountPage viewer={viewerOf(context)} />)
+    },
+
     async status(context) {
       const current = context.currentUser
       if (current === null) return redirect(routes.signIn.form.index.href(), 303)

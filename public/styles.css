@@ -910,3 +910,64 @@ button:disabled {
 .results-bar h2 {
   margin: 0;
 }
+
+/* Settings template (ADR 0022): contents on the left, sections "explanation | card". */
+.settings {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+.settings-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+.toc-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+}
+.settings-sections {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+}
+.setting {
+  display: grid;
+  gap: 0.75rem;
+  scroll-margin-top: 5rem;
+}
+.setting h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+}
+.setting p.status {
+  margin: 0;
+}
+.danger-zone {
+  border-color: var(--danger);
+}
+.plain-list {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+}
+@container main (min-width: 56rem) {
+  .settings {
+    grid-template-columns: 12rem minmax(0, 1fr);
+  }
+  .settings-toc {
+    position: sticky;
+    top: 5rem;
+    flex-direction: column;
+  }
+  .setting {
+    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .setting:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
