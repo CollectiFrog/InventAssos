@@ -7,6 +7,9 @@ description: Same pages for phones and computers, bottom tab bar on phones, sobe
 |----------|------------|------------|
 | Accepted | 2026-11-09 | @tritriper |
 
+Partly superseded by [0022](../0022-sidebar-navigation-on-computers/): on computers the entries are
+in a left sidebar, not the top bar, and content is fluid.
+
 ## Context
 
 V0.2 to V0.6 built the pages story by story, without an interface model: the header grew to six
