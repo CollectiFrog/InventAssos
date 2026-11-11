@@ -3,20 +3,29 @@ import type { Handle } from 'remix/component'
 import { routes } from '../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../ui/form.tsx'
 import { Layout } from '../../ui/layout.tsx'
+import { returnParam } from '../return-path.ts'
 
 /** E-mail form asking for a sign-in link (US-0.2.2). */
 export function SignInPage(
-  handle: Handle<{ csrfToken: string; email?: string; errors?: FieldErrors }>,
+  handle: Handle<{
+    csrfToken: string
+    email?: string
+    errors?: FieldErrors
+    /** The page to land on after signing in (US-0.7.8). */
+    returnPath?: string | null
+  }>,
 ) {
   return () => {
-    const { csrfToken, email, errors = {} } = handle.props
+    const { csrfToken, email, errors = {}, returnPath } = handle.props
     return (
       <Layout title="Se connecter">
         <h1>Se connecter</h1>
         <p>Pas de mot de passe : nous vous envoyons un lien de connexion par e-mail.</p>
         <ErrorSummary errors={errors} />
+        {returnPath ? <p class="status">Connectez-vous pour ouvrir la page demandée.</p> : null}
         <form method="post" action={routes.signIn.form.action.href()} class="stack">
           <CsrfField token={csrfToken} />
+          {returnPath ? <input type="hidden" name={returnParam} value={returnPath} /> : null}
           <TextField
             name="email"
             label="Adresse e-mail"
@@ -55,7 +64,9 @@ export function SignInSentPage() {
 }
 
 /** Opened from the e-mail: a button confirms, so link scanners cannot use the token. */
-export function SignInLinkPage(handle: Handle<{ csrfToken: string; token: string }>) {
+export function SignInLinkPage(
+  handle: Handle<{ csrfToken: string; token: string; returnPath?: string | null }>,
+) {
   return () => (
     <Layout title="Connexion">
       <h1>Connexion</h1>
@@ -65,6 +76,9 @@ export function SignInLinkPage(handle: Handle<{ csrfToken: string; token: string
         class="stack"
       >
         <CsrfField token={handle.props.csrfToken} />
+        {handle.props.returnPath ? (
+          <input type="hidden" name={returnParam} value={handle.props.returnPath} />
+        ) : null}
         <button type="submit">Me connecter</button>
       </form>
     </Layout>

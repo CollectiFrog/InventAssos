@@ -16,6 +16,7 @@ import { hitFormFromClient, mayMailAddress } from '../../../rate-limits.ts'
 import { routes } from '../../../routes.ts'
 import { emailAddress, formValue, parseForm } from '../../../validation.ts'
 import { tooManyRequests } from '../../guards.tsx'
+import { returnParam, safeReturnPath, withReturnPath } from '../../return-path.ts'
 import { SignInPage } from '../sign-in-pages.tsx'
 
 const signInSchema = f.object({ email: f.field(emailAddress()) })
@@ -26,6 +27,7 @@ async function sendSignInLink(
   mailer: Mailer,
   settings: AppSettings,
   email: string,
+  returnPath: string | null,
 ): Promise<void> {
   if (!(await mayMailAddress(db, settings, email))) return
   let user = await findUserByEmail(db, email)
@@ -36,7 +38,8 @@ async function sendSignInLink(
   if (user !== null) user = await syncPlatformAdmin(db, user, settings.adminEmails)
   if (user !== null && signedInStatuses.has(user.status)) {
     const token = await createSignInToken(db, user.id)
-    const url = settings.appUrl + routes.signIn.link.index.href({ token })
+    const url =
+      settings.appUrl + withReturnPath(routes.signIn.link.index.href({ token }), returnPath)
     await sendSafely(mailer, signInLinkMail(user.email, url))
   }
 }
@@ -45,17 +48,22 @@ async function sendSignInLink(
 export default createController(routes.signIn.form, {
   actions: {
     index(context) {
-      return context.render(<SignInPage csrfToken={getCsrfToken(context)} />)
+      const returnPath = safeReturnPath(context.url.searchParams.get(returnParam))
+      return context.render(
+        <SignInPage csrfToken={getCsrfToken(context)} returnPath={returnPath} />,
+      )
     },
 
     async action(context) {
       const parsed = parseForm(signInSchema, context.formData)
+      const returnPath = safeReturnPath(formValue(context.formData, returnParam))
       if (!parsed.ok) {
         return context.render(
           <SignInPage
             csrfToken={getCsrfToken(context)}
             email={formValue(context.formData, 'email')}
             errors={parsed.errors}
+            returnPath={returnPath}
           />,
           { status: 400 },
         )
@@ -67,7 +75,7 @@ export default createController(routes.signIn.form, {
 
       // After the response: its timing must not tell whether the e-mail has an account (US-0.2.2).
       const email = parsed.value.email
-      background.run(() => sendSignInLink(db, mailer, settings, email))
+      background.run(() => sendSignInLink(db, mailer, settings, email, returnPath))
 
       // Same answer whether or not the e-mail has an account.
       return redirect(routes.signIn.sent.href(), 303)

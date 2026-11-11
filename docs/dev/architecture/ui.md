@@ -145,6 +145,8 @@ It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
   is a GET parameter, so an active filter is a link that removes it;
 - `/collectifs/:slug/lieux` and `/collectifs/:slug/responsables`, the tabs of a collectif's page
   (`/collectifs/:slug` is its Matériel tab);
+- `?suite=<path>` on `/connexion` and on the e-mailed link: the page a visitor asked for, followed
+  after sign-in (US-0.7.8); only an internal path is kept (`safeReturnPath`), never an off-site URL;
 - `/compte/supprimer`, a confirmation page instead of a modal window;
 - `/admin/demandes` (also `/admin`), `/admin/comptes`, `/admin/collectifs`, `/admin/moderateurs`,
   `/admin/categories`, `/admin/instance`.

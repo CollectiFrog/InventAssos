@@ -31,6 +31,9 @@ InventAssos n'utilise pas de mot de passe.
 2. Ouvrez l'e-mail « Votre lien de connexion InventAssos » et cliquez sur le lien.
 3. Sur la page qui s'ouvre, cliquez sur **Me connecter**.
 
+Si vous avez ouvert un lien vers une page de l'application (un objet, un collectif…) sans être
+connecté, vous arrivez sur cette page une fois connecté, et non sur l'accueil.
+
 Le lien est valable **15 minutes** et ne sert **qu'une fois**. Vous restez connecté 30 jours sur cet
 appareil. Si le lien a expiré, demandez-en simplement un nouveau.
 
