@@ -79,6 +79,8 @@ export const collectifs = table({
     name: c.text(),
     slug: c.text(),
     description: c.text(),
+    /** Empty only for a collectif created before V0.7 with no location (migration 0010). */
+    city: c.text(),
     contact_phone: c.text().nullable(),
     status: c.enum(collectifStatuses),
     requested_by: c.uuid().nullable(),

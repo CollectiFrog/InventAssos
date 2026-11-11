@@ -41,12 +41,14 @@ describe("edit a collectif's profile (US-0.3.5)", () => {
 
   it('lets a responsible of C edit it, and logs the change', async () => {
     const response = await edit('rita@example.org', {
+      city: 'Saint-Malo',
       description: 'Sono, lumière',
       contactPhone: '06 00 00 00 00',
     })
 
     assert.equal(response.location, routes.collectifs.show.href({ slug: grenouilles.slug }))
     const updated = await findCollectifById(db, grenouilles.id)
+    assert.equal(updated?.city, 'Saint-Malo')
     assert.equal(updated?.description, 'Sono, lumière')
     assert.equal(updated?.contact_phone, '06 00 00 00 00')
     const entries = await listEntityHistory(db, 'collectif', grenouilles.id)
@@ -54,13 +56,13 @@ describe("edit a collectif's profile (US-0.3.5)", () => {
   })
 
   it('lets a platform admin edit any collectif', async () => {
-    await edit('boss@example.org', { description: 'Par l’admin' })
+    await edit('boss@example.org', { city: 'Rennes', description: 'Par l’admin' })
     assert.equal((await findCollectifById(db, grenouilles.id))?.description, 'Par l’admin')
   })
 
   it('refuses a responsible of another collectif and a plain user (403)', async () => {
     for (const email of ['otto@example.org', 'max@example.org']) {
-      const response = await edit(email, { description: 'Pirate' })
+      const response = await edit(email, { city: 'Rennes', description: 'Pirate' })
       assert.equal(response.status, 403, email)
     }
     assert.equal((await findCollectifById(db, grenouilles.id))?.description, '')
@@ -77,9 +79,11 @@ describe("edit a collectif's profile (US-0.3.5)", () => {
     assert.doesNotMatch((await max.get(url)).text, /Modifier la présentation/)
   })
 
-  it('shows errors on invalid input', async () => {
-    const response = await edit('rita@example.org', { contactPhone: 'nope' })
+  it('shows errors on invalid input, and requires the city', async () => {
+    const response = await edit('rita@example.org', { city: ' ', contactPhone: 'nope' })
     assert.equal(response.status, 400)
     assert.match(response.text, /Numéro de téléphone invalide/)
+    assert.match(response.text, /Ce champ est obligatoire/)
+    assert.equal((await findCollectifById(db, grenouilles.id))?.city, 'Rennes')
   })
 })

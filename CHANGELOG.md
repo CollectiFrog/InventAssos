@@ -11,6 +11,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Contributors can run the app, its tests and the checks with only Docker installed, or in a VS Code Dev Container.
 - Navigation with four entries (Accueil, Rechercher, Mon matériel, Collectifs): a tab bar at the bottom of the screen on a phone, a sidebar with your collectifs on a computer.
 - On a computer, every page has a search field and an « Ajouter du matériel » button at the top.
+- Collectifs page: your collectifs first, then a directory of all collectifs with their city, searchable by name or city.
+- A collectif states its city, asked when it is declared and editable by its responsibles.
 
 ### Changed
 

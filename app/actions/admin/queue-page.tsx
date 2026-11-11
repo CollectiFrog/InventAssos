@@ -109,6 +109,7 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
               <li key={c.id} class="card">
                 <p>
                   <strong>{c.name}</strong>
+                  {c.city ? ` · ${c.city}` : ''}
                   <br />
                   <span class="status">
                     Demandé par {c.requesterName ?? 'compte supprimé'}

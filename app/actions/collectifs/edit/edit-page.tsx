@@ -16,11 +16,11 @@ export interface EditCollectifPageProps {
   viewer: Viewer
   csrfToken: string
   collectif: Collectif
-  values: { description: string; contactPhone: string }
+  values: { city: string; description: string; contactPhone: string }
   errors?: FieldErrors
 }
 
-/** Description and contact phone of a collectif (US-0.3.5). */
+/** City, description and contact phone of a collectif (US-0.3.5, US-0.7.12). */
 export function EditCollectifPage(handle: Handle<EditCollectifPageProps>) {
   return () => {
     const { viewer, csrfToken, collectif, values, errors = {} } = handle.props
@@ -34,6 +34,16 @@ export function EditCollectifPage(handle: Handle<EditCollectifPageProps>) {
         <ErrorSummary errors={errors} />
         <form method="post" action={routes.collectifs.edit.action.href({ slug })} class="stack">
           <CsrfField token={csrfToken} />
+          <TextField
+            name="city"
+            label="Ville"
+            value={values.city}
+            error={errors.city}
+            required
+            maxLength={120}
+            autoComplete="address-level2"
+            hint="Montrée dans l’annuaire des collectifs."
+          />
           <TextArea
             name="description"
             label="Description"
@@ -48,7 +58,7 @@ export function EditCollectifPage(handle: Handle<EditCollectifPageProps>) {
             value={values.contactPhone}
             error={errors.contactPhone}
             maxLength={25}
-            hint="Visible par les utilisateurs validés."
+            hint="Visible par les personnes qui voient le matériel du collectif."
           />
           <div class="actions">
             <button type="submit">Enregistrer</button>

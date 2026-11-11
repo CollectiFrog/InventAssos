@@ -13,6 +13,7 @@ export async function createPendingCollectif(
 ): Promise<Collectif> {
   return createCollectifRequest(db, {
     name,
+    city: 'Rennes',
     description: '',
     contactPhone: null,
     requestedBy: requesterId,

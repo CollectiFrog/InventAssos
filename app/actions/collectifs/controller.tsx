@@ -4,8 +4,8 @@ import { createController } from 'remix/router'
 
 import {
   findActiveCollectifBySlug,
-  listCollectifs,
   listPendingRequestsBy,
+  searchActiveCollectifs,
 } from '../../data/collectifs.ts'
 import { listItemsOwnedBy } from '../../data/items.ts'
 import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
@@ -28,7 +28,7 @@ import { viewerOf } from '../viewer.ts'
 import { CollectifPage, type Membership } from './collectif-page.tsx'
 import { CollectifsPage } from './collectifs-pages.tsx'
 
-/** List of collectifs. */
+/** The collectifs directory (US-0.7.12) and a collectif's page. */
 export default createController(routes.collectifs, {
   actions: {
     async index(context) {
@@ -36,12 +36,19 @@ export default createController(routes.collectifs, {
       if (actor instanceof Response) return actor
       if (!isValidatedUser(actor)) return forbidden(context)
 
+      const { db } = context
+      const query = context.url.searchParams.get('q')?.trim().slice(0, 100) ?? ''
+      const all = await searchActiveCollectifs(db)
+      const matching = query ? await searchActiveCollectifs(db, query) : all
+      const isMine = (c: { id: string }) => actor.managedCollectifIds.has(c.id)
       const notice = context.session.get('notice')
       return context.render(
         <CollectifsPage
           viewer={viewerOf(context)}
-          active={await listCollectifs(context.db, 'active')}
-          myRequests={await listPendingRequestsBy(context.db, actor.id)}
+          mine={all.filter(isMine)}
+          others={matching.filter((c) => !isMine(c))}
+          query={query}
+          myRequests={await listPendingRequestsBy(db, actor.id)}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
