@@ -369,3 +369,18 @@ export async function countItemsOwnedBy(
   `)
   return new Map((result.rows ?? []).map((row) => [String(row.owner_collectif_id), Number(row.n)]))
 }
+
+/** Active items stored in a collectif's locations but owned by someone else: its deposits. */
+export async function listItemsDepositedAt(
+  db: Database,
+  collectifId: string,
+  scope: ItemScope,
+): Promise<ItemSummary[]> {
+  const result = await db.exec(sql`
+    select ${summaryColumns} from items i ${summaryJoins}
+    where i.archived_at is null and l.collectif_id = ${collectifId}
+      and i.owner_collectif_id is distinct from ${collectifId}::uuid and ${visibleIn(scope)}
+    order by lower(i.name), i.id
+  `)
+  return (result.rows ?? []).map(toSummary)
+}

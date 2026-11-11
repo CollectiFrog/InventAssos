@@ -22,6 +22,8 @@ export const routes = route({
     index: get('/collectifs'),
     request: form('/collectifs/nouveau'),
     show: get('/collectifs/:slug'),
+    places: get('/collectifs/:slug/lieux'),
+    people: get('/collectifs/:slug/responsables'),
     edit: form('/collectifs/:slug/modifier'),
     requestResponsibility: post('/collectifs/:slug/devenir-responsable'),
   },

@@ -125,24 +125,26 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 
 ## Pages
 
-| Zone         | Pages                                                                                                              |
-|--------------|--------------------------------------------------------------------------------------------------------------------|
-| Visitor      | `/connexion`, `/connexion/envoyee`, `/connexion/lien/:token`, `/inscription`, `/inscription/envoyee`               |
-| Pending      | `/compte/statut`, `/compte/statut/redemander`                                                                      |
-| Accueil      | `/`                                                                                                                |
-| Rechercher   | `/inventaire`                                                                                                      |
-| Item         | `/materiel/:itemId` and its `/modifier`, `/deplacer`, `/archiver`, `/contacter`                                    |
-| Mon matériel | `/materiel`, `/materiel/nouveau`, `/lieux`, `/lieux/nouveau`, `/lieux/:locationId` (+ `/modifier`, `/supprimer`)   |
-| Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/modifier`, `/devenir-responsable`)                  |
-| People       | `/personnes/:userId`                                                                                               |
-| Account      | `/compte/profil` (sections: profil, affichage, collectifs, données, à propos), `/compte/supprimer`, `/deconnexion` |
-| Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/moderateurs`, `/categories`, `/instance`        |
+| Zone         | Pages                                                                                                                        |
+|--------------|------------------------------------------------------------------------------------------------------------------------------|
+| Visitor      | `/connexion`, `/connexion/envoyee`, `/connexion/lien/:token`, `/inscription`, `/inscription/envoyee`                         |
+| Pending      | `/compte/statut`, `/compte/statut/redemander`                                                                                |
+| Accueil      | `/`                                                                                                                          |
+| Rechercher   | `/inventaire`                                                                                                                |
+| Item         | `/materiel/:itemId` and its `/modifier`, `/deplacer`, `/archiver`, `/contacter`                                              |
+| Mon matériel | `/materiel`, `/materiel/nouveau`, `/lieux`, `/lieux/nouveau`, `/lieux/:locationId` (+ `/modifier`, `/supprimer`)             |
+| Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/lieux`, `/responsables`, `/modifier`, `/devenir-responsable`) |
+| People       | `/personnes/:userId`                                                                                                         |
+| Account      | `/compte/profil` (sections: profil, affichage, collectifs, données, à propos), `/compte/supprimer`, `/deconnexion`           |
+| Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/moderateurs`, `/categories`, `/instance`                  |
 
 URLs are a contract: V0.7 changes what the pages show and how they are reached, not their URLs.
 It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
 
 - `?vue=liste|grille` and `?tri=<column>` on `/inventaire` and on a collectif's equipment; a filter
   is a GET parameter, so an active filter is a link that removes it;
+- `/collectifs/:slug/lieux` and `/collectifs/:slug/responsables`, the tabs of a collectif's page
+  (`/collectifs/:slug` is its Matériel tab);
 - `/compte/supprimer`, a confirmation page instead of a modal window;
 - `/admin/demandes` (also `/admin`), `/admin/comptes`, `/admin/collectifs`, `/admin/moderateurs`,
   `/admin/categories`, `/admin/instance`.

@@ -118,7 +118,7 @@ export default createController(routes.admin.responsibles, {
       }
       const backUrl =
         collectif.status === 'active'
-          ? routes.collectifs.show.href({ slug: collectif.slug })
+          ? routes.collectifs.people.href({ slug: collectif.slug })
           : queueUrl
 
       const parsed = parseForm(removeSchema, context.formData)

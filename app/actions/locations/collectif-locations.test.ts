@@ -69,7 +69,7 @@ describe("a collectif's locations (US-0.4.1)", () => {
       (await client.get(routes.locations.index.href())).text,
       /<strong>Local Dupont<\/strong>/,
     )
-    const page = await client.get(routes.collectifs.show.href({ slug: grenouilles.slug }))
+    const page = await client.get(routes.collectifs.places.href({ slug: grenouilles.slug }))
     assert.match(page.text, /Local Dupont<\/a> · Rennes/)
 
     const id = location?.id ?? ''

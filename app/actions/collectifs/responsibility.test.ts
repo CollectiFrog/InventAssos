@@ -36,14 +36,14 @@ describe('ask to become responsible (US-0.3.3)', () => {
 
     const page = await client.get(routes.collectifs.show.href({ slug: collectif.slug }))
     assert.equal(page.status, 200)
-    assert.match(page.text, /Devenir responsable/)
+    assert.match(page.text, /Demander à devenir responsable/)
     // People of a collectif stay among themselves until V1.1 (ADR 0021).
     assert.doesNotMatch(page.text, /Rita/)
 
     const rita = app.client()
     await signIn(app, rita, 'rita@example.org')
-    const inside = await rita.get(routes.collectifs.show.href({ slug: collectif.slug }))
-    assert.match(inside.text, /Responsables<\/dt><dd>Rita/)
+    const inside = await rita.get(routes.collectifs.people.href({ slug: collectif.slug }))
+    assert.match(inside.text, /<a href="\/personnes\/[^"]+">Rita<\/a>/)
   })
 
   it('records one pending request and notifies the admins', async () => {
