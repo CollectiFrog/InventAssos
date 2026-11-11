@@ -16,6 +16,7 @@ import {
 } from '../../data/users.ts'
 import { sendSafely } from '../../mail/mailer.ts'
 import { accountApprovedMail, accountRejectedMail } from '../../mail/messages.ts'
+import type { AppContext } from '../../middleware/index.ts'
 import {
   canDisableAccount,
   canEnableAccount,
@@ -26,25 +27,44 @@ import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
-import { QueuePage } from './queue-page.tsx'
+import { AccountsPage, QueuePage } from './queue-page.tsx'
 
 const rejectSchema = f.object({ reason: f.field(optionalText(500)) })
 
+/** Administration › Demandes, at /admin and /admin/demandes (ADR 0022). */
+async function renderRequests(context: AppContext) {
+  const actor = requireUser(context)
+  if (actor instanceof Response) return actor
+  if (!canReviewAccounts(actor)) return forbidden(context)
+
+  const notice = context.session.get('notice')
+  return context.render(
+    <QueuePage
+      viewer={viewerOf(context)}
+      csrfToken={getCsrfToken(context)}
+      pending={await listPendingUsers(context.db)}
+      pendingCollectifs={await listPendingCollectifs(context.db)}
+      pendingResponsibles={await listPendingResponsibles(context.db)}
+      notice={typeof notice === 'string' ? notice : undefined}
+    />,
+  )
+}
+
 export default createController(routes.admin, {
   actions: {
-    async index(context) {
+    index: (context) => renderRequests(context),
+    requests: (context) => renderRequests(context),
+
+    async accounts(context) {
       const actor = requireUser(context)
       if (actor instanceof Response) return actor
       if (!canReviewAccounts(actor)) return forbidden(context)
 
       const notice = context.session.get('notice')
       return context.render(
-        <QueuePage
+        <AccountsPage
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
-          pending={await listPendingUsers(context.db)}
-          pendingCollectifs={await listPendingCollectifs(context.db)}
-          pendingResponsibles={await listPendingResponsibles(context.db)}
           active={await listActiveUsers(context.db)}
           disabled={await listDisabledUsers(context.db)}
           selfId={actor.id}
@@ -124,7 +144,7 @@ export default createController(routes.admin, {
       if (target !== null && !canDisableAccount(actor, target)) return forbidden(context)
       if (user === null || user.status !== 'active') {
         session.flash('notice', 'Ce compte n’est pas actif.')
-        return redirect(routes.admin.index.href(), 303)
+        return redirect(routes.admin.accounts.href(), 303)
       }
 
       await db.transaction(async (tx) => {
@@ -139,7 +159,7 @@ export default createController(routes.admin, {
         })
       })
       session.flash('notice', `Compte de ${user.name} désactivé.`)
-      return redirect(routes.admin.index.href(), 303)
+      return redirect(routes.admin.accounts.href(), 303)
     },
 
     // US-0.6.5: the way back from a disable, so no admin is ever locked out for good.
@@ -152,7 +172,7 @@ export default createController(routes.admin, {
       const user = await findUserById(db, context.params.userId)
       if (user === null || user.status !== 'disabled') {
         session.flash('notice', 'Ce compte n’est pas désactivé.')
-        return redirect(routes.admin.index.href(), 303)
+        return redirect(routes.admin.accounts.href(), 303)
       }
 
       await db.transaction(async (tx) => {
@@ -165,7 +185,7 @@ export default createController(routes.admin, {
         })
       })
       session.flash('notice', `Compte de ${user.name} réactivé.`)
-      return redirect(routes.admin.index.href(), 303)
+      return redirect(routes.admin.accounts.href(), 303)
     },
   },
 })

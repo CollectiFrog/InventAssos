@@ -13,9 +13,13 @@ prend effet après son redémarrage.
 
 ## La file d'attente
 
-**Administration** (`/admin`) rassemble toutes les demandes en attente : comptes, collectifs et
+**Administration** a quatre onglets : **Demandes**, **Comptes**, **Collectifs** et **Catégories**.
+**Demandes** (`/admin`) rassemble toutes les demandes en attente : comptes, collectifs et
 responsables, avec leur nombre en haut de la page. Chaque nouvelle demande vous est aussi signalée
-par e-mail, avec un lien vers cette page.
+par e-mail, avec un lien vers cette page ; l'accueil en affiche aussi le nombre.
+
+**Collectifs** liste les collectifs validés, avec leur ville, leur nombre de responsables et
+d'objets ; un nom mène à l'onglet **Responsables** du collectif.
 
 ## Valider les comptes
 
@@ -45,14 +49,15 @@ actuels si besoin, puis **Accepter** ou **Refuser** ; la personne est prévenue 
 
 ## Retirer un responsable
 
-Sur la page d'un collectif, la section **Gérer les responsables** (visible des administrateurs)
+Sur la page d'un collectif, onglet **Responsables**, la section **Gérer les responsables** (visible
+des administrateurs)
 permet de **Retirer** un responsable, par exemple quand il quitte l'association. Un collectif garde
 toujours au moins un responsable : pour retirer le dernier, indiquez dans le même formulaire l'e-mail
 d'un utilisateur validé qui le remplace. La personne retirée est prévenue par e-mail.
 
 ## Désactiver un compte
 
-La page **Administration** liste aussi les comptes actifs. **Désactiver** coupe immédiatement
+L'onglet **Comptes** d'**Administration** liste les comptes actifs. **Désactiver** coupe immédiatement
 l'accès de la personne : elle est déconnectée partout et ne peut plus recevoir de lien de connexion.
 Rien n'est supprimé, et son matériel reste visible. Vous ne pouvez pas désactiver votre propre compte,
 ni celui d'un autre administrateur de la plateforme (marqué « administrateur ») : pour retirer ses
@@ -60,7 +65,7 @@ droits, l'hébergeur le retire de `PLATFORM_ADMIN_EMAILS`.
 
 ## Réactiver un compte
 
-La section **Comptes désactivés** de la page **Administration** liste les comptes désactivés.
+La section **Comptes désactivés** de l'onglet **Comptes** liste les comptes désactivés.
 **Réactiver** rend à la personne ses accès : elle peut de nouveau demander un lien de connexion.
 La réactivation est enregistrée dans l'historique de la plateforme.
 

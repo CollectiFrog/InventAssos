@@ -125,3 +125,12 @@ export async function listPendingResponsibles(db: Database): Promise<PendingResp
     requestedAt: new Date(String(row.requested_at)),
   }))
 }
+
+/** How many active responsibles each collectif has; a collectif with none is absent. */
+export async function countActiveResponsibles(db: Database): Promise<Map<string, number>> {
+  const result = await db.exec(sql`
+    select collectif_id, count(*)::int as n from responsibles
+    where status = 'active' group by collectif_id
+  `)
+  return new Map((result.rows ?? []).map((row) => [String(row.collectif_id), Number(row.n)]))
+}

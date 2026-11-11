@@ -17,30 +17,14 @@ export interface QueuePageProps {
   pending: User[]
   pendingCollectifs: PendingCollectif[]
   pendingResponsibles: PendingResponsible[]
-  active: User[]
-  disabled: User[]
-  /** The admin viewing the page: they cannot disable themselves. */
-  selfId: string
-  /** Listed platform admins cannot be disabled from here (permissions.md). */
-  adminEmails: ReadonlySet<string>
   notice?: string
 }
 
-/** Every pending request in one place (US-0.3.7), then the active accounts. */
+/** Administration › Demandes: every pending request in one place (US-0.3.7). */
 export function QueuePage(handle: Handle<QueuePageProps>) {
   return () => {
-    const {
-      viewer,
-      csrfToken,
-      pending,
-      pendingCollectifs,
-      pendingResponsibles,
-      active,
-      disabled,
-      selfId,
-      adminEmails,
-      notice,
-    } = handle.props
+    const { viewer, csrfToken, pending, pendingCollectifs, pendingResponsibles, notice } =
+      handle.props
     return (
       <Layout title="Administration" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
@@ -176,6 +160,42 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
             })}
           </ul>
         )}
+      </Layout>
+    )
+  }
+}
+
+/** "0 compte en attente", "2 comptes en attente". */
+function plural(count: number, one: string, many: string): string {
+  return `${count} ${count > 1 ? many : one} en attente`
+}
+
+/** Props of Administration › Comptes. */
+export interface AccountsPageProps {
+  viewer: Viewer
+  csrfToken: string
+  active: User[]
+  disabled: User[]
+  /** The admin viewing the page: they cannot disable themselves. */
+  selfId: string
+  /** Listed platform admins cannot be disabled from here (permissions.md). */
+  adminEmails: ReadonlySet<string>
+  notice?: string
+}
+
+/** Administration › Comptes: active accounts to disable, disabled ones to re-enable. */
+export function AccountsPage(handle: Handle<AccountsPageProps>) {
+  return () => {
+    const { viewer, csrfToken, active, disabled, selfId, adminEmails, notice } = handle.props
+    return (
+      <Layout title="Comptes" viewer={viewer} headerLink="admin">
+        <h1>Administration</h1>
+        <AdminTabs current="accounts" />
+        {notice ? (
+          <p class="notice notice-success" role="status">
+            {notice}
+          </p>
+        ) : null}
         <h2 id="comptes-actifs">Comptes actifs</h2>
         <p>
           Désactiver un compte coupe immédiatement ses accès (ses sessions sont fermées) sans rien
@@ -229,9 +249,4 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
       </Layout>
     )
   }
-}
-
-/** "0 compte en attente", "2 comptes en attente". */
-function plural(count: number, one: string, many: string): string {
-  return `${count} ${count > 1 ? many : one} en attente`
 }

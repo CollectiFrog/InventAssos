@@ -35,7 +35,7 @@ describe('disable an account (US-0.2.7)', () => {
   })
 
   it('lists active accounts with a disable button, except the admin themselves', async () => {
-    const page = await admin.get(routes.admin.index.href())
+    const page = await admin.get(routes.admin.accounts.href())
     const boss = await findUserByEmail(db, 'boss@example.org')
 
     assert.match(page.text, /Max Member/)
@@ -51,7 +51,7 @@ describe('disable an account (US-0.2.7)', () => {
 
     const response = await admin.post(routes.admin.disableAccount.href({ userId: member.id }))
 
-    assert.equal(response.location, routes.admin.index.href())
+    assert.equal(response.location, routes.admin.accounts.href())
     assert.equal((await findUserById(db, member.id))?.status, 'disabled')
     assert.doesNotMatch((await memberClient.get(routes.home.href())).text, /Bonjour Max/)
     const [entry] = await listEntityHistory(db, 'user', member.id)
@@ -90,7 +90,7 @@ describe('disable an account (US-0.2.7)', () => {
     const boss = twoAdmins.client()
     await signIn(twoAdmins, boss, 'boss@example.org')
 
-    const page = await boss.get(routes.admin.index.href())
+    const page = await boss.get(routes.admin.accounts.href())
     assert.match(page.text, /Ada Admin/)
     assert.doesNotMatch(page.text, new RegExp(routes.admin.disableAccount.href({ userId: ada.id })))
     const response = await boss.post(routes.admin.disableAccount.href({ userId: ada.id }))
@@ -121,7 +121,7 @@ describe('re-enable a disabled account (US-0.6.5)', () => {
   })
 
   it('lists disabled accounts with a re-enable button', async () => {
-    const page = await admin.get(routes.admin.index.href())
+    const page = await admin.get(routes.admin.accounts.href())
     assert.match(page.text, /Comptes désactivés/)
     assert.match(page.text, new RegExp(routes.admin.enableAccount.href({ userId: member.id })))
   })
@@ -129,7 +129,7 @@ describe('re-enable a disabled account (US-0.6.5)', () => {
   it('re-enables the account, logs it, and the person can sign in again', async () => {
     const response = await admin.post(routes.admin.enableAccount.href({ userId: member.id }))
 
-    assert.equal(response.location, routes.admin.index.href())
+    assert.equal(response.location, routes.admin.accounts.href())
     assert.equal((await findUserById(db, member.id))?.status, 'active')
     const [entry] = await listEntityHistory(db, 'user', member.id)
     assert.equal(entry?.action, 'account.enabled')
