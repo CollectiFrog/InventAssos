@@ -19,8 +19,11 @@ Pages and copy are in French; this page uses their French names.
    created from the add form.
 5. **Owner and location always visible** on an item: ownership ≠ storage
    ([ADR 0009](../../adr/0009-ownership-and-locations/)), and only the city is shown to others.
-6. **Plain French**, the words of the field ("Mon matériel", "Rangé à", "Appartient à").
-7. **No client JavaScript, accessible**: plain links and forms (ADR 0015), WCAG AA.
+6. **My collectifs only**: until V1.1 every list shows only what the user may see — their
+   collectifs' equipment and what they hold ([ADR 0021](../../adr/0021-inventory-within-collectifs/));
+   other collectifs appear only in the directory, without their equipment.
+7. **Plain French**, the words of the field ("Mon matériel", "Rangé à", "Appartient à").
+8. **No client JavaScript, accessible**: plain links and forms (ADR 0015), WCAG AA.
 
 ## Site map
 
@@ -53,13 +56,13 @@ flowchart TB
 
 ## Navigation
 
-| Entry        | URL                        | Holds                                                                      |
-|--------------|----------------------------|----------------------------------------------------------------------------|
-| Accueil      | `/`                        | search field, pending requests (admins, moderators), my collectifs, recent |
-| Rechercher   | `/inventaire`              | text search, filters (category, collectif, city), results                  |
-| Mon matériel | `/materiel`, tab `/lieux`  | what is stored in my locations: mine, my collectifs', borrowed; tab Lieux  |
-| Collectifs   | `/collectifs`              | list of collectifs, request a new one; each collectif page has tabs        |
-| *Header*     | `/compte/profil`, `/admin` | account (initials), administration for admins and moderators               |
+| Entry        | URL                        | Holds                                                                              |
+|--------------|----------------------------|------------------------------------------------------------------------------------|
+| Accueil      | `/`                        | search field, pending requests (admins, moderators), my collectifs, recent in them |
+| Rechercher   | `/inventaire`              | text search in my collectifs' equipment, filters (category, my collectifs, city)   |
+| Mon matériel | `/materiel`, tab `/lieux`  | what is stored in my locations: mine, my collectifs', borrowed; tab Lieux          |
+| Collectifs   | `/collectifs`              | my collectifs, then the directory of all (name, city); request a new one           |
+| *Header*     | `/compte/profil`, `/admin` | account (initials), administration for admins and moderators                       |
 
 - **Phone (< 720 px):** a tab bar fixed at the bottom with the four entries, icon and label.
 - **Computer (≥ 720 px):** the same four entries in the top bar, next to the name; content
@@ -71,6 +74,8 @@ flowchart TB
   never point off the site.
 - Tabs inside a page (Mon matériel: Matériel, Lieux; collectif: Matériel, Lieux, Responsables,
   Membres from V0.8) are links to distinct URLs, so they work without JavaScript and can be shared.
+- A collectif page seen from outside (not responsible, not member) shows its name, city and
+  description and the request button only: no tabs, no equipment.
 
 ## Journeys
 
@@ -81,27 +86,27 @@ flowchart LR
   subgraph j1[1 · Join · new volunteer]
     a1[Sign up] --> a2[E-mail: request received] --> a3{{Approval}} --> a4[Sign-in link] --> a5[Dashboard]
   end
-  subgraph j2[2 · Find · any volunteer]
-    b1[Dashboard] --> b2[Search and filters] --> b3[Item page] --> b4[Call, SMS or write]
+  subgraph j2[2 · Find · in my collectifs]
+    b1[Dashboard] --> b2[Search my collectifs] --> b3[Item page] --> b4[Call, SMS or write]
   end
   subgraph j3[3 · List · own equipment]
     c1[Mon matériel] --> c2[Add] --> c3[No location? create one] --> c4[Fill the form] --> c5[Item visible]
   end
   subgraph j4[4 · Collectif · responsible]
-    d1[Collectifs] --> d2[Request or join] --> d3{{Approval}} --> d4[Collectif page] --> d5[Locations and equipment]
+    d1[Collectifs directory] --> d2[Request or join] --> d3{{Approval}} --> d4[Collectif page] --> d5[Locations and equipment]
   end
   subgraph j5[5 · Approve · admin or moderator]
     e1[Badge on the dashboard] --> e2[Queue] --> e3[Accept or refuse] --> e4[E-mail to the person]
   end
 ```
 
-| Journey     | Stories                       | What must hold                                                         |
-|-------------|-------------------------------|------------------------------------------------------------------------|
-| 1 Join      | US-0.2.1 → US-0.2.5           | the pending page says how long it takes and whom to contact            |
-| 2 Find      | US-0.6.1 → US-0.6.3, US-0.7.6 | three taps at most from the dashboard to the owner's phone             |
-| 3 List      | US-0.4.2, US-0.5.1, US-0.7.4  | a location is created without leaving the add form                     |
-| 4 Collectif | US-0.3.1 → US-0.3.5, US-0.8.3 | a responsible lands on the collectif page, "Ajouter du matériel" first |
-| 5 Approve   | US-0.2.4, US-0.3.7, US-0.8.4  | one screen, Accept and Refuse on each row, undo right after            |
+| Journey     | Stories                                  | What must hold                                                         |
+|-------------|------------------------------------------|------------------------------------------------------------------------|
+| 1 Join      | US-0.2.1 → US-0.2.5                      | the pending page says how long it takes and whom to contact            |
+| 2 Find      | US-0.6.1 → US-0.6.3, US-0.7.6, US-0.7.11 | three taps at most from the dashboard to the keeper's phone            |
+| 3 List      | US-0.4.2, US-0.5.1, US-0.7.4             | a location is created without leaving the add form                     |
+| 4 Collectif | US-0.3.1 → US-0.3.5, US-0.8.3            | a responsible lands on the collectif page, "Ajouter du matériel" first |
+| 5 Approve   | US-0.2.4, US-0.3.7, US-0.8.4             | one screen, Accept and Refuse on each row, undo right after            |
 
 From V0.8, a request to join a collectif is approved by its responsibles, not by the platform.
 
