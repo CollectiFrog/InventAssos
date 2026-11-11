@@ -12,6 +12,7 @@ import { createActiveUser } from '../../../test/users.ts'
 import { setResponsible } from '../../data/responsibles.ts'
 import { createUser } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
+import { withReturnPath } from '../return-path.ts'
 
 describe('browse the equipment of my collectifs (US-0.6.1, US-0.7.11)', () => {
   let db: Database
@@ -82,7 +83,10 @@ describe('browse the equipment of my collectifs (US-0.6.1, US-0.7.11)', () => {
 
   it('is for validated users only', async () => {
     const visitor = await app.client().get(routes.inventory.index.href())
-    assert.equal(visitor.location, routes.signIn.form.index.href())
+    assert.equal(
+      visitor.location,
+      withReturnPath(routes.signIn.form.index.href(), routes.inventory.index.href()),
+    )
 
     const pending = app.client()
     await signIn(app, pending, 'pat@example.org')

@@ -6,6 +6,8 @@ import { consumeSignInToken } from '../../../data/sign-in-tokens.ts'
 import { findUserById, syncPlatformAdmin } from '../../../data/users.ts'
 import { sessionUserKey, signedInStatuses } from '../../../middleware/current-user.ts'
 import { routes } from '../../../routes.ts'
+import { formValue } from '../../../validation.ts'
+import { returnParam, safeReturnPath } from '../../return-path.ts'
 import { SignInLinkInvalidPage, SignInLinkPage } from '../sign-in-pages.tsx'
 
 /** The link from the e-mail: GET asks for confirmation, POST signs in. */
@@ -13,7 +15,11 @@ export default createController(routes.signIn.link, {
   actions: {
     index(context) {
       return context.render(
-        <SignInLinkPage csrfToken={getCsrfToken(context)} token={context.params.token} />,
+        <SignInLinkPage
+          csrfToken={getCsrfToken(context)}
+          token={context.params.token}
+          returnPath={safeReturnPath(context.url.searchParams.get(returnParam))}
+        />,
       )
     },
 
@@ -31,7 +37,9 @@ export default createController(routes.signIn.link, {
       for (const key of Object.keys(session.data[0])) session.unset(key)
       session.regenerateId(true)
       session.set(sessionUserKey, user.id)
-      return redirect(routes.home.href(), 303)
+      // US-0.7.8: back to the page asked for before signing in, if it is one of ours.
+      const returnPath = safeReturnPath(formValue(context.formData, returnParam))
+      return redirect(returnPath ?? routes.home.href(), 303)
     },
   },
 })

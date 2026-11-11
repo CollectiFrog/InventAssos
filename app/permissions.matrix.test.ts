@@ -542,7 +542,9 @@ describe('permissions matrix (US-0.5.7)', () => {
         assert.equal(happened, expected)
         if (!expected && rule.denial !== 'hidden') {
           const sentAway =
+            // A visitor goes to sign-in, with the page asked for kept for afterwards (US-0.7.8).
             response.location === routes.signIn.form.index.href() ||
+            response.location?.startsWith(`${routes.signIn.form.index.href()}?suite=`) ||
             response.location === routes.account.status.href()
           assert.ok(
             response.status === 403 || sentAway || response.status === 404,

@@ -9,6 +9,7 @@ import { createActiveUser } from '../../../test/users.ts'
 import { findCollectifHoldingSlug, slugify } from '../../data/collectifs.ts'
 import { createUser } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
+import { withReturnPath } from '../return-path.ts'
 
 const requestUrl = routes.collectifs.request.action.href()
 
@@ -84,7 +85,10 @@ describe('request a new collectif (US-0.3.1)', () => {
     const visitor = await app.client().post(requestUrl, { name: 'X' }, { csrf: false })
     assert.equal(visitor.status, 403)
     const visitorPage = await app.client().get(routes.collectifs.request.index.href())
-    assert.equal(visitorPage.location, routes.signIn.form.index.href())
+    assert.equal(
+      visitorPage.location,
+      withReturnPath(routes.signIn.form.index.href(), routes.collectifs.request.index.href()),
+    )
 
     const pending = app.client()
     await signIn(app, pending, 'pat@example.org')
