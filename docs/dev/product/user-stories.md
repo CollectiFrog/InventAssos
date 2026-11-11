@@ -171,8 +171,9 @@ computers.
 
 - **US-0.7.1 Navigation.** As a validated user, I want four entries (Accueil, Rechercher, Mon
   matériel, Collectifs), so that I always know where to go.
-    - A tab bar at the bottom of the screen on a phone, a top bar on a computer; account and
-      administration are reached from the header.
+    - A tab bar at the bottom of the screen on a phone; on a computer a left rail (720–1099 px)
+      then a sidebar with my collectifs and Administration (ADR 0022). A top bar holds the search
+      field, "Ajouter du matériel" and the account.
 - **US-0.7.2 Dashboard.** As a validated user, I want a home page with search first, my
   collectifs and recently added equipment, so that every task starts from one place.
     - Admins (and moderators from V0.8) see the number of pending requests, linked to the queue.
@@ -200,6 +201,15 @@ computers.
   and labelled controls, so that the app works in a dark storage room, in the sun and with
   assistive technologies.
     - An automated accessibility check runs in CI on the key pages.
+- **US-0.7.13 Use the whole screen.** As a user on a computer, I want pages that use the full
+  width of my window, so that I see more of my inventory at once and manage it faster (ADR 0022).
+    - No page-wide maximum width up to 2000 px; four templates (index, detail, settings, wizard),
+      no phone-sized frame on any page.
+    - Rechercher and a collectif's equipment are dense tables by default, sortable, with filters
+      on the left and active filters removable; `?vue=grille` shows cards.
+    - Mon compte is a settings page in sections; deleting the account goes through
+      `/compte/supprimer`. Administration sections have their own URLs.
+    - Nothing changes below 720 px.
 - **US-0.7.10 Manage categories.** As a platform admin, I want to add a category, rename it and
   change the order of the list, so that the categories fit what associations really own without a
   new release (decided in #69).
