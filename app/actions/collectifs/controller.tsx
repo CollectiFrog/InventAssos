@@ -16,8 +16,10 @@ import {
   canManageCollectifLocations,
   canManageResponsibles,
   canRequestResponsibility,
+  canSeeCollectifInventory,
   canSeeFullAddress,
   isValidatedUser,
+  itemScopeOf,
 } from '../../permissions.ts'
 import { hitUserRequest, notifyAdmins } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
@@ -58,20 +60,31 @@ export default createController(routes.collectifs, {
       const membership: Membership =
         link?.status === 'active' ? 'responsible' : link?.status === 'pending' ? 'pending' : 'none'
       const notice = context.session.get('notice')
+      // Outsiders get the directory entry only: no equipment, locations or people (ADR 0021).
+      const inside = canSeeCollectifInventory(actor, collectif.id)
       return context.render(
         <CollectifPage
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
           collectif={collectif}
-          responsibles={await listActiveResponsibles(db, collectif.id)}
+          inside={inside}
+          responsibles={inside ? await listActiveResponsibles(db, collectif.id) : []}
           canManageResponsibles={canManageResponsibles(actor)}
           membership={membership}
           canEdit={canEditCollectif(actor, collectif.id)}
-          locations={(await listCollectifLocations(db, collectif.id)).map((location) =>
-            redactLocation(location, canSeeFullAddress(actor, location)),
-          )}
+          locations={
+            inside
+              ? (await listCollectifLocations(db, collectif.id)).map((location) =>
+                  redactLocation(location, canSeeFullAddress(actor, location)),
+                )
+              : []
+          }
           canManageLocations={canManageCollectifLocations(actor, collectif.id)}
-          items={await listItemsOwnedBy(db, { collectifId: collectif.id })}
+          items={
+            inside
+              ? await listItemsOwnedBy(db, { collectifId: collectif.id }, itemScopeOf(actor))
+              : []
+          }
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )

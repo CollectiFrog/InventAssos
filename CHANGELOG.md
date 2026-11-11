@@ -16,6 +16,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 - The account is reached from a round button with your initials; « Se déconnecter » moved to the account page.
 - Pages use the whole width of a computer screen instead of a narrow centred column.
+- Each collectif's equipment, locations and people are now seen only by its responsibles, the people who own the items and those who store them; other collectifs show only their name and presentation.
 
 ## [0.6.1] - 2026-11-10
 

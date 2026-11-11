@@ -1,5 +1,6 @@
 // One function per action in docs/dev/architecture/permissions.md. Everything not allowed here is
 // denied. Controllers call these on the server; hiding a button is never the only barrier.
+import type { ItemScope } from './data/items.ts'
 import type { CurrentUser } from './middleware/current-user.ts'
 
 /** Who is acting: the signed-in user, or null for a visitor. */
@@ -162,4 +163,69 @@ export function canEditItem(actor: Actor, item: ItemAccess): boolean {
  */
 export function canChangeItem(actor: Actor, item: ItemAccess & { archived_at: unknown }): boolean {
   return item.archived_at == null && canEditItem(actor, item)
+}
+
+/** True when the actor belongs to one of these collectifs (responsible; member from V0.8). */
+function sharesCollectif(actor: CurrentUser, collectifIds: readonly string[]): boolean {
+  return collectifIds.some((id) => actor.managedCollectifIds.has(id))
+}
+
+/** An item as visibility needs it: its owner and storage, and the owning person's collectifs. */
+export interface ItemVisibility extends ItemAccess {
+  /** Collectifs the owning person belongs to; empty when a collectif owns the item. */
+  ownerCollectifIds: readonly string[]
+}
+
+/**
+ * "See an item, its owner, the city of its location" (ADR 0021): admin; owned by C or by a person
+ * of C, or stored in C's location; owner, or stored in own location. `itemScopeOf` mirrors it in SQL.
+ */
+export function canSeeItem(actor: Actor, item: ItemVisibility): boolean {
+  if (!isValidatedUser(actor)) return false
+  if (actor.isAdmin || item.owner_user_id === actor.id) return true
+  if (item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id)) {
+    return true
+  }
+  if (item.owner_user_id !== null && sharesCollectif(actor, item.ownerCollectifIds)) return true
+  return canManageLocation(actor, {
+    collectif_id: item.locationCollectifId,
+    user_id: item.locationUserId,
+  })
+}
+
+/** The listings' side of `canSeeItem`: every query that lists items filters with this scope. */
+export function itemScopeOf(actor: CurrentUser): ItemScope {
+  if (actor.isAdmin) return { everything: true }
+  return { everything: false, userId: actor.id, collectifIds: [...actor.managedCollectifIds] }
+}
+
+/** "See a person's page and phone": admin, the person, or someone sharing a collectif (ADR 0021). */
+export function canSeePerson(
+  actor: Actor,
+  person: { id: string; collectifIds: readonly string[] },
+): boolean {
+  if (!isValidatedUser(actor)) return false
+  return actor.isAdmin || actor.id === person.id || sharesCollectif(actor, person.collectifIds)
+}
+
+/**
+ * "See C's equipment, locations and responsibles": admin, or a person of C. Everybody else sees
+ * the directory entry only: name, city and description (ADR 0021).
+ */
+export function canSeeCollectifInventory(actor: Actor, collectifId: string): boolean {
+  if (!isValidatedUser(actor)) return false
+  return actor.isAdmin || actor.managedCollectifIds.has(collectifId)
+}
+
+/**
+ * "See a location (name, city)": admin, its managers, or whoever sees an item stored there, since
+ * the item page links to it (ADR 0021).
+ */
+export function canSeeLocation(
+  actor: Actor,
+  location: { collectif_id: string | null; user_id: string | null },
+  seesAnItemThere: boolean,
+): boolean {
+  if (!isValidatedUser(actor)) return false
+  return isActiveAdmin(actor) || canManageLocation(actor, location) || seesAnItemThere
 }

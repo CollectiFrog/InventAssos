@@ -17,7 +17,7 @@ export function HomePage(handle: Handle<{ databaseOk: boolean; viewer: Viewer }>
         {viewer ? (
           <p class="actions">
             <a class="button" href={routes.inventory.index.href()}>
-              Parcourir l’inventaire
+              Rechercher dans mes collectifs
             </a>
             <a class="button secondary" href={routes.items.index.href()}>
               Mon matériel

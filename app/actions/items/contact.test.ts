@@ -27,12 +27,16 @@ describe('item page and contact (US-0.6.3)', () => {
     await resetDatabase(db)
     const rita = await createActiveUser(db, 'Rita', 'rita@example.org')
     const max = await createActiveUser(db, 'Max', 'max.secret@example.org')
-    await createActiveUser(db, 'Lou', 'lou@example.org')
+    const louUser = await createActiveUser(db, 'Lou', 'lou@example.org')
     const collectif = await createActiveCollectif(db, 'Les Grenouilles', rita.id)
-    const local = await createTestLocation(db, { collectifId: collectif.id }, 'Local')
+    // Lou sees both items (ADR 0021): she keeps the Grenouilles' console at home, and shares
+    // Les Rainettes with Max.
+    const rainettes = await createActiveCollectif(db, 'Les Rainettes', louUser.id)
+    await setResponsible(db, { userId: max.id, collectifId: rainettes.id, status: 'active' })
+    const louHome = await createTestLocation(db, { userId: louUser.id }, 'Chez Lou')
     const garage = await createTestLocation(db, { userId: max.id }, 'Garage')
     collectifItem = await createTestItem(db, {
-      locationId: local.id,
+      locationId: louHome.id,
       owner: { collectifId: collectif.id },
       createdBy: rita.id,
       name: 'Console du collectif',
@@ -122,6 +126,48 @@ describe('item page and contact (US-0.6.3)', () => {
 
   it('sends nothing for an empty message', async () => {
     await lou.post(routes.items.contact.href({ itemId: personItem.id }), { message: '   ' })
+    assert.equal(app.mailer.outbox.length, 0)
+  })
+
+  it("shows a person's phone and page only to who shares a collectif with them", async () => {
+    await db.exec(
+      sql`update users set phone = '06 07 08 09 10' where email = 'max.secret@example.org'`,
+    )
+    // Max deposits an item at the Grenouilles: Rita keeps it, but does not share a collectif with him.
+    const local = await createTestLocation(
+      db,
+      { collectifId: String(collectifItem.owner_collectif_id) },
+      'Local',
+    )
+    const deposit = await createTestItem(db, {
+      locationId: local.id,
+      owner: { userId: String(personItem.owner_user_id) },
+      createdBy: String(personItem.owner_user_id),
+      name: 'Enceinte de Max',
+    })
+    const rita = app.client()
+    await signIn(app, rita, 'rita@example.org')
+    const html = await page(deposit, rita)
+    assert.match(html, /Max/)
+    assert.doesNotMatch(html, /06 07 08 09 10/)
+    assert.doesNotMatch(html, /href="\/personnes\//)
+    assert.match(html, /Votre message/)
+
+    assert.match(await page(deposit), /06 07 08 09 10/)
+  })
+
+  it('answers 404 to someone outside the collectifs, for the page and the contact form', async () => {
+    const otto = await createActiveUser(db, 'Otto', 'otto@example.org')
+    const client = app.client()
+    await signIn(app, client, otto.email)
+    app.mailer.outbox.length = 0
+    const show = await client.get(routes.items.show.href({ itemId: personItem.id }))
+    assert.equal(show.status, 404)
+    assert.doesNotMatch(show.text, /Ampli de Max/)
+    const sent = await client.post(routes.items.contact.href({ itemId: personItem.id }), {
+      message: 'Bonjour',
+    })
+    assert.equal(sent.status, 404)
     assert.equal(app.mailer.outbox.length, 0)
   })
 

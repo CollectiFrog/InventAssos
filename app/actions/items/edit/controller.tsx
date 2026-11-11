@@ -12,7 +12,7 @@ import {
   updateItemFields,
 } from '../../../data/items.ts'
 import type { AppContext } from '../../../middleware/index.ts'
-import { canChangeItem } from '../../../permissions.ts'
+import { canChangeItem, canSeeItem } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors } from '../../../ui/form.tsx'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
@@ -100,7 +100,7 @@ export default createController(routes.items.edit, {
       const actor = requireUser(context)
       if (actor instanceof Response) return actor
       const item = await findItemDetails(context.db, context.params.itemId)
-      if (item === null || item.archived_at) return notFound(context)
+      if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
       if (!canChangeItem(actor, item)) return forbidden(context)
       return render(context, item, valuesOf(item))
     },
@@ -110,7 +110,7 @@ export default createController(routes.items.edit, {
       if (actor instanceof Response) return actor
       const { db, formData, session } = context
       const item = await findItemDetails(db, context.params.itemId)
-      if (item === null || item.archived_at) return notFound(context)
+      if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
       if (!canChangeItem(actor, item)) return forbidden(context)
 
       const parsed = parseForm(itemFieldsSchema, formData)

@@ -21,20 +21,33 @@ chaque page un champ de **recherche** et le bouton **Ajouter du matériel**.
 En haut à droite, le rond avec vos initiales ouvre **votre compte**. Sur un téléphone, les
 administrateurs trouvent le lien **Administration** à côté.
 
+## Qui voit quoi
+
+Chaque collectif garde son inventaire pour lui. Vous voyez un objet quand :
+
+- il appartient à un collectif dont vous êtes responsable ;
+- il vous appartient, ou appartient à une personne de l'un de vos collectifs ;
+- il est rangé dans l'un de vos lieux, ou dans un lieu de l'un de vos collectifs.
+
+Les autres collectifs n'apparaissent que par leur nom et leur présentation : ni leur matériel, ni
+leurs lieux, ni leurs responsables. La page d'une personne, et son téléphone, ne s'affichent qu'aux
+personnes qui partagent un collectif avec elle. Le partage avec d'autres collectifs viendra plus tard.
+
 ## Parcourir l'inventaire
 
-**Rechercher** liste tout le matériel actif de la plateforme, 24 objets par
+**Rechercher** liste le matériel actif que vous pouvez voir, 24 objets par
 page : nom, quantité, catégorie, ville et propriétaire. Cliquez sur un objet pour voir sa page.
 Les adresses des lieux n'y apparaissent jamais, seulement la ville.
 
 En haut de la liste, **Rechercher** cherche dans le nom, la marque, le modèle et la description
-(majuscules et accents ne comptent pas). Les filtres **Catégorie**, **Collectif propriétaire** et
-**Ville** se combinent entre eux et avec la recherche ; **Tout afficher** les efface.
+(majuscules et accents ne comptent pas). Les filtres **Catégorie**, **Collectif propriétaire** (parmi
+vos collectifs) et **Ville** se combinent entre eux et avec la recherche ; **Tout afficher** les efface.
 
 ## Contacter le propriétaire d'un objet
 
 La page d'un objet indique à qui il appartient, la ville où il est rangé et un **téléphone** : celui
-du collectif, ou celui de la personne si elle l'a renseigné dans son profil. Sans téléphone, un
+du collectif, ou celui de la personne si elle l'a renseigné dans son profil et que vous partagez un
+collectif avec elle. Sans téléphone, un
 formulaire permet d'écrire au propriétaire (pour un collectif, à chacun de ses responsables, dans
 un e-mail séparé) : son adresse e-mail reste cachée, la vôtre lui est transmise pour qu'il puisse
 vous répondre. Le prêt, la location ou l'échange s'organisent ensuite directement entre vous.
@@ -46,13 +59,14 @@ le compte est désactivé n'est plus affiché.
 Touchez le rond avec vos initiales, en haut à droite. Vous pouvez y changer votre nom et indiquer un
 numéro de téléphone (facultatif), et vous déconnecter.
 
-Le téléphone est **visible par tous les utilisateurs validés** de la plateforme : c'est ainsi qu'ils
-vous contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
+Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous
+contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
 
 ## Modifier la présentation d'un collectif
 
 Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y
-changer la description et le téléphone de contact, visibles par les utilisateurs validés. Pour
+changer la description, visible par tous les utilisateurs validés, et le téléphone de contact,
+visible par les personnes qui voient le matériel du collectif. Pour
 changer le nom, contactez un administrateur.
 
 ## Gérer les lieux de stockage

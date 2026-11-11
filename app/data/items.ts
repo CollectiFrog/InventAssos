@@ -101,6 +101,36 @@ const summaryJoins = sql`
   left join users ou on ou.id = i.owner_user_id
 `
 
+/** Whose point of view a listing takes; built by `itemScopeOf` in app/permissions.ts. */
+export type ItemScope =
+  | { everything: true }
+  | { everything: false; userId: string; collectifIds: readonly string[] }
+
+/**
+ * The SQL side of `canSeeItem` (ADR 0021), over `items i` joined to `locations l`. Keep both in
+ * step: app/data/items.visibility.test.ts compares them.
+ */
+function visibleIn(scope: ItemScope) {
+  if (scope.everything) return sql`true`
+  const ids = [...scope.collectifIds]
+  return sql`(
+    i.owner_user_id = ${scope.userId}
+    or i.owner_collectif_id = any(${ids}::uuid[])
+    or exists (
+      select 1 from responsibles vr
+      where vr.user_id = i.owner_user_id and vr.status = 'active'
+        and vr.collectif_id = any(${ids}::uuid[])
+    )
+    or l.user_id = ${scope.userId}
+    or l.collectif_id = any(${ids}::uuid[])
+  )`
+}
+
+/** Splits the comma-joined IDs of a `string_agg`. */
+function idList(value: unknown): string[] {
+  return typeof value === 'string' && value !== '' ? value.split(',') : []
+}
+
 /**
  * Active items a person deals with: owned by them or by a collectif they manage, or stored in a
  * location they or those collectifs own.
@@ -137,6 +167,8 @@ export interface ItemDetails extends Item {
   ownerUserId: string | null
   /** The collectif's contact phone, or the owner's phone while their account is active. */
   contactPhone: string | null
+  /** Collectifs the owning person belongs to, for `canSeeItem` and `canSeePerson`. */
+  ownerCollectifIds: string[]
 }
 
 /** Loads an item with its category, location and owner names. */
@@ -148,7 +180,11 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
            l.collectif_id as location_collectif_id, l.user_id as location_user_id,
            coalesce(oc.name, ou.name) as owner_name, oc.slug as owner_slug,
            case when i.owner_collectif_id is not null then oc.contact_phone
-                when ou.status = 'active' then ou.phone end as contact_phone
+                when ou.status = 'active' then ou.phone end as contact_phone,
+           (select string_agg(r.collectif_id::text, ',') from responsibles r
+            join collectifs rc on rc.id = r.collectif_id
+            where r.user_id = i.owner_user_id and r.status = 'active' and rc.status = 'active'
+           ) as owner_collectif_ids
     from items i ${summaryJoins}
     where i.id = ${id}
   `)
@@ -165,6 +201,7 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
     ownerSlug: row.owner_slug == null ? null : String(row.owner_slug),
     contactPhone: row.contact_phone == null ? null : String(row.contact_phone),
     ownerUserId: item.owner_user_id,
+    ownerCollectifIds: idList(row.owner_collectif_ids),
   }
 }
 
@@ -230,13 +267,13 @@ function likeLiteral(text: string): string {
   return text.replace(/[\\%_]/g, (char) => `\\${char}`)
 }
 
-/** Active (non-archived) items of everybody, by name, one page at a time (US-0.6.1, US-0.6.2). */
+/** Active items the scope may see, by name, one page at a time (US-0.6.2, US-0.7.11). */
 export async function listInventory(
   db: Database,
-  options: { page: number; pageSize: number; filters?: InventoryFilters },
+  options: { scope: ItemScope; page: number; pageSize: number; filters?: InventoryFilters },
 ): Promise<InventoryPage> {
   const f = options.filters ?? {}
-  const conditions = [sql`i.archived_at is null`]
+  const conditions = [sql`i.archived_at is null`, visibleIn(options.scope)]
   if (f.query) {
     conditions.push(sql`inv_fold(concat_ws(' ', i.name, i.brand, i.model, i.description))
       like '%' || inv_fold(${likeLiteral(f.query)}) || '%'`)
@@ -257,11 +294,11 @@ export async function listInventory(
   return { items: (result.rows ?? []).map(toSummary), total: Number(count.rows?.[0]?.n ?? 0) }
 }
 
-/** Cities that hold at least one active item, for the city filter. */
-export async function listInventoryCities(db: Database): Promise<string[]> {
+/** Cities that hold at least one active item the scope may see, for the city filter. */
+export async function listInventoryCities(db: Database, scope: ItemScope): Promise<string[]> {
   const result = await db.exec(sql`
     select distinct l.city from items i join locations l on l.id = i.location_id
-    where i.archived_at is null order by l.city
+    where i.archived_at is null and ${visibleIn(scope)} order by l.city
   `)
   return (result.rows ?? []).map((row) => String(row.city))
 }
@@ -280,16 +317,34 @@ export async function listOwnerContactEmails(db: Database, item: Item): Promise<
   return (result.rows ?? []).map((row) => String(row.email))
 }
 
-/** Active items owned by a collectif or a person, by name (US-0.6.4). */
-export async function listItemsOwnedBy(db: Database, owner: ItemOwner): Promise<ItemSummary[]> {
+/** Active items owned by a collectif or a person that the scope may see, by name (US-0.6.4). */
+export async function listItemsOwnedBy(
+  db: Database,
+  owner: ItemOwner,
+  scope: ItemScope,
+): Promise<ItemSummary[]> {
   const condition =
     'collectifId' in owner
       ? sql`i.owner_collectif_id = ${owner.collectifId}`
       : sql`i.owner_user_id = ${owner.userId}`
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins}
-    where i.archived_at is null and ${condition}
+    where i.archived_at is null and ${condition} and ${visibleIn(scope)}
     order by lower(i.name), i.id
   `)
   return (result.rows ?? []).map(toSummary)
+}
+
+/** True when the scope may see an active item stored in the location (its page names it). */
+export async function locationShowsItemTo(
+  db: Database,
+  locationId: string,
+  scope: ItemScope,
+): Promise<boolean> {
+  const result = await db.exec(sql`
+    select 1 from items i join locations l on l.id = i.location_id
+    where i.location_id = ${locationId} and i.archived_at is null and ${visibleIn(scope)}
+    limit 1
+  `)
+  return (result.rows?.length ?? 0) > 0
 }

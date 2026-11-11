@@ -42,6 +42,7 @@ export function InventoryPage(handle: Handle<InventoryPageProps>) {
     return (
       <Layout title="Inventaire" viewer={viewer} section="search">
         <h1>Inventaire</h1>
+        <p class="status">Le matériel de vos collectifs, le vôtre et celui rangé dans vos lieux.</p>
         <form
           method="get"
           action={routes.inventory.index.href()}

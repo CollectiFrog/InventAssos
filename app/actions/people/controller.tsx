@@ -2,8 +2,9 @@ import type { Handle } from 'remix/component'
 import { createController } from 'remix/router'
 
 import { type ItemSummary, listItemsOwnedBy } from '../../data/items.ts'
+import { listManagedCollectifs } from '../../data/responsibles.ts'
 import { findUserById } from '../../data/users.ts'
-import { isValidatedUser } from '../../permissions.ts'
+import { canSeePerson, isValidatedUser, itemScopeOf } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
@@ -30,7 +31,7 @@ function PersonPage(
   }
 }
 
-/** People pages; only active accounts are shown. */
+/** People pages: active accounts, for those who share a collectif with them (ADR 0021). */
 export default createController(routes.people, {
   actions: {
     async show(context) {
@@ -40,12 +41,17 @@ export default createController(routes.people, {
 
       const person = await findUserById(context.db, context.params.userId)
       if (person === null || person.status !== 'active') return notFound(context)
+      const collectifs = await listManagedCollectifs(context.db, person.id)
+      // 404, not 403: whether this person has an account is not for strangers to know.
+      if (!canSeePerson(actor, { id: person.id, collectifIds: collectifs.map((c) => c.id) })) {
+        return notFound(context)
+      }
       return context.render(
         <PersonPage
           viewer={viewerOf(context)}
           name={person.name}
           phone={person.phone}
-          items={await listItemsOwnedBy(context.db, { userId: person.id })}
+          items={await listItemsOwnedBy(context.db, { userId: person.id }, itemScopeOf(actor))}
         />,
       )
     },

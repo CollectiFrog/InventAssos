@@ -3,7 +3,7 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
-import { locationHoldsItems } from '../../data/items.ts'
+import { locationHoldsItems, locationShowsItemTo } from '../../data/items.ts'
 import {
   deleteLocation,
   findLocationById,
@@ -11,7 +11,13 @@ import {
   listLocationsOwnedBy,
   redactLocation,
 } from '../../data/locations.ts'
-import { canManageLocation, canSeeFullAddress, isValidatedUser } from '../../permissions.ts'
+import {
+  canManageLocation,
+  canSeeFullAddress,
+  canSeeLocation,
+  isValidatedUser,
+  itemScopeOf,
+} from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
@@ -47,6 +53,10 @@ export default createController(routes.locations, {
 
       const location = await findLocationWithOwner(context.db, context.params.locationId)
       if (location === null) return notFound(context)
+      const seesAnItemThere =
+        !canManageLocation(actor, location) &&
+        (await locationShowsItemTo(context.db, location.id, itemScopeOf(actor)))
+      if (!canSeeLocation(actor, location, seesAnItemThere)) return notFound(context)
       return context.render(
         <LocationPage
           viewer={viewerOf(context)}
