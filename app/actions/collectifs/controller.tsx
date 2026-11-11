@@ -26,6 +26,7 @@ import {
 import { hitUserRequest, notifyAdmins } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
 import { parseItemSort, parseItemView } from '../../ui/item-table.tsx'
+import { backHref } from '../back-link.ts'
 import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { CollectifPage, type CollectifTab, type Membership } from './collectif-page.tsx'
@@ -68,6 +69,7 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
       csrfToken={getCsrfToken(context)}
       collectif={collectif}
       tab={tab}
+      back={backHref(context, routes.collectifs.index.href())}
       inside={inside}
       membership={membership}
       canEdit={canEditCollectif(actor, collectif.id)}

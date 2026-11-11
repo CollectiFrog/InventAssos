@@ -42,7 +42,7 @@ function EditItemPage(
         <form
           method="post"
           action={routes.items.edit.action.href({ itemId: item.id })}
-          class="stack"
+          class="stack form-wide"
         >
           <CsrfField token={csrfToken} />
           <ItemFields values={values} errors={errors} categories={categories} />

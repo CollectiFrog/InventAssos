@@ -19,8 +19,9 @@ export function ItemFields(
 ) {
   return () => {
     const { values, errors, categories } = handle.props
+    // Wizard template (ADR 0022): two fields per row when the form is wide enough.
     return (
-      <>
+      <div class="field-grid">
         <TextField
           name="name"
           label="Nom"
@@ -89,7 +90,7 @@ export function ItemFields(
           error={errors.description}
           maxLength={2000}
         />
-      </>
+      </div>
     )
   }
 }

@@ -16,6 +16,12 @@ export type Viewer = {
 /** The four navigation entries (US-0.7.1); a page names the one it belongs to. */
 export type Section = 'home' | 'search' | 'mine' | 'collectifs'
 
+/** One step of the breadcrumb; the last one is the page itself and has no link. */
+export interface Crumb {
+  label: string
+  href?: string
+}
+
 /** Props of the page shell. */
 export interface LayoutProps {
   title: string
@@ -24,6 +30,10 @@ export interface LayoutProps {
   section?: Section
   /** Shell link marked as current, for the pages reached from outside the four entries. */
   headerLink?: 'admin' | 'account'
+  /** Breadcrumb shown above the title on computers (ADR 0022). */
+  trail?: Crumb[]
+  /** Where « Retour » goes on phones: the previous page of this site, else the parent. */
+  back?: string
   children?: RemixNode
 }
 
@@ -84,7 +94,7 @@ const entries: { section: Section; label: string; href: string; icon: RemixNode 
 /** The HTML document every page renders into. Server-rendered only (ADR 0015). */
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
-    const { title, viewer = null, section, headerLink, children } = handle.props
+    const { title, viewer = null, section, headerLink, trail = [], back, children } = handle.props
     const navigates = viewer?.isActive === true
 
     return (
@@ -161,7 +171,35 @@ export function Layout(handle: Handle<LayoutProps>) {
                   )}
                 </div>
               </header>
-              <main id="contenu">{children}</main>
+              <main id="contenu">
+                {back || trail.length > 0 ? (
+                  <div class="page-nav">
+                    {back ? (
+                      <a class="back-link" href={back}>
+                        <span aria-hidden="true">← </span>Retour
+                      </a>
+                    ) : null}
+                    {trail.length > 0 ? (
+                      <nav aria-label="Fil d’Ariane" class="breadcrumb">
+                        <ol>
+                          {trail.map((crumb, index) =>
+                            crumb.href && index < trail.length - 1 ? (
+                              <li>
+                                <a href={crumb.href} class="crumb-link">
+                                  {crumb.label}
+                                </a>
+                              </li>
+                            ) : (
+                              <li aria-current="page">{crumb.label}</li>
+                            ),
+                          )}
+                        </ol>
+                      </nav>
+                    ) : null}
+                  </div>
+                ) : null}
+                {children}
+              </main>
             </div>
           </div>
         </body>

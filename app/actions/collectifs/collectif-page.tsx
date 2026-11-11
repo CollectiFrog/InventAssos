@@ -42,6 +42,8 @@ export interface CollectifPageProps {
   locations: Location[]
   /** Its responsibles (Responsables tab only). */
   responsibles: { id: string; name: string }[]
+  /** « Retour » on phones (`backHref`). */
+  back: string
   notice?: string
 }
 
@@ -56,7 +58,16 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
       inside ? `${p.items.length} ${p.items.length > 1 ? 'objets' : 'objet'}` : '',
     ].filter(Boolean)
     return (
-      <Layout title={collectif.name} viewer={p.viewer} section="collectifs">
+      <Layout
+        title={collectif.name}
+        viewer={p.viewer}
+        section="collectifs"
+        back={p.back}
+        trail={[
+          { label: 'Collectifs', href: routes.collectifs.index.href() },
+          { label: collectif.name },
+        ]}
+      >
         <div class="page-head">
           <div>
             <h1>{collectif.name}</h1>
