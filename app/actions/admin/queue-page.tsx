@@ -6,6 +6,7 @@ import type { User } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
+import { AdminTabs } from './admin-tabs.tsx'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'Europe/Paris' })
 
@@ -43,6 +44,7 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
     return (
       <Layout title="Administration" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
+        <AdminTabs current="requests" />
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}

@@ -63,3 +63,18 @@ droits, l'hébergeur le retire de `PLATFORM_ADMIN_EMAILS`.
 La section **Comptes désactivés** de la page **Administration** liste les comptes désactivés.
 **Réactiver** rend à la personne ses accès : elle peut de nouveau demander un lien de connexion.
 La réactivation est enregistrée dans l'historique de la plateforme.
+
+## Gérer les catégories
+
+**Administration**, onglet **Catégories**, liste les catégories dans l'ordre où elles apparaissent
+dans le formulaire d'ajout et dans les filtres de recherche. Chaque changement s'y voit aussitôt.
+
+- **Ajouter** une catégorie : son nom en français. Elle s'ajoute en fin de liste. Deux catégories ne
+  peuvent pas porter le même nom (majuscules et accents ne comptent pas).
+- **Renommer** : le matériel garde sa catégorie, seul le nom affiché change.
+- **Monter** ou **Descendre** change sa place dans la liste.
+- **Supprimer…** : une catégorie que personne n'utilise disparaît aussitôt. Si du matériel l'utilise
+  encore (y compris du matériel archivé), choisissez d'abord la catégorie qui le reçoit ; son
+  historique indique le changement.
+
+Chaque changement est inscrit au journal, sans le nom de la catégorie.

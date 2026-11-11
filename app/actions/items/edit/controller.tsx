@@ -4,11 +4,11 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../../data/audit-log.ts'
+import { listCategories } from '../../../data/categories.ts'
 import {
   findItemById,
   findItemDetails,
   type ItemDetails,
-  listCategories,
   updateItemFields,
 } from '../../../data/items.ts'
 import type { AppContext } from '../../../middleware/index.ts'

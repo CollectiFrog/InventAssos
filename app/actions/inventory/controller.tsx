@@ -1,13 +1,8 @@
 import { createController } from 'remix/router'
-
+import { listCategories } from '../../data/categories.ts'
 import { listCollectifs } from '../../data/collectifs.ts'
 import { isUuid } from '../../data/ids.ts'
-import {
-  type InventoryFilters,
-  listCategories,
-  listInventory,
-  listInventoryCities,
-} from '../../data/items.ts'
+import { type InventoryFilters, listInventory, listInventoryCities } from '../../data/items.ts'
 import { isValidatedUser, itemScopeOf } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, requireUser } from '../guards.tsx'
