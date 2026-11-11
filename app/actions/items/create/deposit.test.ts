@@ -58,9 +58,11 @@ describe("a person's item stored at a collectif (US-0.5.2)", () => {
     assert.equal(item?.owner_collectif_id, null)
     assert.equal(item?.location_id, local.id)
 
+    // Max owns it and finds it; Mon matériel lists only what is stored at his places (US-0.7.3).
     const maxClient = app.client()
     await signIn(app, maxClient, 'max@example.org')
-    assert.match((await maxClient.get(routes.items.index.href())).text, /Console Yamaha/)
+    assert.match((await maxClient.get(routes.inventory.index.href())).text, /Console Yamaha/)
+    assert.doesNotMatch((await maxClient.get(routes.items.index.href())).text, /Console Yamaha/)
   })
 
   it('requires a validated account as owner', async () => {

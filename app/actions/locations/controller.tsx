@@ -23,7 +23,7 @@ import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { LocationPage } from './location-page.tsx'
 import { LocationsPage } from './locations-pages.tsx'
-import { ownerOptionsFor } from './owners.ts'
+import { listPageOf } from './owners.ts'
 
 /** "Mes lieux" and deletion (US-0.4.1, US-0.4.2). */
 export default createController(routes.locations, {
@@ -39,8 +39,8 @@ export default createController(routes.locations, {
         <LocationsPage
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
-          locations={await listLocationsOwnedBy(db, actor.id, [...actor.managedCollectifIds])}
-          canCreate={(await ownerOptionsFor(db, actor)).length > 0}
+          // US-0.7.3: my own places only; a collectif's are on its page.
+          locations={await listLocationsOwnedBy(db, actor.id, [])}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
@@ -76,7 +76,7 @@ export default createController(routes.locations, {
       // US-0.4.1: the foreign key also refuses it; this check gives a readable message.
       if (await locationHoldsItems(db, location.id)) {
         session.flash('notice', `« ${location.name} » contient du matériel : déplacez-le d’abord.`)
-        return redirect(routes.locations.index.href(), 303)
+        return redirect(await listPageOf(db, location), 303)
       }
 
       await db.transaction(async (tx) => {
@@ -89,7 +89,7 @@ export default createController(routes.locations, {
         })
       })
       session.flash('notice', `Lieu « ${location.name} » supprimé.`)
-      return redirect(routes.locations.index.href(), 303)
+      return redirect(await listPageOf(db, location), 303)
     },
   },
 })

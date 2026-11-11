@@ -5,6 +5,7 @@ import { routes } from '../../routes.ts'
 import type { FieldErrors } from '../../ui/form.tsx'
 import { CsrfField } from '../../ui/form.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
+import { MyStuffTabs } from '../items/items-pages.tsx'
 import { LocationForm, type LocationFormValues, type OwnerOption } from './location-form.tsx'
 
 /** Props of "Mes lieux". */
@@ -12,33 +13,37 @@ export interface LocationsPageProps {
   viewer: Viewer
   csrfToken: string
   locations: LocationWithOwner[]
-  canCreate: boolean
   notice?: string
 }
 
-/** The locations the viewer manages. */
+/** The Lieux tab of Mon matériel: the viewer's own locations (US-0.7.3). */
 export function LocationsPage(handle: Handle<LocationsPageProps>) {
   return () => {
-    const { viewer, csrfToken, locations, canCreate, notice } = handle.props
+    const { viewer, csrfToken, locations, notice } = handle.props
     return (
       <Layout title="Mes lieux" viewer={viewer} section="mine">
-        <h1>Mes lieux de stockage</h1>
+        <div class="page-head">
+          <div>
+            <h1>Mon matériel</h1>
+            <p class="status">Vos lieux de stockage : garage, cave, local personnel…</p>
+          </div>
+          <a class="button" href={`${routes.locations.create.index.href()}?pour=me`}>
+            Ajouter un lieu
+          </a>
+        </div>
+        <MyStuffTabs current="locations" />
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}
           </p>
         ) : null}
-        {canCreate ? (
-          <p>
-            <a class="button" href={routes.locations.create.index.href()}>
+        {locations.length === 0 ? (
+          <div class="card empty-state">
+            <p>Aucun lieu pour l’instant. Déclarez où vous rangez du matériel.</p>
+            <a class="button" href={`${routes.locations.create.index.href()}?pour=me`}>
               Ajouter un lieu
             </a>
-          </p>
-        ) : (
-          <p class="status">Vous pourrez ajouter des lieux une fois responsable d’un collectif.</p>
-        )}
-        {locations.length === 0 ? (
-          <p>Aucun lieu pour l’instant.</p>
+          </div>
         ) : (
           <ul class="cards">
             {locations.map((location) => (

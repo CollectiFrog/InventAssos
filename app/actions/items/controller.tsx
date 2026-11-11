@@ -6,7 +6,8 @@ import { logAction, readHistory } from '../../data/audit-log.ts'
 import {
   findItemDetails,
   type ItemDetails,
-  listItemsManagedBy,
+  type ItemSummary,
+  listItemsStoredAtHomeOf,
   listOwnerContactEmails,
 } from '../../data/items.ts'
 import { sendSafely } from '../../mail/mailer.ts'
@@ -18,7 +19,6 @@ import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
 import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
-import { storableLocations } from './choices.ts'
 import { ItemHistory, itemHistoryActions } from './history.tsx'
 import { ItemPage } from './item-page.tsx'
 import { MyItemsPage } from './items-pages.tsx'
@@ -48,13 +48,17 @@ export default createController(routes.items, {
       if (actor instanceof Response) return actor
       if (!isValidatedUser(actor)) return forbidden(context)
 
-      const { db } = context
+      // US-0.7.3: what is stored at my places right now, grouped by whom it belongs to.
+      const held = await listItemsStoredAtHomeOf(context.db, actor.id)
+      const ofMyCollectifs = (item: ItemSummary) =>
+        item.ownerCollectifId !== null && actor.managedCollectifIds.has(item.ownerCollectifId)
       const notice = context.session.get('notice')
       return context.render(
         <MyItemsPage
           viewer={viewerOf(context)}
-          items={await listItemsManagedBy(db, actor.id, [...actor.managedCollectifIds])}
-          canAdd={(await storableLocations(db, actor)).length > 0}
+          mine={held.filter((item) => item.ownerUserId === actor.id)}
+          collectifs={held.filter(ofMyCollectifs)}
+          borrowed={held.filter((item) => item.ownerUserId !== actor.id && !ofMyCollectifs(item))}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )

@@ -14,11 +14,13 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Collectifs page: your collectifs first, then a directory of all collectifs with their city, searchable by name or city.
 - A collectif states its city, asked when it is declared and editable by its responsibles.
 - Dashboard on the home page: search first, equipment recently added to your collectifs, your collectifs, and the pending requests for admins.
+- A location can be created from the « Ajouter du matériel » form, so having no location yet no longer blocks you.
 
 ### Changed
 
 - The account is reached from a round button with your initials; « Se déconnecter » moved to the account page.
 - Pages use the whole width of a computer screen instead of a narrow centred column.
+- « Mon matériel » lists what is stored at your places right now (yours, your collectifs', borrowed), with a Lieux tab for your own locations; a collectif's locations are on its page.
 - Each collectif's equipment, locations and people are now seen only by its responsibles, the people who own the items and those who store them; other collectifs show only their name and presentation.
 
 ## [0.6.1] - 2026-11-10

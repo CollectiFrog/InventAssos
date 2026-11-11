@@ -17,6 +17,8 @@ export interface TextFieldProps {
   hint?: RemixNode
   type?: 'text' | 'email' | 'tel' | 'number' | 'search'
   required?: boolean
+  /** Required only when its section is used: no "(facultatif)", and the server checks it. */
+  requiredIfUsed?: boolean
   autoComplete?: string
   maxLength?: number
 }
@@ -34,7 +36,7 @@ export function TextField(handle: Handle<TextFieldProps>) {
       <div class={p.error ? 'field field-invalid' : 'field'}>
         <label for={id}>
           {p.label}
-          {p.required ? null : <span class="optional"> (facultatif)</span>}
+          {p.required || p.requiredIfUsed ? null : <span class="optional"> (facultatif)</span>}
         </label>
         {p.hint ? (
           <p class="hint" id={`${id}-hint`}>

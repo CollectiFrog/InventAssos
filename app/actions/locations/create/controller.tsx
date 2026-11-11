@@ -10,7 +10,7 @@ import { formValue, parseForm } from '../../../validation.ts'
 import { forbidden, requireUser } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 import { LocationEditorPage } from '../locations-pages.tsx'
-import { ownerOptionsFor, parseOwner } from '../owners.ts'
+import { listPageOf, ownerOptionsFor, parseOwner } from '../owners.ts'
 import { locationSchema } from '../schema.ts'
 
 const title = 'Ajouter un lieu'
@@ -80,7 +80,7 @@ export default createController(routes.locations.create, {
         )
       }
 
-      await db.transaction(async (tx) => {
+      const created = await db.transaction(async (tx) => {
         const location = await createLocation(tx, owner, parsed.value)
         await logAction(tx, {
           actorId: actor.id,
@@ -90,9 +90,10 @@ export default createController(routes.locations.create, {
           payload:
             'collectifId' in owner ? { collectifId: owner.collectifId } : { userId: owner.userId },
         })
+        return location
       })
       session.flash('notice', `Lieu « ${parsed.value.name} » ajouté.`)
-      return redirect(routes.locations.index.href(), 303)
+      return redirect(await listPageOf(db, created), 303)
     },
   },
 })
