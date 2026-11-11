@@ -25,6 +25,7 @@ import {
 } from '../../permissions.ts'
 import { hitUserRequest, notifyAdmins } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
+import { parseItemSort, parseItemView } from '../../ui/item-table.tsx'
 import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { CollectifPage, type CollectifTab, type Membership } from './collectif-page.tsx'
@@ -47,7 +48,20 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
   // Outsiders get the directory entry only: no equipment, locations or people (ADR 0021).
   const inside = canSeeCollectifInventory(actor, collectif.id)
   const scope = itemScopeOf(actor)
-  const items = inside ? await listItemsOwnedBy(db, { collectifId: collectif.id }, scope) : []
+  const params = context.url.searchParams
+  const sort = parseItemSort(params.get('tri'))
+  const owner = { collectifId: collectif.id }
+  const items = inside ? await listItemsOwnedBy(db, owner, scope, sort) : []
+  // Same tab URL with some parameters changed (sort, view).
+  const hrefWith = (changes: Record<string, string>) => {
+    const query = new URLSearchParams(params)
+    for (const [name, value] of Object.entries(changes)) {
+      if (value) query.set(name, value)
+      else query.delete(name)
+    }
+    const search = query.toString()
+    return search ? `${context.url.pathname}?${search}` : context.url.pathname
+  }
   return context.render(
     <CollectifPage
       viewer={viewerOf(context)}
@@ -61,6 +75,9 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
       canManageLocations={canManageCollectifLocations(actor, collectif.id)}
       canManageResponsibles={canManageResponsibles(actor)}
       items={items}
+      sort={sort}
+      view={parseItemView(params.get('vue'))}
+      hrefWith={hrefWith}
       deposits={
         inside && tab === 'items' ? await listItemsDepositedAt(db, collectif.id, scope) : []
       }

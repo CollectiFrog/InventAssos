@@ -20,6 +20,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - After signing in from a link to a page of the app, you land on that page instead of the home page.
 - Admins manage the categories: add, rename, reorder, and delete one after moving its equipment to another.
 - Clearer feedback: a message after signing out and after moving a category, the contact form's error under its field, empty searches that propose what to do, and the add form recalls location and owner right above « Ajouter ».
+- Rechercher and a collectif's equipment show as a sortable table on a computer (cards with « Grille »), with filters on the left, counts per category and city, and removable active filters.
 
 ### Changed
 
