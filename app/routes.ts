@@ -15,6 +15,7 @@ export const routes = route({
   signOut: post('/deconnexion'),
   account: {
     profile: form('/compte/profil'),
+    deletion: get('/compte/supprimer'),
     status: get('/compte/statut'),
     reapply: post('/compte/statut/redemander'),
   },

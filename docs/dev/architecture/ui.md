@@ -135,7 +135,7 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 | Mon matériel | `/materiel`, `/materiel/nouveau`, `/lieux`, `/lieux/nouveau`, `/lieux/:locationId` (+ `/modifier`, `/supprimer`)             |
 | Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/lieux`, `/responsables`, `/modifier`, `/devenir-responsable`) |
 | People       | `/personnes/:userId`                                                                                                         |
-| Account      | `/compte/profil` (sections: profil, affichage, collectifs, données, à propos), `/compte/supprimer`, `/deconnexion`           |
+| Account      | `/compte/profil` (sections: profil, collectifs, session, à propos, supprimer), `/compte/supprimer`, `/deconnexion`           |
 | Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/moderateurs`, `/categories`, `/instance`                  |
 
 URLs are a contract: V0.7 changes what the pages show and how they are reached, not their URLs.
@@ -147,7 +147,8 @@ It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
   (`/collectifs/:slug` is its Matériel tab);
 - `?suite=<path>` on `/connexion` and on the e-mailed link: the page a visitor asked for, followed
   after sign-in (US-0.7.8); only an internal path is kept (`safeReturnPath`), never an off-site URL;
-- `/compte/supprimer`, a confirmation page instead of a modal window;
+- `/compte/supprimer`, a confirmation page instead of a modal window; until US-1.0.4 (V1.0) it only
+  explains what deleting will do;
 - `/admin/demandes` (also `/admin`), `/admin/comptes`, `/admin/collectifs`, `/admin/moderateurs`,
   `/admin/categories`, `/admin/instance`. In V0.7: demandes, comptes, collectifs and categories;
   `/admin/moderateurs` comes with moderators (V0.8); `/admin/instance` waits for a story.
