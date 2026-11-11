@@ -1,5 +1,5 @@
 # CI contract: .github/workflows/ci.yml runs lint, typecheck, test and build. Same commands locally.
-.PHONY: check lint typecheck test build docs dev db install deps
+.PHONY: check lint typecheck test build a11y docs dev db install deps
 
 check: lint typecheck test build
 
@@ -22,6 +22,12 @@ typecheck:
 # Needs PostgreSQL: `make db` locally, a service container in CI (TEST_DATABASE_URL).
 test:
 	npm test
+
+# Accessibility of the key pages in Chromium, with axe-core (ADR 0024). Needs PostgreSQL like
+# `make test`; the browser is downloaded on first run.
+a11y:
+	npx playwright install chromium
+	npm run test:a11y
 
 # Remix 3 runs TypeScript source, there is no compile step: check the production graph loads.
 build:

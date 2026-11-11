@@ -16,6 +16,8 @@ export interface TestAppOptions {
   adminEmails?: string[]
   /** Defaults to `relaxedRateLimits`; pass `defaultRateLimits` to test the real ones. */
   rateLimits?: RateLimits
+  /** Public URL; a browser test passes its server's, so form origins match (CSRF). */
+  appUrl?: string
 }
 
 const relaxed: RateLimit = { limit: 10_000, windowSeconds: 60 }
@@ -43,7 +45,7 @@ export function createTestApp(db: Database, options: TestAppOptions = {}): TestA
     db,
     mailer,
     settings: {
-      appUrl: testOrigin,
+      appUrl: options.appUrl ?? testOrigin,
       adminEmails: new Set(options.adminEmails?.map((email) => email.toLowerCase()) ?? []),
       rateLimits: options.rateLimits ?? relaxedRateLimits,
     },

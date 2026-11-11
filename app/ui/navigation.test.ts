@@ -110,7 +110,7 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     const home = (await client.get(routes.home.href())).text
     assert.match(
       home,
-      /<a href="\/compte\/profil" aria-label="Mon compte : Camille Martin"[^>]*>CM<\/a>/,
+      /<a href="\/compte\/profil" aria-label="CM, mon compte : Camille Martin"[^>]*>CM<\/a>/,
     )
     assert.doesNotMatch(home, /Administration/)
 
@@ -146,7 +146,7 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
       assert.match(top, /<label for="recherche-globale"[^>]*>Chercher dans mes collectifs<\/label>/)
       assert.match(top, /<input type="search" id="recherche-globale" name="q"/)
       assert.match(top, /<a href="\/materiel\/nouveau"[^>]*>Ajouter du matériel<\/a>/)
-      assert.match(top, /aria-label="Mon compte : Camille Martin"/)
+      assert.match(top, /aria-label="CM, mon compte : Camille Martin"/)
     }
     // The top bar's search lands on Rechercher with the words typed.
     const found = await client.get(`${routes.inventory.index.href()}?q=perceuse`)

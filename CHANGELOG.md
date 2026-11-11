@@ -24,6 +24,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Administration is split into tabs at their own addresses: Demandes, Comptes, Collectifs (new overview of validated collectifs) and Catégories.
 - « Mon compte » is a settings page in sections (profile, collectifs, session, about, delete) with contents; « Supprimer mon compte » explains what deletion will do in V1.0.
 - Detail pages show a breadcrumb on a computer and a « Retour » link on a phone; the item forms use the width of a computer screen, two fields per row.
+- Accessibility: every button, field and menu is at least 44 px high, the account button's name starts with its initials, and the logo link keeps its name on the narrow sidebar; an automated audit checks the key pages.
 
 ### Changed
 

@@ -155,7 +155,8 @@ export function Layout(handle: Handle<LayoutProps>) {
                       <a
                         class="avatar"
                         href={routes.account.profile.index.href()}
-                        aria-label={`Mon compte : ${viewer.name}`}
+                        // The visible initials start the name, for voice control (WCAG 2.5.3).
+                        aria-label={`${initialsOf(viewer.name)}, mon compte : ${viewer.name}`}
                         aria-current={headerLink === 'account' ? 'page' : undefined}
                       >
                         {initialsOf(viewer.name)}

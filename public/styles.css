@@ -225,8 +225,14 @@ body.has-nav main {
     font-size: 0.85rem;
     font-weight: 800;
   }
+  /* Hidden on the rail but still read, so the brand link keeps its name (WCAG 2.4.4). */
   .brand-name {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .side-foot {
     display: block;
@@ -282,7 +288,11 @@ body.has-nav main {
     padding: 0.25rem 0.6rem 0.9rem;
   }
   .brand-name {
-    display: inline;
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
   }
   .main-nav a,
   .side-foot a,
@@ -346,6 +356,7 @@ h1 {
 input,
 textarea,
 select {
+  min-height: var(--touch);
   font: inherit;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--border);
@@ -387,6 +398,7 @@ select {
 
 button,
 .button {
+  min-height: var(--touch);
   display: inline-block;
   font: inherit;
   font-weight: 600;
@@ -802,7 +814,7 @@ button:disabled {
 .chip {
   display: inline-flex;
   align-items: center;
-  min-height: 2rem;
+  min-height: var(--touch);
   padding: 0 0.7rem;
   border-radius: 999px;
   background: var(--accent-soft);
@@ -820,7 +832,7 @@ button:disabled {
 .view-switch a {
   display: inline-flex;
   align-items: center;
-  min-height: 2.25rem;
+  min-height: var(--touch);
   padding: 0 0.8rem;
   color: var(--muted);
   text-decoration: none;
@@ -925,7 +937,9 @@ button:disabled {
 .toc-link {
   display: inline-flex;
   align-items: center;
+  min-width: var(--touch);
   min-height: var(--touch);
+  padding: 0 0.35rem;
 }
 .settings-sections {
   display: grid;
