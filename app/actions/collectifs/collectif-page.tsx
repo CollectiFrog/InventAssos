@@ -1,9 +1,10 @@
 import type { Handle } from 'remix/component'
 
-import type { ItemSummary } from '../../data/items.ts'
+import type { ItemSort, ItemSummary } from '../../data/items.ts'
 import type { Collectif, Location } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
+import { ItemTable, type ItemView, ViewSwitch } from '../../ui/item-table.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 import { Tabs } from '../../ui/tabs.tsx'
 import { ItemList } from '../items/items-pages.tsx'
@@ -29,8 +30,12 @@ export interface CollectifPageProps {
   canManageLocations: boolean
   /** Platform admins see a remove form per responsible (US-0.3.6). */
   canManageResponsibles: boolean
-  /** Items the collectif owns. */
+  /** Items the collectif owns, sorted by `sort`, shown as `view`. */
   items: ItemSummary[]
+  sort: ItemSort
+  view: ItemView
+  /** This tab's URL with some parameters changed. */
+  hrefWith: (changes: Record<string, string>) => string
   /** Items stored in its locations that belong to someone else (Matériel tab only). */
   deposits: ItemSummary[]
   /** Its locations (Lieux tab only). */
@@ -135,13 +140,28 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
 /** Matériel: what the collectif owns, then what others deposited in its locations. */
 function ItemsTab(handle: Handle<CollectifPageProps>) {
   return () => {
-    const { items, deposits, canAddItems, collectif } = handle.props
+    const { items, deposits, canAddItems, collectif, sort, view, hrefWith } = handle.props
     return (
       <>
-        <section aria-labelledby="materiel-collectif">
-          <h2 id="materiel-collectif">Matériel du collectif · {items.length}</h2>
-          {items.length > 0 ? (
-            <ItemList items={items} />
+        <section aria-labelledby="materiel-collectif" class="index-results">
+          <div class="results-bar">
+            <h2 id="materiel-collectif">Matériel du collectif · {items.length}</h2>
+            {items.length > 0 ? (
+              <ViewSwitch
+                view={view}
+                hrefFor={(next) => hrefWith({ vue: next === 'grille' ? 'grille' : '' })}
+              />
+            ) : null}
+          </div>
+          {items.length > 0 && view === 'grille' ? (
+            <ItemList items={items} grid />
+          ) : items.length > 0 ? (
+            <ItemTable
+              items={items}
+              caption={`Matériel de ${collectif.name}`}
+              sort={sort}
+              sortHref={(next) => hrefWith({ tri: `${next.descending ? '-' : ''}${next.column}` })}
+            />
           ) : (
             <div class="card empty-state">
               <p>Aucun matériel déclaré pour l’instant.</p>

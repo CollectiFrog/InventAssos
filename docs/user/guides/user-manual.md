@@ -43,13 +43,22 @@ personnes qui partagent un collectif avec elle. Le partage avec d'autres collect
 
 ## Parcourir l'inventaire
 
-**Rechercher** liste le matériel actif que vous pouvez voir, 24 objets par
-page : nom, quantité, catégorie, ville et propriétaire. Cliquez sur un objet pour voir sa page.
-Les adresses des lieux n'y apparaissent jamais, seulement la ville.
+**Rechercher** liste le matériel actif que vous pouvez voir, 24 objets par page : nom, catégorie,
+quantité, ville et propriétaire. Cliquez sur un objet pour voir sa page. Les adresses des lieux n'y
+apparaissent jamais, seulement la ville.
 
-En haut de la liste, **Rechercher** cherche dans le nom, la marque, le modèle et la description
-(majuscules et accents ne comptent pas). Les filtres **Catégorie**, **Collectif propriétaire** (parmi
-vos collectifs) et **Ville** se combinent entre eux et avec la recherche ; **Tout afficher** les efface.
+- **Filtres** (à gauche sur un ordinateur, au-dessus sur un téléphone) : la recherche porte sur le
+  nom, la marque, le modèle et la description (majuscules et accents ne comptent pas) ; **Catégorie**
+  et **Ville** indiquent entre parenthèses combien d'objets elles contiennent ; **Collectif
+  propriétaire** propose vos collectifs. Ils se combinent ; cliquez sur **Appliquer**.
+- **Filtres actifs** : chacun s'affiche au-dessus des résultats ; cliquez dessus pour le retirer, ou
+  sur **Tout effacer**.
+- **Trier** : sur un ordinateur, la liste est un tableau ; cliquez sur un titre de colonne pour trier
+  par cette colonne, une seconde fois pour inverser l'ordre.
+- **Liste** ou **Grille** choisit entre le tableau et des cartes. Sur un téléphone, ce sont toujours
+  des cartes.
+
+Le matériel d'un collectif, sur sa page, se trie et s'affiche de la même façon.
 
 ## Contacter le propriétaire d'un objet
 

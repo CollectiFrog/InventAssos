@@ -103,6 +103,29 @@ const summaryJoins = sql`
   left join users ou on ou.id = i.owner_user_id
 `
 
+/** Columns a list of items can be sorted by (`?tri=`, US-0.7.13). */
+export const itemSortColumns = ['nom', 'categorie', 'quantite', 'ville', 'proprietaire'] as const
+
+/** One column, ascending or descending; ties are broken by name. */
+export interface ItemSort {
+  column: (typeof itemSortColumns)[number]
+  descending: boolean
+}
+
+/** The ORDER BY of a sort, from a fixed list of expressions: never text from the URL. */
+function orderBy(sort: ItemSort = { column: 'nom', descending: false }) {
+  const expression = {
+    nom: sql`lower(i.name)`,
+    categorie: sql`cat.position`,
+    quantite: sql`i.quantity`,
+    ville: sql`lower(l.city)`,
+    proprietaire: sql`lower(coalesce(oc.name, ou.name))`,
+  }[sort.column]
+  return sort.descending
+    ? sql`order by ${expression} desc, lower(i.name), i.id`
+    : sql`order by ${expression}, lower(i.name), i.id`
+}
+
 /** Whose point of view a listing takes; built by `itemScopeOf` in app/permissions.ts. */
 export type ItemScope =
   | { everything: true }
@@ -257,7 +280,13 @@ export interface InventoryFilters {
 /** Active items the scope may see, by name, one page at a time (US-0.6.2, US-0.7.11). */
 export async function listInventory(
   db: Database,
-  options: { scope: ItemScope; page: number; pageSize: number; filters?: InventoryFilters },
+  options: {
+    scope: ItemScope
+    page: number
+    pageSize: number
+    filters?: InventoryFilters
+    sort?: ItemSort
+  },
 ): Promise<InventoryPage> {
   const f = options.filters ?? {}
   const conditions = [sql`i.archived_at is null`, visibleIn(options.scope)]
@@ -275,7 +304,7 @@ export async function listInventory(
   const count = await db.exec(sql`select count(*)::int as n from items i ${summaryJoins} ${where}`)
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins} ${where}
-    order by lower(i.name), i.id
+    ${orderBy(options.sort)}
     limit ${options.pageSize} offset ${offset}
   `)
   return { items: (result.rows ?? []).map(toSummary), total: Number(count.rows?.[0]?.n ?? 0) }
@@ -309,6 +338,7 @@ export async function listItemsOwnedBy(
   db: Database,
   owner: ItemOwner,
   scope: ItemScope,
+  sort?: ItemSort,
 ): Promise<ItemSummary[]> {
   const condition =
     'collectifId' in owner
@@ -317,7 +347,7 @@ export async function listItemsOwnedBy(
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins}
     where i.archived_at is null and ${condition} and ${visibleIn(scope)}
-    order by lower(i.name), i.id
+    ${orderBy(sort)}
   `)
   return (result.rows ?? []).map(toSummary)
 }
@@ -400,4 +430,21 @@ export async function recategorizeItems(
     returning id
   `)
   return (result.rows ?? []).map((row) => String(row.id))
+}
+
+/** How many visible active items each category and each city holds, for the filters' counts. */
+export async function countVisibleItems(
+  db: Database,
+  scope: ItemScope,
+): Promise<{ byCategory: Map<string, number>; byCity: Map<string, number> }> {
+  const visible = sql`from items i join locations l on l.id = i.location_id
+    where i.archived_at is null and ${visibleIn(scope)}`
+  const categories = await db.exec(sql`select i.category_id as k, count(*)::int as n ${visible}
+    group by i.category_id`)
+  const cities = await db.exec(
+    sql`select l.city as k, count(*)::int as n ${visible} group by l.city`,
+  )
+  const toMap = (rows: Record<string, unknown>[] | undefined) =>
+    new Map((rows ?? []).map((row) => [String(row.k), Number(row.n)]))
+  return { byCategory: toMap(categories.rows), byCity: toMap(cities.rows) }
 }

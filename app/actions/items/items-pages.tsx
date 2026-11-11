@@ -100,9 +100,9 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
 }
 
 /** A list of item summaries linking to their pages. */
-export function ItemList(handle: Handle<{ items: ItemSummary[] }>) {
+export function ItemList(handle: Handle<{ items: ItemSummary[]; grid?: boolean }>) {
   return () => (
-    <ul class="cards">
+    <ul class={handle.props.grid ? 'cards item-grid' : 'cards'}>
       {handle.props.items.map((item) => (
         <li key={item.id} class="card">
           <a href={routes.items.show.href({ itemId: item.id })}>
