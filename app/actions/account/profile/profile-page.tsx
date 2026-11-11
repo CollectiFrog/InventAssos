@@ -49,7 +49,7 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
             error={errors.phone}
             autoComplete="tel"
             maxLength={25}
-            hint="Visible par tous les utilisateurs validés de la plateforme, pour qu’ils puissent vous joindre au sujet du matériel. Laissez vide pour ne pas le partager."
+            hint="Visible par les personnes de vos collectifs, pour qu’elles puissent vous joindre au sujet du matériel. Laissez vide pour ne pas le partager."
           />
           <button type="submit">Enregistrer</button>
         </form>

@@ -12,7 +12,7 @@ import {
 import { sendSafely } from '../../mail/mailer.ts'
 import { itemContactMail } from '../../mail/messages.ts'
 import type { CurrentUser } from '../../middleware/current-user.ts'
-import { canEditItem, isValidatedUser } from '../../permissions.ts'
+import { canEditItem, canSeeItem, canSeePerson, isValidatedUser } from '../../permissions.ts'
 import { hitContact } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
@@ -31,6 +31,13 @@ function ownsItem(actor: CurrentUser, item: ItemDetails): boolean {
     item.owner_user_id === actor.id ||
     (item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id))
   )
+}
+
+/** The item as this viewer may see it: a person owner's phone and page only if they may see them. */
+function shownTo(actor: CurrentUser, item: ItemDetails): ItemDetails {
+  if (item.owner_user_id === null) return item
+  const person = { id: item.owner_user_id, collectifIds: item.ownerCollectifIds }
+  return canSeePerson(actor, person) ? item : { ...item, ownerUserId: null, contactPhone: null }
 }
 
 /** "Mon matériel", the item page and its contact form. */
@@ -59,13 +66,15 @@ export default createController(routes.items, {
       if (!isValidatedUser(actor)) return forbidden(context)
 
       const item = await findItemDetails(context.db, context.params.itemId)
-      // An archived item stays visible to those who manage it, for its history (US-0.5.5).
-      if (item === null || (item.archived_at && !canEditItem(actor, item))) return notFound(context)
+      // 404 rather than 403, so that an item's existence does not leak (ADR 0021). An archived
+      // item stays visible to those who manage it, for its history (US-0.5.5).
+      if (item === null || !canSeeItem(actor, item)) return notFound(context)
+      if (item.archived_at && !canEditItem(actor, item)) return notFound(context)
       const notice = context.session.get('notice')
       return context.render(
         <ItemPage
           viewer={viewerOf(context)}
-          item={item}
+          item={shownTo(actor, item)}
           canEdit={canEditItem(actor, item)}
           contact={
             ownsItem(actor, item)
@@ -93,7 +102,7 @@ export default createController(routes.items, {
 
       const { db, mailer, settings, session } = context
       const item = await findItemDetails(db, context.params.itemId)
-      if (item === null || item.archived_at) return notFound(context)
+      if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
       const showUrl = routes.items.show.href({ itemId: item.id })
       if (ownsItem(actor, item)) return redirect(showUrl, 303)
       const limit = await hitContact(db, settings, actor.id)

@@ -23,6 +23,8 @@ export interface CollectifPageProps {
   locations: Location[]
   canManageLocations: boolean
   items: ItemSummary[]
+  /** False for someone outside the collectif: name, description and request button only. */
+  inside: boolean
   notice?: string
 }
 
@@ -40,6 +42,7 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
       locations,
       canManageLocations,
       items,
+      inside,
       notice,
     } = handle.props
     const slug = collectif.slug
@@ -59,48 +62,59 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           </p>
         ) : null}
         {collectif.description ? <p class="prose">{collectif.description}</p> : null}
-        <dl class="facts">
-          <dt>Téléphone de contact</dt>
-          <dd>{collectif.contact_phone ?? 'non renseigné'}</dd>
-          <dt>Responsables</dt>
-          <dd>{responsibles.length > 0 ? responsibles.map((r) => r.name).join(', ') : 'aucun'}</dd>
-        </dl>
-        <h2>Matériel</h2>
-        {items.length === 0 ? <p>Aucun matériel déclaré.</p> : <ItemList items={items} />}
-        <h2>Lieux de stockage</h2>
-        {locations.length === 0 ? (
-          <p>Aucun lieu déclaré.</p>
+        {inside ? (
+          <>
+            <dl class="facts">
+              <dt>Téléphone de contact</dt>
+              <dd>{collectif.contact_phone ?? 'non renseigné'}</dd>
+              <dt>Responsables</dt>
+              <dd>
+                {responsibles.length > 0 ? responsibles.map((r) => r.name).join(', ') : 'aucun'}
+              </dd>
+            </dl>
+            <h2>Matériel</h2>
+            {items.length === 0 ? <p>Aucun matériel déclaré.</p> : <ItemList items={items} />}
+            <h2>Lieux de stockage</h2>
+            {locations.length === 0 ? (
+              <p>Aucun lieu déclaré.</p>
+            ) : (
+              <ul>
+                {locations.map((location) => (
+                  <li key={location.id}>
+                    <a href={routes.locations.show.href({ locationId: location.id })}>
+                      {location.name}
+                    </a>{' '}
+                    · {location.city}
+                    {location.address ? ` · ${location.address}` : null}
+                    {canManageLocations ? (
+                      <>
+                        {' '}
+                        <a href={routes.locations.edit.index.href({ locationId: location.id })}>
+                          modifier
+                        </a>
+                      </>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {canManageLocations ? (
+              <p>
+                <a
+                  class="button secondary"
+                  href={`${routes.locations.create.index.href()}?pour=collectif:${collectif.id}`}
+                >
+                  Ajouter un lieu
+                </a>
+              </p>
+            ) : null}
+          </>
         ) : (
-          <ul>
-            {locations.map((location) => (
-              <li key={location.id}>
-                <a href={routes.locations.show.href({ locationId: location.id })}>
-                  {location.name}
-                </a>{' '}
-                · {location.city}
-                {location.address ? ` · ${location.address}` : null}
-                {canManageLocations ? (
-                  <>
-                    {' '}
-                    <a href={routes.locations.edit.index.href({ locationId: location.id })}>
-                      modifier
-                    </a>
-                  </>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-        {canManageLocations ? (
-          <p>
-            <a
-              class="button secondary"
-              href={`${routes.locations.create.index.href()}?pour=collectif:${collectif.id}`}
-            >
-              Ajouter un lieu
-            </a>
+          <p class="status">
+            Le matériel, les lieux et les personnes de ce collectif sont visibles par ses
+            responsables uniquement.
           </p>
-        ) : null}
+        )}
         {membership === 'responsible' ? (
           <p class="status">Vous êtes responsable de ce collectif.</p>
         ) : membership === 'pending' ? (

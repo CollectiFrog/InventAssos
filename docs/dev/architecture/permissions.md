@@ -26,8 +26,9 @@ only by the people who keep it, until sharing arrives in V1.1. "A person of C" i
 C, and from V0.8 a member too; a user who belongs to several collectifs gets the union of their
 rows. Every listing (dashboard, search, collectif page, person page, history, export) filters with
 the same rule as `canSeeItem`, in SQL; a page for an item or a person one may not see answers 404,
-not 403, so that its existence does not leak. Until V0.7 ships, V0.6 still shows every item to
-every validated user.
+not 403, so that its existence does not leak. `itemScopeOf(actor)` gives the listings the same
+rule, and `app/data/items.visibility.test.ts` checks both sides agree on every branch. Admins keep
+seeing everything (open point of ADR 0021).
 
 Everything is denied unless a row below allows it. Pending, rejected, disabled and deleted users
 can only see their status page and sign out.
@@ -51,8 +52,10 @@ can only see their status page and sign out.
 | Move an item to a location                       | yes            | if C's location                                       | if own location              |
 | Edit, move or archive an archived item           | no             | no                                                    | no                           |
 | See the collectifs directory (name, city, text)  | yes            | yes                                                   | yes                          |
+| See C's equipment, locations and people          | yes            | yes                                                   | no                           |
 | See an item, its owner, the city of its location | yes            | if owned by C or by a person of C, or in C's location | if owner, or in own location |
 | See a person's page and phone                    | yes            | if the person belongs to C                            | if it is their own           |
+| See a location (name, city)                      | yes            | if C's location, or it stores an item seen            | if own, or stores one seen   |
 | See a location's full address                    | yes            | if C's location                                       | if own location              |
 | Import into / export from a location             | yes            | if C's location                                       | if own location              |
 

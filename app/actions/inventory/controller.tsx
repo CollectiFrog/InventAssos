@@ -8,7 +8,7 @@ import {
   listInventory,
   listInventoryCities,
 } from '../../data/items.ts'
-import { isValidatedUser } from '../../permissions.ts'
+import { isValidatedUser, itemScopeOf } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
@@ -20,7 +20,7 @@ const maxPage = 10_000
 /** Items per page of the inventory. */
 export const pageSize = 24
 
-/** Browse the whole inventory (US-0.6.1). */
+/** Search the equipment of my collectifs (US-0.6.1, US-0.7.11). */
 export default createController(routes.inventory, {
   actions: {
     async index(context) {
@@ -39,7 +39,8 @@ export default createController(routes.inventory, {
         city: read('ville'),
       }
       const { db } = context
-      const { items, total } = await listInventory(db, { page, pageSize, filters })
+      const scope = itemScopeOf(actor)
+      const { items, total } = await listInventory(db, { scope, page, pageSize, filters })
       const pageCount = Math.max(1, Math.ceil(total / pageSize))
 
       return context.render(
@@ -57,11 +58,14 @@ export default createController(routes.inventory, {
           }}
           filters={filters}
           categories={(await listCategories(db)).map((c) => ({ value: c.id, label: c.name }))}
-          collectifs={(await listCollectifs(db, 'active')).map((c) => ({
-            value: c.id,
-            label: c.name,
+          // The collectif filter offers my collectifs only; admins still see them all (ADR 0021).
+          collectifs={(actor.isAdmin ? await listCollectifs(db, 'active') : actor.collectifs).map(
+            (c) => ({ value: c.id, label: c.name }),
+          )}
+          cities={(await listInventoryCities(db, scope)).map((city) => ({
+            value: city,
+            label: city,
           }))}
-          cities={(await listInventoryCities(db)).map((city) => ({ value: city, label: city }))}
         />,
       )
     },

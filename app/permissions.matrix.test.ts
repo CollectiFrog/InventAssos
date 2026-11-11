@@ -86,7 +86,28 @@ async function seed(db: Database) {
     name: 'Console archivée',
   })
   await archiveItem(db, archived.id, 'sold')
+  // Visibility branches (ADR 0021): Cora, a second responsible of C, and her own drill at home;
+  // Val's own item at her home (her garage stays empty for the delete case).
+  const cora = await createActiveUser(db, 'Cora', 'cora@example.org')
+  await setResponsible(db, { userId: cora.id, collectifId: c.id, status: 'active' })
+  const coraHome = await createTestLocation(db, { userId: cora.id }, 'Chez Cora')
+  const coraItem = await createTestItem(db, {
+    locationId: coraHome.id,
+    owner: { userId: cora.id },
+    createdBy: cora.id,
+    name: 'Perceuse de Cora',
+  })
+  const valOwn = await createTestItem(db, {
+    locationId: valHome.id,
+    owner: { userId: val.id },
+    createdBy: val.id,
+    name: 'Scie de Val',
+  })
   return {
+    cora,
+    coraItem,
+    coraHome,
+    valOwn,
     coAdmin,
     gone,
     archived,
@@ -390,10 +411,76 @@ const rules: Rule[] = [
   },
   {
     row: 'See an item, its owner, the city of its location',
-    allowed: ['admin', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'responsibleOfC'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.item.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Projecteur C/.test(response.text) && /Rennes/.test(response.text),
+  },
+  {
+    row: 'See an item, its owner, the city of its location (owned by a person of C)',
+    allowed: ['admin', 'responsibleOfC'],
+    act: (c, w) => c.get(routes.items.show.href({ itemId: w.coraItem.id })),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /Perceuse de Cora/.test(response.text),
+  },
+  {
+    row: 'See an item, its owner, the city of its location (own item)',
+    allowed: ['admin', 'validated'],
+    act: (c, w) => c.get(routes.items.show.href({ itemId: w.valOwn.id })),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /Scie de Val/.test(response.text),
+  },
+  {
+    row: "See an item, its owner, the city of its location (C's item in own location)",
+    allowed: ['admin', 'responsibleOfC', 'validated'],
+    act: (c, w) => c.get(routes.items.show.href({ itemId: w.cAtVal.id })),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /Pied de C/.test(response.text),
+  },
+  {
+    row: "See a person's page and phone",
+    allowed: ['admin', 'responsibleOfC'],
+    act: (c, w) => c.get(routes.people.show.href({ userId: w.cora.id })),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /<h1>Cora<\/h1>/.test(response.text),
+  },
+  {
+    row: "See a person's page and phone (own page)",
+    allowed: ['admin', 'validated'],
+    act: (c, w) => c.get(routes.people.show.href({ userId: w.val.id })),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /<h1>Val<\/h1>/.test(response.text),
+  },
+  {
+    row: 'See the collectifs directory (name, city, text)',
+    allowed: ['admin', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    act: (c) => c.get(routes.collectifs.index.href()),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /Collectif C/.test(response.text),
+  },
+  {
+    row: "See C's equipment, locations and people",
+    allowed: ['admin', 'responsibleOfC'],
+    denial: 'hidden',
+    act: (c, w) => c.get(routes.collectifs.show.href({ slug: w.c.slug })),
+    happened: async (_db, _w, response) =>
+      /Projecteur C/.test(response.text) &&
+      /Local C/.test(response.text) &&
+      /Cora/.test(response.text),
+  },
+  {
+    // Val sees C's local: her amp is stored there, and its page links to the place.
+    row: 'See a location (name, city)',
+    allowed: ['admin', 'responsibleOfC', 'validated'],
+    act: (c, w) => c.get(routes.locations.show.href({ locationId: w.local.id })),
+    happened: async (_db, _w, response) => response.status === 200 && /Local C/.test(response.text),
+  },
+  {
+    row: "See a location (name, city) (someone else's home)",
+    allowed: ['admin', 'responsibleOfC'],
+    act: (c, w) => c.get(routes.locations.show.href({ locationId: w.coraHome.id })),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /Chez Cora/.test(response.text),
   },
   {
     row: "See a location's full address",

@@ -9,6 +9,7 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createTestItem } from '../../../test/items.ts'
 import { createTestLocation } from '../../../test/locations.ts'
 import { createActiveUser } from '../../../test/users.ts'
+import { setResponsible } from '../../data/responsibles.ts'
 import type { Collectif, Item, User } from '../../data/tables.ts'
 import { createUser } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
@@ -28,8 +29,11 @@ describe('collectif and person equipment pages (US-0.6.4)', () => {
     await resetDatabase(db)
     const rita = await createActiveUser(db, 'Rita', 'rita@example.org')
     max = await createActiveUser(db, 'Max', 'max@example.org')
-    await createActiveUser(db, 'Lou', 'lou@example.org')
+    const louUser = await createActiveUser(db, 'Lou', 'lou@example.org')
     collectif = await createActiveCollectif(db, 'Les Grenouilles', rita.id)
+    // Lou shares Les Rainettes with Max, not Les Grenouilles (ADR 0021).
+    const rainettes = await createActiveCollectif(db, 'Les Rainettes', louUser.id)
+    await setResponsible(db, { userId: max.id, collectifId: rainettes.id, status: 'active' })
     const local = await createTestLocation(db, { collectifId: collectif.id }, 'Local')
     const garage = await createTestLocation(db, { userId: max.id }, 'Garage')
     await createTestItem(db, {
@@ -70,11 +74,19 @@ describe('collectif and person equipment pages (US-0.6.4)', () => {
   })
 
   it('lists the active items a collectif owns, not the deposits it stores', async () => {
-    const html = (await lou.get(routes.collectifs.show.href({ slug: collectif.slug }))).text
+    const rita = app.client()
+    await signIn(app, rita, 'rita@example.org')
+    const html = (await rita.get(routes.collectifs.show.href({ slug: collectif.slug }))).text
     assert.match(html, /Console du collectif/)
     assert.doesNotMatch(html, /Vieille console/)
     assert.doesNotMatch(html, /Ampli de Max/)
-    assert.doesNotMatch(html, /12 rue Secrète/)
+  })
+
+  it('shows someone outside a collectif none of its items, locations or people', async () => {
+    const html = (await lou.get(routes.collectifs.show.href({ slug: collectif.slug }))).text
+    assert.match(html, /<h1>Les Grenouilles<\/h1>/)
+    assert.doesNotMatch(html, /Console du collectif|Local|Rennes|12 rue Secrète|Rita/)
+    assert.match(html, /Devenir responsable/)
   })
 
   it("lists a person's items, wherever they are stored, with their phone and no address", async () => {
@@ -90,6 +102,15 @@ describe('collectif and person equipment pages (US-0.6.4)', () => {
   it("links an item to its owner's page", async () => {
     const html = (await lou.get(routes.items.show.href({ itemId: maxItem.id }))).text
     assert.match(html, new RegExp(`href="${routes.people.show.href({ userId: max.id })}"`))
+  })
+
+  it('answers 404 for a person who shares no collectif with the viewer', async () => {
+    const otto = app.client()
+    await createActiveUser(db, 'Otto', 'otto@example.org')
+    await signIn(app, otto, 'otto@example.org')
+    const page = await otto.get(routes.people.show.href({ userId: max.id }))
+    assert.equal(page.status, 404)
+    assert.doesNotMatch(page.text, /06 11 22 33 44|Ampli de Max/)
   })
 
   it('shows no page for an account that is not active', async () => {

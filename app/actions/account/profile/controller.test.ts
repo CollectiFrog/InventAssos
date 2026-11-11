@@ -33,7 +33,7 @@ describe('profile (US-0.2.6)', () => {
     const page = await client.get(profileUrl)
     assert.equal(page.status, 200)
     assert.match(page.text, /value="Camille"/)
-    assert.match(page.text, /Visible par tous les utilisateurs validés/)
+    assert.match(page.text, /Visible par les personnes de vos collectifs/)
   })
 
   it('saves name and phone, and clears the phone when left blank', async () => {

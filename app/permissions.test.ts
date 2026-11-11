@@ -18,8 +18,13 @@ import {
   canRequestResponsibility,
   canReviewAccounts,
   canReviewCollectifs,
+  canSeeCollectifInventory,
   canSeeFullAddress,
+  canSeeItem,
+  canSeeLocation,
+  canSeePerson,
   canStoreItemsIn,
+  itemScopeOf,
 } from './permissions.ts'
 
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
@@ -225,5 +230,70 @@ describe('permissions: accounts', () => {
     assert.equal(canChangeItem(user(), archived), false)
     assert.equal(canChangeItem(user({ isAdmin: true }), archived), false)
     assert.equal(canChangeItem(user({ id: 'u2' }), item), false)
+  })
+})
+
+describe('permissions: visibility (ADR 0021)', () => {
+  // Owned by person u9, stored at u9's home; u9 belongs to c9.
+  const item = {
+    owner_collectif_id: null,
+    owner_user_id: 'u9',
+    locationCollectifId: null,
+    locationUserId: 'u9',
+    ownerCollectifIds: ['c9'],
+  }
+  const responsibleOf = (...ids: string[]) => user({ managedCollectifIds: new Set(ids) })
+
+  it("shows an item to its owner, the admin, and people of its owner's collectifs", () => {
+    assert.equal(canSeeItem(user({ id: 'u9' }), item), true)
+    assert.equal(canSeeItem(user({ isAdmin: true }), item), true)
+    assert.equal(canSeeItem(responsibleOf('c9'), item), true)
+    assert.equal(canSeeItem(responsibleOf('c1'), item), false)
+    assert.equal(canSeeItem(user(), item), false)
+  })
+
+  it('shows a collectif item to its people, and any item to whoever manages its location', () => {
+    const owned = { ...item, owner_user_id: null, owner_collectif_id: 'c1', ownerCollectifIds: [] }
+    assert.equal(canSeeItem(responsibleOf('c1'), owned), true)
+    assert.equal(canSeeItem(responsibleOf('c2'), owned), false)
+    assert.equal(canSeeItem(user({ id: 'u9' }), owned), true, 'stored at u9')
+    const atC2 = { ...item, locationUserId: null, locationCollectifId: 'c2' }
+    assert.equal(canSeeItem(responsibleOf('c2'), atC2), true)
+  })
+
+  it('shows nothing to a pending account', () => {
+    assert.equal(canSeeItem(user({ id: 'u9', status: 'pending' }), item), false)
+    assert.equal(canSeePerson(user({ status: 'pending' }), { id: 'u1', collectifIds: [] }), false)
+  })
+
+  it('shows a person to themselves, the admin and who shares a collectif with them', () => {
+    const person = { id: 'u9', collectifIds: ['c9'] }
+    assert.equal(canSeePerson(user({ id: 'u9' }), person), true)
+    assert.equal(canSeePerson(user({ isAdmin: true }), person), true)
+    assert.equal(canSeePerson(responsibleOf('c9'), person), true)
+    assert.equal(canSeePerson(responsibleOf('c1'), person), false)
+  })
+
+  it("shows a collectif's inside to its people and the admin only", () => {
+    assert.equal(canSeeCollectifInventory(responsibleOf('c1'), 'c1'), true)
+    assert.equal(canSeeCollectifInventory(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canSeeCollectifInventory(responsibleOf('c2'), 'c1'), false)
+  })
+
+  it('shows a location to its managers, the admin, and who sees an item stored there', () => {
+    const home = { collectif_id: null, user_id: 'u9' }
+    assert.equal(canSeeLocation(user({ id: 'u9' }), home, false), true)
+    assert.equal(canSeeLocation(user({ isAdmin: true }), home, false), true)
+    assert.equal(canSeeLocation(user(), home, true), true)
+    assert.equal(canSeeLocation(user(), home, false), false)
+  })
+
+  it('gives listings the same scope: everything for the admin, else me and my collectifs', () => {
+    assert.deepEqual(itemScopeOf(user({ isAdmin: true })), { everything: true })
+    assert.deepEqual(itemScopeOf(responsibleOf('c1')), {
+      everything: false,
+      userId: 'u1',
+      collectifIds: ['c1'],
+    })
   })
 })

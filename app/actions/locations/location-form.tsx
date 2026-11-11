@@ -70,7 +70,7 @@ export function LocationForm(handle: Handle<LocationFormProps>) {
             error={errors.city}
             required
             maxLength={120}
-            hint="La seule information visible par les autres utilisateurs."
+            hint="La seule information visible par ceux qui voient le matériel rangé ici."
           />
           <TextField
             name="address"

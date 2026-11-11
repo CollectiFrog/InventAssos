@@ -4,10 +4,12 @@ import { after, before, beforeEach, describe, it } from 'remix/test'
 
 import { createTestApp } from '../../../test/app.ts'
 import { signIn } from '../../../test/auth.ts'
+import { createActiveCollectif } from '../../../test/collectifs.ts'
 import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createTestItem, itemFormFields } from '../../../test/items.ts'
 import { createTestLocation } from '../../../test/locations.ts'
 import { createActiveUser } from '../../../test/users.ts'
+import { setResponsible } from '../../data/responsibles.ts'
 import { routes } from '../../routes.ts'
 
 describe('item history (US-0.5.6)', () => {
@@ -25,7 +27,10 @@ describe('item history (US-0.5.6)', () => {
 
   it('shows created, edited, moved and archived, with names resolved at display', async () => {
     const max = await createActiveUser(db, 'Maxime Zébulon', 'maxime.zebulon@example.org')
-    await createActiveUser(db, 'Lou', 'lou@example.org')
+    const louUser = await createActiveUser(db, 'Lou', 'lou@example.org')
+    // Lou shares a collectif with Maxime, so she sees his items (ADR 0021).
+    const collectif = await createActiveCollectif(db, 'Les Grenouilles', max.id)
+    await setResponsible(db, { userId: louUser.id, collectifId: collectif.id, status: 'active' })
     const garage = await createTestLocation(db, { userId: max.id }, 'Garage Zébulon')
     const cave = await createTestLocation(db, { userId: max.id }, 'Cave Zébulon')
     const app = createTestApp(db)
@@ -81,8 +86,14 @@ describe('item history (US-0.5.6)', () => {
 
   it('never shows who contacted the owner, to anyone; the log keeps the IDs', async () => {
     const max = await createActiveUser(db, 'Max', 'max@example.org')
-    await createActiveUser(db, 'Alice Contacteuse', 'alice@example.org')
-    await createActiveUser(db, 'Bob', 'bob@example.org')
+    const collectif = await createActiveCollectif(db, 'Les Grenouilles', max.id)
+    for (const [name, email] of [
+      ['Alice Contacteuse', 'alice@example.org'],
+      ['Bob', 'bob@example.org'],
+    ] as const) {
+      const user = await createActiveUser(db, name, email)
+      await setResponsible(db, { userId: user.id, collectifId: collectif.id, status: 'active' })
+    }
     const garage = await createTestLocation(db, { userId: max.id }, 'Garage')
     const item = await createTestItem(db, {
       locationId: garage.id,
