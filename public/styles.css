@@ -575,3 +575,53 @@ button.danger {
   max-width: 32rem;
   margin-bottom: 1rem;
 }
+
+/* Dashboard (US-0.7.2): search first, then recent equipment beside my collectifs when wide. */
+.home-search {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 40rem;
+  margin-bottom: 1.25rem;
+}
+.home-search label {
+  font-weight: 600;
+}
+.home-search input {
+  min-height: var(--touch);
+}
+.pending-card {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  max-width: 40rem;
+  margin-bottom: 1.25rem;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--fg);
+  text-decoration: none;
+}
+.pending-count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+}
+.dashboard {
+  display: grid;
+  gap: 0 2rem;
+  align-items: start;
+}
+@container main (min-width: 60rem) {
+  .dashboard {
+    grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  }
+}
+.empty-state p {
+  margin-top: 0;
+}

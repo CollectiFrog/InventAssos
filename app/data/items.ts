@@ -344,3 +344,32 @@ export async function locationShowsItemTo(
   `)
   return (result.rows?.length ?? 0) > 0
 }
+
+/** The most recently added active items the scope may see, newest first (US-0.7.2). */
+export async function listRecentItems(
+  db: Database,
+  scope: ItemScope,
+  limit: number,
+): Promise<ItemSummary[]> {
+  const result = await db.exec(sql`
+    select ${summaryColumns} from items i ${summaryJoins}
+    where i.archived_at is null and ${visibleIn(scope)}
+    order by i.created_at desc, i.id
+    limit ${limit}
+  `)
+  return (result.rows ?? []).map(toSummary)
+}
+
+/** How many active items each of these collectifs owns; a collectif with none is absent. */
+export async function countItemsOwnedBy(
+  db: Database,
+  collectifIds: readonly string[],
+): Promise<Map<string, number>> {
+  const ids = [...collectifIds]
+  const result = await db.exec(sql`
+    select owner_collectif_id, count(*)::int as n from items
+    where archived_at is null and owner_collectif_id = any(${ids}::uuid[])
+    group by owner_collectif_id
+  `)
+  return new Map((result.rows ?? []).map((row) => [String(row.owner_collectif_id), Number(row.n)]))
+}
