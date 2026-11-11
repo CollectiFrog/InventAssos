@@ -7,11 +7,13 @@ import {
   listPendingRequestsBy,
   searchActiveCollectifs,
 } from '../../data/collectifs.ts'
-import { listItemsOwnedBy } from '../../data/items.ts'
+import { listItemsDepositedAt, listItemsOwnedBy } from '../../data/items.ts'
 import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
 import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/responsibles.ts'
 import { newResponsibleRequestMail } from '../../mail/messages.ts'
+import type { AppContext } from '../../middleware/index.ts'
 import {
+  canAssignItemOwner,
   canEditCollectif,
   canManageCollectifLocations,
   canManageResponsibles,
@@ -25,8 +27,57 @@ import { hitUserRequest, notifyAdmins } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
 import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
-import { CollectifPage, type Membership } from './collectif-page.tsx'
+import { CollectifPage, type CollectifTab, type Membership } from './collectif-page.tsx'
 import { CollectifsPage } from './collectifs-pages.tsx'
+
+/** A collectif's page on one of its tabs (US-0.7.5); outsiders get its directory entry only. */
+async function renderCollectif(context: AppContext, slug: string, tab: CollectifTab) {
+  const actor = requireUser(context)
+  if (actor instanceof Response) return actor
+  if (!isValidatedUser(actor)) return forbidden(context)
+
+  const { db } = context
+  const collectif = await findActiveCollectifBySlug(db, slug)
+  if (collectif === null) return notFound(context)
+
+  const link = await findResponsible(db, actor.id, collectif.id)
+  const membership: Membership =
+    link?.status === 'active' ? 'responsible' : link?.status === 'pending' ? 'pending' : 'none'
+  const notice = context.session.get('notice')
+  // Outsiders get the directory entry only: no equipment, locations or people (ADR 0021).
+  const inside = canSeeCollectifInventory(actor, collectif.id)
+  const scope = itemScopeOf(actor)
+  const items = inside ? await listItemsOwnedBy(db, { collectifId: collectif.id }, scope) : []
+  return context.render(
+    <CollectifPage
+      viewer={viewerOf(context)}
+      csrfToken={getCsrfToken(context)}
+      collectif={collectif}
+      tab={tab}
+      inside={inside}
+      membership={membership}
+      canEdit={canEditCollectif(actor, collectif.id)}
+      canAddItems={canAssignItemOwner(actor, { collectifId: collectif.id })}
+      canManageLocations={canManageCollectifLocations(actor, collectif.id)}
+      canManageResponsibles={canManageResponsibles(actor)}
+      items={items}
+      deposits={
+        inside && tab === 'items' ? await listItemsDepositedAt(db, collectif.id, scope) : []
+      }
+      locations={
+        inside && tab === 'places'
+          ? (await listCollectifLocations(db, collectif.id)).map((location) =>
+              redactLocation(location, canSeeFullAddress(actor, location)),
+            )
+          : []
+      }
+      responsibles={
+        inside && tab === 'people' ? await listActiveResponsibles(db, collectif.id) : []
+      }
+      notice={typeof notice === 'string' ? notice : undefined}
+    />,
+  )
+}
 
 /** The collectifs directory (US-0.7.12) and a collectif's page. */
 export default createController(routes.collectifs, {
@@ -54,48 +105,9 @@ export default createController(routes.collectifs, {
       )
     },
 
-    async show(context) {
-      const actor = requireUser(context)
-      if (actor instanceof Response) return actor
-      if (!isValidatedUser(actor)) return forbidden(context)
-
-      const { db } = context
-      const collectif = await findActiveCollectifBySlug(db, context.params.slug)
-      if (collectif === null) return notFound(context)
-
-      const link = await findResponsible(db, actor.id, collectif.id)
-      const membership: Membership =
-        link?.status === 'active' ? 'responsible' : link?.status === 'pending' ? 'pending' : 'none'
-      const notice = context.session.get('notice')
-      // Outsiders get the directory entry only: no equipment, locations or people (ADR 0021).
-      const inside = canSeeCollectifInventory(actor, collectif.id)
-      return context.render(
-        <CollectifPage
-          viewer={viewerOf(context)}
-          csrfToken={getCsrfToken(context)}
-          collectif={collectif}
-          inside={inside}
-          responsibles={inside ? await listActiveResponsibles(db, collectif.id) : []}
-          canManageResponsibles={canManageResponsibles(actor)}
-          membership={membership}
-          canEdit={canEditCollectif(actor, collectif.id)}
-          locations={
-            inside
-              ? (await listCollectifLocations(db, collectif.id)).map((location) =>
-                  redactLocation(location, canSeeFullAddress(actor, location)),
-                )
-              : []
-          }
-          canManageLocations={canManageCollectifLocations(actor, collectif.id)}
-          items={
-            inside
-              ? await listItemsOwnedBy(db, { collectifId: collectif.id }, itemScopeOf(actor))
-              : []
-          }
-          notice={typeof notice === 'string' ? notice : undefined}
-        />,
-      )
-    },
+    show: (context) => renderCollectif(context, context.params.slug, 'items'),
+    places: (context) => renderCollectif(context, context.params.slug, 'places'),
+    people: (context) => renderCollectif(context, context.params.slug, 'people'),
 
     // US-0.3.3: one open request per person and collectif; a rejected or removed person may ask again.
     async requestResponsibility(context) {

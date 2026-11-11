@@ -70,12 +70,15 @@ export default createController(routes.items.create, {
       if (!isValidatedUser(actor)) return forbidden(context)
 
       const locationId = context.url.searchParams.get('lieu') ?? ''
+      // « Ajouter du matériel » on a collectif's page preselects it as owner (US-0.7.5).
+      const asked = context.url.searchParams.get('pour') ?? ''
+      const owner = parseItemOwner(asked, actor) ? asked : 'me'
       const empty = Object.fromEntries(itemFieldNames.map((name) => [name, '']))
       return renderForm(context, actor, {
         ...(empty as AddItemPageProps['values']),
         quantity: '1',
         categoryId: 'other',
-        owner: 'me',
+        owner,
         ownerEmail: '',
         locationId,
         newLocationOwner: 'me',

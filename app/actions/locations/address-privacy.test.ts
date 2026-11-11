@@ -52,7 +52,7 @@ describe('only the city is shown to others (US-0.4.3)', () => {
     const client = app.client()
     await signIn(app, client, email)
     const pages = [
-      routes.collectifs.show.href({ slug: collectif.slug }),
+      routes.collectifs.places.href({ slug: collectif.slug }),
       routes.locations.show.href({ locationId: collectifPlace.id }),
       routes.locations.show.href({ locationId: homePlace.id }),
       routes.locations.index.href(),

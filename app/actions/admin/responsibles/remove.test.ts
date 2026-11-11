@@ -42,7 +42,7 @@ describe('remove a responsible (US-0.3.6)', () => {
   }
 
   it('shows the remove forms to the admin on the collectif page', async () => {
-    const page = await admin.get(routes.collectifs.show.href({ slug: collectif.slug }))
+    const page = await admin.get(routes.collectifs.people.href({ slug: collectif.slug }))
     assert.match(page.text, /Gérer les responsables/)
     assert.match(page.text, new RegExp(removeUrl(rita.id)))
   })

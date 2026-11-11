@@ -73,13 +73,15 @@ describe('collectif and person equipment pages (US-0.6.4)', () => {
     await db.close()
   })
 
-  it('lists the active items a collectif owns, not the deposits it stores', async () => {
+  it('lists the active items a collectif owns, then apart the deposits it stores', async () => {
     const rita = app.client()
     await signIn(app, rita, 'rita@example.org')
     const html = (await rita.get(routes.collectifs.show.href({ slug: collectif.slug }))).text
-    assert.match(html, /Console du collectif/)
+    const [owned = '', deposits = ''] = html.split('Déposé dans nos lieux')
+    assert.match(owned, /Console du collectif/)
+    assert.doesNotMatch(owned, /Ampli de Max/)
+    assert.match(deposits, /Ampli de Max/)
     assert.doesNotMatch(html, /Vieille console/)
-    assert.doesNotMatch(html, /Ampli de Max/)
   })
 
   it('shows someone outside a collectif none of its items, locations or people', async () => {
@@ -88,7 +90,7 @@ describe('collectif and person equipment pages (US-0.6.4)', () => {
     const html = (await lou.get(routes.collectifs.show.href({ slug: collectif.slug }))).text
     assert.match(html, /<h1>Les Grenouilles<\/h1><p class="status">Pacé<\/p>/)
     assert.doesNotMatch(html, /Console du collectif|Local|Rennes|12 rue Secrète|Rita/)
-    assert.match(html, /Devenir responsable/)
+    assert.match(html, /Demander à devenir responsable/)
   })
 
   it("lists a person's items, wherever they are stored, with their phone and no address", async () => {

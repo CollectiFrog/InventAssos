@@ -70,6 +70,14 @@ numéro de téléphone (facultatif), et vous déconnecter.
 Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous
 contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
 
+## La page d'un collectif
+
+Pour ses responsables, la page d'un collectif a trois onglets : **Matériel** (ce qu'il possède,
+puis ce que d'autres ont déposé dans ses lieux), **Lieux** et **Responsables** (avec son téléphone
+de contact). **Ajouter du matériel**, en haut, ouvre le formulaire avec le collectif comme
+propriétaire. Les autres utilisateurs ne voient que son nom, sa ville, sa présentation et le
+bouton **Demander à devenir responsable**.
+
 ## Modifier la présentation d'un collectif
 
 Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y

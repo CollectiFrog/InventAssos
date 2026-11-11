@@ -466,7 +466,17 @@ const rules: Rule[] = [
     row: "See C's equipment, locations and people",
     allowed: ['admin', 'responsibleOfC'],
     denial: 'hidden',
-    act: (c, w) => c.get(routes.collectifs.show.href({ slug: w.c.slug })),
+    // The three tabs of C's page together (US-0.7.5).
+    act: async (c, w) => {
+      const tabs = [routes.collectifs.show, routes.collectifs.places, routes.collectifs.people]
+      const pages = await Promise.all(tabs.map((route) => c.get(route.href({ slug: w.c.slug }))))
+      const [first] = pages
+      return {
+        status: first?.status ?? 0,
+        location: first?.location ?? null,
+        text: pages.map((page) => page.text).join('\n'),
+      }
+    },
     happened: async (_db, _w, response) =>
       /Projecteur C/.test(response.text) &&
       /Local C/.test(response.text) &&

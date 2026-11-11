@@ -100,7 +100,7 @@ describe('collectifs directory (US-0.7.12)', () => {
   it("shows a collectif's city on its page", async () => {
     await db.exec(sql`update collectifs set city = 'Rennes' where id = ${frog.id}`)
     const page = await camille.get(routes.collectifs.show.href({ slug: frog.slug }))
-    assert.match(page.text, /<h1>Collecti'FROG<\/h1><p class="status">Rennes<\/p>/)
+    assert.match(page.text, /<h1>Collecti'FROG<\/h1><p class="status">Rennes · 0 objet/)
   })
 })
 
