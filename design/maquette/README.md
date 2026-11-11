@@ -28,3 +28,6 @@ Rules: copy in French, fictional data only, the two devices kept in sync, access
 links, buttons and labels). The app itself follows [UI](../../docs/dev/architecture/ui.md); this
 mock-up is a reference, not code to ship: once a page is built, the app is the reference and the
 mock-up is not kept in sync with it.
+
+A professional design system will replace the mock-up's look later, through the CSS custom
+properties of [ADR 0019](../../docs/adr/0019-interface-conventions.md).
