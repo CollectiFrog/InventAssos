@@ -149,7 +149,8 @@ It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
   after sign-in (US-0.7.8); only an internal path is kept (`safeReturnPath`), never an off-site URL;
 - `/compte/supprimer`, a confirmation page instead of a modal window;
 - `/admin/demandes` (also `/admin`), `/admin/comptes`, `/admin/collectifs`, `/admin/moderateurs`,
-  `/admin/categories`, `/admin/instance`.
+  `/admin/categories`, `/admin/instance`. In V0.7: demandes, comptes, collectifs and categories;
+  `/admin/moderateurs` comes with moderators (V0.8); `/admin/instance` waits for a story.
 
 ## Page templates
 

@@ -51,11 +51,14 @@ export const routes = route({
   },
   admin: {
     index: get('/admin'),
+    requests: get('/admin/demandes'),
+    accounts: get('/admin/comptes'),
     approveAccount: post('/admin/comptes/:userId/accepter'),
     rejectAccount: post('/admin/comptes/:userId/refuser'),
     disableAccount: post('/admin/comptes/:userId/desactiver'),
     enableAccount: post('/admin/comptes/:userId/reactiver'),
     collectifs: {
+      index: get('/admin/collectifs'),
       approve: post('/admin/collectifs/:collectifId/accepter'),
       reject: post('/admin/collectifs/:collectifId/refuser'),
     },

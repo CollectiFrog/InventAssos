@@ -3,8 +3,13 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../../data/audit-log.ts'
-import { decideCollectif, findCollectifById } from '../../../data/collectifs.ts'
-import { setResponsible } from '../../../data/responsibles.ts'
+import {
+  decideCollectif,
+  findCollectifById,
+  searchActiveCollectifs,
+} from '../../../data/collectifs.ts'
+import { countItemsOwnedBy } from '../../../data/items.ts'
+import { countActiveResponsibles, setResponsible } from '../../../data/responsibles.ts'
 import { findUserById } from '../../../data/users.ts'
 import { sendSafely } from '../../../mail/mailer.ts'
 import { collectifApprovedMail, collectifRejectedMail } from '../../../mail/messages.ts'
@@ -12,13 +17,41 @@ import { canReviewCollectifs } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { optionalText, parseForm } from '../../../validation.ts'
 import { forbidden, requireUser } from '../../guards.tsx'
+import { viewerOf } from '../../viewer.ts'
+import { AdminCollectifsPage } from './collectifs-page.tsx'
 
 const rejectSchema = f.object({ reason: f.field(optionalText(500)) })
 const queueUrl = routes.admin.index.href()
 
-/** Accept or reject a collectif request (US-0.3.2). */
+/** Administration › Collectifs (ADR 0022), and accepting or rejecting a request (US-0.3.2). */
 export default createController(routes.admin.collectifs, {
   actions: {
+    async index(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      if (!canReviewCollectifs(actor)) return forbidden(context)
+
+      const { db } = context
+      const collectifs = await searchActiveCollectifs(db)
+      const responsibles = await countActiveResponsibles(db)
+      const items = await countItemsOwnedBy(
+        db,
+        collectifs.map((c) => c.id),
+      )
+      return context.render(
+        <AdminCollectifsPage
+          viewer={viewerOf(context)}
+          collectifs={collectifs.map((c) => ({
+            name: c.name,
+            slug: c.slug,
+            city: c.city,
+            responsibles: responsibles.get(c.id) ?? 0,
+            items: items.get(c.id) ?? 0,
+          }))}
+        />,
+      )
+    },
+
     async approve(context) {
       const actor = requireUser(context)
       if (actor instanceof Response) return actor
