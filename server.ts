@@ -48,11 +48,10 @@ let shuttingDown = false
 function shutdown() {
   if (shuttingDown) return
   shuttingDown = true
-  stopPurge()
+  const purgeStopped = stopPurge()
   server.close(() => {
-    // E-mails still being sent after their response finish before the database closes.
-    background
-      .idle()
+    // E-mails still being sent after their response, and a running purge, finish before the database closes.
+    Promise.all([background.idle(), purgeStopped])
       .then(() => db.close())
       .catch((error: unknown) => console.error('Error while closing the database', error))
       .finally(() => process.exit(0))

@@ -6,7 +6,13 @@ import { openTestDatabase, resetDatabase } from '../test/database.ts'
 import { createPostgresSessionStorage } from './data/sessions.ts'
 import { createSignInToken } from './data/sign-in-tokens.ts'
 import { createUser } from './data/users.ts'
-import { purgeExpiredData, startPeriodicPurge } from './maintenance.ts'
+import {
+  purgeExpiredData,
+  purgeIntervalMs,
+  type Repeat,
+  repeatWithTimer,
+  startPeriodicPurge,
+} from './maintenance.ts'
 
 describe('purge of expired rows (review F5)', () => {
   let db: Database
@@ -54,16 +60,61 @@ describe('purge of expired rows (review F5)', () => {
     assert.deepEqual(await counts(), { sessions: 1, tokens: 1 })
   })
 
-  it('runs again on a timer while the server runs', async () => {
-    await seedOneLiveAndOneExpiredOfEach()
-    const stop = startPeriodicPurge(db, 10)
-    try {
-      for (let i = 0; i < 100 && (await counts())?.sessions !== 1; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 10))
-      }
-    } finally {
-      stop()
+  /** A scheduler the test drives by hand: no real time, so no race (#90). */
+  function manualRepeat() {
+    const state = {
+      intervalMs: 0,
+      cancelled: false,
+      tick: async () => {},
     }
+    const repeat: Repeat = (run, intervalMs) => {
+      state.intervalMs = intervalMs
+      state.tick = run
+      return () => {
+        state.cancelled = true
+      }
+    }
+    return { state, repeat }
+  }
+
+  it('purges on each tick of the hourly timer while the server runs', async () => {
+    const { state, repeat } = manualRepeat()
+    const stop = startPeriodicPurge(db, undefined, repeat)
+    assert.equal(state.intervalMs, purgeIntervalMs)
+
+    await seedOneLiveAndOneExpiredOfEach()
+    await state.tick()
     assert.deepEqual(await counts(), { sessions: 1, tokens: 1 })
+
+    await stop()
+    assert.equal(state.cancelled, true)
+  })
+
+  it('waits for a running purge when stopped, and never runs two at once', async () => {
+    const { state, repeat } = manualRepeat()
+    const stop = startPeriodicPurge(db, 10, repeat)
+    await seedOneLiveAndOneExpiredOfEach()
+
+    const first = state.tick()
+    assert.equal(state.tick(), first)
+    await stop()
+    assert.deepEqual(await counts(), { sessions: 1, tokens: 1 })
+  })
+})
+
+describe('repeatWithTimer', () => {
+  it('calls the function at each interval until cancelled', (t) => {
+    const timers = t.useFakeTimers()
+    const run = t.mock.fn(async () => {})
+    const cancel = repeatWithTimer(run, 1000)
+
+    timers.advance(999)
+    assert.equal(run.mock.calls.length, 0)
+    timers.advance(1)
+    timers.advance(1000)
+    assert.equal(run.mock.calls.length, 2)
+    cancel()
+    timers.advance(5000)
+    assert.equal(run.mock.calls.length, 2)
   })
 })
