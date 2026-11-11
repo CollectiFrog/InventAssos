@@ -520,3 +520,58 @@ button.danger {
 .filters .actions {
   align-self: end;
 }
+
+/* Page header: title on the left, the page's main action on the right. */
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.page-head h1 {
+  margin-bottom: 0.25rem;
+}
+.page-head p {
+  margin: 0;
+}
+
+/* Collectifs directory (US-0.7.12): cards fill the width, as many per row as fit. */
+.directory {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+.directory-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.directory-card p {
+  margin: 0;
+}
+.directory-name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+.excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.directory-new {
+  border-style: dashed;
+  justify-content: center;
+}
+.directory-new .button {
+  align-self: flex-start;
+  margin-top: 0.35rem;
+}
+.directory-search {
+  max-width: 32rem;
+  margin-bottom: 1rem;
+}

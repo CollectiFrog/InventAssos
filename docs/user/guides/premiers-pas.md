@@ -47,8 +47,10 @@ droite, puis **Se déconnecter**. La session est fermée et ne peut plus être r
 Une fois votre compte validé, ouvrez **Collectifs** dans la barre de navigation (en bas de l'écran
 sur un téléphone, à gauche sur un ordinateur).
 
-- Votre association n'est pas encore inscrite : **Déclarer un collectif**, avec son nom, une
-  description et éventuellement un téléphone de contact. Un administrateur vérifie la demande ;
+- Cherchez-la d'abord dans **Collectifs** : vos collectifs sont en haut, puis l'annuaire de tous
+  les autres, avec leur ville et leur présentation. Le champ de recherche trouve un nom ou une ville.
+- Votre association n'est pas encore inscrite : **Déclarer un collectif**, avec son nom, sa ville,
+  une description et éventuellement un téléphone de contact. Un administrateur vérifie la demande ;
   une fois validée, vous devenez **responsable** du collectif.
 - Votre association est déjà inscrite : ouvrez sa page et choisissez **Devenir responsable**. Un
   administrateur valide la demande. Une seule demande à la fois par collectif ; si elle est

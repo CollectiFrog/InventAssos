@@ -145,6 +145,7 @@ describe('rate limits (ADR 0018)', () => {
     for (let i = 0; i < 5; i++) {
       const response = await val.post(routes.collectifs.request.action.href(), {
         name: `Collectif ${i}`,
+        city: 'Rennes',
       })
       assert.equal(response.status, 303)
     }

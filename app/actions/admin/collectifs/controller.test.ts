@@ -57,7 +57,7 @@ describe('accept or reject a collectif (US-0.3.2)', () => {
     await signIn(app, rita, 'rita@example.org')
     assert.match(
       (await rita.get(routes.collectifs.index.href())).text,
-      /Collectifs inscrits[\s\S]*Les Grenouilles/,
+      /Mes collectifs<\/h2>[\s\S]*Les Grenouilles/,
     )
   })
 

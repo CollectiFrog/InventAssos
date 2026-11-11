@@ -65,7 +65,7 @@ contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
 ## Modifier la présentation d'un collectif
 
 Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y
-changer la description, visible par tous les utilisateurs validés, et le téléphone de contact,
+changer la ville et la description, visibles par tous les utilisateurs validés, et le téléphone de contact,
 visible par les personnes qui voient le matériel du collectif. Pour
 changer le nom, contactez un administrateur.
 

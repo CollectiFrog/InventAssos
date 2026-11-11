@@ -182,7 +182,8 @@ const rules: Rule[] = [
   {
     row: 'Request a new collectif',
     allowed: ['admin', 'responsibleOfC', 'responsibleOfD', 'validated'],
-    act: (c) => c.post(routes.collectifs.request.action.href(), { name: 'Collectif F' }),
+    act: (c) =>
+      c.post(routes.collectifs.request.action.href(), { name: 'Collectif F', city: 'Vitré' }),
     happened: async (db) => {
       const rows = await db.exec(sql`select 1 from collectifs where slug = 'collectif-f'`)
       return (rows.rows?.length ?? 0) > 0
@@ -220,7 +221,10 @@ const rules: Rule[] = [
     row: "Edit C's profile",
     allowed: ['admin', 'responsibleOfC'],
     act: (c, w) =>
-      c.post(routes.collectifs.edit.action.href({ slug: w.c.slug }), { description: 'Changé' }),
+      c.post(routes.collectifs.edit.action.href({ slug: w.c.slug }), {
+        city: 'Rennes',
+        description: 'Changé',
+      }),
     happened: async (db, w) => (await findCollectifById(db, w.c.id))?.description === 'Changé',
   },
   {

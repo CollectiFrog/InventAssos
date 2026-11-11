@@ -83,8 +83,10 @@ describe('collectif and person equipment pages (US-0.6.4)', () => {
   })
 
   it('shows someone outside a collectif none of its items, locations or people', async () => {
+    // The collectif's own city is public (ADR 0023); its locations' cities are not.
+    await db.exec(sql`update collectifs set city = 'Pacé' where id = ${collectif.id}`)
     const html = (await lou.get(routes.collectifs.show.href({ slug: collectif.slug }))).text
-    assert.match(html, /<h1>Les Grenouilles<\/h1>/)
+    assert.match(html, /<h1>Les Grenouilles<\/h1><p class="status">Pacé<\/p>/)
     assert.doesNotMatch(html, /Console du collectif|Local|Rennes|12 rue Secrète|Rita/)
     assert.match(html, /Devenir responsable/)
   })

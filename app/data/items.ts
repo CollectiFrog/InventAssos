@@ -2,6 +2,7 @@
 import { type Database, sql } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
+import { likeLiteral } from './search.ts'
 import { type Category, categories, type Item, items } from './tables.ts'
 
 /** Owner of an item: a collectif or a person, never both (ADR 0009). */
@@ -260,11 +261,6 @@ export interface InventoryFilters {
   categoryId?: string
   collectifId?: string
   city?: string
-}
-
-/** Escapes LIKE wildcards so a search for "50%" means the text "50%". */
-function likeLiteral(text: string): string {
-  return text.replace(/[\\%_]/g, (char) => `\\${char}`)
 }
 
 /** Active items the scope may see, by name, one page at a time (US-0.6.2, US-0.7.11). */

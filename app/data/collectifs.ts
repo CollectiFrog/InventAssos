@@ -1,7 +1,8 @@
 // Data access for collectifs: the only module that reads or writes the `collectifs` table.
-import { and, type Database, ne, sql } from 'remix/data-table'
+import { and, type Database, inList, ne, sql } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
+import { likeLiteral } from './search.ts'
 import { type Collectif, type CollectifStatus, collectifs } from './tables.ts'
 
 /** URL-safe form of a name; two names with the same slug count as the same collectif. */
@@ -38,13 +39,20 @@ export async function findActiveCollectifBySlug(
 /** Records a request for a new collectif, `pending` until a platform admin decides. */
 export async function createCollectifRequest(
   db: Database,
-  input: { name: string; description: string; contactPhone: string | null; requestedBy: string },
+  input: {
+    name: string
+    city: string
+    description: string
+    contactPhone: string | null
+    requestedBy: string
+  },
 ): Promise<Collectif> {
   return db.create(
     collectifs,
     {
       name: input.name,
       slug: slugify(input.name),
+      city: input.city,
       description: input.description,
       contact_phone: input.contactPhone,
       requested_by: input.requestedBy,
@@ -56,6 +64,27 @@ export async function createCollectifRequest(
 /** Collectifs with a given status, by name. */
 export async function listCollectifs(db: Database, status: CollectifStatus): Promise<Collectif[]> {
   return db.findMany(collectifs, { where: { status }, orderBy: ['name', 'asc'] })
+}
+
+/**
+ * Active collectifs for the directory, by name; `query` matches the name or the city, ignoring case
+ * and accents (US-0.7.12).
+ */
+export async function searchActiveCollectifs(db: Database, query = ''): Promise<Collectif[]> {
+  const words = query.trim()
+  const match = words
+    ? sql`and (inv_fold(name) like '%' || inv_fold(${likeLiteral(words)}) || '%'
+           or inv_fold(city) like '%' || inv_fold(${likeLiteral(words)}) || '%')`
+    : sql``
+  const result = await db.exec(sql`
+    select id from collectifs where status = 'active' ${match}
+    order by lower(name), id
+  `)
+  const ids = (result.rows ?? []).map((row) => String(row.id))
+  if (ids.length === 0) return []
+  const rows = await db.findMany(collectifs, { where: inList(collectifs.id, ids) })
+  const byId = new Map(rows.map((row) => [row.id, row]))
+  return ids.flatMap((id) => byId.get(id) ?? [])
 }
 
 /** Pending requests made by one person. */
@@ -85,6 +114,7 @@ export async function decideCollectif(
 export interface PendingCollectif {
   id: string
   name: string
+  city: string
   description: string
   contactPhone: string | null
   requesterName: string | null
@@ -95,7 +125,7 @@ export interface PendingCollectif {
 /** Pending collectif requests for the admin queue, oldest first. */
 export async function listPendingCollectifs(db: Database): Promise<PendingCollectif[]> {
   const result = await db.exec(sql`
-    select c.id, c.name, c.description, c.contact_phone, c.created_at,
+    select c.id, c.name, c.city, c.description, c.contact_phone, c.created_at,
            u.name as requester_name, u.email as requester_email
     from collectifs c left join users u on u.id = c.requested_by
     where c.status = 'pending'
@@ -104,6 +134,7 @@ export async function listPendingCollectifs(db: Database): Promise<PendingCollec
   return (result.rows ?? []).map((row) => ({
     id: String(row.id),
     name: String(row.name),
+    city: String(row.city),
     description: String(row.description),
     contactPhone: row.contact_phone === null ? null : String(row.contact_phone),
     requesterName: row.requester_name === null ? null : String(row.requester_name),
@@ -116,9 +147,10 @@ export async function listPendingCollectifs(db: Database): Promise<PendingCollec
 export async function updateCollectifProfile(
   db: Database,
   id: string,
-  profile: { description: string; contactPhone: string | null },
+  profile: { city: string; description: string; contactPhone: string | null },
 ): Promise<Collectif> {
   return db.update(collectifs, id, {
+    city: profile.city,
     description: profile.description,
     contact_phone: profile.contactPhone,
     updated_at: new Date(),
