@@ -10,11 +10,16 @@ sidebar:
 ## Se repérer
 
 Quatre entrées mènent partout : **Accueil**, **Rechercher**, **Mon matériel** et **Collectifs**.
-Sur un téléphone, elles sont dans la barre en bas de l'écran ; sur un ordinateur, en haut de la
-page. L'entrée de la section où vous êtes est mise en évidence.
+Sur un téléphone, elles sont dans la barre en bas de l'écran ; sur un ordinateur, dans la colonne à
+gauche (réduite à des icônes sur un écran étroit). L'entrée de la section où vous êtes est mise en
+évidence.
 
-En haut à droite, le rond avec vos initiales ouvre **votre compte** ; les administrateurs y trouvent
-aussi le lien **Administration**.
+Sur un ordinateur, la colonne de gauche liste aussi **Mes collectifs** (les cinq premiers, puis
+**Tous**) et, en bas, **Administration** pour les administrateurs. La barre du haut garde sur
+chaque page un champ de **recherche** et le bouton **Ajouter du matériel**.
+
+En haut à droite, le rond avec vos initiales ouvre **votre compte**. Sur un téléphone, les
+administrateurs trouvent le lien **Administration** à côté.
 
 ## Parcourir l'inventaire
 

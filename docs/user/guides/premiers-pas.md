@@ -45,7 +45,7 @@ droite, puis **Se déconnecter**. La session est fermée et ne peut plus être r
 ## Rejoindre ou créer un collectif
 
 Une fois votre compte validé, ouvrez **Collectifs** dans la barre de navigation (en bas de l'écran
-sur un téléphone, en haut sur un ordinateur).
+sur un téléphone, à gauche sur un ordinateur).
 
 - Votre association n'est pas encore inscrite : **Déclarer un collectif**, avec son nom, une
   description et éventuellement un téléphone de contact. Un administrateur vérifie la demande ;

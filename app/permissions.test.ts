@@ -30,6 +30,7 @@ function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
     status: 'active',
     isAdmin: false,
     managedCollectifIds: new Set(),
+    collectifs: [],
     ...overrides,
   }
 }
