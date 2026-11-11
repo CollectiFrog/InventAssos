@@ -18,6 +18,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - A collectif's page has tabs Matériel, Lieux and Responsables, with « Ajouter du matériel » first for its responsibles; deposits in its locations are listed apart.
 - An item's page shows its owner and city at the top with « Appeler », « SMS » and « Écrire » buttons; writing is offered even when a phone is known.
 - After signing in from a link to a page of the app, you land on that page instead of the home page.
+- Admins manage the categories: add, rename, reorder, and delete one after moving its equipment to another.
 
 ### Changed
 

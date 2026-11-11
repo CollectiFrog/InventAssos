@@ -47,6 +47,11 @@ export function canRequestCollectif(actor: Actor): boolean {
   return isValidatedUser(actor)
 }
 
+/** "Add, rename, reorder, delete an unused category": platform admin (moderators from V0.8). */
+export function canManageCategories(actor: Actor): boolean {
+  return isActiveAdmin(actor)
+}
+
 /** "Approve or reject a collectif": platform admin only. */
 export function canReviewCollectifs(actor: Actor): boolean {
   return isActiveAdmin(actor)

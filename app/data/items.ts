@@ -3,7 +3,7 @@ import { type Database, sql } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
 import { likeLiteral } from './search.ts'
-import { type Category, categories, type Item, items } from './tables.ts'
+import { type Item, items } from './tables.ts'
 
 /** Owner of an item: a collectif or a person, never both (ADR 0009). */
 export type ItemOwner = { collectifId: string } | { userId: string }
@@ -19,11 +19,6 @@ export interface ItemFields {
   condition: Item['condition']
   estimatedValue: number | null
   description: string | null
-}
-
-/** The fixed list of categories, in display order. */
-export async function listCategories(db: Database): Promise<Category[]> {
-  return db.findMany(categories, { orderBy: ['position', 'asc'] })
 }
 
 function toColumns(fields: ItemFields) {
@@ -383,4 +378,26 @@ export async function listItemsDepositedAt(
     order by lower(i.name), i.id
   `)
   return (result.rows ?? []).map(toSummary)
+}
+
+/** How many items, archived ones included, use each category; an unused one is absent. */
+export async function countItemsByCategory(db: Database): Promise<Map<string, number>> {
+  const result = await db.exec(sql`
+    select category_id, count(*)::int as n from items group by category_id
+  `)
+  return new Map((result.rows ?? []).map((row) => [String(row.category_id), Number(row.n)]))
+}
+
+/** Moves every item, archived ones included, from one category to another; returns their IDs. */
+export async function recategorizeItems(
+  db: Database,
+  fromId: string,
+  toId: string,
+): Promise<string[]> {
+  const result = await db.exec(sql`
+    update items set category_id = ${toId}, updated_at = now()
+    where category_id = ${fromId}
+    returning id
+  `)
+  return (result.rows ?? []).map((row) => String(row.id))
 }

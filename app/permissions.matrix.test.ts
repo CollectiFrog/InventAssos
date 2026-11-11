@@ -12,6 +12,7 @@ import { openTestDatabase, resetDatabase } from '../test/database.ts'
 import { createTestItem, itemFormFields } from '../test/items.ts'
 import { createTestLocation } from '../test/locations.ts'
 import { createActiveUser } from '../test/users.ts'
+import { findCategory, listCategories } from './data/categories.ts'
 import { findCollectifById } from './data/collectifs.ts'
 import { archiveItem, findItemById } from './data/items.ts'
 import { findLocationById } from './data/locations.ts'
@@ -150,6 +151,31 @@ const rules: Rule[] = [
     allowed: ['admin'],
     act: (c, w) => c.post(routes.admin.approveAccount.href({ userId: w.target.id })),
     happened: async (db, w) => (await findUserById(db, w.target.id))?.status === 'active',
+  },
+  {
+    row: 'Add, rename, reorder, delete an unused category (add)',
+    allowed: ['admin'],
+    act: (c) => c.post(routes.admin.categories.create.href(), { name: 'Instruments' }),
+    happened: async (db) => (await findCategory(db, 'instruments')) !== null,
+  },
+  {
+    row: 'Add, rename, reorder, delete an unused category (rename)',
+    allowed: ['admin'],
+    act: (c) =>
+      c.post(routes.admin.categories.rename.href({ categoryId: 'video' }), { name: 'Image' }),
+    happened: async (db) => (await findCategory(db, 'video'))?.name === 'Image',
+  },
+  {
+    row: 'Add, rename, reorder, delete an unused category (reorder)',
+    allowed: ['admin'],
+    act: (c) => c.post(routes.admin.categories.up.href({ categoryId: 'lighting' })),
+    happened: async (db) => (await listCategories(db))[0]?.id === 'lighting',
+  },
+  {
+    row: 'Add, rename, reorder, delete an unused category (delete)',
+    allowed: ['admin'],
+    act: (c) => c.post(routes.admin.categories.remove.href({ categoryId: 'video' })),
+    happened: async (db) => (await findCategory(db, 'video')) === null,
   },
   {
     row: 'Disable an account',
