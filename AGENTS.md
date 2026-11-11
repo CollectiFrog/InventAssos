@@ -95,6 +95,8 @@ Project-specific rules go below this line, kept short.
 - **Audit log stores IDs only**: never a name, e-mail or phone (`docs/adr/0010-personal-data-retention.md`).
 - **Exact addresses never leave the owner.** Other users, exports and APIs get the city only:
   pass every location through `redactLocation(location, canSeeFullAddress(actor, location))`.
+- **Inventory stays within collectifs** until V1.1: every page and listing filters items with
+  `canSeeItem`'s rule; a non-member gets 404 (`docs/adr/0021-inventory-within-collectifs.md`).
 - **Ownership ≠ storage.** An item has one owner (collectif xor person) and one location; never merge
   the two (`docs/adr/0009-ownership-and-locations.md`).
 - **One responsive interface.** Pages follow `docs/dev/architecture/ui.md` and reuse the shared pieces

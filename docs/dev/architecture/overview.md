@@ -74,6 +74,7 @@ session secret, `PLATFORM_ADMIN_EMAILS`, S3 (from V0.9). No deployment value liv
 | Ownership and locations | [0009](../../adr/0009-ownership-and-locations/)                                                                       |
 | Personal data retention | [0010](../../adr/0010-personal-data-retention/)                                                                       |
 | Roles                   | [0020](../../adr/0020-platform-and-collectif-roles/)                                                                  |
+| Inventory visibility    | [0021](../../adr/0021-inventory-within-collectifs/)                                                                   |
 | Deployment              | [0005](../../adr/0005-deployment/)                                                                                    |
 | Tests                   | [0012](../../adr/0012-testing-with-remix-test/)                                                                       |
 | Migrations              | [0013](../../adr/0013-sql-migrations-at-startup/)                                                                     |
