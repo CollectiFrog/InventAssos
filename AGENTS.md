@@ -67,7 +67,7 @@ Without Node or `make` on the host, run any target in the app container:
 | `docs/dev/`          | developer docs → published from `dev` at `/dev/`            |
 | `docs/adr/`          | architecture decision records → published with the dev docs |
 | `docs/site/`         | the Starlight app that renders both sites                   |
-| `design/maquette/`   | V0.7 clickable mock-up sources (claude.ai Design canvas)    |
+| `design/maquette/`   | clickable mock-up up to V1.0 (claude.ai Design canvas)      |
 | `.github/workflows/` | CI (PR checks), PR title, docs, release                     |
 | `CHANGELOG.md`       | user-visible changes, Keep a Changelog format               |
 | `server.ts`          | entry point: config, migrations, HTTP server                |
@@ -95,6 +95,8 @@ Project-specific rules go below this line, kept short.
 - **Audit log stores IDs only**: never a name, e-mail or phone (`docs/adr/0010-personal-data-retention.md`).
 - **Exact addresses never leave the owner.** Other users, exports and APIs get the city only:
   pass every location through `redactLocation(location, canSeeFullAddress(actor, location))`.
+- **Inventory stays within collectifs** until V1.1: every page and listing filters items with
+  `canSeeItem`'s rule; a non-member gets 404 (`docs/adr/0021-inventory-within-collectifs.md`).
 - **Ownership ≠ storage.** An item has one owner (collectif xor person) and one location; never merge
   the two (`docs/adr/0009-ownership-and-locations.md`).
 - **One responsive interface.** Pages follow `docs/dev/architecture/ui.md` and reuse the shared pieces
