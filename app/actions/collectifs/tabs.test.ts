@@ -52,7 +52,7 @@ describe('collectif page in tabs (US-0.7.5)', () => {
       places: routes.collectifs.places.href({ slug }),
       people: routes.collectifs.people.href({ slug }),
     }
-    const all = [`Matériel ${urls.items}`, `Lieux ${urls.places}`, `Responsables ${urls.people}`]
+    const all = [`Matériel ${urls.items}`, `Lieux ${urls.places}`, `Membres ${urls.people}`]
     const mark = (n: number) => all.map((tab, i) => (i === n ? `*${tab}` : tab))
     assert.deepEqual(tabs(await page('rita@example.org', urls.items)), mark(0))
     const places = await page('rita@example.org', urls.places)

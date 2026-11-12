@@ -86,9 +86,25 @@ export function canReviewCollectifs(actor: Actor): boolean {
   return isActiveStaff(actor)
 }
 
-/** "Request to become responsible of C": a validated user who is not already responsible of C. */
+/**
+ * "Request to become responsible of C": a validated user who does not belong to C yet. A member asks
+ * C's responsibles instead (US-0.8.6), so that a refusal never costs them their membership.
+ */
 export function canRequestResponsibility(actor: Actor, collectifId: string): boolean {
-  return isValidatedUser(actor) && !actor.managedCollectifIds.has(collectifId)
+  return isValidatedUser(actor) && !actor.memberCollectifIds.has(collectifId)
+}
+
+/** "Ask to join C" (US-0.8.3): a validated user who does not belong to C yet. */
+export function canRequestMembership(actor: Actor, collectifId: string): boolean {
+  return isValidatedUser(actor) && !actor.memberCollectifIds.has(collectifId)
+}
+
+/**
+ * "Accept, reject or remove a member of C" (US-0.8.4): an active responsible of C only. The
+ * platform approves accounts and collectifs, never who belongs to a collectif (ADR 0020).
+ */
+export function canManageMembers(actor: Actor, collectifId: string): boolean {
+  return isValidatedUser(actor) && actor.managedCollectifIds.has(collectifId)
 }
 
 /** "Approve, reject or remove a responsible of C": admin or moderator. */
@@ -207,9 +223,9 @@ export function canModerateItem(actor: Actor, item: { archived_at: unknown }): b
   return isActiveStaff(actor) && item.archived_at == null
 }
 
-/** True when the actor belongs to one of these collectifs (responsible; member from V0.8). */
+/** True when the actor belongs to one of these collectifs, as member or responsible. */
 function sharesCollectif(actor: CurrentUser, collectifIds: readonly string[]): boolean {
-  return collectifIds.some((id) => actor.managedCollectifIds.has(id))
+  return collectifIds.some((id) => actor.memberCollectifIds.has(id))
 }
 
 /** An item as visibility needs it: its owner and storage, and the owning person's collectifs. */
@@ -225,20 +241,19 @@ export interface ItemVisibility extends ItemAccess {
 export function canSeeItem(actor: Actor, item: ItemVisibility): boolean {
   if (!isValidatedUser(actor)) return false
   if (isActiveStaff(actor) || item.owner_user_id === actor.id) return true
-  if (item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id)) {
+  if (item.owner_collectif_id !== null && actor.memberCollectifIds.has(item.owner_collectif_id)) {
     return true
   }
   if (item.owner_user_id !== null && sharesCollectif(actor, item.ownerCollectifIds)) return true
-  return canManageLocation(actor, {
-    collectif_id: item.locationCollectifId,
-    user_id: item.locationUserId,
-  })
+  // Stored in a location I keep: my own, or one of a collectif I belong to.
+  if (item.locationUserId !== null) return item.locationUserId === actor.id
+  return item.locationCollectifId !== null && actor.memberCollectifIds.has(item.locationCollectifId)
 }
 
 /** The listings' side of `canSeeItem`: every query that lists items filters with this scope. */
 export function itemScopeOf(actor: CurrentUser): ItemScope {
   if (isActiveStaff(actor)) return { everything: true }
-  return { everything: false, userId: actor.id, collectifIds: [...actor.managedCollectifIds] }
+  return { everything: false, userId: actor.id, collectifIds: [...actor.memberCollectifIds] }
 }
 
 /** "See a person's page and phone": staff, the person, or someone sharing a collectif (ADR 0021). */
@@ -258,12 +273,12 @@ export function canSeePerson(
  */
 export function canSeeCollectifInventory(actor: Actor, collectifId: string): boolean {
   if (!isValidatedUser(actor)) return false
-  return isActiveStaff(actor) || actor.managedCollectifIds.has(collectifId)
+  return isActiveStaff(actor) || actor.memberCollectifIds.has(collectifId)
 }
 
 /**
- * "See a location (name, city)": admin or moderator, its managers, or whoever sees an item stored there, since
- * the item page links to it (ADR 0021).
+ * "See a location (name, city)": admin or moderator, its managers, the people of its collectif, or
+ * whoever sees an item stored there, since the item page links to it (ADR 0021).
  */
 export function canSeeLocation(
   actor: Actor,
@@ -271,5 +286,6 @@ export function canSeeLocation(
   seesAnItemThere: boolean,
 ): boolean {
   if (!isValidatedUser(actor)) return false
-  return isActiveStaff(actor) || canManageLocation(actor, location) || seesAnItemThere
+  if (isActiveStaff(actor) || canManageLocation(actor, location) || seesAnItemThere) return true
+  return location.collectif_id !== null && actor.memberCollectifIds.has(location.collectif_id)
 }

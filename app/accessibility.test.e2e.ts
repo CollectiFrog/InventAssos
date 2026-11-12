@@ -129,7 +129,7 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
         '/collectifs',
         '/collectifs/collecti-frog',
         '/collectifs/collecti-frog/lieux',
-        '/collectifs/collecti-frog/responsables',
+        '/collectifs/collecti-frog/membres',
         '/compte/profil',
         '/compte/supprimer',
       ])

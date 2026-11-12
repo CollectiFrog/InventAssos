@@ -69,7 +69,7 @@ describe('Administration sections at their own URLs (US-0.7.13)', () => {
     const html = (await boss.get(routes.admin.collectifs.index.href())).text
     assert.match(
       html,
-      /<a href="\/collectifs\/collecti-frog\/responsables"><strong>Collecti'FROG<\/strong>/,
+      /<a href="\/collectifs\/collecti-frog\/membres"><strong>Collecti'FROG<\/strong>/,
     )
     assert.match(html, /<td data-label="Ville">Rennes<\/td>/)
     assert.match(html, /<td data-label="Responsables" class="num">1<\/td>/)

@@ -64,7 +64,7 @@ export default createController(routes.items, {
       // US-0.7.3: what is stored at my places right now, grouped by whom it belongs to.
       const held = await listItemsStoredAtHomeOf(context.db, actor.id)
       const ofMyCollectifs = (item: ItemSummary) =>
-        item.ownerCollectifId !== null && actor.managedCollectifIds.has(item.ownerCollectifId)
+        item.ownerCollectifId !== null && actor.memberCollectifIds.has(item.ownerCollectifId)
       const notice = context.session.get('notice')
       return context.render(
         <MyItemsPage

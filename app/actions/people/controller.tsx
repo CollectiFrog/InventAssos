@@ -2,7 +2,7 @@ import type { Handle } from 'remix/component'
 import { createController } from 'remix/router'
 
 import { type ItemSummary, listItemsOwnedBy } from '../../data/items.ts'
-import { listManagedCollectifs } from '../../data/members.ts'
+import { listMyCollectifs } from '../../data/members.ts'
 import { findUserById } from '../../data/users.ts'
 import { canSeePerson, isValidatedUser, itemScopeOf } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
@@ -53,7 +53,7 @@ export default createController(routes.people, {
 
       const person = await findUserById(context.db, context.params.userId)
       if (person === null || person.status !== 'active') return notFound(context)
-      const collectifs = await listManagedCollectifs(context.db, person.id)
+      const collectifs = await listMyCollectifs(context.db, person.id)
       // 404, not 403: whether this person has an account is not for strangers to know.
       if (!canSeePerson(actor, { id: person.id, collectifIds: collectifs.map((c) => c.id) })) {
         return notFound(context)

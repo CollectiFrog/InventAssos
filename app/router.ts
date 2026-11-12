@@ -9,6 +9,7 @@ import adminModeratorsController from './actions/admin/moderators/controller.tsx
 import adminResponsiblesController from './actions/admin/responsibles/controller.tsx'
 import collectifsController from './actions/collectifs/controller.tsx'
 import editCollectifController from './actions/collectifs/edit/controller.tsx'
+import collectifMembersController from './actions/collectifs/members/controller.tsx'
 import requestCollectifController from './actions/collectifs/request/controller.tsx'
 import controller from './actions/controller.tsx'
 import healthController from './actions/health/controller.ts'
@@ -42,6 +43,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.admin.moderators, adminModeratorsController)
   router.map(routes.admin.responsibles, adminResponsiblesController)
   router.map(routes.collectifs, collectifsController)
+  router.map(routes.collectifs.members, collectifMembersController)
   router.map(routes.collectifs.request, requestCollectifController)
   router.map(routes.collectifs.edit, editCollectifController)
   router.map(routes.health, healthController)

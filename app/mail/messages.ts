@@ -192,3 +192,48 @@ export function itemModeratedMail(input: {
       signature,
   }
 }
+
+/** To one responsible: someone asks to join their collectif (US-0.8.3). */
+export function membershipRequestMail(input: {
+  to: string
+  personName: string
+  collectifName: string
+  membersUrl: string
+}): Mail {
+  return {
+    to: input.to,
+    subject: `Demande pour rejoindre « ${input.collectifName} »`,
+    text:
+      `Bonjour,\n\n${input.personName} demande à rejoindre le collectif « ${input.collectifName} ». ` +
+      `Acceptez ou refusez sa demande dans l’onglet Membres :\n${input.membersUrl}${signature}`,
+  }
+}
+
+/** To the person: a responsible accepted them as a member (US-0.8.4). */
+export function membershipApprovedMail(to: string, collectifName: string, url: string): Mail {
+  return {
+    to,
+    subject: `Bienvenue dans « ${collectifName} »`,
+    text:
+      `Bonjour,\n\nVous êtes maintenant membre du collectif « ${collectifName} » : vous voyez son ` +
+      `matériel, ses lieux et ses membres.\n${url}${signature}`,
+  }
+}
+
+/** To the person: a responsible rejected their request to join (US-0.8.4). */
+export function membershipRejectedMail(to: string, collectifName: string): Mail {
+  return {
+    to,
+    subject: `Demande pour rejoindre « ${collectifName} »`,
+    text: `Bonjour,\n\nVotre demande pour rejoindre le collectif « ${collectifName} » n’a pas été acceptée.${signature}`,
+  }
+}
+
+/** To the person: a responsible removed them from the collectif (US-0.8.4). */
+export function membershipRemovedMail(to: string, collectifName: string): Mail {
+  return {
+    to,
+    subject: `Vous n’êtes plus membre de « ${collectifName} »`,
+    text: `Bonjour,\n\nUn responsable vous a retiré du collectif « ${collectifName} ».${signature}`,
+  }
+}

@@ -22,7 +22,7 @@ export default createController(routes, {
       const actor = context.currentUser
       let dashboard: Dashboard | undefined
       if (isValidatedUser(actor)) {
-        const counts = await countItemsOwnedBy(db, [...actor.managedCollectifIds])
+        const counts = await countItemsOwnedBy(db, [...actor.memberCollectifIds])
         dashboard = {
           collectifs: actor.collectifs.map((c) => ({ ...c, itemCount: counts.get(c.id) ?? 0 })),
           recent: await listRecentItems(db, itemScopeOf(actor), recentItemCount),

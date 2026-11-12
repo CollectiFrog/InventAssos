@@ -37,12 +37,12 @@ valider**, qui mène à la file d'attente.
 
 Chaque collectif garde son inventaire pour lui. Vous voyez un objet quand :
 
-- il appartient à un collectif dont vous êtes responsable ;
+- il appartient à un collectif dont vous êtes responsable ou membre ;
 - il vous appartient, ou appartient à une personne de l'un de vos collectifs ;
 - il est rangé dans l'un de vos lieux, ou dans un lieu de l'un de vos collectifs.
 
 Les autres collectifs n'apparaissent que par leur nom et leur présentation : ni leur matériel, ni
-leurs lieux, ni leurs responsables. La page d'une personne, et son téléphone, ne s'affichent qu'aux
+leurs lieux, ni leurs membres. La page d'une personne, et son téléphone, ne s'affichent qu'aux
 personnes qui partagent un collectif avec elle. Le partage avec d'autres collectifs viendra plus tard.
 
 ## Parcourir l'inventaire
@@ -90,11 +90,27 @@ contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
 
 ## La page d'un collectif
 
-Pour ses responsables, la page d'un collectif a trois onglets : **Matériel** (ce qu'il possède,
-puis ce que d'autres ont déposé dans ses lieux), **Lieux** et **Responsables** (avec son téléphone
-de contact). **Ajouter du matériel**, en haut, ouvre le formulaire avec le collectif comme
-propriétaire. Les autres utilisateurs ne voient que son nom, sa ville, sa présentation et le
-bouton **Demander à devenir responsable**.
+Pour ses responsables et ses membres, la page d'un collectif a trois onglets : **Matériel** (ce qu'il
+possède, puis ce que d'autres ont déposé dans ses lieux), **Lieux** et **Membres** (chacun avec son
+rôle, et le téléphone de contact). Pour ses responsables, **Ajouter du matériel**, en haut, ouvre le
+formulaire avec le collectif comme propriétaire. Les autres utilisateurs ne voient que son nom, sa
+ville, sa présentation et les boutons **Demander à rejoindre** et **Demander à devenir
+responsable**.
+
+## Accueillir les membres d'un collectif
+
+Une personne qui fait partie de votre association choisit **Demander à rejoindre** sur la page du
+collectif. Chaque responsable reçoit un e-mail, et la demande apparaît en tête de l'onglet
+**Membres** (l'onglet indique le nombre de demandes en attente).
+
+- **Accepter** : la personne devient membre ; elle voit le matériel, les lieux et les membres du
+  collectif. Elle est prévenue par e-mail.
+- **Refuser** : la personne est prévenue par e-mail ; elle pourra refaire une demande.
+- **Retirer** un membre, dans la liste : il ne voit plus rien du collectif, aussitôt, et reçoit un
+  e-mail.
+
+Seuls les responsables du collectif décident : ni les administrateurs ni les modérateurs de la
+plateforme. Chaque décision est inscrite au journal.
 
 ## Modifier la présentation d'un collectif
 

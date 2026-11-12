@@ -85,10 +85,13 @@ flowchart TB
   the `Referer` header (sent for same-origin navigation, `Referrer-Policy: same-origin`) when it is
   an internal path, and falls back to the section's list page otherwise; no JavaScript, and it can
   never point off the site.
-- Tabs inside a page (Mon matériel: Matériel, Lieux; collectif: Matériel, Lieux, Responsables,
-  Membres from V0.8) are links to distinct URLs, so they work without JavaScript and can be shared.
+- Tabs inside a page (Mon matériel: Matériel, Lieux; collectif: Matériel, Lieux, Membres) are
+  links to distinct URLs, so they work without JavaScript and can be shared. Membres
+  (`/collectifs/:slug/membres`, which replaced Responsables in V0.8) lists everyone with their
+  role, the pending requests first for its responsibles, and counts them in the tab's label.
 - A collectif page seen from outside (not responsible, not member) shows its name, city and
-  description and the request button only: no tabs, no equipment.
+  description and the request buttons only (« Demander à rejoindre », then « Demander à devenir
+  responsable »): no tabs, no equipment.
 
 ## Journeys
 
