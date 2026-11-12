@@ -28,7 +28,7 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
     return (
       <Layout title="Administration" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
-        <AdminTabs current="requests" />
+        <AdminTabs current="requests" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}
@@ -170,27 +170,32 @@ function plural(count: number, one: string, many: string): string {
   return `${count} ${count > 1 ? many : one} en attente`
 }
 
+/** One account on Administration › Comptes, with what the viewer may do to it. */
+export interface AccountRow {
+  user: User
+  /** Shown instead of a button when the viewer may not act on the account. */
+  role?: 'vous' | 'administrateur' | 'modérateur'
+  canDisable: boolean
+  canEnable: boolean
+}
+
 /** Props of Administration › Comptes. */
 export interface AccountsPageProps {
   viewer: Viewer
   csrfToken: string
-  active: User[]
-  disabled: User[]
-  /** The admin viewing the page: they cannot disable themselves. */
-  selfId: string
-  /** Listed platform admins cannot be disabled from here (permissions.md). */
-  adminEmails: ReadonlySet<string>
+  active: AccountRow[]
+  disabled: AccountRow[]
   notice?: string
 }
 
 /** Administration › Comptes: active accounts to disable, disabled ones to re-enable. */
 export function AccountsPage(handle: Handle<AccountsPageProps>) {
   return () => {
-    const { viewer, csrfToken, active, disabled, selfId, adminEmails, notice } = handle.props
+    const { viewer, csrfToken, active, disabled, notice } = handle.props
     return (
       <Layout title="Comptes" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
-        <AdminTabs current="accounts" />
+        <AdminTabs current="accounts" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}
@@ -202,22 +207,21 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
           supprimer : son matériel reste visible.
         </p>
         <ul class="cards">
-          {active.map((user) => (
+          {active.map(({ user, role, canDisable }) => (
             <li key={user.id} class="card row">
               <span>
                 <strong>{user.name}</strong> · {user.email}
+                {role && canDisable ? <span class="status"> · {role}</span> : null}
               </span>
-              {user.id === selfId ? (
-                <span class="status">vous</span>
-              ) : adminEmails.has(user.email) ? (
-                <span class="status">administrateur</span>
-              ) : (
+              {canDisable ? (
                 <form method="post" action={routes.admin.disableAccount.href({ userId: user.id })}>
                   <CsrfField token={csrfToken} />
                   <button type="submit" class="danger">
                     Désactiver
                   </button>
                 </form>
+              ) : (
+                <span class="status">{role ?? ''}</span>
               )}
             </li>
           ))}
@@ -232,15 +236,22 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
               lien de connexion.
             </p>
             <ul class="cards">
-              {disabled.map((user) => (
+              {disabled.map(({ user, role, canEnable }) => (
                 <li key={user.id} class="card row">
                   <span>
                     <strong>{user.name}</strong> · {user.email}
                   </span>
-                  <form method="post" action={routes.admin.enableAccount.href({ userId: user.id })}>
-                    <CsrfField token={csrfToken} />
-                    <button type="submit">Réactiver</button>
-                  </form>
+                  {canEnable ? (
+                    <form
+                      method="post"
+                      action={routes.admin.enableAccount.href({ userId: user.id })}
+                    >
+                      <CsrfField token={csrfToken} />
+                      <button type="submit">Réactiver</button>
+                    </form>
+                  ) : (
+                    <span class="status">{role ?? ''}</span>
+                  )}
                 </li>
               ))}
             </ul>

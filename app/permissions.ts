@@ -11,14 +11,27 @@ export function isActiveAdmin(actor: Actor): actor is CurrentUser {
   return actor !== null && actor.status === 'active' && actor.isAdmin
 }
 
+/** An active moderator (US-0.8.1); a listed admin is never treated as one. */
+export function isActiveModerator(actor: Actor): boolean {
+  return isValidatedUser(actor) && actor.isModerator && !actor.isAdmin
+}
+
+/**
+ * Platform staff: an active admin or moderator, who run the approval queue (ADR 0020). Not a type
+ * guard: a false answer says nothing about whether someone is signed in.
+ */
+export function isActiveStaff(actor: Actor): boolean {
+  return isActiveAdmin(actor) || isActiveModerator(actor)
+}
+
 /** A validated (active) user, admin or not. */
 export function isValidatedUser(actor: Actor): actor is CurrentUser {
   return actor !== null && actor.status === 'active'
 }
 
-/** "Approve or reject an account": platform admin only. */
+/** "Approve or reject an account": admin or moderator. */
 export function canReviewAccounts(actor: Actor): boolean {
-  return isActiveAdmin(actor)
+  return isActiveStaff(actor)
 }
 
 /** "Manage own profile" (UC05): any validated user, for their own account only. */
@@ -26,19 +39,35 @@ export function canEditOwnProfile(actor: Actor): boolean {
   return isValidatedUser(actor)
 }
 
-/**
- * "Disable an account": platform admin only; never their own account, nor another listed admin
- * (one admin must not lock the others out; they leave PLATFORM_ADMIN_EMAILS instead).
- */
-export function canDisableAccount(
-  actor: Actor,
-  target: { id: string; isListedAdmin: boolean },
-): boolean {
-  return isActiveAdmin(actor) && actor.id !== target.id && !target.isListedAdmin
+/** An account as the account rules see it: who it is and which platform role it holds. */
+export interface AccountTarget {
+  id: string
+  isListedAdmin: boolean
+  isModerator: boolean
 }
 
-/** "Re-enable a disabled account": platform admin only (US-0.6.5). */
-export function canEnableAccount(actor: Actor): boolean {
+/** A moderator never acts on an admin or another moderator (US-0.8.2); an admin may. */
+function staffMayActOn(actor: Actor, target: AccountTarget): boolean {
+  if (target.isListedAdmin) return false
+  return isActiveAdmin(actor) || !target.isModerator
+}
+
+/**
+ * "Disable an account": admin or moderator; never their own account, nor a listed admin (one admin
+ * must not lock the others out; they leave PLATFORM_ADMIN_EMAILS instead), nor, for a moderator,
+ * another moderator.
+ */
+export function canDisableAccount(actor: Actor, target: AccountTarget): boolean {
+  return isActiveStaff(actor) && actor?.id !== target.id && staffMayActOn(actor, target)
+}
+
+/** "Re-enable a disabled account": admin, or moderator if not a moderator's (US-0.6.5, US-0.8.2). */
+export function canEnableAccount(actor: Actor, target: AccountTarget): boolean {
+  return isActiveStaff(actor) && staffMayActOn(actor, target)
+}
+
+/** "Name or remove a moderator": admin only, among other validated accounts (US-0.8.1). */
+export function canNameModerators(actor: Actor): boolean {
   return isActiveAdmin(actor)
 }
 
@@ -47,14 +76,14 @@ export function canRequestCollectif(actor: Actor): boolean {
   return isValidatedUser(actor)
 }
 
-/** "Add, rename, reorder, delete an unused category": platform admin (moderators from V0.8). */
+/** "Add, rename, reorder, delete an unused category": admin or moderator. */
 export function canManageCategories(actor: Actor): boolean {
-  return isActiveAdmin(actor)
+  return isActiveStaff(actor)
 }
 
-/** "Approve or reject a collectif": platform admin only. */
+/** "Approve or reject a collectif": admin or moderator. */
 export function canReviewCollectifs(actor: Actor): boolean {
-  return isActiveAdmin(actor)
+  return isActiveStaff(actor)
 }
 
 /** "Request to become responsible of C": a validated user who is not already responsible of C. */
@@ -62,9 +91,9 @@ export function canRequestResponsibility(actor: Actor, collectifId: string): boo
   return isValidatedUser(actor) && !actor.managedCollectifIds.has(collectifId)
 }
 
-/** "Approve, reject or remove a responsible of C": platform admin only. */
+/** "Approve, reject or remove a responsible of C": admin or moderator. */
 export function canManageResponsibles(actor: Actor): boolean {
-  return isActiveAdmin(actor)
+  return isActiveStaff(actor)
 }
 
 /** "Edit C's profile": platform admin, or an active responsible of C. */
@@ -170,6 +199,14 @@ export function canChangeItem(actor: Actor, item: ItemAccess & { archived_at: un
   return item.archived_at == null && canEditItem(actor, item)
 }
 
+/**
+ * "Archive an abusive item" (US-0.8.2): admin or moderator, on any item still in the inventory.
+ * The owner is e-mailed the reason.
+ */
+export function canModerateItem(actor: Actor, item: { archived_at: unknown }): boolean {
+  return isActiveStaff(actor) && item.archived_at == null
+}
+
 /** True when the actor belongs to one of these collectifs (responsible; member from V0.8). */
 function sharesCollectif(actor: CurrentUser, collectifIds: readonly string[]): boolean {
   return collectifIds.some((id) => actor.managedCollectifIds.has(id))
@@ -182,12 +219,12 @@ export interface ItemVisibility extends ItemAccess {
 }
 
 /**
- * "See an item, its owner, the city of its location" (ADR 0021): admin; owned by C or by a person
+ * "See an item, its owner, the city of its location" (ADR 0021): admin or moderator; owned by C or by a person
  * of C, or stored in C's location; owner, or stored in own location. `itemScopeOf` mirrors it in SQL.
  */
 export function canSeeItem(actor: Actor, item: ItemVisibility): boolean {
   if (!isValidatedUser(actor)) return false
-  if (actor.isAdmin || item.owner_user_id === actor.id) return true
+  if (isActiveStaff(actor) || item.owner_user_id === actor.id) return true
   if (item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id)) {
     return true
   }
@@ -200,30 +237,32 @@ export function canSeeItem(actor: Actor, item: ItemVisibility): boolean {
 
 /** The listings' side of `canSeeItem`: every query that lists items filters with this scope. */
 export function itemScopeOf(actor: CurrentUser): ItemScope {
-  if (actor.isAdmin) return { everything: true }
+  if (isActiveStaff(actor)) return { everything: true }
   return { everything: false, userId: actor.id, collectifIds: [...actor.managedCollectifIds] }
 }
 
-/** "See a person's page and phone": admin, the person, or someone sharing a collectif (ADR 0021). */
+/** "See a person's page and phone": staff, the person, or someone sharing a collectif (ADR 0021). */
 export function canSeePerson(
   actor: Actor,
   person: { id: string; collectifIds: readonly string[] },
 ): boolean {
   if (!isValidatedUser(actor)) return false
-  return actor.isAdmin || actor.id === person.id || sharesCollectif(actor, person.collectifIds)
+  return (
+    isActiveStaff(actor) || actor.id === person.id || sharesCollectif(actor, person.collectifIds)
+  )
 }
 
 /**
- * "See C's equipment, locations and responsibles": admin, or a person of C. Everybody else sees
+ * "See C's equipment, locations and responsibles": admin or moderator, or a person of C. Everybody else sees
  * the directory entry only: name, city and description (ADR 0021).
  */
 export function canSeeCollectifInventory(actor: Actor, collectifId: string): boolean {
   if (!isValidatedUser(actor)) return false
-  return actor.isAdmin || actor.managedCollectifIds.has(collectifId)
+  return isActiveStaff(actor) || actor.managedCollectifIds.has(collectifId)
 }
 
 /**
- * "See a location (name, city)": admin, its managers, or whoever sees an item stored there, since
+ * "See a location (name, city)": admin or moderator, its managers, or whoever sees an item stored there, since
  * the item page links to it (ADR 0021).
  */
 export function canSeeLocation(
@@ -232,5 +271,5 @@ export function canSeeLocation(
   seesAnItemThere: boolean,
 ): boolean {
   if (!isValidatedUser(actor)) return false
-  return isActiveAdmin(actor) || canManageLocation(actor, location) || seesAnItemThere
+  return isActiveStaff(actor) || canManageLocation(actor, location) || seesAnItemThere
 }

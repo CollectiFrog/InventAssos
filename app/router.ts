@@ -5,6 +5,7 @@ import profileController from './actions/account/profile/controller.tsx'
 import adminCategoriesController from './actions/admin/categories/controller.tsx'
 import adminCollectifsController from './actions/admin/collectifs/controller.tsx'
 import adminController from './actions/admin/controller.tsx'
+import adminModeratorsController from './actions/admin/moderators/controller.tsx'
 import adminResponsiblesController from './actions/admin/responsibles/controller.tsx'
 import collectifsController from './actions/collectifs/controller.tsx'
 import editCollectifController from './actions/collectifs/edit/controller.tsx'
@@ -38,6 +39,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.admin, adminController)
   router.map(routes.admin.categories, adminCategoriesController)
   router.map(routes.admin.collectifs, adminCollectifsController)
+  router.map(routes.admin.moderators, adminModeratorsController)
   router.map(routes.admin.responsibles, adminResponsiblesController)
   router.map(routes.collectifs, collectifsController)
   router.map(routes.collectifs.request, requestCollectifController)

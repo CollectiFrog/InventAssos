@@ -24,8 +24,9 @@ export function StatusPage(handle: Handle<StatusPageProps>) {
               <strong>Votre demande est en cours d’examen.</strong>
             </p>
             <p>
-              Un administrateur de la plateforme va la valider. Vous recevrez un e-mail dès que
-              votre compte sera ouvert ; en attendant, l’inventaire n’est pas accessible.
+              La plateforme (un administrateur ou un modérateur) va la valider. Vous recevrez un
+              e-mail dès que votre compte sera ouvert ; en attendant, l’inventaire n’est pas
+              accessible.
             </p>
           </div>
         ) : (

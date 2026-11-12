@@ -17,12 +17,20 @@ import { findCollectifById } from './data/collectifs.ts'
 import { archiveItem, findItemById } from './data/items.ts'
 import { findLocationById } from './data/locations.ts'
 import { findResponsible, setResponsible } from './data/responsibles.ts'
-import { createUser, findUserById, setUserStatus } from './data/users.ts'
+import { createUser, findUserById, setUserRole, setUserStatus } from './data/users.ts'
 import { routes } from './routes.ts'
 
-type Actor = 'admin' | 'responsibleOfC' | 'responsibleOfD' | 'validated' | 'pending' | 'visitor'
+type Actor =
+  | 'admin'
+  | 'moderator'
+  | 'responsibleOfC'
+  | 'responsibleOfD'
+  | 'validated'
+  | 'pending'
+  | 'visitor'
 const actors: Actor[] = [
   'admin',
+  'moderator',
   'responsibleOfC',
   'responsibleOfD',
   'validated',
@@ -32,6 +40,7 @@ const actors: Actor[] = [
 
 const emails: Record<Exclude<Actor, 'visitor'>, string> = {
   admin: 'admin@example.org',
+  moderator: 'mona@example.org',
   responsibleOfC: 'rita@example.org',
   responsibleOfD: 'otto@example.org',
   validated: 'val@example.org',
@@ -52,6 +61,14 @@ async function seed(db: Database) {
   const coAdmin = await createActiveUser(db, 'Ada', coAdminEmail)
   const gone = await createActiveUser(db, 'Gus', 'gus@example.org')
   await setUserStatus(db, gone.id, 'disabled')
+  // Moderators (US-0.8.1): Mona acts; Max is active and Gil disabled, both out of her reach.
+  const mona = await createActiveUser(db, 'Mona', emails.moderator)
+  await setUserRole(db, mona.id, 'moderator')
+  const max = await createActiveUser(db, 'Max', 'max@example.org')
+  await setUserRole(db, max.id, 'moderator')
+  const gil = await createActiveUser(db, 'Gil', 'gil@example.org')
+  await setUserRole(db, gil.id, 'moderator')
+  await setUserStatus(db, gil.id, 'disabled')
   const c = await createActiveCollectif(db, 'Collectif C', rita.id)
   await createActiveCollectif(db, 'Collectif D', otto.id)
   const pendingCollectif = await createPendingCollectif(db, 'Collectif E', zed.id)
@@ -105,6 +122,8 @@ async function seed(db: Database) {
     name: 'Scie de Val',
   })
   return {
+    max,
+    gil,
     cora,
     coraItem,
     coraHome,
@@ -148,38 +167,38 @@ interface Rule {
 const rules: Rule[] = [
   {
     row: 'Approve or reject an account',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c, w) => c.post(routes.admin.approveAccount.href({ userId: w.target.id })),
     happened: async (db, w) => (await findUserById(db, w.target.id))?.status === 'active',
   },
   {
     row: 'Add, rename, reorder, delete an unused category (add)',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c) => c.post(routes.admin.categories.create.href(), { name: 'Instruments' }),
     happened: async (db) => (await findCategory(db, 'instruments')) !== null,
   },
   {
     row: 'Add, rename, reorder, delete an unused category (rename)',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c) =>
       c.post(routes.admin.categories.rename.href({ categoryId: 'video' }), { name: 'Image' }),
     happened: async (db) => (await findCategory(db, 'video'))?.name === 'Image',
   },
   {
     row: 'Add, rename, reorder, delete an unused category (reorder)',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c) => c.post(routes.admin.categories.up.href({ categoryId: 'lighting' })),
     happened: async (db) => (await listCategories(db))[0]?.id === 'lighting',
   },
   {
     row: 'Add, rename, reorder, delete an unused category (delete)',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c) => c.post(routes.admin.categories.remove.href({ categoryId: 'video' })),
     happened: async (db) => (await findCategory(db, 'video')) === null,
   },
   {
     row: 'Disable an account',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c, w) => c.post(routes.admin.disableAccount.href({ userId: w.zed.id })),
     happened: async (db, w) => (await findUserById(db, w.zed.id))?.status === 'disabled',
   },
@@ -192,13 +211,38 @@ const rules: Rule[] = [
   },
   {
     row: 'Re-enable a disabled account',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c, w) => c.post(routes.admin.enableAccount.href({ userId: w.gone.id })),
     happened: async (db, w) => (await findUserById(db, w.gone.id))?.status === 'active',
   },
   {
+    // A moderator never acts on another moderator (US-0.8.2); an admin may.
+    row: 'Disable an account (another moderator)',
+    allowed: ['admin'],
+    act: (c, w) => c.post(routes.admin.disableAccount.href({ userId: w.max.id })),
+    happened: async (db, w) => (await findUserById(db, w.max.id))?.status === 'disabled',
+  },
+  {
+    row: 'Re-enable a disabled account (a moderator)',
+    allowed: ['admin'],
+    act: (c, w) => c.post(routes.admin.enableAccount.href({ userId: w.gil.id })),
+    happened: async (db, w) => (await findUserById(db, w.gil.id))?.status === 'active',
+  },
+  {
+    row: 'Name or remove a moderator (name)',
+    allowed: ['admin'],
+    act: (c) => c.post(routes.admin.moderators.name.href(), { email: emails.validated }),
+    happened: async (db, w) => (await findUserById(db, w.val.id))?.role === 'moderator',
+  },
+  {
+    row: 'Name or remove a moderator (remove)',
+    allowed: ['admin'],
+    act: (c, w) => c.post(routes.admin.moderators.remove.href({ userId: w.max.id })),
+    happened: async (db, w) => (await findUserById(db, w.max.id))?.role === 'member',
+  },
+  {
     row: 'Edit own profile (name, phone)',
-    allowed: ['admin', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
     act: (c) => c.post(routes.account.profile.action.href(), { name: 'Renommé', phone: '' }),
     happened: async (db) => {
       const rows = await db.exec(sql`select 1 from users where name = 'Renommé'`)
@@ -207,7 +251,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Request a new collectif',
-    allowed: ['admin', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
     act: (c) =>
       c.post(routes.collectifs.request.action.href(), { name: 'Collectif F', city: 'Vitré' }),
     happened: async (db) => {
@@ -217,7 +261,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Approve or reject a collectif',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c, w) =>
       c.post(routes.admin.collectifs.approve.href({ collectifId: w.pendingCollectif.id })),
     happened: async (db, w) =>
@@ -226,7 +270,7 @@ const rules: Rule[] = [
   {
     // "—" for admins and responsibles of C in the table: an admin may ask, a responsible of C need not.
     row: 'Request to become responsible of C',
-    allowed: ['admin', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfD', 'validated'],
     act: (c, w) => c.post(routes.collectifs.requestResponsibility.href({ slug: w.c.slug })),
     happened: async (db) => {
       const rows = await db.exec(sql`
@@ -238,7 +282,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Approve, reject or remove a responsible of C',
-    allowed: ['admin'],
+    allowed: ['admin', 'moderator'],
     act: (c, w) =>
       c.post(routes.admin.responsibles.approve.href({ collectifId: w.c.id, userId: w.zed.id })),
     happened: async (db, w) => (await findResponsible(db, w.zed.id, w.c.id))?.status === 'active',
@@ -285,7 +329,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Create, edit, delete own personal locations',
-    allowed: ['admin', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
     act: (c) =>
       c.post(routes.locations.create.action.href(), {
         owner: 'me',
@@ -381,6 +425,17 @@ const rules: Rule[] = [
     happened: async (db, w) => (await findItemById(db, w.item.id))?.archived_at != null,
   },
   {
+    // US-0.8.2: the owner is e-mailed the message; managers archive with their own reasons.
+    row: 'Archive an abusive item',
+    allowed: ['admin', 'moderator'],
+    act: (c, w) =>
+      c.post(routes.items.archive.action.href({ itemId: w.item.id }), {
+        reason: 'moderated',
+        message: 'Annonce abusive.',
+      }),
+    happened: async (db, w) => (await findItemById(db, w.item.id))?.archive_reason === 'moderated',
+  },
+  {
     // US-0.5.5: an archived item has left the inventory; nobody changes it any more (review F6).
     row: 'Edit, move or archive an archived item (edit)',
     allowed: [],
@@ -441,56 +496,56 @@ const rules: Rule[] = [
   },
   {
     row: 'See an item, its owner, the city of its location',
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.item.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Projecteur C/.test(response.text) && /Rennes/.test(response.text),
   },
   {
     row: 'See an item, its owner, the city of its location (owned by a person of C)',
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.coraItem.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Perceuse de Cora/.test(response.text),
   },
   {
     row: 'See an item, its owner, the city of its location (own item)',
-    allowed: ['admin', 'validated'],
+    allowed: ['admin', 'moderator', 'validated'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.valOwn.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Scie de Val/.test(response.text),
   },
   {
     row: "See an item, its owner, the city of its location (C's item in own location)",
-    allowed: ['admin', 'responsibleOfC', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'validated'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.cAtVal.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Pied de C/.test(response.text),
   },
   {
     row: "See a person's page and phone",
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
     act: (c, w) => c.get(routes.people.show.href({ userId: w.cora.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /<h1>Cora<\/h1>/.test(response.text),
   },
   {
     row: "See a person's page and phone (own page)",
-    allowed: ['admin', 'validated'],
+    allowed: ['admin', 'moderator', 'validated'],
     act: (c, w) => c.get(routes.people.show.href({ userId: w.val.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /<h1>Val<\/h1>/.test(response.text),
   },
   {
     row: 'See the collectifs directory (name, city, text)',
-    allowed: ['admin', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
     act: (c) => c.get(routes.collectifs.index.href()),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Collectif C/.test(response.text),
   },
   {
     row: "See C's equipment, locations and people",
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
     denial: 'hidden',
     // The three tabs of C's page together (US-0.7.5).
     act: async (c, w) => {
@@ -511,13 +566,13 @@ const rules: Rule[] = [
   {
     // Val sees C's local: her amp is stored there, and its page links to the place.
     row: 'See a location (name, city)',
-    allowed: ['admin', 'responsibleOfC', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'validated'],
     act: (c, w) => c.get(routes.locations.show.href({ locationId: w.local.id })),
     happened: async (_db, _w, response) => response.status === 200 && /Local C/.test(response.text),
   },
   {
     row: "See a location (name, city) (someone else's home)",
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
     act: (c, w) => c.get(routes.locations.show.href({ locationId: w.coraHome.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Chez Cora/.test(response.text),

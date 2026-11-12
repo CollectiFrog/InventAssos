@@ -4,25 +4,44 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../../data/audit-log.ts'
-import { archiveItem, findItemDetails, type ItemDetails } from '../../../data/items.ts'
-import { archiveReasons } from '../../../data/tables.ts'
-import { canChangeItem, canSeeItem } from '../../../permissions.ts'
+import {
+  archiveItem,
+  findItemDetails,
+  type ItemDetails,
+  listOwnerContactEmails,
+} from '../../../data/items.ts'
+import { type ArchiveReason, archiveReasons, ownerArchiveReasons } from '../../../data/tables.ts'
+import { sendSafely } from '../../../mail/mailer.ts'
+import { itemModeratedMail } from '../../../mail/messages.ts'
+import type { AppContext } from '../../../middleware/index.ts'
+import { canChangeItem, canModerateItem, canSeeItem } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
-import { CsrfField, SelectField } from '../../../ui/form.tsx'
+import { CsrfField, type FieldErrors, SelectField, TextArea } from '../../../ui/form.tsx'
 import { archiveReasonLabels } from '../../../ui/labels.ts'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
 import { formValue } from '../../../validation.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 
-const reasonOptions = archiveReasons.map((value) => ({ value, label: archiveReasonLabels[value] }))
+/** Longest message a moderator sends the owner. */
+const maxMessage = 1000
 
-/** Confirm the archive with a reason (US-0.5.5). */
-function ArchiveItemPage(
-  handle: Handle<{ viewer: Viewer; csrfToken: string; item: ItemDetails; error?: string }>,
-) {
+interface ArchivePageProps {
+  viewer: Viewer
+  csrfToken: string
+  item: ItemDetails
+  /** The reasons this person may give: the owner's, the moderation's, or both. */
+  reasons: readonly ArchiveReason[]
+  values: Record<string, string>
+  errors: FieldErrors
+}
+
+/** Confirm the archive with a reason (US-0.5.5), or as a moderation with a message (US-0.8.2). */
+function ArchiveItemPage(handle: Handle<ArchivePageProps>) {
   return () => {
-    const { viewer, csrfToken, item, error } = handle.props
+    const { viewer, csrfToken, item, reasons, values, errors } = handle.props
+    const moderates = reasons.includes('moderated')
+    const onlyModerates = moderates && reasons.length === 1
     return (
       <Layout title={`Archiver ${item.name}`} viewer={viewer}>
         <h1>Archiver « {item.name} »</h1>
@@ -39,10 +58,26 @@ function ArchiveItemPage(
           <SelectField
             name="reason"
             label="Raison"
-            options={reasonOptions}
-            error={error}
+            options={reasons.map((value) => ({ value, label: archiveReasonLabels[value] }))}
+            value={values.reason ?? (onlyModerates ? 'moderated' : undefined)}
+            error={errors.reason}
             required
           />
+          {moderates ? (
+            <TextArea
+              name="message"
+              label="Message au propriétaire"
+              value={values.message}
+              error={errors.message}
+              required={onlyModerates}
+              maxLength={maxMessage}
+              hint={
+                onlyModerates
+                  ? 'Envoyé par e-mail au propriétaire : expliquez pourquoi le matériel est retiré.'
+                  : 'Obligatoire pour « Retiré par la modération » : envoyé par e-mail au propriétaire.'
+              }
+            />
+          ) : null}
           <button type="submit" class="danger">
             Archiver
           </button>
@@ -55,40 +90,77 @@ function ArchiveItemPage(
   }
 }
 
-/** Archive a sold, lost or broken item: same permission as editing it. */
+/** The reasons the actor may give for this item; empty when they may not archive it. */
+function reasonsFor(
+  actor: Parameters<typeof canChangeItem>[0],
+  item: ItemDetails,
+): ArchiveReason[] {
+  return [
+    ...(canChangeItem(actor, item) ? ownerArchiveReasons : []),
+    ...(canModerateItem(actor, item) ? (['moderated'] as const) : []),
+  ]
+}
+
+/** Loads the item the actor may archive, or the answer to send instead. */
+async function loadItem(context: AppContext, itemId: string) {
+  const actor = requireUser(context)
+  if (actor instanceof Response) return actor
+  const item = await findItemDetails(context.db, itemId)
+  if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
+  const reasons = reasonsFor(actor, item)
+  if (reasons.length === 0) return forbidden(context)
+  return { actor, item, reasons }
+}
+
+/**
+ * Archive a sold, lost or broken item: same permission as editing it. Admins and moderators may
+ * also archive an abusive item, whose owner is e-mailed their message (US-0.8.2).
+ */
 export default createController(routes.items.archive, {
   actions: {
     async index(context) {
-      const actor = requireUser(context)
-      if (actor instanceof Response) return actor
-      const item = await findItemDetails(context.db, context.params.itemId)
-      if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
-      if (!canChangeItem(actor, item)) return forbidden(context)
+      const loaded = await loadItem(context, context.params.itemId)
+      if (loaded instanceof Response) return loaded
       return context.render(
         <ArchiveItemPage
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
-          item={item}
+          item={loaded.item}
+          reasons={loaded.reasons}
+          values={{}}
+          errors={{}}
         />,
       )
     },
 
     async action(context) {
-      const actor = requireUser(context)
-      if (actor instanceof Response) return actor
-      const { db, formData, session } = context
-      const item = await findItemDetails(db, context.params.itemId)
-      if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
-      if (!canChangeItem(actor, item)) return forbidden(context)
+      const loaded = await loadItem(context, context.params.itemId)
+      if (loaded instanceof Response) return loaded
+      const { actor, item, reasons } = loaded
+      const { db, formData, mailer, session, settings } = context
 
-      const reason = archiveReasons.find((value) => value === formValue(formData, 'reason'))
-      if (reason === undefined) {
+      const chosen = formValue(formData, 'reason')
+      // A real reason this person may not give is a refusal, not a form error.
+      if (archiveReasons.some((value) => value === chosen) && !reasons.some((r) => r === chosen)) {
+        return forbidden(context)
+      }
+      const reason = reasons.find((value) => value === chosen)
+      const message = formValue(formData, 'message').trim()
+      const errors: FieldErrors = {}
+      if (reason === undefined) errors.reason = 'Choisissez une raison.'
+      if (reason === 'moderated' && message === '') {
+        errors.message = 'Expliquez au propriétaire pourquoi le matériel est retiré.'
+      }
+      if (message.length > maxMessage) errors.message = `${maxMessage} caractères au plus.`
+      if (reason === undefined || Object.keys(errors).length > 0) {
         return context.render(
           <ArchiveItemPage
             viewer={viewerOf(context)}
             csrfToken={getCsrfToken(context)}
             item={item}
-            error="Choisissez une raison."
+            reasons={reasons}
+            values={{ reason: chosen, message }}
+            errors={errors}
           />,
           { status: 400 },
         )
@@ -96,6 +168,7 @@ export default createController(routes.items.archive, {
 
       await db.transaction(async (tx) => {
         await archiveItem(tx, item.id, reason)
+        // The message is free text: it is e-mailed, never stored nor logged (ADR 0010).
         await logAction(tx, {
           actorId: actor.id,
           action: 'item.archived',
@@ -104,6 +177,20 @@ export default createController(routes.items.archive, {
           payload: { reason },
         })
       })
+      if (reason === 'moderated') {
+        // One e-mail per responsible: co-responsibles never see each other's address.
+        for (const to of await listOwnerContactEmails(db, item)) {
+          await sendSafely(
+            mailer,
+            itemModeratedMail({
+              to,
+              itemName: item.name,
+              itemUrl: settings.appUrl + routes.items.show.href({ itemId: item.id }),
+              message,
+            }),
+          )
+        }
+      }
       session.flash('notice', `« ${item.name} » archivé.`)
       return redirect(routes.items.show.href({ itemId: item.id }), 303)
     },

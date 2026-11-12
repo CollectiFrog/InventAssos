@@ -30,7 +30,7 @@ export function CategoriesPage(handle: Handle<CategoriesPageProps>) {
     return (
       <Layout title="Catégories" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
-        <AdminTabs current="categories" />
+        <AdminTabs current="categories" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}

@@ -1,22 +1,25 @@
 ---
 title: Administration
-description: Valider les comptes et gérer la plateforme (administrateurs).
+description: Valider les comptes et gérer la plateforme (administrateurs et modérateurs).
 sidebar:
   order: 3
 ---
 
 Les administrateurs de la plateforme sont les adresses e-mail listées par l'hébergeur dans la
 configuration (`PLATFORM_ADMIN_EMAILS`). À la première connexion, leur compte est créé et validé
-automatiquement. Un lien **Administration** apparaît en bas de la colonne de gauche sur un
+automatiquement. Les **modérateurs** sont nommés par un administrateur dans l'application (voir
+[Nommer des modérateurs](#nommer-des-modérateurs)). Un lien **Administration** apparaît en bas de la colonne de gauche sur un
 ordinateur, en haut de la page sur un téléphone. La liste est lue au démarrage de l'application : un ajout ou un retrait
 prend effet après son redémarrage.
 
 ## La file d'attente
 
-**Administration** a quatre onglets : **Demandes**, **Comptes**, **Collectifs** et **Catégories**.
+**Administration** a cinq onglets : **Demandes**, **Comptes**, **Collectifs**, **Modérateurs**
+(administrateurs seulement) et **Catégories**.
 **Demandes** (`/admin`) rassemble toutes les demandes en attente : comptes, collectifs et
 responsables, avec leur nombre en haut de la page. Chaque nouvelle demande vous est aussi signalée
-par e-mail, avec un lien vers cette page ; l'accueil en affiche aussi le nombre.
+par e-mail, avec un lien vers cette page, aux administrateurs comme aux modérateurs ; l'accueil en
+affiche aussi le nombre.
 
 **Collectifs** liste les collectifs validés, avec leur ville, leur nombre de responsables et
 d'objets ; un nom mène à l'onglet **Responsables** du collectif.
@@ -61,7 +64,8 @@ L'onglet **Comptes** d'**Administration** liste les comptes actifs. **Désactive
 l'accès de la personne : elle est déconnectée partout et ne peut plus recevoir de lien de connexion.
 Rien n'est supprimé, et son matériel reste visible. Vous ne pouvez pas désactiver votre propre compte,
 ni celui d'un autre administrateur de la plateforme (marqué « administrateur ») : pour retirer ses
-droits, l'hébergeur le retire de `PLATFORM_ADMIN_EMAILS`.
+droits, l'hébergeur le retire de `PLATFORM_ADMIN_EMAILS`. Un modérateur ne peut pas non plus
+désactiver ni réactiver le compte d'un autre modérateur (marqué « modérateur »).
 
 ## Réactiver un compte
 
@@ -83,3 +87,27 @@ dans le formulaire d'ajout et dans les filtres de recherche. Chaque changement s
   historique indique le changement.
 
 Chaque changement est inscrit au journal, sans le nom de la catégorie.
+
+## Nommer des modérateurs
+
+Les modérateurs partagent le travail des administrateurs. Ils traitent les demandes (comptes,
+collectifs, responsables), désactivent ou réactivent des comptes, gèrent les catégories et retirent
+du matériel abusif. Comme les administrateurs, ils voient le matériel de tous les collectifs, mais
+pas l'adresse exacte des lieux. Ils ne peuvent agir ni sur un administrateur ni sur un autre
+modérateur, et ne nomment personne.
+
+**Administration**, onglet **Modérateurs** (administrateurs seulement) :
+
+- **Nommer modérateur** : indiquez l'adresse e-mail d'un compte validé. La personne garde son
+  matériel et ses collectifs ; le lien **Administration** apparaît à sa prochaine page.
+- **Retirer** : la personne redevient un utilisateur ordinaire, aussitôt.
+
+Chaque nomination et chaque retrait sont inscrits au journal.
+
+## Retirer du matériel abusif
+
+Sur la page d'un objet, un modérateur trouve **Retirer (modération)** ; un administrateur choisit
+**Archiver** puis la raison **Retiré par la modération**. Écrivez au propriétaire pourquoi le
+matériel est retiré : ce message lui est envoyé par e-mail (aux responsables du collectif s'il
+appartient à un collectif) et n'est pas conservé. L'objet est archivé, pas supprimé : sa page et son
+historique restent visibles de ceux qui le gèrent.

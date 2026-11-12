@@ -13,6 +13,8 @@ export interface ItemPageProps {
   item: ItemDetails
   /** Whether the viewer may edit, move and archive the item (`canEditItem`). */
   canEdit?: boolean
+  /** Whether the viewer may archive it as abusive (`canModerateItem`, US-0.8.2). */
+  canModerate?: boolean
   /** Contact section (US-0.6.3); absent on the viewer's own items. */
   contact?: { csrfToken: string; sent?: boolean; error?: string }
   /** History section (US-0.5.6). */
@@ -47,7 +49,7 @@ function OwnerLink(handle: Handle<{ item: ItemDetails }>) {
  */
 export function ItemPage(handle: Handle<ItemPageProps>) {
   return () => {
-    const { viewer, item, canEdit, contact, history, notice, back } = handle.props
+    const { viewer, item, canEdit, canModerate, contact, history, notice, back } = handle.props
     // An item has no section of its own: the trail follows its owning collectif, else Rechercher.
     const trail = item.ownerSlug
       ? [
@@ -223,6 +225,17 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                     href={routes.items.archive.index.href({ itemId: item.id })}
                   >
                     Archiver
+                  </a>
+                </p>
+              </div>
+            ) : canModerate && !item.archived_at ? (
+              <div class="card">
+                <p class="actions">
+                  <a
+                    class="button secondary"
+                    href={routes.items.archive.index.href({ itemId: item.id })}
+                  >
+                    Retirer (modération)
                   </a>
                 </p>
               </div>

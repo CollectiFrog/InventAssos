@@ -2,6 +2,7 @@
 import type { Database } from 'remix/data-table'
 
 import { hitRateLimit, type RateLimit, type RateLimitResult } from './data/rate-limits.ts'
+import { listActiveModeratorEmails } from './data/users.ts'
 import { type Mail, type Mailer, sendSafely } from './mail/mailer.ts'
 import type { AppSettings } from './middleware/services.ts'
 
@@ -71,10 +72,13 @@ export function hitContact(
   return hitRateLimit(db, `contact:${userId}`, limits(settings).contactsPerUser)
 }
 
-/** Kinds of request the admins are told about. */
+/** Kinds of request the admins and moderators are told about. */
 export type AdminNotice = 'account' | 'collectif' | 'responsible'
 
-/** E-mails the admins about a new request, unless they were told about this kind recently. */
+/**
+ * E-mails the admins and the active moderators about a new request (US-0.8.2), unless they were
+ * told about this kind recently.
+ */
 export async function notifyAdmins(
   db: Database,
   mailer: Mailer,
@@ -82,7 +86,7 @@ export async function notifyAdmins(
   kind: AdminNotice,
   mail: (admins: string[]) => Mail,
 ): Promise<void> {
-  const admins = [...settings.adminEmails]
+  const admins = [...new Set([...settings.adminEmails, ...(await listActiveModeratorEmails(db))])]
   if (admins.length === 0) return
   const { allowed } = await hitRateLimit(db, `admins:${kind}`, limits(settings).adminNotifications)
   if (allowed) await sendSafely(mailer, mail(admins))
