@@ -346,6 +346,9 @@ These stories complement the [GDPR checklist](../gdpr-checklist/).
 | US-0.2.2  | Link and session duration?                       | link 15 min, single use; session 30 days                                     |
 | US-0.5.5  | Archive only, or also hard delete?               | decided: archive until V0.7; final deletion from V0.8 (US-0.8.9, US-0.8.10)  |
 | US-0.10.1 | One file per location, or a location column?     | optional location column; otherwise the chosen location                      |
+| US-0.10.1 | CSV and Excel, or CSV first?                     | decided: CSV first ([ADR 0026](../../adr/0026-csv-import-export/))           |
+| US-0.10.1 | Who imports for a collectif?                     | decided: its responsibles for now; members maybe later                       |
+| US-0.10.2 | What is a duplicate row?                         | decided: by reference; same name only warns (ADR 0026)                       |
 | US-0.8.5  | Can a member delete an item, or only archive it? | decided: a member archives, and asks a responsible to delete (US-0.8.10)     |
 | US-0.7.11 | Do admins and moderators see every inventory?    | decided: yes, both ([ADR 0025](../../adr/0025-staff-see-every-inventory/))   |
 | US-0.8.3  | Could responsibles approve new accounts alone?   | later, maybe: admins and moderators approve accounts for now                 |

@@ -19,7 +19,6 @@ import { sendSafely } from '../../mail/mailer.ts'
 import { accountApprovedMail, accountRejectedMail } from '../../mail/messages.ts'
 import type { AppContext } from '../../middleware/index.ts'
 import {
-  type AccountTarget,
   canDisableAccount,
   canEnableAccount,
   canReviewAccounts,
