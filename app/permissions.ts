@@ -109,6 +109,26 @@ export function canNameResponsibles(actor: Actor, collectifId: string): boolean 
   )
 }
 
+/**
+ * "Remove a responsible of C": an admin, a responsible of C, or a moderator unless the person is
+ * an admin or another moderator (a moderator never acts on them).
+ */
+export function canRemoveResponsible(
+  actor: Actor,
+  collectifId: string,
+  target: AccountTarget,
+): boolean {
+  if (!canNameResponsibles(actor, collectifId)) return false
+  if (!isValidatedUser(actor)) return false
+  if (actor.isAdmin || actor.managedCollectifIds.has(collectifId)) return true
+  return staffMayActOn(actor, target)
+}
+
+/** The same through the platform's replacement form, where only staff act. */
+export function canRemoveResponsibleByPlatform(actor: Actor, target: AccountTarget): boolean {
+  return canManageResponsibles(actor) && staffMayActOn(actor, target)
+}
+
 /** "Make a member of C responsible": as above, and never oneself unless admin. */
 export function canPromoteToResponsible(
   actor: Actor,
@@ -280,8 +300,14 @@ export function canChangeItem(actor: Actor, item: ItemAccess & { archived_at: un
  * "Archive an abusive item" (US-0.8.2): admin or moderator, on any item still in the inventory.
  * The owner is e-mailed the reason.
  */
-export function canModerateItem(actor: Actor, item: { archived_at: unknown }): boolean {
-  return isActiveStaff(actor) && item.archived_at == null
+export function canModerateItem(
+  actor: Actor,
+  item: { archived_at: unknown },
+  owner: AccountTarget | null,
+): boolean {
+  if (!isActiveStaff(actor) || item.archived_at != null) return false
+  // A moderator never acts on an admin or another moderator, their items included.
+  return owner === null || staffMayActOn(actor, owner)
 }
 
 /**
@@ -291,10 +317,33 @@ export function canModerateItem(actor: Actor, item: { archived_at: unknown }): b
 export function canDeleteItem(
   actor: Actor,
   item: { owner_collectif_id: string | null; owner_user_id: string | null },
+  /** The person who owns it, as an account; null when a collectif does. */
+  owner: AccountTarget | null,
 ): boolean {
   if (!isValidatedUser(actor)) return false
-  if (isActiveStaff(actor) || item.owner_user_id === actor.id) return true
+  if (deletesOwnItem(actor, item)) return true
+  // The platform: never a moderator on the personal item of an admin or another moderator.
+  return isActiveStaff(actor) && (owner === null || staffMayActOn(actor, owner))
+}
+
+/** True when the actor deletes as the item's owner or a responsible of its owning collectif. */
+function deletesOwnItem(
+  actor: CurrentUser,
+  item: { owner_collectif_id: string | null; owner_user_id: string | null },
+): boolean {
+  if (item.owner_user_id === actor.id) return true
   return item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id)
+}
+
+/**
+ * True when the deletion is the platform's and not the owner's: the admin or moderator then gives
+ * a reason, e-mailed to the owner (security review of V0.8).
+ */
+export function deletesAsPlatform(
+  actor: Actor,
+  item: { owner_collectif_id: string | null; owner_user_id: string | null },
+): boolean {
+  return isValidatedUser(actor) && isActiveStaff(actor) && !deletesOwnItem(actor, item)
 }
 
 /** "Ask to delete an item of C" (US-0.8.10): a member of C who may not delete it themselves. */
@@ -302,7 +351,7 @@ export function canRequestItemDeletion(
   actor: Actor,
   item: { owner_collectif_id: string | null; owner_user_id: string | null },
 ): boolean {
-  if (!isValidatedUser(actor) || canDeleteItem(actor, item)) return false
+  if (!isValidatedUser(actor) || canDeleteItem(actor, item, null)) return false
   return item.owner_collectif_id !== null && actor.memberCollectifIds.has(item.owner_collectif_id)
 }
 
