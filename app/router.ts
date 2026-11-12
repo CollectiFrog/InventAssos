@@ -8,6 +8,7 @@ import adminController from './actions/admin/controller.tsx'
 import adminModeratorsController from './actions/admin/moderators/controller.tsx'
 import adminResponsiblesController from './actions/admin/responsibles/controller.tsx'
 import collectifsController from './actions/collectifs/controller.tsx'
+import deletionRequestsController from './actions/collectifs/deletions/controller.tsx'
 import editCollectifController from './actions/collectifs/edit/controller.tsx'
 import collectifMembersController from './actions/collectifs/members/controller.tsx'
 import requestCollectifController from './actions/collectifs/request/controller.tsx'
@@ -19,6 +20,7 @@ import itemsController from './actions/items/controller.tsx'
 import createItemController from './actions/items/create/controller.tsx'
 import editItemController from './actions/items/edit/controller.tsx'
 import moveItemController from './actions/items/move/controller.tsx'
+import deleteItemController from './actions/items/remove/controller.tsx'
 import locationsController from './actions/locations/controller.tsx'
 import createLocationController from './actions/locations/create/controller.tsx'
 import editLocationController from './actions/locations/edit/controller.tsx'
@@ -44,6 +46,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.admin.responsibles, adminResponsiblesController)
   router.map(routes.collectifs, collectifsController)
   router.map(routes.collectifs.members, collectifMembersController)
+  router.map(routes.collectifs.deletions, deletionRequestsController)
   router.map(routes.collectifs.request, requestCollectifController)
   router.map(routes.collectifs.edit, editCollectifController)
   router.map(routes.health, healthController)
@@ -53,6 +56,7 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.items.edit, editItemController)
   router.map(routes.items.move, moveItemController)
   router.map(routes.items.archive, archiveItemController)
+  router.map(routes.items.remove, deleteItemController)
   router.map(routes.locations, locationsController)
   router.map(routes.people, peopleController)
   router.map(routes.locations.create, createLocationController)

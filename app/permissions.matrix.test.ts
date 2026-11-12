@@ -14,6 +14,7 @@ import { createTestLocation } from '../test/locations.ts'
 import { createActiveUser } from '../test/users.ts'
 import { findCategory, listCategories } from './data/categories.ts'
 import { findCollectifById } from './data/collectifs.ts'
+import { hasDeletionRequest, requestItemDeletion } from './data/deletion-requests.ts'
 import { archiveItem, findItemById } from './data/items.ts'
 import { findLocationById } from './data/locations.ts'
 import {
@@ -135,6 +136,8 @@ async function seed(db: Database) {
   })
   const pia = await createActiveUser(db, 'Pia', 'pia@example.org')
   await requestMembership(db, pia.id, c.id)
+  // US-0.8.10: Mia asked to delete C's foot stored at Val's.
+  await requestItemDeletion(db, cAtVal.id, mia.id)
   const valOwn = await createTestItem(db, {
     locationId: valHome.id,
     owner: { userId: val.id },
@@ -530,6 +533,32 @@ const rules: Rule[] = [
         message: 'Annonce abusive.',
       }),
     happened: async (db, w) => (await findItemById(db, w.item.id))?.archive_reason === 'moderated',
+  },
+  {
+    // US-0.8.9: final, so a member of C asks instead (next rows).
+    row: 'Delete an item',
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    act: (c, w) => c.post(routes.items.remove.action.href({ itemId: w.item.id })),
+    happened: async (db, w) => (await findItemById(db, w.item.id)) === null,
+  },
+  {
+    row: 'Delete an item (own item)',
+    allowed: ['admin', 'moderator', 'validated'],
+    act: (c, w) => c.post(routes.items.remove.action.href({ itemId: w.valOwn.id })),
+    happened: async (db, w) => (await findItemById(db, w.valOwn.id)) === null,
+  },
+  {
+    row: 'Ask to delete an item of C',
+    allowed: ['memberOfC'],
+    act: (c, w) => c.post(routes.items.requestDeletion.href({ itemId: w.item.id })),
+    happened: async (db, w) => hasDeletionRequest(db, w.item.id),
+  },
+  {
+    row: 'Accept or reject a request to delete an item of C',
+    allowed: ['responsibleOfC'],
+    act: (c, w) =>
+      c.post(routes.collectifs.deletions.approve.href({ slug: w.c.slug, itemId: w.cAtVal.id })),
+    happened: async (db, w) => (await findItemById(db, w.cAtVal.id)) === null,
   },
   {
     // US-0.5.5: an archived item has left the inventory; nobody changes it any more (review F6).

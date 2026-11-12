@@ -416,7 +416,8 @@ button.secondary,
   background: transparent;
   color: var(--accent);
 }
-button.danger {
+button.danger,
+.button.danger {
   background: var(--danger);
   border-color: var(--danger);
 }

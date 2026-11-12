@@ -200,6 +200,18 @@ choisissez la raison. Il disparaît de l'inventaire et des listes, mais n'est pa
 et son historique restent consultables par ceux qui le gèrent. Un objet archivé ne peut plus être
 modifié ni déplacé.
 
+## Supprimer du matériel
+
+Pour du matériel saisi par erreur (un doublon, une fausse manipulation), **Supprimer…** sur sa page
+ouvre une page de confirmation ; **Supprimer définitivement** efface l'objet et son historique. Ce
+bouton apparaît pour la personne propriétaire, pour les responsables du collectif propriétaire, et
+pour les administrateurs et modérateurs. Pour du matériel vendu, perdu ou cassé, archivez-le
+plutôt : il garde son historique.
+
+Un membre du collectif choisit **Demander la suppression** : la demande apparaît dans l'onglet
+**Membres**, sans e-mail. Un responsable la **supprime** ou la **refuse** ; une seule demande à la
+fois par objet.
+
 ## Historique d'un objet
 
 En bas de la page d'un objet, l'**historique** liste ce qui lui est arrivé : ajout, modifications

@@ -3,6 +3,7 @@ import { getCsrfToken } from 'remix/middleware/csrf'
 import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 import { logAction, readHistory } from '../../data/audit-log.ts'
+import { hasDeletionRequest, requestItemDeletion } from '../../data/deletion-requests.ts'
 import {
   findItemDetails,
   type ItemDetails,
@@ -14,8 +15,10 @@ import { sendSafely } from '../../mail/mailer.ts'
 import { itemContactMail } from '../../mail/messages.ts'
 import type { CurrentUser } from '../../middleware/current-user.ts'
 import {
+  canDeleteItem,
   canEditItem,
   canModerateItem,
+  canRequestItemDeletion,
   canSeeItem,
   canSeePerson,
   isActiveStaff,
@@ -103,6 +106,15 @@ export default createController(routes.items, {
           )}
           canEdit={canEditItem(actor, item)}
           canModerate={canModerateItem(actor, item)}
+          canDelete={canDeleteItem(actor, item)}
+          deletion={
+            canRequestItemDeletion(actor, item)
+              ? {
+                  csrfToken: getCsrfToken(context),
+                  requested: await hasDeletionRequest(context.db, item.id),
+                }
+              : undefined
+          }
           contact={
             ownsItem(actor, item)
               ? undefined
@@ -120,6 +132,39 @@ export default createController(routes.items, {
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
+    },
+
+    // US-0.8.10: a member asks C's responsibles to delete one of C's items; no e-mail is sent.
+    async requestDeletion(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      if (!isValidatedUser(actor)) return forbidden(context)
+
+      const { db, session } = context
+      const item = await findItemDetails(db, context.params.itemId)
+      if (item === null || !canSeeItem(actor, item)) return notFound(context)
+      if (!canRequestItemDeletion(actor, item)) return forbidden(context)
+
+      const showUrl = routes.items.show.href({ itemId: item.id })
+      const recorded = await db.transaction(async (tx) => {
+        const created = await requestItemDeletion(tx, item.id, actor.id)
+        if (created) {
+          await logAction(tx, {
+            actorId: actor.id,
+            action: 'item.deletion_requested',
+            entity: 'item',
+            entityId: item.id,
+          })
+        }
+        return created
+      })
+      session.flash(
+        'notice',
+        recorded
+          ? 'Demande envoyée : un responsable du collectif va l’examiner.'
+          : 'La suppression de cet objet est déjà demandée.',
+      )
+      return redirect(showUrl, 303)
     },
 
     // US-0.6.3: e-mails the owner without showing their address; the sender's goes in Reply-To.

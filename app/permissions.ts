@@ -255,6 +255,33 @@ export function canModerateItem(actor: Actor, item: { archived_at: unknown }): b
   return isActiveStaff(actor) && item.archived_at == null
 }
 
+/**
+ * "Delete an item" (US-0.8.9): its personal owner, a responsible of its owning collectif, an admin
+ * or a moderator; archived or not. Deletion is final, so a member of C asks instead (US-0.8.10).
+ */
+export function canDeleteItem(
+  actor: Actor,
+  item: { owner_collectif_id: string | null; owner_user_id: string | null },
+): boolean {
+  if (!isValidatedUser(actor)) return false
+  if (isActiveStaff(actor) || item.owner_user_id === actor.id) return true
+  return item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id)
+}
+
+/** "Ask to delete an item of C" (US-0.8.10): a member of C who may not delete it themselves. */
+export function canRequestItemDeletion(
+  actor: Actor,
+  item: { owner_collectif_id: string | null; owner_user_id: string | null },
+): boolean {
+  if (!isValidatedUser(actor) || canDeleteItem(actor, item)) return false
+  return item.owner_collectif_id !== null && actor.memberCollectifIds.has(item.owner_collectif_id)
+}
+
+/** "Accept or reject a request to delete an item of C" (US-0.8.10): a responsible of C. */
+export function canDecideItemDeletion(actor: Actor, collectifId: string): boolean {
+  return isValidatedUser(actor) && actor.managedCollectifIds.has(collectifId)
+}
+
 /** True when the actor belongs to one of these collectifs, as member or responsible. */
 function sharesCollectif(actor: CurrentUser, collectifIds: readonly string[]): boolean {
   return collectifIds.some((id) => actor.memberCollectifIds.has(id))

@@ -5,6 +5,8 @@ import type { CurrentUser } from './middleware/current-user.ts'
 import {
   canAssignItemOwner,
   canChangeItem,
+  canDecideItemDeletion,
+  canDeleteItem,
   canDepositForPerson,
   canDisableAccount,
   canEditCollectif,
@@ -21,6 +23,7 @@ import {
   canNameModerators,
   canNameResponsibles,
   canRequestCollectif,
+  canRequestItemDeletion,
   canRequestMembership,
   canRequestResponsibility,
   canReviewAccounts,
@@ -417,6 +420,31 @@ describe('permissions: visibility (ADR 0021)', () => {
       "someone's deposit stays with C's responsibles",
     )
     assert.equal(canDepositForPerson(member, local), false)
+  })
+
+  it('"Delete an item": personal owner, responsible of the owner, admin, moderator', () => {
+    const ofC = { owner_collectif_id: 'c1', owner_user_id: null }
+    const ofU1 = { owner_collectif_id: null, owner_user_id: 'u1' }
+    assert.equal(canDeleteItem(user({ managedCollectifIds: new Set(['c1']) }), ofC), true)
+    assert.equal(canDeleteItem(user({ memberCollectifIds: new Set(['c1']) }), ofC), false)
+    assert.equal(canDeleteItem(user(), ofU1), true)
+    assert.equal(canDeleteItem(user({ id: 'u2' }), ofU1), false)
+    assert.equal(canDeleteItem(user({ id: 'u2', isAdmin: true }), ofU1), true)
+    assert.equal(canDeleteItem(moderator({ id: 'u2' }), ofC), true)
+    assert.equal(canDeleteItem(user({ status: 'pending' }), ofU1), false)
+  })
+
+  it('"Ask to delete an item of C": a member of C only; its responsibles decide', () => {
+    const ofC = { owner_collectif_id: 'c1', owner_user_id: null }
+    assert.equal(canRequestItemDeletion(user({ memberCollectifIds: new Set(['c1']) }), ofC), true)
+    assert.equal(canRequestItemDeletion(user({ managedCollectifIds: new Set(['c1']) }), ofC), false)
+    assert.equal(canRequestItemDeletion(user(), ofC), false)
+    assert.equal(
+      canRequestItemDeletion(user(), { owner_collectif_id: null, owner_user_id: 'u1' }),
+      false,
+    )
+    assert.equal(canDecideItemDeletion(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canDecideItemDeletion(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
   })
 
   it('lets a member of C see like a responsible, without managing anything', () => {

@@ -7,6 +7,7 @@ import {
   listPendingRequestsBy,
   searchActiveCollectifs,
 } from '../../data/collectifs.ts'
+import { listDeletionRequests } from '../../data/deletion-requests.ts'
 import { listItemsDepositedAt, listItemsOwnedBy } from '../../data/items.ts'
 import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
 import {
@@ -22,6 +23,7 @@ import { membershipRequestMail, newResponsibleRequestMail } from '../../mail/mes
 import type { AppContext } from '../../middleware/index.ts'
 import {
   canAssignItemOwner,
+  canDecideItemDeletion,
   canEditCollectif,
   canManageCollectifLocations,
   canManageMembers,
@@ -112,8 +114,12 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
           : []
       }
       people={inside && tab === 'people' ? await listCollectifPeople(db, collectif.id) : []}
-      requests={
-        managesMembers && tab === 'people' ? await listMembershipRequests(db, collectif.id) : []
+      // Loaded on every tab: the Membres tab's label counts what waits for its responsibles.
+      requests={managesMembers ? await listMembershipRequests(db, collectif.id) : []}
+      deletionRequests={
+        canDecideItemDeletion(actor, collectif.id)
+          ? await listDeletionRequests(db, collectif.id)
+          : []
       }
       notice={typeof notice === 'string' ? notice : undefined}
     />,
