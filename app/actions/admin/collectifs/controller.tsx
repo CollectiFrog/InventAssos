@@ -9,7 +9,7 @@ import {
   searchActiveCollectifs,
 } from '../../../data/collectifs.ts'
 import { countItemsOwnedBy } from '../../../data/items.ts'
-import { countActiveResponsibles, setResponsible } from '../../../data/responsibles.ts'
+import { countActiveResponsibles, setResponsible } from '../../../data/members.ts'
 import { findUserById } from '../../../data/users.ts'
 import { sendSafely } from '../../../mail/mailer.ts'
 import { collectifApprovedMail, collectifRejectedMail } from '../../../mail/messages.ts'

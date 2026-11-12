@@ -99,23 +99,29 @@ export const collectifs = table({
 
 export type Collectif = TableRow<typeof collectifs>
 
-export const responsibleStatuses = ['pending', 'active', 'rejected', 'removed'] as const
-export type ResponsibleStatus = (typeof responsibleStatuses)[number]
+/** Statuses of a membership row: a request, then its outcome (ADR 0020). */
+export const membershipStatuses = ['pending', 'active', 'rejected', 'removed'] as const
+export type MembershipStatus = (typeof membershipStatuses)[number]
 
-export const responsibles = table({
-  name: 'responsibles',
+/** Roles within a collectif (ADR 0020): a responsible can do everything a member can. */
+export const membershipRoles = ['member', 'responsible'] as const
+export type MembershipRole = (typeof membershipRoles)[number]
+
+export const collectifMembers = table({
+  name: 'collectif_members',
   primaryKey: ['user_id', 'collectif_id'],
   columns: {
     user_id: c.uuid(),
     collectif_id: c.uuid(),
-    status: c.enum(responsibleStatuses),
+    role: c.enum(membershipRoles),
+    status: c.enum(membershipStatuses),
     requested_at: c.timestamp({ withTimezone: true }),
     validated_by: c.uuid().nullable(),
     validated_at: c.timestamp({ withTimezone: true }).nullable(),
   },
 })
 
-export type Responsible = TableRow<typeof responsibles>
+export type Membership = TableRow<typeof collectifMembers>
 
 export const locations = table({
   name: 'locations',

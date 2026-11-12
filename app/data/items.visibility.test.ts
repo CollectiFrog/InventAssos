@@ -12,7 +12,7 @@ import { createActiveUser } from '../../test/users.ts'
 import type { CurrentUser } from '../middleware/current-user.ts'
 import { canSeeItem, itemScopeOf } from '../permissions.ts'
 import { findItemDetails, listInventory, listItemsOwnedBy, locationShowsItemTo } from './items.ts'
-import { listManagedCollectifs, setResponsible } from './responsibles.ts'
+import { listManagedCollectifs, setResponsible } from './members.ts'
 import type { User } from './tables.ts'
 
 describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {

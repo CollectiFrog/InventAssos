@@ -7,7 +7,7 @@ import { signIn } from '../../../test/auth.ts'
 import { createActiveCollectif } from '../../../test/collectifs.ts'
 import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createActiveUser } from '../../../test/users.ts'
-import { findResponsible, setResponsible } from '../../data/responsibles.ts'
+import { findResponsible, setResponsible } from '../../data/members.ts'
 import type { Collectif, User } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 

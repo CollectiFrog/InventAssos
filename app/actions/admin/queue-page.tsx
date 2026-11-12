@@ -1,7 +1,7 @@
 import type { Handle } from 'remix/component'
 
 import type { PendingCollectif } from '../../data/collectifs.ts'
-import type { PendingResponsible } from '../../data/responsibles.ts'
+import type { PendingResponsible } from '../../data/members.ts'
 import type { User } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'

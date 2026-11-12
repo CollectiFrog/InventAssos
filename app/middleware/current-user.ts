@@ -1,7 +1,7 @@
 import type { Database } from 'remix/data-table'
 import { createContextKey, type Middleware } from 'remix/router'
 import { Session } from 'remix/session'
-import { type CollectifLink, listManagedCollectifs } from '../data/responsibles.ts'
+import { type CollectifLink, listManagedCollectifs } from '../data/members.ts'
 import type { UserStatus } from '../data/tables.ts'
 import { findUserById } from '../data/users.ts'
 

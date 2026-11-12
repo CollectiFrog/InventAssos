@@ -142,7 +142,7 @@ function visibleIn(scope: ItemScope) {
     i.owner_user_id = ${scope.userId}
     or i.owner_collectif_id = any(${ids}::uuid[])
     or exists (
-      select 1 from responsibles vr
+      select 1 from collectif_members vr
       where vr.user_id = i.owner_user_id and vr.status = 'active'
         and vr.collectif_id = any(${ids}::uuid[])
     )
@@ -196,7 +196,7 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
            coalesce(oc.name, ou.name) as owner_name, oc.slug as owner_slug,
            case when i.owner_collectif_id is not null then oc.contact_phone
                 when ou.status = 'active' then ou.phone end as contact_phone,
-           (select string_agg(r.collectif_id::text, ',') from responsibles r
+           (select string_agg(r.collectif_id::text, ',') from collectif_members r
             join collectifs rc on rc.id = r.collectif_id
             where r.user_id = i.owner_user_id and r.status = 'active' and rc.status = 'active'
            ) as owner_collectif_ids
@@ -323,8 +323,9 @@ export async function listInventoryCities(db: Database, scope: ItemScope): Promi
 export async function listOwnerContactEmails(db: Database, item: Item): Promise<string[]> {
   const result = item.owner_collectif_id
     ? await db.exec(sql`
-        select u.email from responsibles r join users u on u.id = r.user_id
-        where r.collectif_id = ${item.owner_collectif_id} and r.status = 'active'
+        select u.email from collectif_members r join users u on u.id = r.user_id
+        where r.collectif_id = ${item.owner_collectif_id} and r.role = 'responsible'
+          and r.status = 'active'
           and u.status = 'active'
       `)
     : await db.exec(sql`
