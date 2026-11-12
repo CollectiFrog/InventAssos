@@ -40,6 +40,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - A collectif can no longer be left with only a disabled responsible; disabling the only responsible of a collectif now says which collectifs need another one.
 - « Nouvelle demande » e-mails go to each admin and moderator separately, so they no longer see each other's address.
 - A name can no longer hold a line break, which could shape the e-mails that quote it.
+- Form posts are limited in size and no longer accept files where none is expected, so an oversized request can no longer exhaust the server's memory; a malformed form answers an error page instead of a server error.
 - A moderator can no longer take the responsible role from an admin or another moderator, nor archive or delete their personal items.
 - An admin or moderator who deletes someone else's item must give a reason, sent by e-mail to its owner.
 
