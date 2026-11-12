@@ -2,7 +2,7 @@ import type { Handle } from 'remix/component'
 import { createController } from 'remix/router'
 
 import { type ItemSummary, listItemsOwnedBy } from '../../data/items.ts'
-import { listManagedCollectifs } from '../../data/responsibles.ts'
+import { listManagedCollectifs } from '../../data/members.ts'
 import { findUserById } from '../../data/users.ts'
 import { canSeePerson, isValidatedUser, itemScopeOf } from '../../permissions.ts'
 import { routes } from '../../routes.ts'

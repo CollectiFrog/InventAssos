@@ -1,38 +1,50 @@
-// Data access for responsibles: the only module that reads or writes `responsibles`.
+// Data access for collectif memberships: the only module that reads or writes `collectif_members`
+// (ADR 0020). A row links a person to a collectif with a role (member or responsible) and a status.
 import { type Database, sql } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
-import { type Responsible, type ResponsibleStatus, responsibles } from './tables.ts'
+import { collectifMembers, type Membership, type MembershipStatus } from './tables.ts'
 
-/** The row linking a person to a collectif, whatever its status. */
+/** The row linking a person to a collectif, whatever its role and status. */
+export async function findMembership(
+  db: Database,
+  userId: string,
+  collectifId: string,
+): Promise<Membership | null> {
+  if (!isUuid(userId) || !isUuid(collectifId)) return null
+  return db.findOne(collectifMembers, { where: { user_id: userId, collectif_id: collectifId } })
+}
+
+/** The person's row as a responsible of the collectif (requested, active…), or null. */
 export async function findResponsible(
   db: Database,
   userId: string,
   collectifId: string,
-): Promise<Responsible | null> {
-  if (!isUuid(userId) || !isUuid(collectifId)) return null
-  return db.findOne(responsibles, { where: { user_id: userId, collectif_id: collectifId } })
+): Promise<Membership | null> {
+  const row = await findMembership(db, userId, collectifId)
+  return row?.role === 'responsible' ? row : null
 }
 
-/** Creates or overwrites the link between a person and a collectif. */
+/** Creates or overwrites the link between a person and a collectif, as a responsible. */
 export async function setResponsible(
   db: Database,
   input: {
     userId: string
     collectifId: string
-    status: ResponsibleStatus
+    status: MembershipStatus
     validatedBy?: string | null
   },
 ): Promise<void> {
   const validated = input.status === 'pending' ? null : new Date()
   const row = {
+    role: 'responsible' as const,
     status: input.status,
     validated_by: input.validatedBy ?? null,
     validated_at: validated,
     ...(input.status === 'pending' ? { requested_at: new Date() } : {}),
   }
   await db
-    .query(responsibles)
+    .query(collectifMembers)
     .upsert(
       { user_id: input.userId, collectif_id: input.collectifId, ...row },
       { conflictTarget: ['user_id', 'collectif_id'], update: row },
@@ -53,9 +65,10 @@ export async function listManagedCollectifs(
   userId: string,
 ): Promise<CollectifLink[]> {
   const result = await db.exec(sql`
-    select c.id, c.name, c.slug, c.city from responsibles r
+    select c.id, c.name, c.slug, c.city from collectif_members r
     join collectifs c on c.id = r.collectif_id
-    where r.user_id = ${userId} and r.status = 'active' and c.status = 'active'
+    where r.user_id = ${userId} and r.role = 'responsible' and r.status = 'active'
+      and c.status = 'active'
     order by lower(c.name), c.id
   `)
   return (result.rows ?? []).map((row) => ({
@@ -72,8 +85,8 @@ export async function listActiveResponsibles(
   collectifId: string,
 ): Promise<{ id: string; name: string }[]> {
   const result = await db.exec(sql`
-    select u.id, u.name from responsibles r join users u on u.id = r.user_id
-    where r.collectif_id = ${collectifId} and r.status = 'active'
+    select u.id, u.name from collectif_members r join users u on u.id = r.user_id
+    where r.collectif_id = ${collectifId} and r.role = 'responsible' and r.status = 'active'
     order by u.name
   `)
   return (result.rows ?? []).map((row) => ({ id: String(row.id), name: String(row.name) }))
@@ -88,8 +101,8 @@ export async function countActiveResponsiblesForUpdate(
   collectifId: string,
 ): Promise<number> {
   const result = await db.exec(sql`
-    select user_id from responsibles
-    where collectif_id = ${collectifId} and status = 'active'
+    select user_id from collectif_members
+    where collectif_id = ${collectifId} and role = 'responsible' and status = 'active'
     for update
   `)
   return result.rows?.length ?? 0
@@ -110,10 +123,10 @@ export async function listPendingResponsibles(db: Database): Promise<PendingResp
   const result = await db.exec(sql`
     select r.user_id, u.name as user_name, u.email as user_email,
            r.collectif_id, c.name as collectif_name, r.requested_at
-    from responsibles r
+    from collectif_members r
     join users u on u.id = r.user_id and u.status = 'active'
     join collectifs c on c.id = r.collectif_id and c.status = 'active'
-    where r.status = 'pending'
+    where r.role = 'responsible' and r.status = 'pending'
     order by r.requested_at
   `)
   return (result.rows ?? []).map((row) => ({
@@ -129,8 +142,8 @@ export async function listPendingResponsibles(db: Database): Promise<PendingResp
 /** How many active responsibles each collectif has; a collectif with none is absent. */
 export async function countActiveResponsibles(db: Database): Promise<Map<string, number>> {
   const result = await db.exec(sql`
-    select collectif_id, count(*)::int as n from responsibles
-    where status = 'active' group by collectif_id
+    select collectif_id, count(*)::int as n from collectif_members
+    where role = 'responsible' and status = 'active' group by collectif_id
   `)
   return new Map((result.rows ?? []).map((row) => [String(row.collectif_id), Number(row.n)]))
 }

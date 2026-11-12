@@ -5,7 +5,7 @@ import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
 import { listPendingCollectifs } from '../../data/collectifs.ts'
-import { listPendingResponsibles } from '../../data/responsibles.ts'
+import { listPendingResponsibles } from '../../data/members.ts'
 import { deleteUserSessions } from '../../data/sessions.ts'
 import type { User } from '../../data/tables.ts'
 import {

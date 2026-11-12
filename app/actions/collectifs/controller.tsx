@@ -9,7 +9,7 @@ import {
 } from '../../data/collectifs.ts'
 import { listItemsDepositedAt, listItemsOwnedBy } from '../../data/items.ts'
 import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
-import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/responsibles.ts'
+import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/members.ts'
 import { newResponsibleRequestMail } from '../../mail/messages.ts'
 import type { AppContext } from '../../middleware/index.ts'
 import {

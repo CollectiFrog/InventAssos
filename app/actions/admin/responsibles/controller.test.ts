@@ -8,7 +8,7 @@ import { createActiveCollectif } from '../../../../test/collectifs.ts'
 import { openTestDatabase, resetDatabase } from '../../../../test/database.ts'
 import { createActiveUser } from '../../../../test/users.ts'
 import { listEntityHistory } from '../../../data/audit-log.ts'
-import { findResponsible, setResponsible } from '../../../data/responsibles.ts'
+import { findResponsible, setResponsible } from '../../../data/members.ts'
 import type { Collectif, User } from '../../../data/tables.ts'
 import { routes } from '../../../routes.ts'
 

@@ -8,7 +8,7 @@ import {
   countActiveResponsiblesForUpdate,
   findResponsible,
   setResponsible,
-} from '../../../data/responsibles.ts'
+} from '../../../data/members.ts'
 import { findUserByEmail, findUserById } from '../../../data/users.ts'
 import { sendSafely } from '../../../mail/mailer.ts'
 import {

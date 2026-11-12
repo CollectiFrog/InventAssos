@@ -9,7 +9,7 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createTestItem, itemFormFields } from '../../../test/items.ts'
 import { createTestLocation } from '../../../test/locations.ts'
 import { createActiveUser } from '../../../test/users.ts'
-import { setResponsible } from '../../data/responsibles.ts'
+import { setResponsible } from '../../data/members.ts'
 import { routes } from '../../routes.ts'
 
 describe('item history (US-0.5.6)', () => {

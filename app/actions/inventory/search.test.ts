@@ -9,7 +9,7 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createTestItem } from '../../../test/items.ts'
 import { createActiveUser } from '../../../test/users.ts'
 import { createLocation } from '../../data/locations.ts'
-import { setResponsible } from '../../data/responsibles.ts'
+import { setResponsible } from '../../data/members.ts'
 import type { Collectif } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 

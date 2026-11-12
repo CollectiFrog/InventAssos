@@ -16,7 +16,7 @@ import { findCategory, listCategories } from './data/categories.ts'
 import { findCollectifById } from './data/collectifs.ts'
 import { archiveItem, findItemById } from './data/items.ts'
 import { findLocationById } from './data/locations.ts'
-import { findResponsible, setResponsible } from './data/responsibles.ts'
+import { findResponsible, setResponsible } from './data/members.ts'
 import { createUser, findUserById, setUserRole, setUserStatus } from './data/users.ts'
 import { routes } from './routes.ts'
 
@@ -274,7 +274,7 @@ const rules: Rule[] = [
     act: (c, w) => c.post(routes.collectifs.requestResponsibility.href({ slug: w.c.slug })),
     happened: async (db) => {
       const rows = await db.exec(sql`
-        select 1 from responsibles r join users u on u.id = r.user_id
+        select 1 from collectif_members r join users u on u.id = r.user_id
         where r.status = 'pending' and u.email <> 'zed@example.org'
       `)
       return (rows.rows?.length ?? 0) > 0
