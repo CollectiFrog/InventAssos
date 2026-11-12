@@ -3,11 +3,15 @@ import * as s from 'remix/data-schema'
 
 import type { FieldErrors } from './ui/form.tsx'
 
-/** True when the text holds a line break or another control character. */
-function hasControlCharacter(value: string): boolean {
-  for (const character of value) {
-    const code = character.charCodeAt(0)
-    if (code < 32 || code === 127) return true
+/**
+ * True when the text holds a line break or another control character: C0, DEL and C1 (what a
+ * Windows-1252 file read as Latin-1 produces). Same set as the database checks, written out so
+ * that no server locale changes it.
+ */
+export function hasControlCharacter(value: string): boolean {
+  for (let index = 0; index < value.length; index++) {
+    const code = value.charCodeAt(index)
+    if (code <= 0x1f || (code >= 0x7f && code <= 0x9f)) return true
   }
   return false
 }
@@ -25,12 +29,18 @@ export function requiredText(max: number) {
     .refine((value) => value.length <= max, `${max} caractères au maximum.`)
 }
 
-/** An optional, trimmed, single-line text: blank becomes null (a reference, a code). */
+/**
+ * An optional, trimmed, single-line text: blank becomes null (a reference, a code). Normalised to
+ * NFC, so that « é » typed on a Mac (e + accent) and on Windows (one character) are one value:
+ * references are compared with `inv_fold`, which only knows precomposed letters.
+ */
 export function optionalLine(max: number) {
-  return optionalText(max).refine(
-    (value) => value === null || !hasControlCharacter(value),
-    'Une seule ligne, sans retour à la ligne.',
-  )
+  return optionalText(max)
+    .transform((value) => (value === null ? null : value.normalize('NFC')))
+    .refine(
+      (value) => value === null || !hasControlCharacter(value),
+      'Une seule ligne, sans retour à la ligne.',
+    )
 }
 
 /** An optional, trimmed text: blank becomes null. */

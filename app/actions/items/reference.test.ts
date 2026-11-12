@@ -129,6 +129,116 @@ describe('item reference, unique per owner (US-0.10.3)', () => {
     assert.match(page, /Modifié \([^)]*référence/)
   })
 
+  it('refuses C1 control characters as a form error, not a server error', async () => {
+    for (const ref of ['A\u0085B', 'AB\u009f']) {
+      const response = await add({ name: 'Pied', ref })
+      assert.equal(response.status, 400, JSON.stringify(ref))
+      assert.match(response.text, /Une seule ligne/)
+    }
+  })
+
+  it('stores NFC, so a reference typed on a Mac collides with the same one typed elsewhere', async () => {
+    assert.equal((await add({ name: 'Été 1', ref: 'Été-1' })).status, 303)
+    const decomposed = 'Été-1'.normalize('NFD')
+    assert.notEqual(decomposed, 'Été-1')
+    const response = await add({ name: 'Été 2', ref: decomposed })
+    assert.equal(response.status, 400)
+    assert.match(response.text, /porte déjà cette référence/)
+  })
+
+  it('lets only the owner set a reference: a deposit learns nothing of the person’s', async () => {
+    const paul = await createActiveUser(db, 'Paul', 'paul@example.org')
+    const paulHome = await createTestLocation(db, { userId: paul.id }, 'Chez Paul')
+    await createTestItem(db, {
+      locationId: paulHome.id,
+      owner: { userId: paul.id },
+      createdBy: paul.id,
+      ref: 'SECRET-1',
+    })
+    const deposit = (ref: string) =>
+      ritaClient.post(
+        routes.items.create.action.href(),
+        itemFormFields({
+          locationId: local.id,
+          owner: 'person',
+          ownerEmail: 'paul@example.org',
+          name: 'Dépôt',
+          ref,
+        }),
+      )
+    // The same answer whether Paul uses the reference or not.
+    for (const ref of ['SECRET-1', 'LIBRE-9']) {
+      const response = await deposit(ref)
+      assert.equal(response.status, 400)
+      assert.match(response.text, /Seul le propriétaire de l’objet choisit sa référence/)
+    }
+    const created = await deposit('')
+    assert.equal(created.status, 303)
+    const itemId = /\/materiel\/([0-9a-f-]{36})$/.exec(created.location ?? '')?.[1] ?? ''
+    // Rita may still edit the deposit, but not give it a reference.
+    const edit = (ref: string) =>
+      ritaClient.post(
+        routes.items.edit.action.href({ itemId }),
+        itemFormFields({ name: 'Dépôt', ref }),
+      )
+    assert.equal((await edit('')).status, 303)
+    const refused = await edit('SECRET-1')
+    assert.equal(refused.status, 400)
+    assert.match(refused.text, /Seul le propriétaire/)
+  })
+
+  it('answers a duplicate taken between the check and the write with the same message', async () => {
+    // A database that slips a racer's item in just before the next transaction starts.
+    let racerRef: string | null = null
+    const racing = new Proxy(db, {
+      get(target, property) {
+        const value = Reflect.get(target, property, target)
+        if (property !== 'transaction') {
+          return typeof value === 'function' ? value.bind(target) : value
+        }
+        return async (run: (tx: Database) => Promise<unknown>) => {
+          if (racerRef !== null) {
+            const ref = racerRef
+            racerRef = null
+            await createTestItem(target, {
+              locationId: local.id,
+              owner: { collectifId: frog.id },
+              createdBy: rita.id,
+              ref,
+            })
+          }
+          return target.transaction(run)
+        }
+      },
+    })
+    const raceApp = createTestApp(racing)
+    const client = raceApp.client()
+    await signIn(raceApp, client, 'rita@example.org')
+
+    racerRef = 'RACE-1'
+    const created = await client.post(
+      routes.items.create.action.href(),
+      itemFormFields({
+        locationId: local.id,
+        owner: `collectif:${frog.id}`,
+        name: 'X',
+        ref: 'RACE-1',
+      }),
+    )
+    assert.equal(created.status, 400)
+    assert.match(created.text, /porte déjà cette référence/)
+    assert.match(created.text, /value="X"/)
+
+    racerRef = 'RACE-2'
+    const edited = await client.post(
+      routes.items.edit.action.href({ itemId: amp.id }),
+      itemFormFields({ name: 'Ampli renommé', ref: 'RACE-2' }),
+    )
+    assert.equal(edited.status, 400)
+    assert.match(edited.text, /porte déjà cette référence/)
+    assert.equal((await findItemById(db, amp.id))?.name, 'Ampli')
+  })
+
   it('refuses a reference on several lines or longer than 60 characters', async () => {
     assert.equal((await add({ ref: 'A\nB' })).status, 400)
     const long = await add({ ref: 'x'.repeat(61) })

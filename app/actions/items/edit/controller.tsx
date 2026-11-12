@@ -14,7 +14,7 @@ import {
   updateItemFields,
 } from '../../../data/items.ts'
 import type { AppContext } from '../../../middleware/index.ts'
-import { canChangeItem, canSeeItem } from '../../../permissions.ts'
+import { canChangeItem, canSeeItem, canSetItemRef } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors } from '../../../ui/form.tsx'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
@@ -26,6 +26,7 @@ import {
   type ItemFormValues,
   itemFieldNames,
   itemFieldsSchema,
+  refOwnerOnlyMessage,
   refTakenMessage,
 } from '../schema.ts'
 
@@ -131,8 +132,15 @@ export default createController(routes.items.edit, {
       const owner = item.owner_collectif_id
         ? { collectifId: item.owner_collectif_id }
         : { userId: item.owner_user_id ?? '' }
-      if (parsed.ok && parsed.value.ref !== null) {
-        if (await refTaken(db, owner, parsed.value.ref, item.id)) errors.ref = refTakenMessage
+      if (parsed.ok && parsed.value.ref !== item.ref) {
+        // Checked before uniqueness, so editing a deposit never tells which references are used.
+        if (!canSetItemRef(actor, owner)) errors.ref = refOwnerOnlyMessage
+        else if (
+          parsed.value.ref !== null &&
+          (await refTaken(db, owner, parsed.value.ref, item.id))
+        ) {
+          errors.ref = refTakenMessage
+        }
       }
       const redisplay = () => {
         const values = Object.fromEntries(itemFieldNames.map((n) => [n, formValue(formData, n)]))

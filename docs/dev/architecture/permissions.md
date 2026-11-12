@@ -62,6 +62,7 @@ can only see their status page and sign out.
 | Edit, move, archive an item                               | yes            | if owner, or in own location        | if in C's location or owned by C                      | if owned by C, or owner, or in own location           | if owner, or in own location |
 | Move an item to a location                                | yes            | if own location                     | if C's location                                       | if C's location or own location                       | if own location              |
 | Edit, move or archive an archived item                    | no             | no                                  | no                                                    | no                                                    | no                           |
+| Give or change an item's reference                        | yes            | if owner                            | if owned by C, or owner                               | if owned by C, or owner                               | if owner                     |
 | Archive an abusive item (owner e-mailed)                  | yes            | yes                                 | no                                                    | no                                                    | no                           |
 | Delete an item (final)                                    | yes            | yes                                 | if owned by C, or owner                               | if owner                                              | if owner                     |
 | Ask to delete an item of C                                | no             | no                                  | no                                                    | yes                                                   | no                           |
@@ -100,6 +101,11 @@ being responsible of that collectif; to put an item in a location, you must mana
 or, from V0.8, belong to its collectif (US-0.8.5). A member of C keeps C's own equipment; the items
 others deposited in C's locations, C's locations, its members and its profile stay with its
 responsibles.
+
+An item's reference (US-0.10.3) is unique in its owner's namespace, so only the owner sets it: the
+person, a person of the owning collectif, or an admin. A responsible who deposits or edits someone
+else's item leaves it as it is; the refusal comes before the uniqueness check, so it never tells
+which references that person uses.
 
 What "edit, move, archive" covers: whoever may edit an item may change **every** property of it
 (name, category, quantity, condition, value, description…), archive it, and move it to **any**

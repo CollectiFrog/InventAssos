@@ -240,6 +240,21 @@ export function canStoreItemsIn(
   )
 }
 
+/**
+ * "Give or change an item's reference" (US-0.10.3): the reference lives in its owner's namespace,
+ * so only the owner sets it (the person, a person of the owning collectif, an admin). Someone who
+ * deposits or edits another person's item would otherwise learn which references that person uses.
+ */
+export function canSetItemRef(
+  actor: Actor,
+  owner: { collectifId: string } | { userId: string },
+): boolean {
+  if (!isValidatedUser(actor)) return false
+  if (actor.isAdmin) return true
+  if ('userId' in owner) return owner.userId === actor.id
+  return actor.memberCollectifIds.has(owner.collectifId)
+}
+
 /** May the actor own an item as this owner: themselves, or a collectif they belong to (US-0.8.5). */
 export function canAssignItemOwner(
   actor: Actor,

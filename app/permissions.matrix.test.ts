@@ -536,6 +536,30 @@ const rules: Rule[] = [
     happened: async (db, w) => (await findItemById(db, w.item.id))?.archive_reason === 'moderated',
   },
   {
+    // US-0.10.3: the reference lives in its owner's namespace.
+    row: "Give or change an item's reference",
+    allowed: ['admin', 'responsibleOfC', 'memberOfC'],
+    act: (c, w) =>
+      c.post(
+        routes.items.edit.action.href({ itemId: w.item.id }),
+        itemFormFields({ name: 'Projecteur C', ref: 'PROJ-1' }),
+      ),
+    happened: async (db, w) => (await findItemById(db, w.item.id))?.ref === 'PROJ-1',
+  },
+  {
+    // C's responsible may edit Val's deposit, but not name it in Val's namespace. The field sits
+    // in a form they may submit, so the refusal is a form error (400), not a 403.
+    row: "Give or change an item's reference (Val's item stored at C)",
+    allowed: ['admin', 'validated'],
+    denial: 'hidden',
+    act: (c, w) =>
+      c.post(
+        routes.items.edit.action.href({ itemId: w.valAtC.id }),
+        itemFormFields({ name: 'Ampli de Val', ref: 'VAL-1' }),
+      ),
+    happened: async (db, w) => (await findItemById(db, w.valAtC.id))?.ref === 'VAL-1',
+  },
+  {
     // US-0.8.9: final, so a member of C asks instead (next rows).
     row: 'Delete an item',
     allowed: ['admin', 'moderator', 'responsibleOfC'],

@@ -39,6 +39,10 @@ export const itemFieldsSchema = f.object({
   description: f.field(optionalText(2000)),
 })
 
+/** Error under « Référence » when the actor is not the owner (US-0.10.3). */
+export const refOwnerOnlyMessage =
+  'Seul le propriétaire de l’objet choisit sa référence : laissez ce champ comme il était.'
+
 /** Error under « Référence » when the owner already uses it (US-0.10.3). */
 export const refTakenMessage = 'Un autre objet de ce propriétaire porte déjà cette référence.'
 

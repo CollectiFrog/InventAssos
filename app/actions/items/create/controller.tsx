@@ -9,7 +9,12 @@ import { createLocation, findLocationById, type LocationOwner } from '../../../d
 import { findUserByEmail, normalizeEmail } from '../../../data/users.ts'
 import type { CurrentUser } from '../../../middleware/current-user.ts'
 import type { AppContext } from '../../../middleware/index.ts'
-import { canDepositForPerson, canStoreItemsIn, isValidatedUser } from '../../../permissions.ts'
+import {
+  canDepositForPerson,
+  canSetItemRef,
+  canStoreItemsIn,
+  isValidatedUser,
+} from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import type { FieldErrors } from '../../../ui/form.tsx'
 import { formValue, parseForm } from '../../../validation.ts'
@@ -23,6 +28,7 @@ import {
   itemFieldsSchema,
   newLocationChoice,
   newLocationSchema,
+  refOwnerOnlyMessage,
   refTakenMessage,
 } from '../schema.ts'
 
@@ -140,7 +146,9 @@ export default createController(routes.items.create, {
       }
       // US-0.10.3: a reference names one object of its owner, archived ones included.
       if (parsed.ok && owner !== null && parsed.value.ref !== null) {
-        if (await refTaken(db, owner, parsed.value.ref)) errors.ref = refTakenMessage
+        // Checked before uniqueness, so a deposit never tells whether the person uses a reference.
+        if (!canSetItemRef(actor, owner)) errors.ref = refOwnerOnlyMessage
+        else if (await refTaken(db, owner, parsed.value.ref)) errors.ref = refTakenMessage
       }
       const redisplay = () => {
         const values = Object.fromEntries(
