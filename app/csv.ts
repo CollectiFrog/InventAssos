@@ -6,8 +6,8 @@ export interface CsvTable {
   delimiter: ';' | ',' | '\t'
   rows: string[][]
   /**
-   * The 1-based record number of each kept row, blank records counted, so that « ligne 57 » is the
-   * spreadsheet's row 57 (a quoted cell spanning lines is still one record).
+   * The 1-based row number of each kept row, as a spreadsheet shows it: blank records are counted,
+   * and a quoted cell spanning several lines is still one row. So « ligne 57 » is row 57.
    */
   numbers: number[]
 }
@@ -63,7 +63,7 @@ function detectDelimiter(text: string): CsvTable['delimiter'] {
 export function parseCsv(input: string, limits: CsvLimits = {}): CsvTable {
   const maxRows = limits.maxRows ?? Number.POSITIVE_INFINITY
   const maxColumns = limits.maxColumns ?? Number.POSITIVE_INFINITY
-  const sepLine = /^sep=([;,\t])\r?\n/i.exec(input)
+  const sepLine = /^sep=([;,\t])[ \t]*(\r\n|\r|\n|$)/i.exec(input)
   const text = sepLine ? input.slice(sepLine[0].length) : input
   const delimiter = sepLine ? (sepLine[1] as CsvTable['delimiter']) : detectDelimiter(text)
   const rows: string[][] = []
@@ -77,19 +77,23 @@ export function parseCsv(input: string, limits: CsvLimits = {}): CsvTable {
   let blank = true
   let quoted = false
   let wasQuoted = false
+  // True once the row holds a non-blank cell: a blank row is dropped, whatever its width.
+  let rowHasValue = false
 
   const endCell = () => {
+    const value = wasQuoted ? cell : cell.trim()
+    if (value !== '') rowHasValue = true
     if (row.length >= maxColumns) {
-      throw new CsvError(`Ce fichier a trop de colonnes : ${maxColumns} au plus.`)
-    }
-    row.push(wasQuoted ? cell : cell.trim())
+      if (rowHasValue) throw new CsvError(`Ce fichier a trop de colonnes : ${maxColumns} au plus.`)
+      // A blank row wider than the limit: nothing is kept, so nothing to refuse yet.
+    } else row.push(value)
     cell = ''
     blank = true
     wasQuoted = false
   }
   const endRow = () => {
     endCell()
-    if (row.some((value) => value !== '')) {
+    if (rowHasValue) {
       if (rows.length >= maxRows) {
         throw new CsvError(`Ce fichier a trop de lignes : ${maxRows - 1} au plus, sans les titres.`)
       }
@@ -97,6 +101,7 @@ export function parseCsv(input: string, limits: CsvLimits = {}): CsvTable {
       numbers.push(rowStart)
     }
     row = []
+    rowHasValue = false
     record++
     rowStart = record
   }
@@ -109,11 +114,7 @@ export function parseCsv(input: string, limits: CsvLimits = {}): CsvTable {
           cell += '"'
           index++
         } else quoted = false
-      } else {
-        // A line break inside quotes is part of the cell but still a new spreadsheet row.
-        if (character === '\n' || (character === '\r' && text[index + 1] !== '\n')) record++
-        cell += character
-      }
+      } else cell += character
     } else if (character === '"' && blank) {
       // An opening quote, possibly after spaces; a quote inside a bare cell stays a character.
       cell = ''
@@ -127,7 +128,8 @@ export function parseCsv(input: string, limits: CsvLimits = {}): CsvTable {
       endRow()
     } else {
       cell += character
-      if (blank && character !== ' ' && character !== '\t') blank = false
+      // Any whitespace counts, as `trim()` does (no-break space, a stray BOM…), still O(1).
+      if (blank && character.trim() !== '') blank = false
     }
   }
   if (quoted) throw new CsvError('Ce fichier CSV est mal formé : un guillemet n’est pas fermé.')

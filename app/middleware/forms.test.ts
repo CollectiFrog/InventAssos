@@ -40,14 +40,27 @@ describe('bounded form posts (security review of ADR 0026)', () => {
     assert.equal(n.rows?.[0]?.n, 0)
   })
 
-  it('refuses a body too large, from its Content-Length or while reading it', async () => {
-    const big = 'x'.repeat(300 * 1024)
-    const declared = await lou.postRaw(profile, `name=${big}`, {
+  it('refuses from Content-Length alone, without reading the body', async () => {
+    // The body is tiny: only the declared length can make this refusal.
+    const response = await lou.postRaw(profile, 'name=x', {
       'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': String(300 * 1024),
     })
-    assert.equal(declared.status, 413)
+    assert.equal(response.status, 413)
+  })
+
+  it('refuses while reading: a field over 64 KiB, or 256 KiB in all', async () => {
+    const oneField = new FormData()
+    oneField.set('name', 'x'.repeat(70 * 1024))
+    assert.equal((await lou.postForm(profile, oneField)).status, 413)
+    const fiveFields = new FormData()
+    for (let index = 0; index < 5; index++) fiveFields.set(`champ-${index}`, 'x'.repeat(60 * 1024))
+    assert.equal((await lou.postForm(profile, fiveFields)).status, 413)
+  })
+
+  it('refuses more than 400 fields', async () => {
     const body = new FormData()
-    body.set('description', big)
+    for (let index = 0; index < 401; index++) body.set(`champ-${index}`, 'x')
     assert.equal((await lou.postForm(profile, body)).status, 413)
   })
 
@@ -63,6 +76,18 @@ describe('bounded form posts (security review of ADR 0026)', () => {
 
   it('answers 400, not a server error, to a malformed multipart body', async () => {
     const response = await lou.postRaw(profile, '--x\r\nbroken', {
+      'Content-Type': 'multipart/form-data; boundary=x',
+    })
+    assert.equal(response.status, 400)
+  })
+
+  it('answers 400 to invalid UTF-8 in a field', async () => {
+    const head = new TextEncoder().encode(
+      '--x\r\nContent-Disposition: form-data; name="name"\r\n\r\n',
+    )
+    const tail = new TextEncoder().encode('\r\n--x--\r\n')
+    const body = new Uint8Array([...head, 0xff, 0xfe, ...tail])
+    const response = await lou.postRaw(profile, body, {
       'Content-Type': 'multipart/form-data; boundary=x',
     })
     assert.equal(response.status, 400)

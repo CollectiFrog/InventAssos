@@ -1,11 +1,9 @@
 import {
-  FormDataParseError,
   MaxFileSizeExceededError,
   MaxFilesExceededError,
   MaxHeaderSizeExceededError,
   MaxPartsExceededError,
   MaxTotalSizeExceededError,
-  MultipartParseError,
   type ParseFormDataOptions,
   parseFormData,
 } from 'remix/form-data-parser'
@@ -32,6 +30,7 @@ export const defaultFormLimits = {
   maxFileSize: 64 * 1024,
   maxTotalSize: 256 * 1024,
   maxParts: 400,
+  maxHeaderSize: 1024,
 } satisfies ParseFormDataOptions
 
 /** A route allowed a file, with its limits and the page that explains a refusal. */
@@ -60,10 +59,13 @@ export function boundedFormData(
   uploadFor: (context: RequestContext) => UploadAllowance | null = () => null,
 ): Middleware<{ key: typeof FormData; value: FormData; property: 'formData' }> {
   return async (context, next) => {
-    const contentType = context.headers.get('Content-Type')?.toLowerCase() ?? ''
+    // The media type alone, as Remix's own form-data middleware compares it.
+    const mediaType = (context.headers.get('Content-Type') ?? '')
+      .split(';')[0]
+      ?.trim()
+      .toLowerCase()
     const isForm =
-      contentType.startsWith('multipart/') ||
-      contentType.startsWith('application/x-www-form-urlencoded')
+      mediaType?.startsWith('multipart/') || mediaType === 'application/x-www-form-urlencoded'
     if (context.method === 'GET' || context.method === 'HEAD' || !isForm) {
       context.set(FormData, new FormData(), { property: 'formData' })
       return next()
@@ -79,13 +81,12 @@ export function boundedFormData(
       parsed = await parseFormData(context.request, limits)
     } catch (error) {
       if (isLimitError(error)) return refuse(upload)
-      if (error instanceof FormDataParseError || error instanceof MultipartParseError) {
-        return new Response('Formulaire illisible.', {
-          status: 400,
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-        })
-      }
-      throw error
+      // Anything else the parser throws is about the body sent (bad framing, invalid UTF-8 in a
+      // field or a part header…): the client's fault, never a server error.
+      return new Response('Formulaire illisible.', {
+        status: 400,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      })
     }
     context.set(FormData, parsed, { property: 'formData' })
     return next()

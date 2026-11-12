@@ -52,8 +52,10 @@ Middleware order: security headers and CSP → static files → database, mailer
 → CSRF check on unsafe methods → renderer.
 
 Form data is parsed by `boundedFormData` (`app/middleware/forms.ts`), before the CSRF check: no
-file, 64 KiB per field, 256 KiB and 400 fields per request. A larger body is refused with 413
-(before reading it when `Content-Length` says so), a malformed one with 400. A route that takes a
+file, 400 fields, 256 KiB of form content per request and, in a multipart form, 64 KiB per field
+and 1 KiB per part header. A larger body is refused with 413, before it is read when
+`Content-Length` says so; anything the parser cannot read (bad framing, invalid UTF-8) with 400.
+Both answers are a bare line of text: browsers never send such forms from our pages. A route that takes a
 file names its own limits through `uploadFor`, and only an active user can reach it, since the
 gate runs first.
 
