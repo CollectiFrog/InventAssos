@@ -141,33 +141,49 @@ export function canManageLocation(
   return false
 }
 
+/** True when the location belongs to a collectif the actor is a member or responsible of. */
+function isLocationOfMyCollectif(
+  actor: CurrentUser,
+  location: { collectif_id: string | null },
+): boolean {
+  return location.collectif_id !== null && actor.memberCollectifIds.has(location.collectif_id)
+}
+
 /**
- * "See a location's full address": its managers and the platform admin. Everybody else gets the
- * city only (ADR 0010); notes follow the same rule since they often hold access codes.
+ * "See a location's full address": its managers, the members of its collectif (US-0.8.5) and the
+ * platform admin. Everybody else gets the city only (ADR 0010); notes follow the same rule since
+ * they often hold access codes.
  */
 export function canSeeFullAddress(
   actor: Actor,
   location: { collectif_id: string | null; user_id: string | null },
 ): boolean {
-  return isActiveAdmin(actor) || canManageLocation(actor, location)
+  if (isActiveAdmin(actor) || canManageLocation(actor, location)) return true
+  return isValidatedUser(actor) && isLocationOfMyCollectif(actor, location)
 }
 
-/** "Add an item to a location" / "Move an item to a location": admin, or a manager of it. */
+/**
+ * "Add an item to a location" / "Move an item to a location": admin, a manager of it, or a member
+ * of its collectif (US-0.8.5).
+ */
 export function canStoreItemsIn(
   actor: Actor,
   location: { collectif_id: string | null; user_id: string | null },
 ): boolean {
-  return isValidatedUser(actor) && (actor.isAdmin || canManageLocation(actor, location))
+  if (!isValidatedUser(actor)) return false
+  return (
+    actor.isAdmin || canManageLocation(actor, location) || isLocationOfMyCollectif(actor, location)
+  )
 }
 
-/** May the actor own an item as this owner: themselves, or a collectif they manage. */
+/** May the actor own an item as this owner: themselves, or a collectif they belong to (US-0.8.5). */
 export function canAssignItemOwner(
   actor: Actor,
   owner: { collectifId: string } | { userId: string },
 ): boolean {
   if (!isValidatedUser(actor)) return false
   if ('userId' in owner) return owner.userId === actor.id
-  return actor.isAdmin || actor.managedCollectifIds.has(owner.collectifId)
+  return actor.isAdmin || actor.memberCollectifIds.has(owner.collectifId)
 }
 
 /**
@@ -192,13 +208,14 @@ export interface ItemAccess {
 
 /**
  * "Edit, move, archive an item": admin; responsible of C if the item is in C's location or owned
- * by C; validated user if they own it or it is in their own location (ADR 0009).
+ * by C; member of C if owned by C (US-0.8.5); validated user if they own it or it is in their own
+ * location (ADR 0009).
  */
 export function canEditItem(actor: Actor, item: ItemAccess): boolean {
   if (!isValidatedUser(actor)) return false
   if (actor.isAdmin) return true
   if (item.owner_user_id === actor.id) return true
-  if (item.owner_collectif_id !== null && actor.managedCollectifIds.has(item.owner_collectif_id)) {
+  if (item.owner_collectif_id !== null && actor.memberCollectifIds.has(item.owner_collectif_id)) {
     return true
   }
   return canManageLocation(actor, {

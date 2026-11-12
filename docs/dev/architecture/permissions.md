@@ -55,9 +55,9 @@ can only see their status page and sign out.
 | Edit C's profile                                 | yes            | no                                  | yes                                                   | no                                                    | no                           |
 | Create, edit, delete C's locations               | yes            | no                                  | yes                                                   | no                                                    | no                           |
 | Create, edit, delete own personal locations      | yes            | yes                                 | yes                                                   | yes                                                   | yes                          |
-| Add an item to a location                        | yes            | if own location                     | if C's location                                       | if own location                                       | if own location              |
-| Edit, move, archive an item                      | yes            | if owner, or in own location        | if in C's location or owned by C                      | if owner, or in own location                          | if owner, or in own location |
-| Move an item to a location                       | yes            | if own location                     | if C's location                                       | if own location                                       | if own location              |
+| Add an item to a location                        | yes            | if own location                     | if C's location                                       | if C's location or own location                       | if own location              |
+| Edit, move, archive an item                      | yes            | if owner, or in own location        | if in C's location or owned by C                      | if owned by C, or owner, or in own location           | if owner, or in own location |
+| Move an item to a location                       | yes            | if own location                     | if C's location                                       | if C's location or own location                       | if own location              |
 | Edit, move or archive an archived item           | no             | no                                  | no                                                    | no                                                    | no                           |
 | Archive an abusive item (owner e-mailed)         | yes            | yes                                 | no                                                    | no                                                    | no                           |
 | See the collectifs directory (name, city, text)  | yes            | yes                                 | yes                                                   | yes                                                   | yes                          |
@@ -65,15 +65,18 @@ can only see their status page and sign out.
 | See an item, its owner, the city of its location | yes            | yes                                 | if owned by C or by a person of C, or in C's location | if owned by C or by a person of C, or in C's location | if owner, or in own location |
 | See a person's page and phone                    | yes            | yes                                 | if the person belongs to C                            | if the person belongs to C                            | if it is their own           |
 | See a location (name, city)                      | yes            | yes                                 | if C's location, or it stores an item seen            | if C's location, or it stores an item seen            | if own, or stores one seen   |
-| See a location's full address                    | yes            | if own location                     | if C's location                                       | if own location                                       | if own location              |
-| Import into / export from a location             | yes            | if own location                     | if C's location                                       | if own location                                       | if own location              |
+| See a location's full address                    | yes            | if own location                     | if C's location                                       | if C's location or own location                       | if own location              |
+| Import into / export from a location             | yes            | if own location                     | if C's location                                       | if C's location or own location                       | if own location              |
 
 An admin can never disable their own account, nor the account of another admin listed in
 `PLATFORM_ADMIN_EMAILS` (one admin must not lock the others out; remove them from the list instead). A location's notes follow the full-address rule
 (they often hold access codes): `redactLocation()` blanks both before rendering.
 
 Rules from ADR 0009: the owner of an item stored in a collectif's location may edit it without
-being responsible of that collectif; to put an item in a location, you must manage that location.
+being responsible of that collectif; to put an item in a location, you must manage that location
+or, from V0.8, belong to its collectif (US-0.8.5). A member of C keeps C's own equipment; the items
+others deposited in C's locations, C's locations, its members and its profile stay with its
+responsibles.
 
 What "edit, move, archive" covers: whoever may edit an item may change **every** property of it
 (name, category, quantity, condition, value, description…), archive it, and move it to **any**

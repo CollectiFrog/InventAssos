@@ -92,9 +92,8 @@ contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
 
 Pour ses responsables et ses membres, la page d'un collectif a trois onglets : **Matériel** (ce qu'il
 possède, puis ce que d'autres ont déposé dans ses lieux), **Lieux** et **Membres** (chacun avec son
-rôle, et le téléphone de contact). Pour ses responsables, **Ajouter du matériel**, en haut, ouvre le
-formulaire avec le collectif comme propriétaire. Les autres utilisateurs ne voient que son nom, sa
-ville, sa présentation et les boutons **Demander à rejoindre** et **Demander à devenir
+rôle, et le téléphone de contact). **Ajouter du matériel**, en haut, ouvre le formulaire avec le collectif comme propriétaire. Les autres utilisateurs ne voient que
+son nom, sa ville, sa présentation et les boutons **Demander à rejoindre** et **Demander à devenir
 responsable**.
 
 ## Accueillir les membres d'un collectif
@@ -103,8 +102,10 @@ Une personne qui fait partie de votre association choisit **Demander à rejoindr
 collectif. Chaque responsable reçoit un e-mail, et la demande apparaît en tête de l'onglet
 **Membres** (l'onglet indique le nombre de demandes en attente).
 
-- **Accepter** : la personne devient membre ; elle voit le matériel, les lieux et les membres du
-  collectif. Elle est prévenue par e-mail.
+- **Accepter** : la personne devient membre ; elle voit le matériel, les lieux (adresse comprise)
+  et les membres du collectif, et elle ajoute, modifie, déplace et archive le matériel du collectif.
+  Les lieux, les membres, la présentation et le matériel que d'autres ont déposé restent gérés par
+  les responsables. Elle est prévenue par e-mail.
 - **Refuser** : la personne est prévenue par e-mail ; elle pourra refaire une demande.
 - **Retirer** un membre, dans la liste : il ne voit plus rien du collectif, aussitôt, et reçoit un
   e-mail.
