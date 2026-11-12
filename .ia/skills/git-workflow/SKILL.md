@@ -73,6 +73,6 @@ Agents may prepare steps 1 to 3. **Tagging (step 5) is the maintainer's call.**
    the workflow then fills in the notes from the CHANGELOG.
 6. Back-merge: open a PR `main` → `dev`, **merge commit**. Delete `release/vX.Y.Z`.
 7. Deployment: update the image tag in the infra repository (manual for now, see
-   `docs/adr/0005-deployment.md`).
+   `docs/adr/0005-deployment.md` and `docs/dev/contribute/deploying.md`).
 
 Pushes to `main` publish the user docs; pushes to `dev` publish the developer docs.
