@@ -93,12 +93,33 @@ export class TestClient {
   ): Promise<TestResponse> {
     const body = new FormData()
     for (const [name, value] of Object.entries(fields)) body.set(name, value)
+    return this.postForm(path, body, options)
+  }
+
+  /** POST a ready-made form, files included, with the remembered CSRF token and the Origin. */
+  async postForm(
+    path: string,
+    body: FormData,
+    options: { csrf?: boolean; csrfFrom?: string } = {},
+  ): Promise<TestResponse> {
     if (options.csrf !== false) {
       if (this.#csrfToken === null) await this.get(options.csrfFrom ?? '/connexion')
       body.set('_csrf', this.#csrfToken ?? '')
     }
     const headers = this.#headers()
     headers.set('Origin', testOrigin)
+    return this.#send(new Request(new URL(path, testOrigin), { method: 'POST', body, headers }))
+  }
+
+  /** POST a raw body with the given headers, CSRF token not added: for malformed requests. */
+  async postRaw(
+    path: string,
+    body: BodyInit,
+    extra: Record<string, string>,
+  ): Promise<TestResponse> {
+    const headers = this.#headers()
+    headers.set('Origin', testOrigin)
+    for (const [name, value] of Object.entries(extra)) headers.set(name, value)
     return this.#send(new Request(new URL(path, testOrigin), { method: 'POST', body, headers }))
   }
 

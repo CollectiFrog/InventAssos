@@ -1,6 +1,5 @@
 import { createCookie } from 'remix/cookie'
 import type { Database } from 'remix/data-table'
-import { formData } from 'remix/middleware/form-data'
 import { render } from 'remix/middleware/render'
 import { session } from 'remix/middleware/session'
 import { staticFiles } from 'remix/middleware/static'
@@ -13,6 +12,7 @@ import { provideBackground } from './background.ts'
 import { checkCsrf } from './csrf.ts'
 import { loadCurrentUser } from './current-user.ts'
 import { provideDatabase } from './database.ts'
+import { boundedFormData } from './forms.ts'
 import { contentSecurityPolicy, securityHeaders } from './security-headers.ts'
 import { type AppSettings, provideMailer, provideSettings } from './services.ts'
 
@@ -50,7 +50,8 @@ export function appMiddleware(deps: AppDependencies) {
     session(sessionCookie, createPostgresSessionStorage(deps.db)),
     loadCurrentUser(deps.db, deps.settings.adminEmails),
     gateInactiveAccounts(),
-    formData(),
+    // After the account checks, so that only an active user can ever get an upload allowance.
+    boundedFormData(),
     // Same reason as `secure`: compare form posts with the public origin, not the pod's URL.
     checkCsrf(appUrl.origin),
     render(),

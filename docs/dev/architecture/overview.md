@@ -48,8 +48,16 @@ services (database, mailer, settings, session secret), so tests build the same r
 doubles (`test/app.ts`).
 
 Middleware order: security headers and CSP → static files → database, mailer, settings on the context → session
-(PostgreSQL, ADR 0017) → current user (`context.currentUser`) → form data → CSRF check on unsafe
-methods → renderer.
+(PostgreSQL, ADR 0017) → current user (`context.currentUser`) → inactive-account gate → form data
+→ CSRF check on unsafe methods → renderer.
+
+Form data is parsed by `boundedFormData` (`app/middleware/forms.ts`), before the CSRF check: no
+file, 400 fields, 256 KiB of form content per request and, in a multipart form, 64 KiB per field
+and 1 KiB per part header. A larger body is refused with 413, before it is read when
+`Content-Length` says so; anything the parser cannot read (bad framing, invalid UTF-8) with 400.
+Both answers are a bare line of text: browsers never send such forms from our pages. A route that takes a
+file names its own limits through `uploadFor`, and only an active user can reach it, since the
+gate runs first.
 
 The sign-in link opens a page with a button that POSTs the token: e-mail scanners that prefetch
 links cannot burn it. The token is consumed by a single `UPDATE … WHERE used_at IS NULL AND

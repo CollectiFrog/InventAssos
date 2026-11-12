@@ -20,6 +20,7 @@ describe('CSV (ADR 0026)', () => {
         ['Nom', 'Qté'],
         ['Console', '2'],
       ],
+      numbers: [1, 2],
     })
     assert.equal(parseCsv('Nom,Qté\nConsole,2').delimiter, ',')
     assert.deepEqual(parseCsv('Nom\tQté\nConsole\t2').rows[1], ['Console', '2'])
@@ -63,6 +64,63 @@ describe('CSV (ADR 0026)', () => {
     assert.equal(neutralizeFormula('Console'), 'Console')
     assert.equal(restoreNeutralized("'=1+1"), '=1+1')
     assert.equal(restoreNeutralized("'Console"), "'Console")
+  })
+
+  it('stays linear on a file of quotes, a huge cell or many columns', () => {
+    for (const text of [
+      `a${'"'.repeat(1_000_000)}`,
+      `Nom\n${'x'.repeat(2_000_000)}`,
+      `${' '.repeat(500_000)}"${'y'.repeat(500_000)}"`,
+    ]) {
+      const started = performance.now()
+      parseCsv(text)
+      assert.ok(performance.now() - started < 1000, `took ${performance.now() - started} ms`)
+    }
+  })
+
+  it('stops as soon as a limit is passed, in French', () => {
+    const started = performance.now()
+    assert.throws(() => parseCsv('a\n'.repeat(1_000_000), { maxRows: 2001 }), /trop de lignes/)
+    assert.throws(
+      () => parseCsv(`a${';'.repeat(2_000_000)}`, { maxColumns: 50 }),
+      /trop de colonnes/,
+    )
+    assert.ok(performance.now() - started < 1000)
+    assert.equal(parseCsv('a\nb\nc', { maxRows: 3 }).rows.length, 3)
+  })
+
+  it('numbers rows as the spreadsheet does: blank rows counted, a multi-line cell is one row', () => {
+    const table = parseCsv('Nom;Note\n\nMicro;"deux\nlignes"\nPied;x\r\n\r\nCâble;y')
+    assert.deepEqual(table.numbers, [1, 3, 4, 6])
+    assert.deepEqual(parseCsv('a\n"x\ny"\nb').numbers, [1, 2, 3])
+  })
+
+  it('accepts any whitespace before an opening quote, as before', () => {
+    assert.deepEqual(parseCsv('Nom;Autre\n\u00a0"a;b";c').rows[1], ['a;b', 'c'])
+    assert.deepEqual(parseCsv('\uFEFF"a;b";c').rows[0], ['a;b', 'c'])
+  })
+
+  it('drops a blank row wider than the column limit, and still refuses a wide one', () => {
+    assert.deepEqual(parseCsv('a;b\n;;;;\nc;d', { maxColumns: 3 }).rows, [
+      ['a', 'b'],
+      ['c', 'd'],
+    ])
+    assert.throws(() => parseCsv('a;b\n;;;x', { maxColumns: 3 }), /trop de colonnes/)
+  })
+
+  it('skips a `sep=` line ending in CR, spaces or the end of the file', () => {
+    assert.deepEqual(parseCsv('sep=; \rNom;Qté').rows, [['Nom', 'Qté']])
+    assert.deepEqual(parseCsv('sep=;').rows, [])
+  })
+
+  it('skips the `sep=` line Excel writes, and uses its separator', () => {
+    const table = parseCsv('sep=,\r\nNom,Valeur\r\nAmpli;rouge,150')
+    assert.equal(table.delimiter, ',')
+    assert.deepEqual(table.rows, [
+      ['Nom', 'Valeur'],
+      ['Ampli;rouge', '150'],
+    ])
+    assert.deepEqual(table.numbers, [2, 3])
   })
 
   it('writes what it reads back: BOM, `;`, CRLF, quotes where needed', () => {
