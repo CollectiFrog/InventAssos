@@ -1,5 +1,5 @@
 import type { Handle } from 'remix/component'
-
+import type { DeletionRequest } from '../../data/deletion-requests.ts'
 import type { ItemSort, ItemSummary } from '../../data/items.ts'
 import type { CollectifPerson, MembershipRequest } from '../../data/members.ts'
 import type { Collectif, Location } from '../../data/tables.ts'
@@ -57,6 +57,8 @@ export interface CollectifPageProps {
   people: CollectifPerson[]
   /** Pending requests to join, for its responsibles (Membres tab only). */
   requests: MembershipRequest[]
+  /** Members' requests to delete its items, for its responsibles (Membres tab, US-0.8.10). */
+  deletionRequests: DeletionRequest[]
   /** « Retour » on phones (`backHref`). */
   back: string
   notice?: string
@@ -67,6 +69,7 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
   return () => {
     const p = handle.props
     const { collectif, inside, membership } = p
+    const waiting = p.requests.length + p.deletionRequests.length
     const slug = collectif.slug
     const facts = [
       collectif.city,
@@ -129,8 +132,7 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
                 { label: 'Matériel', href: routes.collectifs.show.href({ slug }), tab: 'items' },
                 { label: 'Lieux', href: routes.collectifs.places.href({ slug }), tab: 'places' },
                 {
-                  label:
-                    p.requests.length > 0 ? `Membres · ${p.requests.length} en attente` : 'Membres',
+                  label: waiting > 0 ? `Membres · ${waiting} en attente` : 'Membres',
                   href: routes.collectifs.people.href({ slug }),
                   tab: 'people',
                 },
@@ -287,6 +289,7 @@ function PeopleTab(handle: Handle<CollectifPageProps>) {
     const {
       people,
       requests,
+      deletionRequests,
       canManageMembers,
       canNameResponsibles,
       canManageResponsibles,
@@ -330,6 +333,55 @@ function PeopleTab(handle: Handle<CollectifPageProps>) {
                       action={routes.collectifs.members.reject.href({
                         slug,
                         userId: request.userId,
+                      })}
+                    >
+                      <CsrfField token={csrfToken} />
+                      <button type="submit" class="secondary">
+                        Refuser
+                      </button>
+                    </form>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+        {deletionRequests.length > 0 ? (
+          <section aria-labelledby="suppressions">
+            <h2 id="suppressions">Demandes de suppression · {deletionRequests.length}</h2>
+            <p class="status">
+              Accepter supprime l’objet et son historique, définitivement. Pour du matériel vendu,
+              perdu ou cassé, refusez et archivez-le plutôt.
+            </p>
+            <ul class="cards">
+              {deletionRequests.map((request) => (
+                <li key={request.itemId} class="card row">
+                  <span>
+                    <a href={routes.items.show.href({ itemId: request.itemId })}>
+                      <strong>{request.itemName}</strong>
+                    </a>{' '}
+                    <span class="status">
+                      demandé par {request.requesterName} · {dateFormat.format(request.requestedAt)}
+                    </span>
+                  </span>
+                  <span class="actions">
+                    <form
+                      method="post"
+                      action={routes.collectifs.deletions.approve.href({
+                        slug,
+                        itemId: request.itemId,
+                      })}
+                    >
+                      <CsrfField token={csrfToken} />
+                      <button type="submit" class="danger">
+                        Supprimer {request.itemName}
+                      </button>
+                    </form>
+                    <form
+                      method="post"
+                      action={routes.collectifs.deletions.reject.href({
+                        slug,
+                        itemId: request.itemId,
                       })}
                     >
                       <CsrfField token={csrfToken} />

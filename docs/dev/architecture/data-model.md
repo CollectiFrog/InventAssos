@@ -31,13 +31,15 @@ erDiagram
 | `sessions`       | id, user_id, data (jsonb), expires_at, created_at                                                                                                                                                                      | signed-in sessions only (visitors' stay in the cookie); user_id → users, deleted with the user; expired rows purged hourly (ADR 0017)                                                                         |
 | `sign_in_tokens` | token_hash, user_id, expires_at, used_at, created_at                                                                                                                                                                   | only the SHA-256 of the token is stored; 15 min, single use                                                                                                                                                   |
 | `rate_limits`    | key_hash, hits, reset_at                                                                                                                                                                                               | key_hash is a SHA-256 of the limited key (no address stored); purged hourly once reset_at passed (ADR 0018)                                                                                                   |
+| `item_deletion_requests` | item_id, requested_by, requested_at                                                                                                                                                                                    | one open request per item (item_id primary key); deleted with the item (US-0.8.10)                                                                                                                            |
 | `audit_log`      | id, actor_id, action, entity, entity_id, payload (jsonb), at                                                                                                                                                           | append only; IDs only, no personal data (ADR 0010)                                                                                                                                                            |
 
 `audit_log` actions so far: `account.approved|rejected|disabled|enabled`,
 `user.moderator_named|moderator_removed`, `collectif.approved|rejected|updated`,
 `member.requested|approved|rejected|removed|left`, `responsible.named`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
-`item.created|updated|moved|archived|contacted`. Payloads hold IDs, enum values and field names
+`item.created|updated|moved|archived|contacted|deleted|deletion_requested|deletion_rejected`. A
+deleted item's entries stay in the log (IDs only, ADR 0010); its page and history are gone. Payloads hold IDs, enum values and field names
 only; `readHistory()` resolves names at display time. The item page shows an allow-list
 (`itemHistoryActions`): `item.contacted` stays in the log for admins and is never displayed.
 

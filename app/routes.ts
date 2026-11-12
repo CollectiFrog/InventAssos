@@ -38,6 +38,10 @@ export const routes = route({
       demote: post('/collectifs/:slug/membres/:userId/retirer-responsable'),
       leave: post('/collectifs/:slug/quitter'),
     },
+    deletions: {
+      approve: post('/collectifs/:slug/suppressions/:itemId/accepter'),
+      reject: post('/collectifs/:slug/suppressions/:itemId/refuser'),
+    },
   },
   inventory: {
     index: get('/inventaire'),
@@ -52,7 +56,9 @@ export const routes = route({
     edit: form('/materiel/:itemId/modifier'),
     move: form('/materiel/:itemId/deplacer'),
     archive: form('/materiel/:itemId/archiver'),
+    remove: form('/materiel/:itemId/supprimer'),
     contact: post('/materiel/:itemId/contacter'),
+    requestDeletion: post('/materiel/:itemId/demander-suppression'),
   },
   locations: {
     index: get('/lieux'),

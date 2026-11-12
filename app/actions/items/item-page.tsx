@@ -2,6 +2,7 @@ import type { Handle, RemixNode } from 'remix/component'
 
 import type { ItemDetails } from '../../data/items.ts'
 import { routes } from '../../routes.ts'
+import { CsrfField } from '../../ui/form.tsx'
 import { archiveReasonLabels, conditionLabels, formatEuros } from '../../ui/labels.ts'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 
@@ -15,6 +16,10 @@ export interface ItemPageProps {
   canEdit?: boolean
   /** Whether the viewer may archive it as abusive (`canModerateItem`, US-0.8.2). */
   canModerate?: boolean
+  /** Whether the viewer may delete it for good (`canDeleteItem`, US-0.8.9). */
+  canDelete?: boolean
+  /** A member's request to delete it (US-0.8.10): the form, or that it is already asked. */
+  deletion?: { csrfToken: string; requested: boolean }
   /** Contact section (US-0.6.3); absent on the viewer's own items. */
   contact?: { csrfToken: string; sent?: boolean; error?: string }
   /** History section (US-0.5.6). */
@@ -49,7 +54,18 @@ function OwnerLink(handle: Handle<{ item: ItemDetails }>) {
  */
 export function ItemPage(handle: Handle<ItemPageProps>) {
   return () => {
-    const { viewer, item, canEdit, canModerate, contact, history, notice, back } = handle.props
+    const {
+      viewer,
+      item,
+      canEdit,
+      canModerate,
+      canDelete,
+      deletion,
+      contact,
+      history,
+      notice,
+      back,
+    } = handle.props
     // An item has no section of its own: the trail follows its owning collectif, else Rechercher.
     const trail = item.ownerSlug
       ? [
@@ -228,7 +244,8 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                   </a>
                 </p>
               </div>
-            ) : canModerate && !item.archived_at ? (
+            ) : null}
+            {canModerate && !canEdit && !item.archived_at ? (
               <div class="card">
                 <p class="actions">
                   <a
@@ -238,6 +255,36 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                     Retirer (modération)
                   </a>
                 </p>
+              </div>
+            ) : null}
+            {canDelete || deletion ? (
+              <div class="card">
+                {canDelete ? (
+                  <p class="actions">
+                    <a
+                      class="button danger"
+                      href={routes.items.remove.index.href({ itemId: item.id })}
+                    >
+                      Supprimer…
+                    </a>
+                  </p>
+                ) : deletion?.requested ? (
+                  <p class="status">Suppression demandée aux responsables du collectif.</p>
+                ) : deletion ? (
+                  <form
+                    method="post"
+                    action={routes.items.requestDeletion.href({ itemId: item.id })}
+                    class="stack"
+                  >
+                    <CsrfField token={deletion.csrfToken} />
+                    <p class="status">
+                      Saisi par erreur ? Les responsables du collectif peuvent le supprimer.
+                    </p>
+                    <button type="submit" class="secondary">
+                      Demander la suppression
+                    </button>
+                  </form>
+                ) : null}
               </div>
             ) : null}
           </aside>

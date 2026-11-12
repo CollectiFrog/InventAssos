@@ -263,6 +263,14 @@ export async function archiveItem(
   })
 }
 
+/**
+ * Deletes an item for good (US-0.8.9), with its pending deletion request. The audit log keeps its
+ * entries, which hold IDs only (ADR 0010).
+ */
+export async function deleteItem(db: Database, itemId: string): Promise<void> {
+  await db.exec(sql`delete from items where id = ${itemId}`)
+}
+
 /** One page of the active inventory, and how many items match in total. */
 export interface InventoryPage {
   items: ItemSummary[]
