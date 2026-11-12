@@ -32,7 +32,7 @@ export interface CollectifPageProps {
   inside: boolean
   membership: Membership
   canEdit: boolean
-  /** Responsibles and admins: « Ajouter du matériel » comes first. */
+  /** Its responsibles and members, and admins: « Ajouter du matériel » comes first. */
   canAddItems: boolean
   canManageLocations: boolean
   /** Platform admins see a remove form per responsible (US-0.3.6). */

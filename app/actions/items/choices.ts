@@ -11,7 +11,7 @@ import type { SelectOption } from '../../ui/form.tsx'
 export async function storableLocations(db: Database, actor: CurrentUser): Promise<SelectOption[]> {
   const candidates = actor.isAdmin
     ? await listAllLocations(db)
-    : await listLocationsOwnedBy(db, actor.id, [...actor.managedCollectifIds])
+    : await listLocationsOwnedBy(db, actor.id, [...actor.memberCollectifIds])
   return candidates
     .filter((location) => canStoreItemsIn(actor, location))
     .map((location) => ({
@@ -20,7 +20,7 @@ export async function storableLocations(db: Database, actor: CurrentUser): Promi
     }))
 }
 
-/** Owners the actor may give an item: themselves, then the collectifs they manage. */
+/** Owners the actor may give an item: themselves, then the collectifs they belong to. */
 export async function ownerOptions(db: Database, actor: CurrentUser): Promise<SelectOption[]> {
   const collectifs = (await listCollectifs(db, 'active')).filter((c) =>
     canAssignItemOwner(actor, { collectifId: c.id }),

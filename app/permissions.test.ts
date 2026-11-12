@@ -371,6 +371,36 @@ describe('permissions: visibility (ADR 0021)', () => {
     assert.equal(canSeeLocation(user(), home, false), false)
   })
 
+  it('lets a member of C keep its equipment: add, edit, move, archive, full address (US-0.8.5)', () => {
+    const member = user({ memberCollectifIds: new Set(['c9']) })
+    const local = { collectif_id: 'c9', user_id: null }
+    assert.equal(canStoreItemsIn(member, local), true)
+    assert.equal(canStoreItemsIn(member, { collectif_id: 'c8', user_id: null }), false)
+    assert.equal(canAssignItemOwner(member, { collectifId: 'c9' }), true)
+    assert.equal(canAssignItemOwner(member, { collectifId: 'c8' }), false)
+    assert.equal(canSeeFullAddress(member, local), true)
+    assert.equal(canSeeFullAddress(member, { collectif_id: 'c8', user_id: null }), false)
+    const ofC = {
+      owner_collectif_id: 'c9',
+      owner_user_id: null,
+      locationCollectifId: null,
+      locationUserId: 'u7',
+    }
+    assert.equal(canEditItem(member, ofC), true, 'owned by C, wherever it is')
+    const deposit = {
+      owner_collectif_id: null,
+      owner_user_id: 'u7',
+      locationCollectifId: 'c9',
+      locationUserId: null,
+    }
+    assert.equal(
+      canEditItem(member, deposit),
+      false,
+      "someone's deposit stays with C's responsibles",
+    )
+    assert.equal(canDepositForPerson(member, local), false)
+  })
+
   it('lets a member of C see like a responsible, without managing anything', () => {
     const member = user({ memberCollectifIds: new Set(['c9']) })
     assert.equal(canSeeItem(member, item), true, 'owned by a person of C')

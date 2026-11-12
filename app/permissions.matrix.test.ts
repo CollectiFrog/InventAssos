@@ -413,7 +413,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Add an item to a location',
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'responsibleOfC', 'memberOfC'],
     act: (c, w) =>
       c.post(
         routes.items.create.action.href(),
@@ -421,6 +421,26 @@ const rules: Rule[] = [
       ),
     happened: async (db) => {
       const rows = await db.exec(sql`select 1 from items where name = 'Ajout'`)
+      return (rows.rows?.length ?? 0) > 0
+    },
+  },
+  {
+    // US-0.8.5: the collectif's own equipment, added by any person of C.
+    row: "Add an item to a location (C's item in C's location)",
+    allowed: ['admin', 'responsibleOfC', 'memberOfC'],
+    act: (c, w) =>
+      c.post(
+        routes.items.create.action.href(),
+        itemFormFields({
+          locationId: w.local.id,
+          owner: `collectif:${w.c.id}`,
+          name: 'Ajout de C',
+        }),
+      ),
+    happened: async (db, w) => {
+      const rows = await db.exec(
+        sql`select 1 from items where name = 'Ajout de C' and owner_collectif_id = ${w.c.id}`,
+      )
       return (rows.rows?.length ?? 0) > 0
     },
   },
@@ -460,7 +480,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Edit, move, archive an item',
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'responsibleOfC', 'memberOfC'],
     act: (c, w) =>
       c.post(
         routes.items.edit.action.href({ itemId: w.item.id }),
@@ -470,7 +490,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Edit, move, archive an item (archive)',
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'responsibleOfC', 'memberOfC'],
     act: (c, w) =>
       c.post(routes.items.archive.action.href({ itemId: w.item.id }), { reason: 'sold' }),
     happened: async (db, w) => (await findItemById(db, w.item.id))?.archived_at != null,
@@ -517,14 +537,14 @@ const rules: Rule[] = [
   },
   {
     row: "Edit, move, archive an item (C's item stored at Val's home)",
-    allowed: ['admin', 'responsibleOfC', 'validated'],
+    allowed: ['admin', 'responsibleOfC', 'validated', 'memberOfC'],
     act: (c, w) =>
       c.post(routes.items.archive.action.href({ itemId: w.cAtVal.id }), { reason: 'broken' }),
     happened: async (db, w) => (await findItemById(db, w.cAtVal.id))?.archived_at != null,
   },
   {
     row: 'Move an item to a location',
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'responsibleOfC', 'memberOfC'],
     act: (c, w) =>
       c.post(routes.items.move.action.href({ itemId: w.item.id }), { locationId: w.annex.id }),
     happened: async (db, w) => (await findItemById(db, w.item.id))?.location_id === w.annex.id,
@@ -630,7 +650,7 @@ const rules: Rule[] = [
   },
   {
     row: "See a location's full address",
-    allowed: ['admin', 'responsibleOfC'],
+    allowed: ['admin', 'responsibleOfC', 'memberOfC'],
     denial: 'hidden',
     act: (c, w) => c.get(routes.locations.show.href({ locationId: w.local.id })),
     happened: async (_db, _w, response) => /12 rue Secrète/.test(response.text),
