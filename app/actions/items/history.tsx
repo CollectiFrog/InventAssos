@@ -16,6 +16,7 @@ const fieldLabels: Record<string, string> = {
   brand: 'marque',
   model: 'modèle',
   serial_number: 'numéro de série',
+  ref: 'référence',
   condition: 'état',
   estimated_value: 'valeur',
   description: 'description',

@@ -121,6 +121,12 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
         <div class="detail">
           <div class="detail-main">
             <dl class="facts">
+              {item.ref ? (
+                <>
+                  <dt>Référence</dt>
+                  <dd>{item.ref}</dd>
+                </>
+              ) : null}
               <dt>Catégorie</dt>
               <dd>{item.categoryName}</dd>
               {item.brand ? (

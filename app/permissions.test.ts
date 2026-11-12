@@ -35,6 +35,7 @@ import {
   canSeeItem,
   canSeeLocation,
   canSeePerson,
+  canSetItemRef,
   canStoreItemsIn,
   deletesAsPlatform,
   itemScopeOf,
@@ -484,6 +485,22 @@ describe('permissions: visibility (ADR 0021)', () => {
       deletesAsPlatform(moderator(), { owner_collectif_id: null, owner_user_id: 'u1' }),
       false,
     )
+  })
+
+  it('"Give or change an item\'s reference": its owner only, or an admin', () => {
+    assert.equal(canSetItemRef(user(), { userId: 'u1' }), true)
+    assert.equal(canSetItemRef(user(), { userId: 'u2' }), false)
+    assert.equal(
+      canSetItemRef(user({ memberCollectifIds: new Set(['c1']) }), { collectifId: 'c1' }),
+      true,
+    )
+    assert.equal(
+      canSetItemRef(user({ managedCollectifIds: new Set(['c2']) }), { userId: 'u9' }),
+      false,
+    )
+    assert.equal(canSetItemRef(moderator(), { collectifId: 'c1' }), false)
+    assert.equal(canSetItemRef(user({ isAdmin: true }), { userId: 'u9' }), true)
+    assert.equal(canSetItemRef(null, { userId: 'u1' }), false)
   })
 
   it('lets a member of C see like a responsible, without managing anything', () => {
