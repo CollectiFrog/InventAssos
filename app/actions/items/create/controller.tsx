@@ -4,7 +4,7 @@ import { createController } from 'remix/router'
 
 import { logAction } from '../../../data/audit-log.ts'
 import { listCategories } from '../../../data/categories.ts'
-import { createItem, type ItemOwner } from '../../../data/items.ts'
+import { createItem, type ItemOwner, isRefConflict, refTaken } from '../../../data/items.ts'
 import { createLocation, findLocationById, type LocationOwner } from '../../../data/locations.ts'
 import { findUserByEmail, normalizeEmail } from '../../../data/users.ts'
 import type { CurrentUser } from '../../../middleware/current-user.ts'
@@ -23,6 +23,7 @@ import {
   itemFieldsSchema,
   newLocationChoice,
   newLocationSchema,
+  refTakenMessage,
 } from '../schema.ts'
 
 /** Fields of the add form besides the item's own (owner, location, new location). */
@@ -137,51 +138,64 @@ export default createController(routes.items.create, {
       if (parsed.ok && !categoryIds.has(parsed.value.categoryId)) {
         errors.categoryId = 'Catégorie inconnue.'
       }
-      if (!parsed.ok || owner === null || Object.keys(errors).length > 0) {
+      // US-0.10.3: a reference names one object of its owner, archived ones included.
+      if (parsed.ok && owner !== null && parsed.value.ref !== null) {
+        if (await refTaken(db, owner, parsed.value.ref)) errors.ref = refTakenMessage
+      }
+      const redisplay = () => {
         const values = Object.fromEntries(
           [...itemFieldNames, ...placeFieldNames].map((n) => [n, formValue(formData, n)]),
         )
         return renderForm(context, actor, values as AddItemPageProps['values'], errors)
       }
+      if (!parsed.ok || owner === null || Object.keys(errors).length > 0) return redisplay()
 
-      const item = await db.transaction(async (tx) => {
-        let locationId = location.id
-        if (newLocation !== null) {
-          const { owner: placeOwner, name, city } = newLocation
-          const place = await createLocation(tx, placeOwner, {
-            name,
-            city,
-            address: null,
-            notes: null,
+      const item = await db
+        .transaction(async (tx) => {
+          let locationId = location.id
+          if (newLocation !== null) {
+            const { owner: placeOwner, name, city } = newLocation
+            const place = await createLocation(tx, placeOwner, {
+              name,
+              city,
+              address: null,
+              notes: null,
+            })
+            await logAction(tx, {
+              actorId: actor.id,
+              action: 'location.created',
+              entity: 'location',
+              entityId: place.id,
+              payload:
+                'collectifId' in placeOwner
+                  ? { collectifId: placeOwner.collectifId }
+                  : { userId: placeOwner.userId },
+            })
+            locationId = place.id
+          }
+          if (locationId === null) throw new Error('No location for the new item')
+          const created = await createItem(tx, {
+            fields: parsed.value,
+            locationId,
+            owner,
+            createdBy: actor.id,
           })
           await logAction(tx, {
             actorId: actor.id,
-            action: 'location.created',
-            entity: 'location',
-            entityId: place.id,
-            payload:
-              'collectifId' in placeOwner
-                ? { collectifId: placeOwner.collectifId }
-                : { userId: placeOwner.userId },
+            action: 'item.created',
+            entity: 'item',
+            entityId: created.id,
+            payload: { locationId },
           })
-          locationId = place.id
-        }
-        if (locationId === null) throw new Error('No location for the new item')
-        const created = await createItem(tx, {
-          fields: parsed.value,
-          locationId,
-          owner,
-          createdBy: actor.id,
+          return created
         })
-        await logAction(tx, {
-          actorId: actor.id,
-          action: 'item.created',
-          entity: 'item',
-          entityId: created.id,
-          payload: { locationId },
+        .catch((error: unknown) => {
+          // Another request took the reference meanwhile: same message as the check above.
+          if (!isRefConflict(error)) throw error
+          errors.ref = refTakenMessage
+          return null
         })
-        return created
-      })
+      if (item === null) return redisplay()
       session.flash('notice', `« ${item.name} » ajouté.`)
       return redirect(routes.items.show.href({ itemId: item.id }), 303)
     },

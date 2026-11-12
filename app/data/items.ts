@@ -16,6 +16,8 @@ export interface ItemFields {
   brand: string | null
   model: string | null
   serialNumber: string | null
+  /** The owner's own reference, unique per owner (US-0.10.3). */
+  ref: string | null
   condition: Item['condition']
   estimatedValue: number | null
   description: string | null
@@ -29,6 +31,7 @@ function toColumns(fields: ItemFields) {
     brand: fields.brand,
     model: fields.model,
     serial_number: fields.serialNumber,
+    ref: fields.ref,
     condition: fields.condition,
     estimated_value: fields.estimatedValue,
     description: fields.description,
@@ -51,6 +54,38 @@ export async function createItem(
     },
     { returnRow: true },
   )
+}
+
+/**
+ * Whether another item of this owner, archived ones included, already has this reference. Compared
+ * as the unique index does (`inv_fold`), so « AMP-01 » and « amp-01 » collide.
+ */
+export async function refTaken(
+  db: Database,
+  owner: ItemOwner,
+  ref: string,
+  exceptItemId: string | null = null,
+): Promise<boolean> {
+  const ownerCondition =
+    'collectifId' in owner
+      ? sql`owner_collectif_id = ${owner.collectifId}`
+      : sql`owner_user_id = ${owner.userId}`
+  const result = await db.exec(sql`
+    select 1 from items
+    where ${ownerCondition} and ref is not null and inv_fold(ref) = inv_fold(${ref})
+      and (${exceptItemId}::uuid is null or id <> ${exceptItemId}::uuid)
+    limit 1
+  `)
+  return (result.rows?.length ?? 0) > 0
+}
+
+/** True when a write failed on the per-owner reference index (a race after `refTaken`). */
+export function isRefConflict(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code
+  const constraint = String((error as { constraint?: unknown } | null)?.constraint ?? '')
+  const cause = (error as { cause?: unknown } | null)?.cause
+  if (code === '23505' && constraint.startsWith('items_ref_')) return true
+  return cause !== undefined && cause !== error && isRefConflict(cause)
 }
 
 /** Finds an item by ID, archived or not. */
@@ -299,7 +334,7 @@ export async function listInventory(
   const f = options.filters ?? {}
   const conditions = [sql`i.archived_at is null`, visibleIn(options.scope)]
   if (f.query) {
-    conditions.push(sql`inv_fold(concat_ws(' ', i.name, i.brand, i.model, i.description))
+    conditions.push(sql`inv_fold(concat_ws(' ', i.name, i.ref, i.brand, i.model, i.description))
       like '%' || inv_fold(${likeLiteral(f.query)}) || '%'`)
   }
   if (f.categoryId) conditions.push(sql`i.category_id = ${f.categoryId}`)

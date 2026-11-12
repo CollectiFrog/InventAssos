@@ -165,16 +165,20 @@ Le formulaire décrit d'abord l'objet, puis rappelle, juste au-dessus du bouton 
 sera rangé et à qui il appartient : vérifiez ces deux choix avant d'enregistrer.
 
 - **Rangé dans** : un lieu que vous gérez (le vôtre, ou celui d'un collectif dont vous êtes
-  responsable), ou **Un nouveau lieu** : décrivez-le dans **Créer un nouveau lieu** (à qui il est,
+  responsable ou membre), ou **Un nouveau lieu** : décrivez-le dans **Créer un nouveau lieu** (à qui il est,
   son nom, sa ville) et il est créé en même temps que l'objet. Sans aucun lieu, le formulaire
   commence par là. L'adresse et les notes se complètent ensuite depuis la page du lieu.
-- **Appartient à** : vous, ou un collectif dont vous êtes responsable. Le propriétaire et le lieu
+- **Appartient à** : vous, ou un collectif dont vous êtes responsable ou membre. Le propriétaire et le lieu
   peuvent être différents : votre ampli peut être rangé au local du collectif.
 - **Dépôt d'une personne** : un responsable peut ranger au local de son collectif un objet qui
   appartient à quelqu'un d'autre. Choisissez « Une autre personne » et indiquez son e-mail ; son
   compte doit être validé. La personne retrouve l'objet avec **Rechercher** et peut le modifier.
 - Le reste décrit l'objet : nom, catégorie, quantité (pour un lot d'objets identiques), marque,
-  modèle, numéro de série, état, valeur estimée et description.
+  modèle, numéro de série, référence, état, valeur estimée et description.
+- **Référence** (facultative) : votre code ou numéro d'inventaire, par exemple celui de
+  l'étiquette. Deux objets du même propriétaire ne peuvent pas porter la même référence (les
+  majuscules et les accents ne comptent pas), même si l'un est archivé. Elle sert à réimporter un
+  fichier sans créer de doublons, et **Rechercher** la trouve.
 
 Un lieu qui contient encore du matériel ne peut pas être supprimé : déplacez d'abord le matériel.
 

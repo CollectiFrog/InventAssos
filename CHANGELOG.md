@@ -33,6 +33,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - In the Membres tab, responsibles (and admins and moderators) make a member responsible or take the role back; a collectif always keeps one responsible, and a removed responsible stays a member.
 - « Quitter le collectif » in the Membres tab; the last responsible names another one first.
 - « Supprimer… » deletes an item entered by mistake for good, after a confirmation page: for its personal owner, its collectif's responsibles, admins and moderators. A member asks with « Demander la suppression », and a responsible accepts or rejects it in the Membres tab.
+- An item can carry a reference (your code or inventory number), unique per owner and found by the search; it will let a file be imported again without duplicates.
 
 ### Security
 

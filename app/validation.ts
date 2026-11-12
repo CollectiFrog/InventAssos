@@ -25,6 +25,14 @@ export function requiredText(max: number) {
     .refine((value) => value.length <= max, `${max} caractères au maximum.`)
 }
 
+/** An optional, trimmed, single-line text: blank becomes null (a reference, a code). */
+export function optionalLine(max: number) {
+  return optionalText(max).refine(
+    (value) => value === null || !hasControlCharacter(value),
+    'Une seule ligne, sans retour à la ligne.',
+  )
+}
+
 /** An optional, trimmed text: blank becomes null. */
 export function optionalText(max: number) {
   return s

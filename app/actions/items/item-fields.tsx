@@ -68,6 +68,14 @@ export function ItemFields(
           error={errors.serialNumber}
           maxLength={120}
         />
+        <TextField
+          name="ref"
+          label="Référence"
+          value={values.ref}
+          error={errors.ref}
+          maxLength={60}
+          hint="Votre code ou numéro d’inventaire. Il sert à réimporter un fichier sans doublon."
+        />
         <SelectField
           name="condition"
           label="État"

@@ -2,7 +2,7 @@ import * as s from 'remix/data-schema'
 import * as f from 'remix/data-schema/form-data'
 
 import { itemConditions } from '../../data/tables.ts'
-import { optionalText, requiredText } from '../../validation.ts'
+import { optionalLine, optionalText, requiredText } from '../../validation.ts'
 
 const quantity = s
   .defaulted(s.string(), '')
@@ -33,10 +33,14 @@ export const itemFieldsSchema = f.object({
   brand: f.field(optionalText(120)),
   model: f.field(optionalText(120)),
   serialNumber: f.field(optionalText(120)),
+  ref: f.field(optionalLine(60)),
   condition: f.field(condition),
   estimatedValue: f.field(euros),
   description: f.field(optionalText(2000)),
 })
+
+/** Error under « Référence » when the owner already uses it (US-0.10.3). */
+export const refTakenMessage = 'Un autre objet de ce propriétaire porte déjà cette référence.'
 
 /** Names of the descriptive fields, to re-display a submitted form. */
 export const itemFieldNames = [
@@ -46,6 +50,7 @@ export const itemFieldNames = [
   'brand',
   'model',
   'serialNumber',
+  'ref',
   'condition',
   'estimatedValue',
   'description',

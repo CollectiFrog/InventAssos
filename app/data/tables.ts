@@ -173,6 +173,7 @@ export const items = table({
     brand: c.text().nullable(),
     model: c.text().nullable(),
     serial_number: c.text().nullable(),
+    ref: c.text().nullable(),
     quantity: c.integer(),
     condition: c.enum(itemConditions).nullable(),
     estimated_value: c.decimal(10, 2).nullable(),
