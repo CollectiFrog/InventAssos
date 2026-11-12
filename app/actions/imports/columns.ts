@@ -1,7 +1,7 @@
 // Guessing which item field each column of an imported file holds (US-0.10.1, ADR 0026). Pure:
 // the guess is always shown, and the person can change every choice before validating.
 import { fold, singular } from './fold.ts'
-import type { InventoryField } from './format.ts'
+import { type InventoryField, inventoryHeaders } from './format.ts'
 
 /**
  * The key a column title is compared by: « N° de série » and « numéro série » give the same key.
@@ -9,16 +9,18 @@ import type { InventoryField } from './format.ts'
  * singular, common abbreviations expanded.
  */
 export function headerKey(header: string): string {
+  // A title is never long; cutting it first keeps every step linear on a hostile file.
   const spelled = header
+    .slice(0, 200)
     .replace(/n\s*[°º]|\bno\.|#/gi, ' numero ')
     .replace(/\b(?:s\/n|n\/s)\b/gi, ' serie ')
     .replaceAll('€', ' euro ')
-    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\([^()]*\)/g, ' ')
   const folded = fold(spelled)
   if (folded === '') return ''
   return folded
     .split(' ')
-    .map((word) => aliases[word] ?? word)
+    .map((word) => (Object.hasOwn(aliases, word) ? (aliases[word] ?? word) : word))
     .filter((word) => !stopWords.has(word))
     .map(singular)
     .join(' ')
@@ -42,7 +44,8 @@ const stopWords = new Set('de du des d la le les l un une en a au aux et the of 
 const blockingWords = new Set(
   (
     'proprietaire owner fournisseur supplier vendeur contact responsable emprunteur date annee ' +
-    'facture garantie achat location caution poids dimension taille longueur photo lien url'
+    'facture garantie achat location caution poids dimension taille longueur photo lien url ' +
+    'total totale prete famille'
   ).split(' '),
 )
 
@@ -276,8 +279,19 @@ export function exactSynonymKeys(): ReadonlyMap<string, InventoryField> {
   return exactKeys
 }
 
-/** How sure a column guess is: saved by this owner, an exact title, or a word in the title. */
-export type ColumnGuessSource = 'saved' | 'exact' | 'contains'
+/** Our own export's titles: an exact match on one of them beats any other synonym. */
+const ownTitles = new Map<string, InventoryField>(
+  (Object.entries(inventoryHeaders) as [InventoryField, string][]).map(([field, title]) => [
+    headerKey(title),
+    field,
+  ]),
+)
+
+/**
+ * How sure a column guess is: saved by this owner, our own title, another exact title, or a word
+ * in the title.
+ */
+export type ColumnGuessSource = 'saved' | 'own' | 'exact' | 'contains'
 
 /** The field guessed for a column, or null for « Ne pas importer ». */
 export interface ColumnGuess {
@@ -294,7 +308,7 @@ export function guessColumns(
   headers: readonly string[],
   saved: Readonly<Record<string, string>> = {},
 ): ColumnGuess[] {
-  const scores = { saved: 4, exact: 3, contains: 2 } as const
+  const scores = { saved: 5, own: 4, exact: 3, contains: 2 } as const
   const candidates: { column: number; field: InventoryField; source: ColumnGuessSource }[] = []
   headers.forEach((header, column) => {
     const key = headerKey(header)
@@ -303,8 +317,12 @@ export function guessColumns(
     if (remembered !== undefined && (fieldOrder as string[]).includes(remembered)) {
       candidates.push({ column, field: remembered as InventoryField, source: 'saved' })
     }
+    const own = ownTitles.get(key)
+    if (own !== undefined) candidates.push({ column, field: own, source: 'own' })
     const exact = exactKeys.get(key)
-    if (exact !== undefined) candidates.push({ column, field: exact, source: 'exact' })
+    if (exact !== undefined && exact !== own) {
+      candidates.push({ column, field: exact, source: 'exact' })
+    }
     const tokens = key.split(' ')
     if (tokens.some((word) => blockingWords.has(word))) return
     for (const { field, words } of containsWords) {

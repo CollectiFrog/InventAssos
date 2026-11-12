@@ -1,38 +1,81 @@
 // Reading quantities and amounts as French spreadsheets write them (ADR 0026). Pure functions.
-
-/** Every kind of space a spreadsheet may put in a number: normal, no-break, narrow, thin. */
-const spaces = /[\s   ]/g
+// When a cell could mean two numbers, it is refused rather than guessed: a wrong amount is worse
+// than a question.
 
 /** A parsed cell: blank, a value, or not readable. */
 export type CellParse<value> = { blank: true } | { blank: false; value: value } | null
 
 /**
- * A quantity: a whole number of at least 1, possibly written « x2 », « 2 pcs », « 1 000 » or
- * « 2,0 ». Blank is reported as such: 1 on creation, unchanged on update. Null when unreadable.
+ * Full-width digits and separators, as some keyboards type them, become ordinary ones. Nothing
+ * else is normalised: NFKC would also turn « 150² » or « ① » into digits.
  */
-export function parseQuantity(cell: string): CellParse<number> {
-  const text = cell.normalize('NFKC').replace(spaces, '')
-  if (text === '') return { blank: true }
-  const match =
-    /^[x×]?(\d{1,6})(?:[.,]0+)?(?:[x×]|pcs?\.?|pi[eè]ces?|u\.?|unit[eé]s?|ex\.?)?$/i.exec(text)
-  const value = match ? Number(match[1]) : 0
-  return value >= 1 ? { blank: false, value } : null
+function narrow(text: string): string {
+  return text
+    .replace(/[０-９]/g, (digit) => String(digit.charCodeAt(0) - 0xff10))
+    .replaceAll('，', ',')
+    .replaceAll('．', '.')
+}
+
+/** Spaces a spreadsheet may put between groups of digits: normal, no-break, narrow, thin. */
+const groupSpace = /[    ]/g
+
+/**
+ * The digits of a number written in groups of three, with one kind of separator (« 1 000 »,
+ * « 1.000 », « 1'000 »), or null when it is not written so.
+ */
+function groupedDigits(text: string): string | null {
+  const match = /^(\d{1,3})(?:([ .,'’])\d{3})(?:\2\d{3})*$/.exec(text)
+  return match ? text.replace(/\D/g, '') : null
 }
 
 /**
+ * A quantity: a whole number of at least 1, possibly written « x2 », « 2 pcs », « 1 000 »,
+ * « 1.000 » or « 2,0 ». Blank is reported as such: 1 on creation, unchanged on update. Null when
+ * unreadable, or when it could be read two ways (« 1 2 »).
+ */
+export function parseQuantity(cell: string): CellParse<number> {
+  const trimmed = narrow(cell).replace(groupSpace, ' ').trim()
+  if (trimmed === '') return { blank: true }
+  const unit = /^[x×]?\s*(.+?)\s*(?:[x×]|pcs?\.?|pi[eè]ces?|u\.?|unit[eé]s?|ex\.?)?$/i.exec(trimmed)
+  const core = unit?.[1] ?? ''
+  let digits: string | null = null
+  if (/^\d+$/.test(core)) digits = core
+  // « 2,0 » or « 2.00 »: a whole number written with decimals; « 2.000 » is two thousand.
+  else if (/^\d+[.,]0{1,2}$/.test(core)) digits = core.replace(/[.,]0+$/, '')
+  else digits = groupedDigits(core)
+  if (digits === null || digits.length > 6) return null
+  const value = Number(digits)
+  return value >= 1 ? { blank: false, value } : null
+}
+
+/** Currency words and tax marks that may come before or after an amount, never inside it. */
+const currencyEdge =
+  /^(?:€|eur(?:o?s)?\.?|ttc|h\.?\s?t\.?)\s*|\s*(?:€|eur(?:o?s)?\.?|ttc|h\.?\s?t\.?|,-)$/i
+
+/**
  * An amount in euros, as the item form stores it: « 1 250,50 € », « 1.250,50 », « 1,250.50 »,
- * « 12 EUR ». The last of `.` and `,` is the decimal separator when both appear; alone and once, it
- * is decimal before one or two digits and a thousands separator before exactly three. Negative,
- * bracketed and ambiguous amounts are unreadable (null).
+ * « 12 EUR », « 0,5 ». The last of `.` and `,` is the decimal separator when both appear; alone
+ * and once, it is decimal before one or two digits and a thousands separator before exactly three
+ * (« 1,250 »), but not after a zero (« 0,500 » is refused). Digits are never joined across a
+ * space or a currency word that does not separate groups of three (« 12 € 50 » is refused).
+ * Negative and bracketed amounts are refused too.
  */
 export function parseEuros(cell: string): CellParse<number> {
-  const text = cell
-    .normalize('NFKC')
-    .replace(/€|\b(?:eur|euros?|ttc|ht)\b/gi, '')
-    .replace(spaces, '')
-    .replace(/['’]/g, '')
-  if (cell.trim() === '') return { blank: true }
-  if (!/^[\d.,]+$/.test(text) || !/\d/.test(text)) return null
+  let text = narrow(cell).replace(groupSpace, ' ').trim()
+  if (text === '') return { blank: true }
+  // Currency words and tax marks at either end, as many as there are: « 150 € HT ».
+  for (let previous = ''; previous !== text; ) {
+    previous = text
+    text = text.replace(currencyEdge, '').trim()
+  }
+  if (!/^[\d.,' ’]+$/.test(text) || !/\d/.test(text)) return null
+
+  // Spaces and apostrophes only between groups of three; the decimals after them.
+  if (/[ '’]/.test(text)) {
+    const grouped = /^(\d{1,3}(?:[ '’]\d{3})+)([.,]\d{1,2})?$/.exec(text)
+    if (!grouped) return null
+    text = `${(grouped[1] ?? '').replace(/\D/g, '')}${grouped[2] ?? ''}`
+  }
 
   const lastDot = text.lastIndexOf('.')
   const lastComma = text.lastIndexOf(',')
@@ -57,17 +100,15 @@ export function parseEuros(cell: string): CellParse<number> {
       if (after.length === 1 || after.length === 2) {
         integer = before
         decimals = after
-      } else if (after.length === 3 && before !== '') integer = before + after
+      } else if (after.length === 3 && /^[1-9]\d{0,2}$/.test(before)) integer = before + after
       else return null
     }
   } else integer = text
 
   if (integer === '') integer = '0'
   if (!/^\d+$/.test(integer) || !/^\d{0,2}$/.test(decimals)) return null
-  const normalised =
-    decimals === ''
-      ? integer.replace(/^0+(?=\d)/, '')
-      : `${integer.replace(/^0+(?=\d)/, '')}.${decimals}`
+  const whole = integer.replace(/^0+(?=\d)/, '')
+  const normalised = decimals === '' ? whole : `${whole}.${decimals}`
   // The item form's rule: up to 9 999 999,99.
   if (!/^\d{1,7}(\.\d{1,2})?$/.test(normalised)) return null
   return { blank: false, value: Number(normalised) }
@@ -76,5 +117,5 @@ export function parseEuros(cell: string): CellParse<number> {
 /** True when `text` is digits in groups of three after the first, joined by `separator`. */
 function groupsOfThree(text: string, separator: string): boolean {
   const [first = '', ...rest] = text.split(separator)
-  return /^\d{1,3}$/.test(first) && rest.every((group) => /^\d{3}$/.test(group))
+  return /^[1-9]\d{0,2}$/.test(first) && rest.every((group) => /^\d{3}$/.test(group))
 }

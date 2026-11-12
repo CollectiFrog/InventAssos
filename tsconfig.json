@@ -16,5 +16,5 @@
     "jsxImportSource": "remix/component",
     "noEmit": true
   },
-  "exclude": ["dist", "docs", "node_modules"]
+  "exclude": ["dist", "docs", "node_modules", ".claude"]
 }

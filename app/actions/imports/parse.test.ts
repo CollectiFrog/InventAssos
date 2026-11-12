@@ -25,6 +25,20 @@ describe('reading quantities and amounts (ADR 0026)', () => {
     }
   })
 
+  it('reads thousands in quantities as amounts do, and never joins separate numbers', () => {
+    for (const [cell, expected] of [
+      ['2.000', 2000],
+      ['1,000', 1000],
+      ['10,000 pcs', 10000],
+      ['2,00', 2],
+    ] as const) {
+      assert.equal(value(parseQuantity(cell)), expected, cell)
+    }
+    for (const cell of ['1 2', '3\n4', '2²', '①', '1.0000']) {
+      assert.equal(parseQuantity(cell), null, cell)
+    }
+  })
+
   it('refuses quantities that are not a whole number of at least 1', () => {
     for (const cell of ['0', '-1', '2,5', 'deux', '1234567', '1e3']) {
       assert.equal(parseQuantity(cell), null, cell)
@@ -55,5 +69,40 @@ describe('reading quantities and amounts (ADR 0026)', () => {
     for (const cell of ['-5', '(5)', '1,2,3', '12,', 'abc', '12345678', '1.2.3,4', '12,345,6']) {
       assert.equal(parseEuros(cell), null, cell)
     }
+  })
+
+  it('never joins digits across a space or a currency word: refused, not 100 times too much', () => {
+    for (const cell of [
+      '12€50',
+      '12 € 50',
+      '12 euros 50',
+      '10 20',
+      '1 2500',
+      "1'2",
+      '1\n250',
+      '12 5',
+    ]) {
+      assert.equal(parseEuros(cell), null, cell)
+    }
+  })
+
+  it('reads a group of three after zero as decimals it cannot be: refused', () => {
+    for (const cell of ['0,125', '0,500', '0.500']) assert.equal(parseEuros(cell), null, cell)
+  })
+
+  it('reads currency words glued to the amount, and refuses superscripts', () => {
+    for (const [cell, expected] of [
+      ['12EUR', 12],
+      ['150ht', 150],
+      ['EUR12', 12],
+      ['12 Eur.', 12],
+      ['150 € H.T.', 150],
+      ['150,-', 150],
+      ['１２，５０', 12.5],
+      ['100 200', 100200],
+    ] as const) {
+      assert.equal(value(parseEuros(cell)), expected, cell)
+    }
+    for (const cell of ['150²', '①', '100¹']) assert.equal(parseEuros(cell), null, cell)
   })
 })

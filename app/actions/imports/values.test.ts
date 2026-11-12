@@ -87,6 +87,31 @@ describe('guessing categories, conditions and locations (ADR 0026)', () => {
     assert.equal(guessCondition('nickel', { nickel: 'new' }).condition, 'new')
   })
 
+  it('reads negations as such: no optimistic guess', () => {
+    const condition = (value: string) => guessCondition(value).condition
+    assert.equal(condition('non fonctionnel'), 'broken')
+    assert.equal(condition('marche pas'), 'broken')
+    assert.equal(condition("Hors d'usage"), 'broken')
+    assert.equal(condition('marche mal'), 'repair')
+    assert.equal(condition('To be checked'), 'repair')
+    for (const value of ['pas bon', 'sans défaut', 'aucun défaut', 'pas en panne']) {
+      assert.equal(condition(value), null, value)
+    }
+  })
+
+  it('does not take common words for the trade’s', () => {
+    for (const value of ['Vendu par lot', 'Imprimante HP', 'Imprimante laser', 'Micro-ondes']) {
+      assert.equal(category(value), 'other', value)
+    }
+    assert.equal(category('PAR LED'), 'lighting')
+    assert.equal(category('Par 64'), 'lighting')
+  })
+
+  it('survives a category whose key is an inherited property name', () => {
+    const odd = [...seeded, { id: 'constructor', name: 'Constructor', position: 8 }]
+    assert.equal(category('Micro', odd), 'sound')
+  })
+
   it('gives no condition phrase to two conditions', () => {
     const owner = new Map<string, string>()
     for (const [condition, phrases] of conditionPhraseList()) {

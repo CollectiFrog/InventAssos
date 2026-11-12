@@ -61,6 +61,29 @@ describe('guessing columns from their titles (ADR 0026)', () => {
     assert.deepEqual(fields(['Statut', 'Status']), [null, null])
   })
 
+  it('prefers our own titles to other synonyms, wherever they sit', () => {
+    assert.deepEqual(fields(['N°', 'Référence', 'Nom']), [null, 'ref', 'name'])
+    assert.deepEqual(fields(['Type', 'Catégorie']), [null, 'category'])
+    assert.deepEqual(fields(['Stock', 'Quantité']), [null, 'quantity'])
+    assert.deepEqual(fields(['Local', 'Lieu']), [null, 'location'])
+  })
+
+  it('blocks totals, loans and family names from « contains » matches', () => {
+    assert.deepEqual(fields(['Nom de famille', 'Prix total', 'Prix unitaire HT']), [
+      null,
+      null,
+      'estimatedValue',
+    ])
+  })
+
+  it('stays fast on a hostile title and ignores inherited keys', () => {
+    const started = performance.now()
+    headerKey('('.repeat(200_000))
+    assert.ok(performance.now() - started < 200)
+    assert.equal(headerKey('Constructor'), 'constructor')
+    assert.deepEqual(fields(['__proto__', 'constructor']), [null, null])
+  })
+
   it('uses each field once, the first column winning, and skips blank titles', () => {
     assert.deepEqual(fields(['Nom', 'Désignation', '', 'Nom']), ['name', null, null, null])
   })

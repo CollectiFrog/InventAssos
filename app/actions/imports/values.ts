@@ -38,7 +38,6 @@ const vocabulary: Record<string, { canonical: string[]; terms: string[] }> = {
       'enceintes',
       'haut parleur',
       'haut parleurs',
-      'hp',
       'caisson',
       'sub',
       'subwoofer',
@@ -86,7 +85,7 @@ const vocabulary: Record<string, { canonical: string[]; terms: string[] }> = {
       'projecteurs',
       'projo',
       'projos',
-      'par',
+      'par 64',
       'par led',
       'led',
       'leds',
@@ -108,7 +107,6 @@ const vocabulary: Record<string, { canonical: string[]; terms: string[] }> = {
       'guirlande',
       'guirlandes',
       'gobo',
-      'laser',
       'blinder',
       'wash',
       'spot',
@@ -354,6 +352,10 @@ const vocabulary: Record<string, { canonical: string[]; terms: string[] }> = {
       'bureau',
       'cuisine',
       'vaisselle',
+      'micro onde',
+      'micro ondes',
+      'casque de chantier',
+      'imprimante',
     ],
   },
 }
@@ -421,11 +423,12 @@ export function guessCategory(
 
   const fromVocabulary = best(
     categories.flatMap((category) => {
-      const list = vocabulary[category.id]
+      // An own property only: an admin may create a category whose key is « constructor ».
+      const list = Object.hasOwn(vocabulary, category.id) ? vocabulary[category.id] : undefined
       if (!list) return []
       // Off when the category was renamed away from what it holds.
       const nameWords = words(category.name)
-      if (!list.canonical.some((word) => nameWords.includes(word))) return []
+      if (!list.canonical.some((word) => nameWords.includes(words(word).join(' ')))) return []
       return list.terms
         .map((term) => words(term))
         .filter((termWords) => containsPhrase(valueWords, termWords))
@@ -448,6 +451,13 @@ const conditionTerms: Record<ItemCondition, string[]> = {
     'morte',
     'foutu',
     'kaput',
+    'non fonctionnel',
+    'non fonctionnelle',
+    'marche pas',
+    'marche plus',
+    'fonctionne pas',
+    'fonctionne plus',
+    'hors d usage',
     'ne fonctionne pas',
     'ne fonctionne plus',
     'ne marche pas',
@@ -486,6 +496,8 @@ const conditionTerms: Record<ItemCondition, string[]> = {
     'faulty',
     'to check',
     'maintenance',
+    'marche mal',
+    'to be checked',
   ],
   worn: [
     'use',
@@ -568,6 +580,9 @@ const conditionTerms: Record<ItemCondition, string[]> = {
   ],
 }
 
+/** Words that turn a phrase around, as `words` writes them (« sans » becomes « san »). */
+const negations = new Set(['non', 'pas', 'san', 'aucun', 'aucune', 'not', 'no'])
+
 /** Most severe first: « bon état, à réviser » is to repair, « ne fonctionne pas » is broken. */
 const severity: ItemCondition[] = ['broken', 'repair', 'worn', 'new', 'good']
 
@@ -603,6 +618,8 @@ export function guessCondition(
       return { condition, source: 'exact' }
     }
   }
+  // A word found inside a negation means its opposite (« pas bon », « sans défaut »): no guess.
+  if (valueWords.some((word) => negations.has(word))) return { condition: null, source: 'fallback' }
   for (const condition of severity) {
     const phrases = conditionPhrases.get(condition) ?? []
     if (phrases.some((phrase) => containsPhrase(valueWords, phrase))) {
