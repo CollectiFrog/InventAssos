@@ -39,6 +39,10 @@ export interface CollectifPageProps {
   canManageResponsibles: boolean
   /** Its responsibles accept, reject and remove members (US-0.8.4). */
   canManageMembers: boolean
+  /** Its responsibles, admins and moderators name and remove responsibles (US-0.8.6). */
+  canNameResponsibles: boolean
+  /** The viewer, to offer « Quitter le collectif » on their own row (US-0.8.8). */
+  viewerId: string
   /** Items the collectif owns, sorted by `sort`, shown as `view`. */
   items: ItemSummary[]
   sort: ItemSort
@@ -280,10 +284,22 @@ const roleLabels = { responsible: 'Responsable', member: 'Membre' } as const
  */
 function PeopleTab(handle: Handle<CollectifPageProps>) {
   return () => {
-    const { people, requests, canManageMembers, canManageResponsibles, collectif, csrfToken } =
-      handle.props
+    const {
+      people,
+      requests,
+      canManageMembers,
+      canNameResponsibles,
+      canManageResponsibles,
+      collectif,
+      csrfToken,
+      viewerId,
+    } = handle.props
     const slug = collectif.slug
     const responsibles = people.filter((person) => person.role === 'responsible')
+    // The last responsible keeps the role until another is named (US-0.8.6, US-0.8.8).
+    const lastResponsible = responsibles.length === 1 ? responsibles[0]?.id : undefined
+    const me = people.find((person) => person.id === viewerId)
+    const hasActions = canManageMembers || canNameResponsibles
     return (
       <>
         {canManageMembers && requests.length > 0 ? (
@@ -335,7 +351,7 @@ function PeopleTab(handle: Handle<CollectifPageProps>) {
               <tr>
                 <th scope="col">Nom</th>
                 <th scope="col">Rôle</th>
-                {canManageMembers ? (
+                {hasActions ? (
                   <th scope="col">
                     <span class="visually-hidden">Actions</span>
                   </th>
@@ -349,22 +365,54 @@ function PeopleTab(handle: Handle<CollectifPageProps>) {
                     <a href={routes.people.show.href({ userId: person.id })}>{person.name}</a>
                   </td>
                   <td data-label="Rôle">{roleLabels[person.role]}</td>
-                  {canManageMembers ? (
+                  {hasActions ? (
                     <td data-label="Actions">
-                      {person.role === 'member' ? (
-                        <form
-                          method="post"
-                          action={routes.collectifs.members.remove.href({
-                            slug,
-                            userId: person.id,
-                          })}
-                        >
-                          <CsrfField token={csrfToken} />
-                          <button type="submit" class="secondary">
-                            Retirer {person.name}
-                          </button>
-                        </form>
-                      ) : null}
+                      <span class="actions">
+                        {canNameResponsibles && person.role === 'member' ? (
+                          <form
+                            method="post"
+                            action={routes.collectifs.members.promote.href({
+                              slug,
+                              userId: person.id,
+                            })}
+                          >
+                            <CsrfField token={csrfToken} />
+                            <button type="submit" class="secondary">
+                              Nommer {person.name} responsable
+                            </button>
+                          </form>
+                        ) : null}
+                        {canNameResponsibles &&
+                        person.role === 'responsible' &&
+                        person.id !== lastResponsible ? (
+                          <form
+                            method="post"
+                            action={routes.collectifs.members.demote.href({
+                              slug,
+                              userId: person.id,
+                            })}
+                          >
+                            <CsrfField token={csrfToken} />
+                            <button type="submit" class="secondary">
+                              Retirer le rôle de responsable à {person.name}
+                            </button>
+                          </form>
+                        ) : null}
+                        {canManageMembers && person.role === 'member' ? (
+                          <form
+                            method="post"
+                            action={routes.collectifs.members.remove.href({
+                              slug,
+                              userId: person.id,
+                            })}
+                          >
+                            <CsrfField token={csrfToken} />
+                            <button type="submit" class="secondary">
+                              Retirer {person.name}
+                            </button>
+                          </form>
+                        ) : null}
+                      </span>
                     </td>
                   ) : null}
                 </tr>
@@ -376,12 +424,34 @@ function PeopleTab(handle: Handle<CollectifPageProps>) {
             <dd>{collectif.contact_phone ?? 'non renseigné'}</dd>
           </dl>
         </section>
+        {me ? (
+          <section aria-labelledby="quitter">
+            <h2 id="quitter">Quitter le collectif</h2>
+            {me.id === lastResponsible ? (
+              <p class="status">
+                Vous êtes le seul responsable : nommez d’abord un membre responsable pour pouvoir
+                partir.
+              </p>
+            ) : (
+              <form method="post" action={routes.collectifs.members.leave.href({ slug })}>
+                <CsrfField token={csrfToken} />
+                <p class="status">
+                  Vous ne verrez plus son matériel, ses lieux ni ses membres. Votre propre matériel
+                  reste à vous.
+                </p>
+                <button type="submit" class="danger">
+                  Quitter « {collectif.name} »
+                </button>
+              </form>
+            )}
+          </section>
+        ) : null}
         {canManageResponsibles && responsibles.length > 0 ? (
           <section aria-labelledby="gerer-responsables">
-            <h2 id="gerer-responsables">Gérer les responsables</h2>
+            <h2 id="gerer-responsables">Remplacer un responsable</h2>
             <p class="status">
-              Un collectif actif garde toujours au moins un responsable : pour retirer le dernier,
-              indiquez l’e-mail d’un utilisateur validé qui le remplace.
+              Pour la plateforme, quand le collectif n’a pas de membre à nommer : indiquez l’e-mail
+              d’un utilisateur validé qui devient responsable. La personne retirée reste membre.
             </p>
             <ul class="cards">
               {responsibles.map((r) => (

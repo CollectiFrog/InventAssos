@@ -113,6 +113,21 @@ collectif. Chaque responsable reçoit un e-mail, et la demande apparaît en têt
 Seuls les responsables du collectif décident : ni les administrateurs ni les modérateurs de la
 plateforme. Chaque décision est inscrite au journal.
 
+## Nommer les responsables
+
+Dans l'onglet **Membres**, un responsable peut **Nommer** un membre **responsable** : il gère alors
+aussi les lieux, les membres et la présentation du collectif. **Retirer le rôle de responsable**
+rend un responsable simple membre ; il garde l'accès au matériel. Un collectif garde toujours au
+moins un responsable : le dernier ne peut pas perdre ce rôle tant qu'un autre n'est pas nommé. Les
+administrateurs et les modérateurs peuvent faire de même pour tout collectif, pour qu'aucun ne
+reste sans responsable. La personne concernée est prévenue par e-mail.
+
+## Quitter un collectif
+
+En bas de l'onglet **Membres**, **Quitter** le collectif : vous ne voyez plus son matériel, ses
+lieux ni ses membres ; votre propre matériel reste à vous. Le seul responsable d'un collectif doit
+d'abord nommer un autre responsable.
+
 ## Modifier la présentation d'un collectif
 
 Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y

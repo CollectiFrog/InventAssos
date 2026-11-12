@@ -7,14 +7,15 @@ import { findCollectifById } from '../../../data/collectifs.ts'
 import {
   countActiveResponsiblesForUpdate,
   findResponsible,
+  setMembershipRole,
   setResponsible,
 } from '../../../data/members.ts'
 import { findUserByEmail, findUserById } from '../../../data/users.ts'
 import { sendSafely } from '../../../mail/mailer.ts'
 import {
   responsibleApprovedMail,
+  responsibleDemotedMail,
   responsibleRejectedMail,
-  responsibleRemovedMail,
 } from '../../../mail/messages.ts'
 import { canManageResponsibles } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
@@ -142,11 +143,12 @@ export default createController(routes.admin.responsibles, {
           const remaining = (await countActiveResponsiblesForUpdate(tx, collectif.id)) - 1
           if (collectif.status === 'active' && remaining < 1) throw new RemovalRefused()
 
-          await setResponsible(tx, {
+          // A removed responsible stays a member of the collectif (US-0.8.6).
+          await setMembershipRole(tx, {
             userId: user.id,
             collectifId: collectif.id,
-            status: 'removed',
-            validatedBy: actor.id,
+            role: 'member',
+            decidedBy: actor.id,
           })
           await logAction(tx, {
             actorId: actor.id,
@@ -165,7 +167,7 @@ export default createController(routes.admin.responsibles, {
         return redirect(backUrl, 303)
       }
 
-      await sendSafely(mailer, responsibleRemovedMail(user.email, collectif.name))
+      await sendSafely(mailer, responsibleDemotedMail(user.email, collectif.name))
       session.flash('notice', `${user.name} n’est plus responsable de « ${collectif.name} ».`)
       return redirect(backUrl, 303)
     },

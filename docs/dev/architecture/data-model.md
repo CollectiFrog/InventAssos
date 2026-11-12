@@ -35,7 +35,7 @@ erDiagram
 
 `audit_log` actions so far: `account.approved|rejected|disabled|enabled`,
 `user.moderator_named|moderator_removed`, `collectif.approved|rejected|updated`,
-`member.requested|approved|rejected|removed`,
+`member.requested|approved|rejected|removed|left`, `responsible.named`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
 `item.created|updated|moved|archived|contacted`. Payloads hold IDs, enum values and field names
 only; `readHistory()` resolves names at display time. The item page shows an allow-list

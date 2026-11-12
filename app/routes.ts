@@ -34,6 +34,9 @@ export const routes = route({
       approve: post('/collectifs/:slug/membres/:userId/accepter'),
       reject: post('/collectifs/:slug/membres/:userId/refuser'),
       remove: post('/collectifs/:slug/membres/:userId/retirer'),
+      promote: post('/collectifs/:slug/membres/:userId/nommer-responsable'),
+      demote: post('/collectifs/:slug/membres/:userId/retirer-responsable'),
+      leave: post('/collectifs/:slug/quitter'),
     },
   },
   inventory: {

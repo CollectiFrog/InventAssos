@@ -247,3 +247,15 @@ export async function countActiveResponsibles(db: Database): Promise<Map<string,
   `)
   return new Map((result.rows ?? []).map((row) => [String(row.collectif_id), Number(row.n)]))
 }
+
+/** Changes an active person's role in a collectif (US-0.8.6): member ↔ responsible. */
+export async function setMembershipRole(
+  db: Database,
+  input: { userId: string; collectifId: string; role: MembershipRole; decidedBy: string },
+): Promise<void> {
+  await db.exec(sql`
+    update collectif_members
+    set role = ${input.role}, validated_by = ${input.decidedBy}, validated_at = now()
+    where user_id = ${input.userId} and collectif_id = ${input.collectifId} and status = 'active'
+  `)
+}

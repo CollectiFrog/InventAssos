@@ -11,6 +11,7 @@ import {
   canEditItem,
   canEditOwnProfile,
   canEnableAccount,
+  canLeaveCollectif,
   canManageCategories,
   canManageCollectifLocations,
   canManageMembers,
@@ -18,6 +19,7 @@ import {
   canManageResponsibles,
   canModerateItem,
   canNameModerators,
+  canNameResponsibles,
   canRequestCollectif,
   canRequestMembership,
   canRequestResponsibility,
@@ -180,6 +182,22 @@ describe('permissions: accounts', () => {
       canRequestResponsibility(user({ memberCollectifIds: new Set(['c1']) }), 'c1'),
       false,
     )
+  })
+
+  it('"Make a member of C responsible, remove a responsible of C": its responsibles and staff', () => {
+    assert.equal(canNameResponsibles(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canNameResponsibles(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canNameResponsibles(moderator(), 'c1'), true)
+    assert.equal(canNameResponsibles(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canNameResponsibles(user({ managedCollectifIds: new Set(['c2']) }), 'c1'), false)
+    assert.equal(canNameResponsibles(null, 'c1'), false)
+  })
+
+  it('"Leave C": any person of C', () => {
+    assert.equal(canLeaveCollectif(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canLeaveCollectif(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canLeaveCollectif(user(), 'c1'), false)
+    assert.equal(canLeaveCollectif(user({ isAdmin: true }), 'c1'), false)
   })
 
   it('"Approve, reject or remove a responsible of C": admin and moderator, not a responsible', () => {

@@ -29,6 +29,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Admins and moderators can archive an abusive item with « Retiré par la modération »; its owner receives their message by e-mail.
 - « Demander à rejoindre » on a collectif's page: its responsibles accept or reject the request in the new Membres tab, which lists everyone with their role and the pending requests first; members see the collectif's equipment, locations and people.
 - Members of a collectif add, edit, move and archive its equipment, store it in its locations and see their full address; its locations, members and profile stay with its responsibles.
+- In the Membres tab, responsibles (and admins and moderators) make a member responsible or take the role back; a collectif always keeps one responsible, and a removed responsible stays a member.
+- « Quitter le collectif » in the Membres tab; the last responsible names another one first.
 
 ### Changed
 

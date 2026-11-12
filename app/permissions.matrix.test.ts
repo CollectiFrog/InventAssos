@@ -339,6 +339,31 @@ const rules: Rule[] = [
     happened: async (db, w) => (await findMembership(db, w.mia.id, w.c.id))?.status === 'removed',
   },
   {
+    // US-0.8.6: C's responsibles, and the platform so that C never lacks one.
+    row: 'Make a member of C responsible, remove a responsible of C',
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    act: (c, w) =>
+      c.post(routes.collectifs.members.promote.href({ slug: w.c.slug, userId: w.mia.id })),
+    happened: async (db, w) => (await findMembership(db, w.mia.id, w.c.id))?.role === 'responsible',
+  },
+  {
+    row: 'Make a member of C responsible, remove a responsible of C (remove)',
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    act: (c, w) =>
+      c.post(routes.collectifs.members.demote.href({ slug: w.c.slug, userId: w.cora.id })),
+    happened: async (db, w) => (await findMembership(db, w.cora.id, w.c.id))?.role === 'member',
+  },
+  {
+    // US-0.8.8: any person of C; C keeps Cora as responsible when Rita leaves.
+    row: 'Leave C',
+    allowed: ['responsibleOfC', 'memberOfC'],
+    act: (c, w) => c.post(routes.collectifs.members.leave.href({ slug: w.c.slug })),
+    happened: async (db) => {
+      const rows = await db.exec(sql`select 1 from audit_log where action = 'member.left'`)
+      return (rows.rows?.length ?? 0) > 0
+    },
+  },
+  {
     row: "Edit C's profile",
     allowed: ['admin', 'responsibleOfC'],
     act: (c, w) =>
