@@ -1,0 +1,80 @@
+import * as assert from 'remix/assert'
+import { describe, it } from 'remix/test'
+
+import {
+  CsvError,
+  decodeCsv,
+  neutralizeFormula,
+  parseCsv,
+  restoreNeutralized,
+  toCsv,
+} from './csv.ts'
+
+const bytes = (text: string) => new TextEncoder().encode(text)
+
+describe('CSV (ADR 0026)', () => {
+  it('reads `;` as French spreadsheets write it, and `,` and tabs', () => {
+    assert.deepEqual(parseCsv('Nom;Qté\r\nConsole;2\r\n'), {
+      delimiter: ';',
+      rows: [
+        ['Nom', 'Qté'],
+        ['Console', '2'],
+      ],
+    })
+    assert.equal(parseCsv('Nom,Qté\nConsole,2').delimiter, ',')
+    assert.deepEqual(parseCsv('Nom\tQté\nConsole\t2').rows[1], ['Console', '2'])
+  })
+
+  it('prefers `;` when a line holds decimal commas', () => {
+    assert.deepEqual(parseCsv('Nom;Valeur\nAmpli;150,50').rows[1], ['Ampli', '150,50'])
+  })
+
+  it('keeps separators, quotes and line breaks inside quoted fields', () => {
+    const table = parseCsv('Nom;Description\n"Câble; 10 m";"Dit ""le long""\nsur deux lignes"\n')
+    assert.deepEqual(table.rows[1], ['Câble; 10 m', 'Dit "le long"\nsur deux lignes'])
+  })
+
+  it('trims cells, drops blank lines and keeps short rows as they are', () => {
+    const table = parseCsv('Nom ; Qté\n\n ;\n  Micro  ;1\nPied\n')
+    assert.deepEqual(table.rows, [['Nom', 'Qté'], ['Micro', '1'], ['Pied']])
+  })
+
+  it('keeps a quote that is not at the start of a cell', () => {
+    assert.deepEqual(parseCsv('Nom\nÉcran 24" LED').rows[1], ['Écran 24" LED'])
+  })
+
+  it('refuses an unclosed quote and a binary file, in French', () => {
+    assert.throws(() => parseCsv('Nom\n"jamais fermé'), CsvError)
+    assert.throws(() => decodeCsv(new Uint8Array([80, 75, 3, 4, 0, 0])), /binaire/)
+  })
+
+  it('decodes UTF-8 with or without BOM, and Windows-1252', () => {
+    assert.equal(decodeCsv(bytes('﻿Éclairage')), 'Éclairage')
+    assert.equal(decodeCsv(bytes('Éclairage')), 'Éclairage')
+    assert.equal(decodeCsv(new Uint8Array([0xc9, 0x63, 0x6c, 0x61, 0x69, 0x72])), 'Éclair')
+  })
+
+  it('makes formulas inert in exports, and numbers stay numbers', () => {
+    assert.equal(neutralizeFormula('=HYPERLINK("http://x")'), '\'=HYPERLINK("http://x")')
+    assert.equal(neutralizeFormula('+33 6 12'), "'+33 6 12")
+    assert.equal(neutralizeFormula('@cmd'), "'@cmd")
+    assert.equal(neutralizeFormula('-3'), '-3')
+    assert.equal(neutralizeFormula('-3+cmd'), "'-3+cmd")
+    assert.equal(neutralizeFormula('Console'), 'Console')
+    assert.equal(restoreNeutralized("'=1+1"), '=1+1')
+    assert.equal(restoreNeutralized("'Console"), "'Console")
+  })
+
+  it('writes what it reads back: BOM, `;`, CRLF, quotes where needed', () => {
+    const rows = [
+      ['Nom', 'Description'],
+      ['Câble; 10 m', 'Dit "le long"\nsur deux lignes'],
+      ['=SOMME(A1)', ' bord '],
+    ]
+    const csv = toCsv(rows)
+    assert.ok(csv.startsWith('﻿Nom;Description\r\n'))
+    const back = parseCsv(decodeCsv(bytes(csv))).rows
+    assert.deepEqual(back[1], rows[1])
+    assert.deepEqual(back[2]?.map(restoreNeutralized), ['=SOMME(A1)', 'bord'])
+  })
+})
