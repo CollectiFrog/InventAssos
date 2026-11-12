@@ -55,8 +55,10 @@ sur un téléphone, à gauche sur un ordinateur).
 - Votre association n'est pas encore inscrite : **Déclarer un collectif**, avec son nom, sa ville,
   une description et éventuellement un téléphone de contact. Un administrateur vérifie la demande ;
   une fois validée, vous devenez **responsable** du collectif.
-- Votre association est déjà inscrite : ouvrez sa page et choisissez **Demander à devenir
-  responsable**. Un administrateur valide la demande. Une seule demande à la fois par collectif ;
-  si elle est refusée, vous pouvez la refaire.
+- Votre association est déjà inscrite : ouvrez sa page et choisissez **Demander à rejoindre**. Ses
+  responsables reçoivent votre demande ; une fois acceptée, vous voyez son matériel, ses lieux et ses
+  membres. Une seule demande à la fois par collectif ; si elle est refusée, vous pouvez la refaire.
+- Si le collectif n'a plus de responsable joignable et que vous le gérez, **Demander à devenir
+  responsable** : un administrateur ou un modérateur examine la demande.
 - Deux collectifs ne peuvent pas porter le même nom (les accents, majuscules et la ponctuation ne
   comptent pas).

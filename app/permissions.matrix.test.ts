@@ -16,7 +16,13 @@ import { findCategory, listCategories } from './data/categories.ts'
 import { findCollectifById } from './data/collectifs.ts'
 import { archiveItem, findItemById } from './data/items.ts'
 import { findLocationById } from './data/locations.ts'
-import { findResponsible, setResponsible } from './data/members.ts'
+import {
+  decideMembership,
+  findMembership,
+  findResponsible,
+  requestMembership,
+  setResponsible,
+} from './data/members.ts'
 import { createUser, findUserById, setUserRole, setUserStatus } from './data/users.ts'
 import { routes } from './routes.ts'
 
@@ -25,6 +31,7 @@ type Actor =
   | 'moderator'
   | 'responsibleOfC'
   | 'responsibleOfD'
+  | 'memberOfC'
   | 'validated'
   | 'pending'
   | 'visitor'
@@ -33,6 +40,7 @@ const actors: Actor[] = [
   'moderator',
   'responsibleOfC',
   'responsibleOfD',
+  'memberOfC',
   'validated',
   'pending',
   'visitor',
@@ -43,6 +51,7 @@ const emails: Record<Exclude<Actor, 'visitor'>, string> = {
   moderator: 'mona@example.org',
   responsibleOfC: 'rita@example.org',
   responsibleOfD: 'otto@example.org',
+  memberOfC: 'mia@example.org',
   validated: 'val@example.org',
   pending: 'pat@example.org',
 }
@@ -115,6 +124,17 @@ async function seed(db: Database) {
     createdBy: cora.id,
     name: 'Perceuse de Cora',
   })
+  // Members (US-0.8.3): Mia belongs to C; Pia asked to join and waits.
+  const mia = await createActiveUser(db, 'Mia', emails.memberOfC)
+  await requestMembership(db, mia.id, c.id)
+  await decideMembership(db, {
+    userId: mia.id,
+    collectifId: c.id,
+    status: 'active',
+    decidedBy: rita.id,
+  })
+  const pia = await createActiveUser(db, 'Pia', 'pia@example.org')
+  await requestMembership(db, pia.id, c.id)
   const valOwn = await createTestItem(db, {
     locationId: valHome.id,
     owner: { userId: val.id },
@@ -122,6 +142,8 @@ async function seed(db: Database) {
     name: 'Scie de Val',
   })
   return {
+    mia,
+    pia,
     max,
     gil,
     cora,
@@ -242,7 +264,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Edit own profile (name, phone)',
-    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated', 'memberOfC'],
     act: (c) => c.post(routes.account.profile.action.href(), { name: 'Renommé', phone: '' }),
     happened: async (db) => {
       const rows = await db.exec(sql`select 1 from users where name = 'Renommé'`)
@@ -251,7 +273,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Request a new collectif',
-    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated', 'memberOfC'],
     act: (c) =>
       c.post(routes.collectifs.request.action.href(), { name: 'Collectif F', city: 'Vitré' }),
     happened: async (db) => {
@@ -275,7 +297,7 @@ const rules: Rule[] = [
     happened: async (db) => {
       const rows = await db.exec(sql`
         select 1 from collectif_members r join users u on u.id = r.user_id
-        where r.status = 'pending' and u.email <> 'zed@example.org'
+        where r.role = 'responsible' and r.status = 'pending' and u.email <> 'zed@example.org'
       `)
       return (rows.rows?.length ?? 0) > 0
     },
@@ -286,6 +308,35 @@ const rules: Rule[] = [
     act: (c, w) =>
       c.post(routes.admin.responsibles.approve.href({ collectifId: w.c.id, userId: w.zed.id })),
     happened: async (db, w) => (await findResponsible(db, w.zed.id, w.c.id))?.status === 'active',
+  },
+  {
+    // US-0.8.3: anyone validated who does not belong to C yet.
+    row: 'Ask to join C',
+    allowed: ['admin', 'moderator', 'responsibleOfD', 'validated'],
+    act: (c, w) => c.post(routes.collectifs.join.href({ slug: w.c.slug })),
+    happened: async (db, w) => {
+      const rows = await db.exec(sql`
+        select 1 from collectif_members
+        where collectif_id = ${w.c.id} and role = 'member' and status = 'pending'
+          and user_id <> ${w.pia.id}
+      `)
+      return (rows.rows?.length ?? 0) > 0
+    },
+  },
+  {
+    // US-0.8.4: C's responsibles only; neither the platform nor C's members.
+    row: 'Accept, reject or remove a member of C',
+    allowed: ['responsibleOfC'],
+    act: (c, w) =>
+      c.post(routes.collectifs.members.approve.href({ slug: w.c.slug, userId: w.pia.id })),
+    happened: async (db, w) => (await findMembership(db, w.pia.id, w.c.id))?.status === 'active',
+  },
+  {
+    row: 'Accept, reject or remove a member of C (remove)',
+    allowed: ['responsibleOfC'],
+    act: (c, w) =>
+      c.post(routes.collectifs.members.remove.href({ slug: w.c.slug, userId: w.mia.id })),
+    happened: async (db, w) => (await findMembership(db, w.mia.id, w.c.id))?.status === 'removed',
   },
   {
     row: "Edit C's profile",
@@ -329,7 +380,7 @@ const rules: Rule[] = [
   },
   {
     row: 'Create, edit, delete own personal locations',
-    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated', 'memberOfC'],
     act: (c) =>
       c.post(routes.locations.create.action.href(), {
         owner: 'me',
@@ -496,14 +547,14 @@ const rules: Rule[] = [
   },
   {
     row: 'See an item, its owner, the city of its location',
-    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'memberOfC'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.item.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Projecteur C/.test(response.text) && /Rennes/.test(response.text),
   },
   {
     row: 'See an item, its owner, the city of its location (owned by a person of C)',
-    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'memberOfC'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.coraItem.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Perceuse de Cora/.test(response.text),
@@ -517,14 +568,14 @@ const rules: Rule[] = [
   },
   {
     row: "See an item, its owner, the city of its location (C's item in own location)",
-    allowed: ['admin', 'moderator', 'responsibleOfC', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'validated', 'memberOfC'],
     act: (c, w) => c.get(routes.items.show.href({ itemId: w.cAtVal.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Pied de C/.test(response.text),
   },
   {
     row: "See a person's page and phone",
-    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'memberOfC'],
     act: (c, w) => c.get(routes.people.show.href({ userId: w.cora.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /<h1>Cora<\/h1>/.test(response.text),
@@ -538,14 +589,14 @@ const rules: Rule[] = [
   },
   {
     row: 'See the collectifs directory (name, city, text)',
-    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated', 'memberOfC'],
     act: (c) => c.get(routes.collectifs.index.href()),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Collectif C/.test(response.text),
   },
   {
     row: "See C's equipment, locations and people",
-    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'memberOfC'],
     denial: 'hidden',
     // The three tabs of C's page together (US-0.7.5).
     act: async (c, w) => {
@@ -566,13 +617,13 @@ const rules: Rule[] = [
   {
     // Val sees C's local: her amp is stored there, and its page links to the place.
     row: 'See a location (name, city)',
-    allowed: ['admin', 'moderator', 'responsibleOfC', 'validated'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'validated', 'memberOfC'],
     act: (c, w) => c.get(routes.locations.show.href({ locationId: w.local.id })),
     happened: async (_db, _w, response) => response.status === 200 && /Local C/.test(response.text),
   },
   {
     row: "See a location (name, city) (someone else's home)",
-    allowed: ['admin', 'moderator', 'responsibleOfC'],
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'memberOfC'],
     act: (c, w) => c.get(routes.locations.show.href({ locationId: w.coraHome.id })),
     happened: async (_db, _w, response) =>
       response.status === 200 && /Chez Cora/.test(response.text),

@@ -1,7 +1,7 @@
 import { getCsrfToken } from 'remix/middleware/csrf'
 import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
-
+import { logAction } from '../../data/audit-log.ts'
 import {
   findActiveCollectifBySlug,
   listPendingRequestsBy,
@@ -9,14 +9,24 @@ import {
 } from '../../data/collectifs.ts'
 import { listItemsDepositedAt, listItemsOwnedBy } from '../../data/items.ts'
 import { listCollectifLocations, redactLocation } from '../../data/locations.ts'
-import { findResponsible, listActiveResponsibles, setResponsible } from '../../data/members.ts'
-import { newResponsibleRequestMail } from '../../mail/messages.ts'
+import {
+  findMembership,
+  listCollectifPeople,
+  listMembershipRequests,
+  listResponsibleEmails,
+  requestMembership,
+  setResponsible,
+} from '../../data/members.ts'
+import { sendSafely } from '../../mail/mailer.ts'
+import { membershipRequestMail, newResponsibleRequestMail } from '../../mail/messages.ts'
 import type { AppContext } from '../../middleware/index.ts'
 import {
   canAssignItemOwner,
   canEditCollectif,
   canManageCollectifLocations,
+  canManageMembers,
   canManageResponsibles,
+  canRequestMembership,
   canRequestResponsibility,
   canSeeCollectifInventory,
   canSeeFullAddress,
@@ -42,9 +52,16 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
   const collectif = await findActiveCollectifBySlug(db, slug)
   if (collectif === null) return notFound(context)
 
-  const link = await findResponsible(db, actor.id, collectif.id)
+  const link = await findMembership(db, actor.id, collectif.id)
   const membership: Membership =
-    link?.status === 'active' ? 'responsible' : link?.status === 'pending' ? 'pending' : 'none'
+    link?.status === 'active'
+      ? link.role
+      : link?.status === 'pending'
+        ? link.role === 'member'
+          ? 'pendingMember'
+          : 'pendingResponsible'
+        : 'none'
+  const managesMembers = canManageMembers(actor, collectif.id)
   const notice = context.session.get('notice')
   // Outsiders get the directory entry only: no equipment, locations or people (ADR 0021).
   const inside = canSeeCollectifInventory(actor, collectif.id)
@@ -76,6 +93,7 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
       canAddItems={canAssignItemOwner(actor, { collectifId: collectif.id })}
       canManageLocations={canManageCollectifLocations(actor, collectif.id)}
       canManageResponsibles={canManageResponsibles(actor)}
+      canManageMembers={managesMembers}
       items={items}
       sort={sort}
       view={parseItemView(params.get('vue'))}
@@ -90,8 +108,9 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
             )
           : []
       }
-      responsibles={
-        inside && tab === 'people' ? await listActiveResponsibles(db, collectif.id) : []
+      people={inside && tab === 'people' ? await listCollectifPeople(db, collectif.id) : []}
+      requests={
+        managesMembers && tab === 'people' ? await listMembershipRequests(db, collectif.id) : []
       }
       notice={typeof notice === 'string' ? notice : undefined}
     />,
@@ -110,7 +129,7 @@ export default createController(routes.collectifs, {
       const query = context.url.searchParams.get('q')?.trim().slice(0, 100) ?? ''
       const all = await searchActiveCollectifs(db)
       const matching = query ? await searchActiveCollectifs(db, query) : all
-      const isMine = (c: { id: string }) => actor.managedCollectifIds.has(c.id)
+      const isMine = (c: { id: string }) => actor.memberCollectifIds.has(c.id)
       const notice = context.session.get('notice')
       return context.render(
         <CollectifsPage
@@ -127,6 +146,8 @@ export default createController(routes.collectifs, {
     show: (context) => renderCollectif(context, context.params.slug, 'items'),
     places: (context) => renderCollectif(context, context.params.slug, 'places'),
     people: (context) => renderCollectif(context, context.params.slug, 'people'),
+    oldPeople: (context) =>
+      redirect(routes.collectifs.people.href({ slug: context.params.slug }), 301),
 
     // US-0.3.3: one open request per person and collectif; a rejected or removed person may ask again.
     async requestResponsibility(context) {
@@ -139,7 +160,7 @@ export default createController(routes.collectifs, {
       if (!canRequestResponsibility(actor, collectif.id)) return forbidden(context)
 
       const showUrl = routes.collectifs.show.href({ slug: collectif.slug })
-      const existing = await findResponsible(db, actor.id, collectif.id)
+      const existing = await findMembership(db, actor.id, collectif.id)
       if (existing?.status === 'pending') {
         session.flash('notice', 'Vous avez déjà une demande en cours pour ce collectif.')
         return redirect(showUrl, 303)
@@ -154,6 +175,53 @@ export default createController(routes.collectifs, {
         newResponsibleRequestMail(admins, reviewUrl),
       )
       session.flash('notice', 'Demande envoyée : un administrateur va l’examiner.')
+      return redirect(showUrl, 303)
+    },
+
+    // US-0.8.3: one open request per person and collectif; its responsibles decide, by e-mail.
+    async join(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+
+      const { db, mailer, settings, session } = context
+      const collectif = await findActiveCollectifBySlug(db, context.params.slug)
+      if (collectif === null) return notFound(context)
+      if (!canRequestMembership(actor, collectif.id)) return forbidden(context)
+
+      const showUrl = routes.collectifs.show.href({ slug: collectif.slug })
+      const existing = await findMembership(db, actor.id, collectif.id)
+      if (existing?.status === 'pending') {
+        session.flash('notice', 'Vous avez déjà une demande en cours pour ce collectif.')
+        return redirect(showUrl, 303)
+      }
+
+      const limit = await hitUserRequest(db, settings, actor.id)
+      if (!limit.allowed) return tooManyRequests(context, limit.retryAfterSeconds)
+
+      await db.transaction(async (tx) => {
+        await requestMembership(tx, actor.id, collectif.id)
+        await logAction(tx, {
+          actorId: actor.id,
+          action: 'member.requested',
+          entity: 'collectif',
+          entityId: collectif.id,
+          payload: { userId: actor.id },
+        })
+      })
+      const membersUrl = settings.appUrl + routes.collectifs.people.href({ slug: collectif.slug })
+      // One e-mail per responsible: co-responsibles never see each other's address.
+      for (const to of await listResponsibleEmails(db, collectif.id)) {
+        await sendSafely(
+          mailer,
+          membershipRequestMail({
+            to,
+            personName: actor.name,
+            collectifName: collectif.name,
+            membersUrl,
+          }),
+        )
+      }
+      session.flash('notice', 'Demande envoyée : un responsable du collectif va l’examiner.')
       return redirect(showUrl, 303)
     },
   },

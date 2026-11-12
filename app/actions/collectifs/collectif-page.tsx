@@ -1,6 +1,7 @@
 import type { Handle } from 'remix/component'
 
 import type { ItemSort, ItemSummary } from '../../data/items.ts'
+import type { CollectifPerson, MembershipRequest } from '../../data/members.ts'
 import type { Collectif, Location } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
@@ -10,7 +11,13 @@ import { Tabs } from '../../ui/tabs.tsx'
 import { ItemList } from '../items/items-pages.tsx'
 
 /** The viewer's relation to the collectif, which decides the call to action. */
-export type Membership = 'responsible' | 'pending' | 'none'
+export type Membership = 'responsible' | 'member' | 'pendingMember' | 'pendingResponsible' | 'none'
+
+const dateFormat = new Intl.DateTimeFormat('fr-FR', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'Europe/Paris',
+})
 
 /** The tabs of a collectif's page, each at its own URL (US-0.7.5). */
 export type CollectifTab = 'items' | 'places' | 'people'
@@ -30,6 +37,8 @@ export interface CollectifPageProps {
   canManageLocations: boolean
   /** Platform admins see a remove form per responsible (US-0.3.6). */
   canManageResponsibles: boolean
+  /** Its responsibles accept, reject and remove members (US-0.8.4). */
+  canManageMembers: boolean
   /** Items the collectif owns, sorted by `sort`, shown as `view`. */
   items: ItemSummary[]
   sort: ItemSort
@@ -40,14 +49,16 @@ export interface CollectifPageProps {
   deposits: ItemSummary[]
   /** Its locations (Lieux tab only). */
   locations: Location[]
-  /** Its responsibles (Responsables tab only). */
-  responsibles: { id: string; name: string }[]
+  /** Its responsibles and members (Membres tab only). */
+  people: CollectifPerson[]
+  /** Pending requests to join, for its responsibles (Membres tab only). */
+  requests: MembershipRequest[]
   /** « Retour » on phones (`backHref`). */
   back: string
   notice?: string
 }
 
-/** A collectif's page: header, then tabs Matériel, Lieux, Responsables for its people. */
+/** A collectif's page: header, then tabs Matériel, Lieux, Membres for its people. */
 export function CollectifPage(handle: Handle<CollectifPageProps>) {
   return () => {
     const p = handle.props
@@ -76,6 +87,8 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
                 {facts.join(' · ')}
                 {membership === 'responsible' ? (
                   <span class="badge">Vous êtes responsable</span>
+                ) : membership === 'member' ? (
+                  <span class="badge">Vous êtes membre</span>
                 ) : null}
               </p>
             ) : null}
@@ -112,7 +125,8 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
                 { label: 'Matériel', href: routes.collectifs.show.href({ slug }), tab: 'items' },
                 { label: 'Lieux', href: routes.collectifs.places.href({ slug }), tab: 'places' },
                 {
-                  label: 'Responsables',
+                  label:
+                    p.requests.length > 0 ? `Membres · ${p.requests.length} en attente` : 'Membres',
                   href: routes.collectifs.people.href({ slug }),
                   tab: 'people',
                 },
@@ -124,24 +138,37 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           </>
         ) : (
           <p class="status">
-            Le matériel, les lieux et les personnes de ce collectif sont visibles par ses
-            responsables uniquement.
+            Le matériel, les lieux et les membres de ce collectif ne sont visibles que par ses
+            membres. Une fois votre demande acceptée par un responsable, vous verrez son inventaire.
           </p>
         )}
-        {membership === 'pending' ? (
+        {membership === 'pendingMember' ? (
+          <p class="status">
+            Votre demande pour rejoindre ce collectif est en cours : un responsable va l’examiner.
+          </p>
+        ) : membership === 'pendingResponsible' ? (
           <p class="status">Votre demande pour devenir responsable est en cours d’examen.</p>
         ) : membership === 'none' ? (
-          <form
-            method="post"
-            action={routes.collectifs.requestResponsibility.href({ slug })}
-            class="stack"
-          >
-            <CsrfField token={p.csrfToken} />
-            <p>Vous faites partie de ce collectif et voulez gérer son matériel ?</p>
-            <button type="submit" class="secondary">
-              Demander à devenir responsable
-            </button>
-          </form>
+          <div class="stack">
+            <form method="post" action={routes.collectifs.join.href({ slug })}>
+              <CsrfField token={p.csrfToken} />
+              <button type="submit">Demander à rejoindre</button>
+            </form>
+            <form
+              method="post"
+              action={routes.collectifs.requestResponsibility.href({ slug })}
+              class="stack"
+            >
+              <CsrfField token={p.csrfToken} />
+              <p class="status">
+                Vous gérez ce collectif et il n’a plus de responsable joignable ? La plateforme peut
+                vous en nommer responsable.
+              </p>
+              <button type="submit" class="secondary">
+                Demander à devenir responsable
+              </button>
+            </form>
+          </div>
         ) : null}
       </Layout>
     )
@@ -244,25 +271,106 @@ function PlacesTab(handle: Handle<CollectifPageProps>) {
   }
 }
 
-/** Responsables: who runs the collectif, its contact phone, and the admins' removal forms. */
+/** "Responsable", "Membre". */
+const roleLabels = { responsible: 'Responsable', member: 'Membre' } as const
+
+/**
+ * Membres: pending requests first for its responsibles (US-0.8.7), then everyone with their role,
+ * its contact phone, and the admins' forms to remove a responsible.
+ */
 function PeopleTab(handle: Handle<CollectifPageProps>) {
   return () => {
-    const { responsibles, canManageResponsibles, collectif, csrfToken } = handle.props
+    const { people, requests, canManageMembers, canManageResponsibles, collectif, csrfToken } =
+      handle.props
+    const slug = collectif.slug
+    const responsibles = people.filter((person) => person.role === 'responsible')
     return (
       <>
-        <section aria-labelledby="responsables">
-          <h2 id="responsables">Responsables · {responsibles.length}</h2>
-          {responsibles.length === 0 ? (
-            <p>Aucun responsable.</p>
-          ) : (
+        {canManageMembers && requests.length > 0 ? (
+          <section aria-labelledby="demandes">
+            <h2 id="demandes">Demandes pour rejoindre · {requests.length}</h2>
             <ul class="cards">
-              {responsibles.map((r) => (
-                <li key={r.id} class="card">
-                  <a href={routes.people.show.href({ userId: r.id })}>{r.name}</a>
+              {requests.map((request) => (
+                <li key={request.userId} class="card row">
+                  <span>
+                    <strong>{request.name}</strong>{' '}
+                    <span class="status">
+                      demande à rejoindre le collectif · {dateFormat.format(request.requestedAt)}
+                    </span>
+                  </span>
+                  <span class="actions">
+                    <form
+                      method="post"
+                      action={routes.collectifs.members.approve.href({
+                        slug,
+                        userId: request.userId,
+                      })}
+                    >
+                      <CsrfField token={csrfToken} />
+                      <button type="submit">Accepter</button>
+                    </form>
+                    <form
+                      method="post"
+                      action={routes.collectifs.members.reject.href({
+                        slug,
+                        userId: request.userId,
+                      })}
+                    >
+                      <CsrfField token={csrfToken} />
+                      <button type="submit" class="secondary">
+                        Refuser
+                      </button>
+                    </form>
+                  </span>
                 </li>
               ))}
             </ul>
-          )}
+          </section>
+        ) : null}
+        <section aria-labelledby="membres">
+          <h2 id="membres">Membres · {people.length}</h2>
+          <table class="data-table">
+            <caption class="visually-hidden">Membres de {collectif.name}</caption>
+            <thead>
+              <tr>
+                <th scope="col">Nom</th>
+                <th scope="col">Rôle</th>
+                {canManageMembers ? (
+                  <th scope="col">
+                    <span class="visually-hidden">Actions</span>
+                  </th>
+                ) : null}
+              </tr>
+            </thead>
+            <tbody>
+              {people.map((person) => (
+                <tr key={person.id}>
+                  <td data-label="Nom">
+                    <a href={routes.people.show.href({ userId: person.id })}>{person.name}</a>
+                  </td>
+                  <td data-label="Rôle">{roleLabels[person.role]}</td>
+                  {canManageMembers ? (
+                    <td data-label="Actions">
+                      {person.role === 'member' ? (
+                        <form
+                          method="post"
+                          action={routes.collectifs.members.remove.href({
+                            slug,
+                            userId: person.id,
+                          })}
+                        >
+                          <CsrfField token={csrfToken} />
+                          <button type="submit" class="secondary">
+                            Retirer {person.name}
+                          </button>
+                        </form>
+                      ) : null}
+                    </td>
+                  ) : null}
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <dl class="facts">
             <dt>Téléphone de contact</dt>
             <dd>{collectif.contact_phone ?? 'non renseigné'}</dd>

@@ -27,6 +27,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Accessibility: every button, field and menu is at least 44 px high, the account button's name starts with its initials, and the logo link keeps its name on the narrow sidebar; an automated audit checks the key pages.
 - Moderators: admins name and remove them in Administration › Modérateurs; moderators handle the requests, disable or re-enable accounts, manage categories and see every collectif's equipment, but never act on an admin or another moderator.
 - Admins and moderators can archive an abusive item with « Retiré par la modération »; its owner receives their message by e-mail.
+- « Demander à rejoindre » on a collectif's page: its responsibles accept or reject the request in the new Membres tab, which lists everyone with their role and the pending requests first; members see the collectif's equipment, locations and people.
 
 ### Changed
 
@@ -34,6 +35,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Pages use the whole width of a computer screen instead of a narrow centred column.
 - « Mon matériel » lists what is stored at your places right now (yours, your collectifs', borrowed), with a Lieux tab for your own locations; a collectif's locations are on its page.
 - Each collectif's equipment, locations and people are now seen only by its responsibles, the people who own the items and those who store them; other collectifs show only their name and presentation.
+- A collectif's Responsables tab became Membres, at `/collectifs/<nom>/membres`; the former address redirects there.
 
 ## [0.6.1] - 2026-11-10
 

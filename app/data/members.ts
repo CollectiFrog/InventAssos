@@ -3,7 +3,12 @@
 import { type Database, sql } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
-import { collectifMembers, type Membership, type MembershipStatus } from './tables.ts'
+import {
+  collectifMembers,
+  type Membership,
+  type MembershipRole,
+  type MembershipStatus,
+} from './tables.ts'
 
 /** The row linking a person to a collectif, whatever its role and status. */
 export async function findMembership(
@@ -59,16 +64,17 @@ export interface CollectifLink {
   city: string
 }
 
-/** Active collectifs a person is an active responsible of, by name. */
-export async function listManagedCollectifs(
-  db: Database,
-  userId: string,
-): Promise<CollectifLink[]> {
+/** A collectif the person belongs to, with their role in it. */
+export interface MyCollectif extends CollectifLink {
+  role: MembershipRole
+}
+
+/** Active collectifs a person is an active member or responsible of, by name (ADR 0020). */
+export async function listMyCollectifs(db: Database, userId: string): Promise<MyCollectif[]> {
   const result = await db.exec(sql`
-    select c.id, c.name, c.slug, c.city from collectif_members r
+    select c.id, c.name, c.slug, c.city, r.role from collectif_members r
     join collectifs c on c.id = r.collectif_id
-    where r.user_id = ${userId} and r.role = 'responsible' and r.status = 'active'
-      and c.status = 'active'
+    where r.user_id = ${userId} and r.status = 'active' and c.status = 'active'
     order by lower(c.name), c.id
   `)
   return (result.rows ?? []).map((row) => ({
@@ -76,7 +82,101 @@ export async function listManagedCollectifs(
     name: String(row.name),
     slug: String(row.slug),
     city: String(row.city),
+    role: row.role === 'responsible' ? 'responsible' : 'member',
   }))
+}
+
+/** Records a request to join a collectif as a member (US-0.8.3). */
+export async function requestMembership(
+  db: Database,
+  userId: string,
+  collectifId: string,
+): Promise<void> {
+  const row = {
+    role: 'member' as const,
+    status: 'pending' as const,
+    requested_at: new Date(),
+    validated_by: null,
+    validated_at: null,
+  }
+  await db
+    .query(collectifMembers)
+    .upsert(
+      { user_id: userId, collectif_id: collectifId, ...row },
+      { conflictTarget: ['user_id', 'collectif_id'], update: row },
+    )
+}
+
+/** Decides on a membership: accepted, rejected or removed by a responsible (US-0.8.4). */
+export async function decideMembership(
+  db: Database,
+  input: { userId: string; collectifId: string; status: MembershipStatus; decidedBy: string },
+): Promise<void> {
+  await db.exec(sql`
+    update collectif_members
+    set status = ${input.status}, validated_by = ${input.decidedBy}, validated_at = now()
+    where user_id = ${input.userId} and collectif_id = ${input.collectifId}
+  `)
+}
+
+/** A person of a collectif, as its Membres tab lists them. */
+export interface CollectifPerson {
+  id: string
+  name: string
+  role: MembershipRole
+}
+
+/** Active members and responsibles of a collectif: responsibles first, then by name. */
+export async function listCollectifPeople(
+  db: Database,
+  collectifId: string,
+): Promise<CollectifPerson[]> {
+  const result = await db.exec(sql`
+    select u.id, u.name, r.role from collectif_members r join users u on u.id = r.user_id
+    where r.collectif_id = ${collectifId} and r.status = 'active' and u.status = 'active'
+    order by r.role = 'responsible' desc, lower(u.name), u.id
+  `)
+  return (result.rows ?? []).map((row) => ({
+    id: String(row.id),
+    name: String(row.name),
+    role: row.role === 'responsible' ? 'responsible' : 'member',
+  }))
+}
+
+/** A pending request to join, as the responsibles see it. */
+export interface MembershipRequest {
+  userId: string
+  name: string
+  requestedAt: Date
+}
+
+/** Pending requests to join a collectif from active accounts, oldest first (US-0.8.7). */
+export async function listMembershipRequests(
+  db: Database,
+  collectifId: string,
+): Promise<MembershipRequest[]> {
+  const result = await db.exec(sql`
+    select u.id, u.name, r.requested_at from collectif_members r
+    join users u on u.id = r.user_id and u.status = 'active'
+    where r.collectif_id = ${collectifId} and r.role = 'member' and r.status = 'pending'
+    order by r.requested_at, u.id
+  `)
+  return (result.rows ?? []).map((row) => ({
+    userId: String(row.id),
+    name: String(row.name),
+    requestedAt: new Date(String(row.requested_at)),
+  }))
+}
+
+/** E-mails of a collectif's active responsibles, each to be written to apart. */
+export async function listResponsibleEmails(db: Database, collectifId: string): Promise<string[]> {
+  const result = await db.exec(sql`
+    select u.email from collectif_members r join users u on u.id = r.user_id
+    where r.collectif_id = ${collectifId} and r.role = 'responsible' and r.status = 'active'
+      and u.status = 'active'
+    order by u.email
+  `)
+  return (result.rows ?? []).map((row) => String(row.email))
 }
 
 /** Active responsibles of a collectif (ID and name), for display. */

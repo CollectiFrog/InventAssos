@@ -1,7 +1,7 @@
 import type { Database } from 'remix/data-table'
 import { createContextKey, type Middleware } from 'remix/router'
 import { Session } from 'remix/session'
-import { type CollectifLink, listManagedCollectifs } from '../data/members.ts'
+import { listMyCollectifs, type MyCollectif } from '../data/members.ts'
 import type { UserStatus } from '../data/tables.ts'
 import { findUserById } from '../data/users.ts'
 
@@ -17,8 +17,10 @@ export interface CurrentUser {
   isModerator: boolean
   /** IDs of the active collectifs this person is an active responsible of. */
   managedCollectifIds: ReadonlySet<string>
-  /** The same collectifs, by name, for the sidebar's "Mes collectifs". */
-  collectifs: readonly CollectifLink[]
+  /** IDs of the active collectifs this person belongs to, as member or responsible (ADR 0020). */
+  memberCollectifIds: ReadonlySet<string>
+  /** Those collectifs, by name, with the role, for the sidebar's "Mes collectifs". */
+  collectifs: readonly MyCollectif[]
 }
 
 /** Context key; actions read `context.currentUser` (null when nobody is signed in). */
@@ -45,7 +47,7 @@ export function loadCurrentUser(
     if (typeof userId === 'string') {
       const user = await findUserById(db, userId)
       if (user !== null && signedInStatuses.has(user.status)) {
-        const collectifs = user.status === 'active' ? await listManagedCollectifs(db, user.id) : []
+        const collectifs = user.status === 'active' ? await listMyCollectifs(db, user.id) : []
         current = {
           id: user.id,
           name: user.name,
@@ -53,7 +55,10 @@ export function loadCurrentUser(
           status: user.status,
           isAdmin: adminEmails.has(user.email),
           isModerator: user.role === 'moderator',
-          managedCollectifIds: new Set(collectifs.map((collectif) => collectif.id)),
+          managedCollectifIds: new Set(
+            collectifs.filter((c) => c.role === 'responsible').map((c) => c.id),
+          ),
+          memberCollectifIds: new Set(collectifs.map((c) => c.id)),
           collectifs,
         }
       } else {

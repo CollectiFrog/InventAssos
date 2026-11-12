@@ -12,7 +12,7 @@ import { createActiveUser } from '../../test/users.ts'
 import type { CurrentUser } from '../middleware/current-user.ts'
 import { canSeeItem, itemScopeOf } from '../permissions.ts'
 import { findItemDetails, listInventory, listItemsOwnedBy, locationShowsItemTo } from './items.ts'
-import { listManagedCollectifs, setResponsible } from './members.ts'
+import { decideMembership, listMyCollectifs, requestMembership, setResponsible } from './members.ts'
 import type { User } from './tables.ts'
 
 describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
@@ -25,19 +25,26 @@ describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
   })
   beforeEach(async () => {
     await resetDatabase(db)
-    const [rita, cora, otto, val, boss] = await Promise.all(
-      ['Rita', 'Cora', 'Otto', 'Val', 'Boss'].map((name) =>
+    const [rita, cora, otto, val, boss, mia] = await Promise.all(
+      ['Rita', 'Cora', 'Otto', 'Val', 'Boss', 'Mia'].map((name) =>
         createActiveUser(db, name, `${name.toLowerCase()}@example.org`),
       ),
     )
-    if (!rita || !cora || !otto || !val || !boss) throw new Error('seed failed')
-    people = [rita, cora, otto, val, boss]
+    if (!rita || !cora || !otto || !val || !boss || !mia) throw new Error('seed failed')
+    people = [rita, cora, otto, val, boss, mia]
     isAdmin = (user) => user.id === boss.id
     const c = await createActiveCollectif(db, 'Collectif C', rita.id)
     await setResponsible(db, { userId: cora.id, collectifId: c.id, status: 'active' })
     const d = await createActiveCollectif(db, 'Collectif D', otto.id)
-    // A pending responsible does not belong to C yet.
+    // A pending responsible does not belong to C yet; Mia, an accepted member, does (US-0.8.3).
     await setResponsible(db, { userId: val.id, collectifId: c.id, status: 'pending' })
+    await requestMembership(db, mia.id, c.id)
+    await decideMembership(db, {
+      userId: mia.id,
+      collectifId: c.id,
+      status: 'active',
+      decidedBy: rita.id,
+    })
 
     const places = {
       local: await createTestLocation(db, { collectifId: c.id }, 'Local C'),
@@ -51,6 +58,7 @@ describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
       cora: { userId: cora.id },
       val: { userId: val.id },
       otto: { userId: otto.id },
+      mia: { userId: mia.id },
     }
     // Every owner in every place: covers each branch of the rule, and their absence.
     for (const [placeName, place] of Object.entries(places)) {
@@ -69,7 +77,7 @@ describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
   })
 
   async function actorFor(user: User): Promise<CurrentUser> {
-    const collectifs = await listManagedCollectifs(db, user.id)
+    const collectifs = await listMyCollectifs(db, user.id)
     return {
       id: user.id,
       name: user.name,
@@ -77,14 +85,17 @@ describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
       status: 'active',
       isAdmin: isAdmin(user),
       isModerator: false,
-      managedCollectifIds: new Set(collectifs.map((collectif) => collectif.id)),
+      managedCollectifIds: new Set(
+        collectifs.filter((c) => c.role === 'responsible').map((c) => c.id),
+      ),
+      memberCollectifIds: new Set(collectifs.map((c) => c.id)),
       collectifs,
     }
   }
 
   it('lists exactly the items canSeeItem allows, for every viewer', async () => {
     const all = await listInventory(db, { scope: { everything: true }, page: 1, pageSize: 100 })
-    assert.equal(all.total, 20)
+    assert.equal(all.total, 24)
 
     for (const user of people) {
       const actor = await actorFor(user)
@@ -120,6 +131,13 @@ describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
     assert.ok(!val.includes('c @ local') && !val.includes('cora @ coraHome'))
     // Rita sees Cora's items wherever they are, since they share C.
     assert.ok((await seen('Rita')).includes('cora @ depot'))
+    // Mia, a member of C, sees like a responsible: C's items, its people's, its local's; Rita sees hers.
+    const mia = await seen('Mia')
+    assert.ok(
+      mia.includes('c @ depot') && mia.includes('cora @ depot') && mia.includes('d @ local'),
+    )
+    assert.ok(!mia.includes('d @ depot') && !mia.includes('otto @ coraHome'))
+    assert.ok((await seen('Rita')).includes('mia @ depot'))
   })
 
   it("filters a collectif's and a person's items, and a location's, with the same rule", async () => {

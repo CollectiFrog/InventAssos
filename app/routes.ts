@@ -24,9 +24,17 @@ export const routes = route({
     request: form('/collectifs/nouveau'),
     show: get('/collectifs/:slug'),
     places: get('/collectifs/:slug/lieux'),
-    people: get('/collectifs/:slug/responsables'),
+    people: get('/collectifs/:slug/membres'),
+    /** The tab's address until V0.7, kept for bookmarks: redirects to `people`. */
+    oldPeople: get('/collectifs/:slug/responsables'),
     edit: form('/collectifs/:slug/modifier'),
     requestResponsibility: post('/collectifs/:slug/devenir-responsable'),
+    join: post('/collectifs/:slug/rejoindre'),
+    members: {
+      approve: post('/collectifs/:slug/membres/:userId/accepter'),
+      reject: post('/collectifs/:slug/membres/:userId/refuser'),
+      remove: post('/collectifs/:slug/membres/:userId/retirer'),
+    },
   },
   inventory: {
     index: get('/inventaire'),

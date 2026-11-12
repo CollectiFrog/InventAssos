@@ -13,11 +13,13 @@ import {
   canEnableAccount,
   canManageCategories,
   canManageCollectifLocations,
+  canManageMembers,
   canManagePersonalLocations,
   canManageResponsibles,
   canModerateItem,
   canNameModerators,
   canRequestCollectif,
+  canRequestMembership,
   canRequestResponsibility,
   canReviewAccounts,
   canReviewCollectifs,
@@ -30,8 +32,10 @@ import {
   itemScopeOf,
 } from './permissions.ts'
 
+/** A test actor; a responsible belongs to the collectifs they manage unless told otherwise. */
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
   return {
+    memberCollectifIds: overrides.managedCollectifIds ?? new Set(),
     id: 'u1',
     name: 'U',
     email: 'u@x.org',
@@ -152,6 +156,30 @@ describe('permissions: accounts', () => {
     )
     assert.equal(canRequestResponsibility(user({ status: 'pending' }), 'c1'), false)
     assert.equal(canRequestResponsibility(null, 'c1'), false)
+  })
+
+  it('"Ask to join C": a validated user who does not belong to C yet', () => {
+    assert.equal(canRequestMembership(user(), 'c1'), true)
+    assert.equal(canRequestMembership(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canRequestMembership(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canRequestMembership(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canRequestMembership(user({ status: 'pending' }), 'c1'), false)
+    assert.equal(canRequestMembership(null, 'c1'), false)
+  })
+
+  it('"Accept, reject or remove a member of C": responsibles of C only, not the platform', () => {
+    assert.equal(canManageMembers(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canManageMembers(user({ managedCollectifIds: new Set(['c2']) }), 'c1'), false)
+    assert.equal(canManageMembers(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canManageMembers(user({ isAdmin: true }), 'c1'), false)
+    assert.equal(canManageMembers(moderator(), 'c1'), false)
+  })
+
+  it('"Request to become responsible of C": not for a member of C, who asks C\'s responsibles', () => {
+    assert.equal(
+      canRequestResponsibility(user({ memberCollectifIds: new Set(['c1']) }), 'c1'),
+      false,
+    )
   })
 
   it('"Approve, reject or remove a responsible of C": admin and moderator, not a responsible', () => {
@@ -341,6 +369,27 @@ describe('permissions: visibility (ADR 0021)', () => {
     assert.equal(canSeeLocation(user({ isAdmin: true }), home, false), true)
     assert.equal(canSeeLocation(user(), home, true), true)
     assert.equal(canSeeLocation(user(), home, false), false)
+  })
+
+  it('lets a member of C see like a responsible, without managing anything', () => {
+    const member = user({ memberCollectifIds: new Set(['c9']) })
+    assert.equal(canSeeItem(member, item), true, 'owned by a person of C')
+    const owned = { ...item, owner_user_id: null, owner_collectif_id: 'c9', ownerCollectifIds: [] }
+    assert.equal(canSeeItem(member, owned), true, 'owned by C')
+    const atC = {
+      ...item,
+      owner_user_id: 'u7',
+      ownerCollectifIds: [],
+      locationUserId: null,
+      locationCollectifId: 'c9',
+    }
+    assert.equal(canSeeItem(member, atC), true, "stored in C's location")
+    assert.equal(canSeeCollectifInventory(member, 'c9'), true)
+    assert.equal(canSeePerson(member, { id: 'u9', collectifIds: ['c9'] }), true)
+    assert.equal(canSeeLocation(member, { collectif_id: 'c9', user_id: null }, false), true)
+    assert.equal(canManageCollectifLocations(member, 'c9'), false)
+    assert.equal(canManageMembers(member, 'c9'), false)
+    assert.deepEqual(itemScopeOf(member), { everything: false, userId: 'u1', collectifIds: ['c9'] })
   })
 
   it('shows moderators everything, like admins (ADR 0021 open point, settled in V0.8)', () => {
