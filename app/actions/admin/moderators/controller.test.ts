@@ -11,6 +11,7 @@ import { createTestLocation } from '../../../../test/locations.ts'
 import { createActiveUser } from '../../../../test/users.ts'
 import { listEntityHistory } from '../../../data/audit-log.ts'
 import { findItemById } from '../../../data/items.ts'
+import { setResponsible } from '../../../data/responsibles.ts'
 import type { Item, User } from '../../../data/tables.ts'
 import { createUser, findUserById, setUserRole, setUserStatus } from '../../../data/users.ts'
 import { routes } from '../../../routes.ts'
@@ -147,13 +148,29 @@ describe('moderators (US-0.8.1, US-0.8.2)', () => {
     assert.equal(response.location, routes.items.show.href({ itemId: item.id }))
     assert.equal((await findItemById(db, item.id))?.archive_reason, 'moderated')
     const mail = app.mailer.outbox.findLast((m) => /retiré par la modération/.test(m.subject))
-    assert.deepEqual(mail?.to, ['rita@example.org'])
+    assert.equal(mail?.to, 'rita@example.org')
     assert.match(mail?.text ?? '', /Annonce commerciale, hors sujet\./)
     const [entry] = await listEntityHistory(db, 'item', item.id)
     assert.doesNotMatch(JSON.stringify(entry), /Annonce commerciale/)
     // The moderator still reaches the archived item, to check what was done.
     const archived = await monaClient.get(routes.items.show.href({ itemId: item.id }))
     assert.match(archived.text, /retiré par la modération/)
+  })
+
+  it('e-mails each responsible apart, so none sees the others’ address', async () => {
+    const cora = await createActiveUser(db, 'Cora', 'cora@example.org')
+    await setResponsible(db, {
+      userId: cora.id,
+      collectifId: item.owner_collectif_id ?? '',
+      status: 'active',
+    })
+    const monaClient = await signedInMona()
+    await monaClient.post(routes.items.archive.action.href({ itemId: item.id }), {
+      reason: 'moderated',
+      message: 'Hors sujet.',
+    })
+    const sent = app.mailer.outbox.filter((m) => /retiré par la modération/.test(m.subject))
+    assert.deepEqual(sent.map((m) => m.to).sort(), ['cora@example.org', 'rita@example.org'])
   })
 
   it('asks a moderator for the message, and refuses an owner reason', async () => {

@@ -177,7 +177,7 @@ export function itemContactMail(input: {
 
 /** To an item's owner (or its collectif's responsibles): a moderator archived it (US-0.8.2). */
 export function itemModeratedMail(input: {
-  to: string[]
+  to: string
   itemName: string
   itemUrl: string
   message: string

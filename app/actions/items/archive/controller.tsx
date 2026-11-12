@@ -178,12 +178,12 @@ export default createController(routes.items.archive, {
         })
       })
       if (reason === 'moderated') {
-        const recipients = await listOwnerContactEmails(db, item)
-        if (recipients.length > 0) {
+        // One e-mail per responsible: co-responsibles never see each other's address.
+        for (const to of await listOwnerContactEmails(db, item)) {
           await sendSafely(
             mailer,
             itemModeratedMail({
-              to: recipients,
+              to,
               itemName: item.name,
               itemUrl: settings.appUrl + routes.items.show.href({ itemId: item.id }),
               message,
