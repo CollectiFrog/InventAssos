@@ -100,6 +100,21 @@ export function canRequestMembership(actor: Actor, collectifId: string): boolean
 }
 
 /**
+ * "Make a member of C responsible, remove a responsible of C" (US-0.8.6): a responsible of C, an
+ * admin or a moderator, so that a collectif is never left without a responsible.
+ */
+export function canNameResponsibles(actor: Actor, collectifId: string): boolean {
+  return (
+    isActiveStaff(actor) || (isValidatedUser(actor) && actor.managedCollectifIds.has(collectifId))
+  )
+}
+
+/** "Leave C" (US-0.8.8): any person of C; the last responsible names another one first. */
+export function canLeaveCollectif(actor: Actor, collectifId: string): boolean {
+  return isValidatedUser(actor) && actor.memberCollectifIds.has(collectifId)
+}
+
+/**
  * "Accept, reject or remove a member of C" (US-0.8.4): an active responsible of C only. The
  * platform approves accounts and collectifs, never who belongs to a collectif (ADR 0020).
  */

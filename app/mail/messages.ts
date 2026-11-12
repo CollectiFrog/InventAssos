@@ -145,15 +145,6 @@ export function responsibleRejectedMail(to: string, collectifName: string): Mail
   }
 }
 
-/** To the person: they no longer manage the collectif. */
-export function responsibleRemovedMail(to: string, collectifName: string): Mail {
-  return {
-    to,
-    subject: `Vous n’êtes plus responsable de « ${collectifName} »`,
-    text: `Bonjour,\n\nLa plateforme vous a retiré du rôle de responsable du collectif « ${collectifName} ».${signature}`,
-  }
-}
-
 /** To an item's owner: a validated user writes about it through the contact form (US-0.6.3). */
 export function itemContactMail(input: {
   to: string
@@ -235,5 +226,27 @@ export function membershipRemovedMail(to: string, collectifName: string): Mail {
     to,
     subject: `Vous n’êtes plus membre de « ${collectifName} »`,
     text: `Bonjour,\n\nUn responsable vous a retiré du collectif « ${collectifName} ».${signature}`,
+  }
+}
+
+/** To the person: a responsible or the platform made them responsible of the collectif (US-0.8.6). */
+export function responsibleNamedMail(to: string, collectifName: string, url: string): Mail {
+  return {
+    to,
+    subject: `Vous êtes responsable de « ${collectifName} »`,
+    text:
+      `Bonjour,\n\nVous êtes maintenant responsable du collectif « ${collectifName} » : vous gérez ` +
+      `ses lieux, ses membres et sa présentation.\n${url}${signature}`,
+  }
+}
+
+/** To the person: they are no longer responsible, and stay a member (US-0.8.6). */
+export function responsibleDemotedMail(to: string, collectifName: string): Mail {
+  return {
+    to,
+    subject: `Vous n’êtes plus responsable de « ${collectifName} »`,
+    text:
+      `Bonjour,\n\nVous n’êtes plus responsable du collectif « ${collectifName} ». Vous en restez ` +
+      `membre : vous voyez et tenez à jour son matériel.${signature}`,
   }
 }

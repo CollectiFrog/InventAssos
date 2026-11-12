@@ -26,6 +26,7 @@ import {
   canManageCollectifLocations,
   canManageMembers,
   canManageResponsibles,
+  canNameResponsibles,
   canRequestMembership,
   canRequestResponsibility,
   canSeeCollectifInventory,
@@ -94,6 +95,8 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
       canManageLocations={canManageCollectifLocations(actor, collectif.id)}
       canManageResponsibles={canManageResponsibles(actor)}
       canManageMembers={managesMembers}
+      canNameResponsibles={canNameResponsibles(actor, collectif.id)}
+      viewerId={actor.id}
       items={items}
       sort={sort}
       view={parseItemView(params.get('vue'))}

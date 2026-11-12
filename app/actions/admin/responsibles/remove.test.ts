@@ -8,7 +8,12 @@ import { createActiveCollectif } from '../../../../test/collectifs.ts'
 import { openTestDatabase, resetDatabase } from '../../../../test/database.ts'
 import { createActiveUser } from '../../../../test/users.ts'
 import { listEntityHistory } from '../../../data/audit-log.ts'
-import { findResponsible, setResponsible } from '../../../data/members.ts'
+import { findMembership, findResponsible, setResponsible } from '../../../data/members.ts'
+import type { Membership } from '../../../data/tables.ts'
+
+/** Role and status of a membership row, or null. */
+const roleOf = (row: Membership | null) => (row ? [row.role, row.status] : null)
+
 import type { Collectif, User } from '../../../data/tables.ts'
 import { routes } from '../../../routes.ts'
 
@@ -43,7 +48,7 @@ describe('remove a responsible (US-0.3.6)', () => {
 
   it('shows the remove forms to the admin on the collectif page', async () => {
     const page = await admin.get(routes.collectifs.people.href({ slug: collectif.slug }))
-    assert.match(page.text, /Gérer les responsables/)
+    assert.match(page.text, /Remplacer un responsable/)
     assert.match(page.text, new RegExp(removeUrl(rita.id)))
   })
 
@@ -59,7 +64,8 @@ describe('remove a responsible (US-0.3.6)', () => {
   it('removes the last responsible when a validated replacement is named', async () => {
     await admin.post(removeUrl(rita.id), { replacementEmail: 'max@example.org' })
 
-    assert.equal((await findResponsible(db, rita.id, collectif.id))?.status, 'removed')
+    // US-0.8.6: a removed responsible stays a member.
+    assert.deepEqual(roleOf(await findMembership(db, rita.id, collectif.id)), ['member', 'active'])
     assert.equal((await findResponsible(db, max.id, collectif.id))?.status, 'active')
     assert.equal(app.mailer.outbox[0]?.to, 'rita@example.org')
     const entries = await listEntityHistory(db, 'collectif', collectif.id)
@@ -70,7 +76,8 @@ describe('remove a responsible (US-0.3.6)', () => {
     await setResponsible(db, { userId: max.id, collectifId: collectif.id, status: 'active' })
     await admin.post(removeUrl(rita.id))
 
-    assert.equal((await findResponsible(db, rita.id, collectif.id))?.status, 'removed')
+    // US-0.8.6: a removed responsible stays a member.
+    assert.deepEqual(roleOf(await findMembership(db, rita.id, collectif.id)), ['member', 'active'])
   })
 
   it('refuses a replacement that is not a validated user', async () => {
@@ -87,6 +94,6 @@ describe('remove a responsible (US-0.3.6)', () => {
     assert.equal(response.status, 403)
     assert.equal((await findResponsible(db, rita.id, collectif.id))?.status, 'active')
     const page = await client.get(routes.collectifs.show.href({ slug: collectif.slug }))
-    assert.doesNotMatch(page.text, /Gérer les responsables/)
+    assert.doesNotMatch(page.text, /Remplacer un responsable/)
   })
 })
