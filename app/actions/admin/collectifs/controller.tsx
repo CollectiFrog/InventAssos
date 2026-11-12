@@ -13,7 +13,7 @@ import { countActiveResponsibles, setResponsible } from '../../../data/members.t
 import { findUserById } from '../../../data/users.ts'
 import { sendSafely } from '../../../mail/mailer.ts'
 import { collectifApprovedMail, collectifRejectedMail } from '../../../mail/messages.ts'
-import { canReviewCollectifs } from '../../../permissions.ts'
+import { canApproveCollectif, canReviewCollectifs } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { optionalText, parseForm } from '../../../validation.ts'
 import { forbidden, requireUser } from '../../guards.tsx'
@@ -66,6 +66,8 @@ export default createController(routes.admin.collectifs, {
         session.flash('notice', 'Cette demande a déjà été traitée.')
         return redirect(queueUrl, 303)
       }
+      // Approving makes the requester responsible: a moderator never does it for themselves.
+      if (!canApproveCollectif(actor, collectif.requested_by)) return forbidden(context)
       // An active collectif must keep a responsible: without an active requester, reject instead.
       if (requester === null || requester.status !== 'active') {
         session.flash('notice', 'Le demandeur n’a plus de compte actif : refusez cette demande.')

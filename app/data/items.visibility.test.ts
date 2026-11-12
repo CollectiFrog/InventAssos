@@ -42,6 +42,7 @@ describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
     await decideMembership(db, {
       userId: mia.id,
       collectifId: c.id,
+      from: { status: 'pending' },
       status: 'active',
       decidedBy: rita.id,
     })

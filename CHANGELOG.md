@@ -34,6 +34,13 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - « Quitter le collectif » in the Membres tab; the last responsible names another one first.
 - « Supprimer… » deletes an item entered by mistake for good, after a confirmation page: for its personal owner, its collectif's responsibles, admins and moderators. A member asks with « Demander la suppression », and a responsible accepts or rejects it in the Membres tab.
 
+### Security
+
+- A moderator can no longer make themselves responsible of a collectif: not by approving their own request or their own collectif, nor by naming or promoting themselves.
+- A collectif can no longer be left with only a disabled responsible; disabling the only responsible of a collectif now says which collectifs need another one.
+- « Nouvelle demande » e-mails go to each admin and moderator separately, so they no longer see each other's address.
+- A name can no longer hold a line break, which could shape the e-mails that quote it.
+
 ### Changed
 
 - The account is reached from a round button with your initials; « Se déconnecter » moved to the account page.

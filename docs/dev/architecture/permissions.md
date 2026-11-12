@@ -73,6 +73,15 @@ can only see their status page and sign out.
 | See a location's full address                             | yes            | if own location                     | if C's location                                       | if C's location or own location                       | if own location              |
 | Import into / export from a location                      | yes            | if own location                     | if C's location                                       | if C's location or own location                       | if own location              |
 
+Nobody but an admin gives themselves a collectif: a moderator never approves their own request to
+become responsible or their own collectif, never names themselves as a replacement, and never
+promotes themselves in a collectif they belong to (`canMakeResponsibleByPlatform`,
+`canApproveCollectif`, `canPromoteToResponsible`; security review of V0.8).
+
+A collectif always keeps one active responsible **with an active account**: a disabled responsible
+does not count, and disabling the only one tells the staff which collectifs need another. Decisions
+on a membership row carry the state they expect in their `UPDATE`, so two at once cannot both apply.
+
 A collectif always keeps one active responsible: removing the role from the last one, or the last
 one leaving, is refused until another member is named (checked in the transaction, rows locked
 `FOR UPDATE`). A removed responsible stays a member of the collectif (US-0.8.6).

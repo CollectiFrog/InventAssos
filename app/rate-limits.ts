@@ -89,5 +89,7 @@ export async function notifyAdmins(
   const admins = [...new Set([...settings.adminEmails, ...(await listActiveModeratorEmails(db))])]
   if (admins.length === 0) return
   const { allowed } = await hitRateLimit(db, `admins:${kind}`, limits(settings).adminNotifications)
-  if (allowed) await sendSafely(mailer, mail(admins))
+  if (!allowed) return
+  // One e-mail per person: admins and moderators never see each other's address.
+  for (const to of admins) await sendSafely(mailer, mail([to]))
 }

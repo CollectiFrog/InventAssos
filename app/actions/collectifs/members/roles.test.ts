@@ -36,6 +36,7 @@ describe('responsibles named by responsibles, and leaving (US-0.8.6, US-0.8.8)',
     await decideMembership(db, {
       userId: sami.id,
       collectifId: frog.id,
+      from: { status: 'pending' },
       status: 'active',
       decidedBy: rita.id,
     })

@@ -131,6 +131,7 @@ async function seed(db: Database) {
   await decideMembership(db, {
     userId: mia.id,
     collectifId: c.id,
+    from: { status: 'pending' },
     status: 'active',
     decidedBy: rita.id,
   })

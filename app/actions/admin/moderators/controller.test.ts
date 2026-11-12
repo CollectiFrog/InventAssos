@@ -121,15 +121,18 @@ describe('moderators (US-0.8.1, US-0.8.2)', () => {
     assert.equal(response.status, 403)
   })
 
-  it('e-mails the moderators about new requests, with the admins', async () => {
+  it('e-mails each admin and moderator apart about new requests', async () => {
     await setUserRole(db, mona.id, 'moderator')
     const visitor = app.client()
     await visitor.post(routes.signUp.form.action.href(), {
       name: 'Nina',
       email: 'nina@example.org',
     })
-    const notice = app.mailer.outbox.find((mail) => mail.subject === 'Nouvelle demande de compte')
-    assert.deepEqual(notice?.to, ['boss@example.org', 'mona@example.org'])
+    const notices = app.mailer.outbox.filter((m) => m.subject === 'Nouvelle demande de compte')
+    assert.deepEqual(
+      notices.map((m) => m.to),
+      [['boss@example.org'], ['mona@example.org']],
+    )
   })
 
   it('archives an abusive item and e-mails its owner the message, never storing it', async () => {

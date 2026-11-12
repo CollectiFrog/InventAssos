@@ -5,7 +5,7 @@ import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
 import { listPendingCollectifs } from '../../data/collectifs.ts'
-import { listPendingResponsibles } from '../../data/members.ts'
+import { listCollectifsRelyingOn, listPendingResponsibles } from '../../data/members.ts'
 import { deleteUserSessions } from '../../data/sessions.ts'
 import type { User } from '../../data/tables.ts'
 import {
@@ -185,7 +185,14 @@ export default createController(routes.admin, {
           entityId: user.id,
         })
       })
-      session.flash('notice', `Compte de ${user.name} désactivé.`)
+      // A disabled responsible cannot run a collectif: say which ones now need another one.
+      const orphans = await listCollectifsRelyingOn(db, user.id)
+      session.flash(
+        'notice',
+        orphans.length > 0
+          ? `Compte de ${user.name} désactivé. Sans autre responsable actif : ${orphans.join(', ')}. Nommez-en un dans l’onglet Membres de chaque collectif.`
+          : `Compte de ${user.name} désactivé.`,
+      )
       return redirect(routes.admin.accounts.href(), 303)
     },
 
