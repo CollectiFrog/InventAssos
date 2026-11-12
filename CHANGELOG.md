@@ -9,6 +9,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 ### Added
 
 - Contributors can run the app, its tests and the checks with only Docker installed, or in a VS Code Dev Container.
+- A guide to deploy a version on Kubernetes: manifests, variables and secrets, probes, migrations, first admin and rollback.
 - Navigation with four entries (Accueil, Rechercher, Mon matériel, Collectifs): a tab bar at the bottom of the screen on a phone, a sidebar with your collectifs on a computer.
 - On a computer, every page has a search field and an « Ajouter du matériel » button at the top.
 - Collectifs page: your collectifs first, then a directory of all collectifs with their city, searchable by name or city.
