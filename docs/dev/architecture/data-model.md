@@ -38,7 +38,8 @@ erDiagram
 `user.moderator_named|moderator_removed`, `collectif.approved|rejected|updated`,
 `member.requested|approved|rejected|removed|left`, `responsible.named`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
-`item.created|updated|moved|archived|contacted|deleted|deletion_requested|deletion_rejected`. A
+`item.created|updated|moved|archived|contacted|deleted|deletion_requested|deletion_rejected`. `inventory.exported` (entity `collectif` or `user`, payload: the item count) records each CSV
+export. A
 deleted item's entries stay in the log (IDs only, ADR 0010); its page and history are gone. Payloads hold IDs, enum values and field names
 only; `readHistory()` resolves names at display time. The item page shows an allow-list
 (`itemHistoryActions`): `item.contacted` stays in the log for admins and is never displayed.

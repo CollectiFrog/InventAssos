@@ -1,4 +1,5 @@
-// Limits on everything that sends e-mail on someone's request (ADR 0018, issue #70).
+// Limits on what someone can make the server do repeatedly: e-mails sent on their request (ADR 0018,
+// issue #70) and whole-inventory exports (US-0.10.4).
 import type { Database } from 'remix/data-table'
 
 import { hitRateLimit, type RateLimit, type RateLimitResult } from './data/rate-limits.ts'
@@ -18,6 +19,8 @@ export interface RateLimits {
   contactsPerUser: RateLimit
   /** "New request" e-mails to the admins, per kind; the admin queue lists every request anyway. */
   adminNotifications: RateLimit
+  /** CSV exports by one user (US-0.10.4): each reads a whole inventory. */
+  exportsPerUser: RateLimit
 }
 
 const hour = 60 * 60
@@ -30,6 +33,7 @@ export const defaultRateLimits: RateLimits = {
   requestsPerUser: { limit: 5, windowSeconds: day },
   contactsPerUser: { limit: 10, windowSeconds: day },
   adminNotifications: { limit: 5, windowSeconds: hour },
+  exportsPerUser: { limit: 30, windowSeconds: hour },
 }
 
 function limits(settings: AppSettings): RateLimits {
@@ -52,6 +56,15 @@ export async function mayMailAddress(
   email: string,
 ): Promise<boolean> {
   return (await hitRateLimit(db, `mail:${email}`, limits(settings).mailsPerAddress)).allowed
+}
+
+/** One CSV export by a user (US-0.10.4). */
+export function hitExport(
+  db: Database,
+  settings: AppSettings,
+  userId: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `export:${userId}`, limits(settings).exportsPerUser)
 }
 
 /** One request that notifies the admins (new collectif, responsibility, re-application). */

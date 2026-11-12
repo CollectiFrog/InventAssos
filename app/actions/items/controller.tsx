@@ -73,6 +73,7 @@ export default createController(routes.items, {
       return context.render(
         <MyItemsPage
           viewer={viewerOf(context)}
+          csrfToken={getCsrfToken(context)}
           mine={held.filter((item) => item.ownerUserId === actor.id)}
           collectifs={held.filter(ofMyCollectifs)}
           borrowed={held.filter((item) => item.ownerUserId !== actor.id && !ofMyCollectifs(item))}

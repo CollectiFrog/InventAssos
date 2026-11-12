@@ -216,6 +216,23 @@ Un membre du collectif choisit **Demander la suppression** : la demande apparaî
 **Membres**, sans e-mail. Un responsable la **supprime** ou la **refuse** ; une seule demande à la
 fois par objet.
 
+## Exporter le matériel
+
+Le matériel part dans un fichier CSV que LibreOffice et Excel ouvrent directement :
+
+- **Exporter le matériel qui m'appartient (CSV)**, en bas de **Mon matériel** : tout ce qui est à
+  vous, où que ce soit rangé.
+- **Exporter (CSV)**, dans l'onglet **Matériel** d'un collectif, pour ses responsables : tout ce
+  que possède le collectif, où que ce soit rangé. Le matériel que d'autres ont déposé dans ses
+  lieux n'y est pas : il reste à eux.
+
+Le fichier a une ligne par objet : référence, nom, catégorie, quantité, marque, modèle, numéro de
+série, état, valeur estimée, description, nom du lieu et identifiant. Le matériel archivé n'y est
+pas, ni l'adresse des lieux, ni le nom des personnes. C'est le format que l'import relira : gardez
+la colonne **Identifiant** si vous comptez réimporter le fichier après l'avoir corrigé. Un modèle
+vide, avec les mêmes colonnes, se télécharge à l'adresse de l'application suivie de
+`/modele-import.csv`.
+
 ## Historique d'un objet
 
 En bas de la page d'un objet, l'**historique** liste ce qui lui est arrivé : ajout, modifications

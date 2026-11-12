@@ -377,6 +377,38 @@ export async function listOwnerContactEmails(db: Database, item: Item): Promise<
   return (result.rows ?? []).map((row) => String(row.email))
 }
 
+/**
+ * What an export holds (US-0.10.4): the active items an owner owns, wherever they are stored, that
+ * the scope may see, by name; with their category name and their location's name, nothing else of
+ * the location.
+ */
+export async function listItemsForExport(
+  db: Database,
+  owner: ItemOwner,
+  scope: ItemScope,
+): Promise<{ item: Item; categoryName: string; locationName: string }[]> {
+  const condition =
+    'collectifId' in owner
+      ? sql`i.owner_collectif_id = ${owner.collectifId}`
+      : sql`i.owner_user_id = ${owner.userId}`
+  const result = await db.exec(sql`
+    select i.*, cat.name as category_name, l.name as location_name
+    from items i
+    join categories cat on cat.id = i.category_id
+    join locations l on l.id = i.location_id
+    where i.archived_at is null and ${condition} and ${visibleIn(scope)}
+    order by lower(i.name), i.id
+  `)
+  return (result.rows ?? []).map((row) => {
+    const { category_name, location_name, ...item } = row
+    return {
+      item: item as unknown as Item,
+      categoryName: String(category_name),
+      locationName: String(location_name),
+    }
+  })
+}
+
 /** Active items owned by a collectif or a person that the scope may see, by name (US-0.6.4). */
 export async function listItemsOwnedBy(
   db: Database,

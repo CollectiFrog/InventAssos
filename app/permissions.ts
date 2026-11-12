@@ -241,6 +241,19 @@ export function canStoreItemsIn(
 }
 
 /**
+ * "Export an owner's equipment" (US-0.10.4): the person their own, a responsible of the collectif,
+ * an admin. Members and moderators export only their own for now (ADR 0027); one line to change.
+ */
+export function canExportInventoryOf(
+  actor: Actor,
+  owner: { collectifId: string } | { userId: string },
+): boolean {
+  if (!isValidatedUser(actor)) return false
+  if ('userId' in owner) return owner.userId === actor.id
+  return actor.isAdmin || actor.managedCollectifIds.has(owner.collectifId)
+}
+
+/**
  * "Give or change an item's reference" (US-0.10.3): the reference lives in its owner's namespace,
  * so only the owner sets it (the person, a person of the owning collectif, an admin). Someone who
  * deposits or edits another person's item would otherwise learn which references that person uses.

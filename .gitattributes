@@ -2,3 +2,5 @@
 *.cmd text eol=crlf
 *.bat text eol=crlf
 *.ps1 text eol=crlf
+# Served as is: the empty import model keeps the CRLF and BOM spreadsheets expect.
+public/*.csv -text

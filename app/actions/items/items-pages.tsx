@@ -39,6 +39,7 @@ export function MyStuffTabs(handle: Handle<{ current: 'items' | 'locations' }>) 
 /** Props of Mon matériel: items stored at my places, by owner. */
 export interface MyItemsPageProps {
   viewer: Viewer
+  csrfToken: string
   mine: ItemSummary[]
   collectifs: ItemSummary[]
   borrowed: ItemSummary[]
@@ -48,7 +49,7 @@ export interface MyItemsPageProps {
 /** "Mon matériel": what is stored in my own locations right now, by owner (US-0.7.3). */
 export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
   return () => {
-    const { viewer, mine, collectifs, borrowed, notice } = handle.props
+    const { viewer, csrfToken, mine, collectifs, borrowed, notice } = handle.props
     const sections = [
       { id: 'a-moi', title: 'À moi', items: mine },
       { id: 'a-mes-collectifs', title: 'À mes collectifs', items: collectifs },
@@ -94,6 +95,16 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
         <p class="status">
           Le matériel rangé au local d’un collectif est sur la page du collectif.
         </p>
+        <form method="post" action={routes.exports.mine.href()} class="stack">
+          <CsrfField token={csrfToken} />
+          <p class="status">
+            Le fichier liste tout ce qui vous appartient, où qu’il soit rangé, dans le format que
+            l’import relit.
+          </p>
+          <button type="submit" class="secondary">
+            Exporter le matériel qui m’appartient (CSV)
+          </button>
+        </form>
       </Layout>
     )
   }

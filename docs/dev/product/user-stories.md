@@ -313,6 +313,8 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
     - Adds `items.ref`, unique per owner.
 - **US-0.10.4 Export.** As a responsible or validated user, I want to export the equipment I manage
   as CSV or Excel, in the import format, so that I can work in a spreadsheet.
+    - A collectif's equipment: its responsibles and admins; everyone exports their own
+      ([ADR 0027](../../adr/0027-import-export-rules/)).
     - An export never holds an item its author may not see (ADR 0021).
 - **US-0.10.5 Import for myself.** As a validated user, I want to import into my personal
   locations, so that I list my own equipment at once.
@@ -349,6 +351,7 @@ These stories complement the [GDPR checklist](../gdpr-checklist/).
 | US-0.10.1 | CSV and Excel, or CSV first?                     | decided: CSV first ([ADR 0026](../../adr/0026-csv-import-export/))           |
 | US-0.10.1 | Who imports for a collectif?                     | decided: its responsibles for now; members maybe later                       |
 | US-0.10.2 | What is a duplicate row?                         | decided: by reference; same name only warns (ADR 0026)                       |
+| US-0.10.3 | Blank cells, archived items, round trip?         | decided: blank keeps; archived not imported unless forced; Identifiant column (ADR 0027) |
 | US-0.8.5  | Can a member delete an item, or only archive it? | decided: a member archives, and asks a responsible to delete (US-0.8.10)     |
 | US-0.7.11 | Do admins and moderators see every inventory?    | decided: yes, both ([ADR 0025](../../adr/0025-staff-see-every-inventory/))   |
 | US-0.8.3  | Could responsibles approve new accounts alone?   | later, maybe: admins and moderators approve accounts for now                 |

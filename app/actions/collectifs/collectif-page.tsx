@@ -39,6 +39,8 @@ export interface CollectifPageProps {
   canManageResponsibles: boolean
   /** Its responsibles accept, reject and remove members (US-0.8.4). */
   canManageMembers: boolean
+  /** Its responsibles and admins export its equipment as CSV (US-0.10.4). */
+  canExport: boolean
   /** Its responsibles, admins and moderators name and remove responsibles (US-0.8.6). */
   canNameResponsibles: boolean
   /** The viewer, to offer « Quitter le collectif » on their own row (US-0.8.8). */
@@ -184,7 +186,8 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
 /** Matériel: what the collectif owns, then what others deposited in its locations. */
 function ItemsTab(handle: Handle<CollectifPageProps>) {
   return () => {
-    const { items, deposits, canAddItems, collectif, sort, view, hrefWith } = handle.props
+    const { items, deposits, canAddItems, canExport, collectif, csrfToken, sort, view, hrefWith } =
+      handle.props
     return (
       <>
         <section aria-labelledby="materiel-collectif" class="index-results">
@@ -195,6 +198,14 @@ function ItemsTab(handle: Handle<CollectifPageProps>) {
                 view={view}
                 hrefFor={(next) => hrefWith({ vue: next === 'grille' ? 'grille' : '' })}
               />
+            ) : null}
+            {canExport ? (
+              <form method="post" action={routes.exports.collectif.href({ slug: collectif.slug })}>
+                <CsrfField token={csrfToken} />
+                <button type="submit" class="secondary">
+                  Exporter (CSV)
+                </button>
+              </form>
             ) : null}
           </div>
           {items.length > 0 && view === 'grille' ? (

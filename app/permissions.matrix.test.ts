@@ -536,6 +536,22 @@ const rules: Rule[] = [
     happened: async (db, w) => (await findItemById(db, w.item.id))?.archive_reason === 'moderated',
   },
   {
+    // US-0.10.4: members and moderators export only their own for now (ADR 0026).
+    row: "Export an owner's equipment (C's)",
+    allowed: ['admin', 'responsibleOfC'],
+    act: (c, w) => c.post(routes.exports.collectif.href({ slug: w.c.slug })),
+    happened: async (_db, _w, response) =>
+      response.status === 200 && /Projecteur C/.test(response.text),
+  },
+  {
+    row: "Export an owner's equipment (own)",
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'memberOfC', 'validated'],
+    act: (c) => c.post(routes.exports.mine.href()),
+    happened: async (_db, _w, response) =>
+      // Reading the body as text drops the BOM; `toCsv`'s own test checks it is sent.
+      response.status === 200 && /^\uFEFF?Référence;Nom;/.test(response.text),
+  },
+  {
     // US-0.10.3: the reference lives in its owner's namespace.
     row: "Give or change an item's reference",
     allowed: ['admin', 'responsibleOfC', 'memberOfC'],
