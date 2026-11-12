@@ -13,6 +13,7 @@ import {
   canEditItem,
   canEditOwnProfile,
   canEnableAccount,
+  canExportInventoryOf,
   canLeaveCollectif,
   canManageCategories,
   canManageCollectifLocations,
@@ -485,6 +486,22 @@ describe('permissions: visibility (ADR 0021)', () => {
       deletesAsPlatform(moderator(), { owner_collectif_id: null, owner_user_id: 'u1' }),
       false,
     )
+  })
+
+  it('"Export an owner\'s equipment": own, or a collectif one is responsible of, or admin', () => {
+    assert.equal(canExportInventoryOf(user(), { userId: 'u1' }), true)
+    assert.equal(canExportInventoryOf(user(), { userId: 'u2' }), false)
+    assert.equal(
+      canExportInventoryOf(user({ managedCollectifIds: new Set(['c1']) }), { collectifId: 'c1' }),
+      true,
+    )
+    assert.equal(
+      canExportInventoryOf(user({ memberCollectifIds: new Set(['c1']) }), { collectifId: 'c1' }),
+      false,
+    )
+    assert.equal(canExportInventoryOf(moderator(), { collectifId: 'c1' }), false)
+    assert.equal(canExportInventoryOf(user({ isAdmin: true }), { collectifId: 'c1' }), true)
+    assert.equal(canExportInventoryOf(user({ status: 'pending' }), { userId: 'u1' }), false)
   })
 
   it('"Give or change an item\'s reference": its owner only, or an admin', () => {

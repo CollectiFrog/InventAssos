@@ -34,6 +34,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - « Quitter le collectif » in the Membres tab; the last responsible names another one first.
 - « Supprimer… » deletes an item entered by mistake for good, after a confirmation page: for its personal owner, its collectif's responsibles, admins and moderators. A member asks with « Demander la suppression », and a responsible accepts or rejects it in the Membres tab.
 - An item can carry a reference (your code or inventory number), unique per owner and found by the search; it will let a file be imported again without duplicates.
+- Export equipment as a CSV file that spreadsheets open directly: your own from « Mon matériel », a collectif's from its Matériel tab (responsibles); a cell that would run as a formula is made harmless.
 
 ### Security
 

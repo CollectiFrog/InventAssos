@@ -25,6 +25,7 @@ import {
   canAssignItemOwner,
   canDecideItemDeletion,
   canEditCollectif,
+  canExportInventoryOf,
   canManageCollectifLocations,
   canManageMembers,
   canManageResponsibles,
@@ -98,6 +99,7 @@ async function renderCollectif(context: AppContext, slug: string, tab: Collectif
       canManageResponsibles={canManageResponsibles(actor)}
       canManageMembers={managesMembers}
       canNameResponsibles={canNameResponsibles(actor, collectif.id)}
+      canExport={canExportInventoryOf(actor, { collectifId: collectif.id })}
       viewerId={actor.id}
       items={items}
       sort={sort}

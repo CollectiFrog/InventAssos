@@ -46,6 +46,10 @@ export const routes = route({
   inventory: {
     index: get('/inventaire'),
   },
+  exports: {
+    collectif: post('/collectifs/:slug/exporter'),
+    mine: post('/materiel/exporter'),
+  },
   people: {
     show: get('/personnes/:userId'),
   },
