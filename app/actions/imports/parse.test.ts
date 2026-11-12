@@ -87,7 +87,37 @@ describe('reading quantities and amounts (ADR 0026)', () => {
   })
 
   it('reads a group of three after zero as decimals it cannot be: refused', () => {
-    for (const cell of ['0,125', '0,500', '0.500']) assert.equal(parseEuros(cell), null, cell)
+    for (const cell of ['0,125', '0,500', '0.500', '0 500', "00'100", '01 121']) {
+      assert.equal(parseEuros(cell), null, cell)
+      assert.equal(parseQuantity(cell), null, cell)
+    }
+    assert.equal(parseQuantity('0.001'), null)
+  })
+
+  it('reads the singular « euro », and a leading word before a decimal point', () => {
+    for (const [cell, expected] of [
+      ['150 euro', 150],
+      ['1 euro', 1],
+      ['150 EURO', 150],
+      ['EUR.50', 0.5],
+      ['ht.5', 0.5],
+      ['H.T. 150', 150],
+    ] as const) {
+      assert.equal(value(parseEuros(cell)), expected, cell)
+    }
+  })
+
+  it('stays fast on a hostile cell', () => {
+    for (const cell of [
+      `1${' '.repeat(1_000_000)}1`,
+      `1${',-'.repeat(500_000)}`,
+      `€${'1'.repeat(1_000_000)}€`,
+    ]) {
+      const started = performance.now()
+      assert.equal(parseEuros(cell), null)
+      assert.equal(parseQuantity(cell), null)
+      assert.ok(performance.now() - started < 200, `${performance.now() - started} ms`)
+    }
   })
 
   it('reads currency words glued to the amount, and refuses superscripts', () => {

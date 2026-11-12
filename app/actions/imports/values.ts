@@ -581,7 +581,20 @@ const conditionTerms: Record<ItemCondition, string[]> = {
 }
 
 /** Words that turn a phrase around, as `words` writes them (« sans » becomes « san »). */
-const negations = new Set(['non', 'pas', 'san', 'aucun', 'aucune', 'not', 'no'])
+const negations = new Set([
+  'non',
+  'pas',
+  'san',
+  'aucun',
+  'aucune',
+  'jamais',
+  'ne',
+  'n',
+  'plu',
+  'sauf',
+  'not',
+  'no',
+])
 
 /** Most severe first: « bon état, à réviser » is to repair, « ne fonctionne pas » is broken. */
 const severity: ItemCondition[] = ['broken', 'repair', 'worn', 'new', 'good']

@@ -24,7 +24,8 @@ const groupSpace = /[    ]/g
  * « 1.000 », « 1'000 »), or null when it is not written so.
  */
 function groupedDigits(text: string): string | null {
-  const match = /^(\d{1,3})(?:([ .,'’])\d{3})(?:\2\d{3})*$/.exec(text)
+  // The first group never starts with 0: « 0,500 » is not five hundred.
+  const match = /^([1-9]\d{0,2})(?:([ .,'’])\d{3})(?:\2\d{3})*$/.exec(text)
   return match ? text.replace(/\D/g, '') : null
 }
 
@@ -36,6 +37,8 @@ function groupedDigits(text: string): string | null {
 export function parseQuantity(cell: string): CellParse<number> {
   const trimmed = narrow(cell).replace(groupSpace, ' ').trim()
   if (trimmed === '') return { blank: true }
+  // No real quantity is this long; a cap before any pattern keeps hostile cells cheap.
+  if (trimmed.length > maxNumberCell) return null
   const unit = /^[x×]?\s*(.+?)\s*(?:[x×]|pcs?\.?|pi[eè]ces?|u\.?|unit[eé]s?|ex\.?)?$/i.exec(trimmed)
   const core = unit?.[1] ?? ''
   let digits: string | null = null
@@ -48,9 +51,15 @@ export function parseQuantity(cell: string): CellParse<number> {
   return value >= 1 ? { blank: false, value } : null
 }
 
-/** Currency words and tax marks that may come before or after an amount, never inside it. */
+/** Longest number cell read; beyond, it is not a number (and patterns stay cheap). */
+const maxNumberCell = 40
+
+/**
+ * Currency words and tax marks that may come before or after an amount, never inside it. A dot
+ * after a leading word is only taken before a space: « EUR.50 » is fifty cents.
+ */
 const currencyEdge =
-  /^(?:€|eur(?:o?s)?\.?|ttc|h\.?\s?t\.?)\s*|\s*(?:€|eur(?:o?s)?\.?|ttc|h\.?\s?t\.?|,-)$/i
+  /^(?:€|eur(?:os?)?|ttc|h\.?\s?t)(?:\.(?=\s|$))?\s*|\s*(?:€|eur(?:os?)?\.?|ttc|h\.?\s?t\.?|,-)$/i
 
 /**
  * An amount in euros, as the item form stores it: « 1 250,50 € », « 1.250,50 », « 1,250.50 »,
@@ -63,6 +72,7 @@ const currencyEdge =
 export function parseEuros(cell: string): CellParse<number> {
   let text = narrow(cell).replace(groupSpace, ' ').trim()
   if (text === '') return { blank: true }
+  if (text.length > maxNumberCell) return null
   // Currency words and tax marks at either end, as many as there are: « 150 € HT ».
   for (let previous = ''; previous !== text; ) {
     previous = text
@@ -72,7 +82,7 @@ export function parseEuros(cell: string): CellParse<number> {
 
   // Spaces and apostrophes only between groups of three; the decimals after them.
   if (/[ '’]/.test(text)) {
-    const grouped = /^(\d{1,3}(?:[ '’]\d{3})+)([.,]\d{1,2})?$/.exec(text)
+    const grouped = /^([1-9]\d{0,2}(?:[ '’]\d{3})+)([.,]\d{1,2})?$/.exec(text)
     if (!grouped) return null
     text = `${(grouped[1] ?? '').replace(/\D/g, '')}${grouped[2] ?? ''}`
   }

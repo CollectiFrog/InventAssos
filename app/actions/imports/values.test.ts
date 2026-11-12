@@ -94,7 +94,14 @@ describe('guessing categories, conditions and locations (ADR 0026)', () => {
     assert.equal(condition("Hors d'usage"), 'broken')
     assert.equal(condition('marche mal'), 'repair')
     assert.equal(condition('To be checked'), 'repair')
-    for (const value of ['pas bon', 'sans défaut', 'aucun défaut', 'pas en panne']) {
+    for (const value of [
+      'pas bon',
+      'sans défaut',
+      'aucun défaut',
+      'pas en panne',
+      "n'a jamais marché",
+      'ok sauf écran',
+    ]) {
       assert.equal(condition(value), null, value)
     }
   })
