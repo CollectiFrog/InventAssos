@@ -26,7 +26,7 @@ each verb of a row ("create, edit, delete"), and each "if …" branch of the res
 member and validated-user columns, is a separate case. A new row, verb or branch needs a new matrix entry.
 
 "Import a file into a location" arrives with the rest of V0.10 and is not implemented yet. Import
-and export of a collectif are for its responsibles for now; members may come later (ADR 0026).
+and export of a collectif are for its responsibles for now; members may come later (ADR 0027).
 
 Visibility ([ADR 0021](../../adr/0021-inventory-within-collectifs/)), from V0.7: an item is seen
 only by the people who keep it, until sharing arrives in V1.1. "A person of C" is a responsible of

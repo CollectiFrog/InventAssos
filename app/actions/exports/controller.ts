@@ -60,6 +60,9 @@ async function sendExport(context: AppContext, owner: ItemOwner, fileStem: strin
 export default createController(routes.exports, {
   actions: {
     async collectif(context) {
+      // Signed in first: a visitor must not learn which collectifs exist from 404 vs 303.
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
       const collectif = await findActiveCollectifBySlug(context.db, context.params.slug)
       if (collectif === null) return notFound(context)
       return sendExport(context, { collectifId: collectif.id }, `inventaire-${collectif.slug}`)

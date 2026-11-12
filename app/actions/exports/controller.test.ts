@@ -14,6 +14,7 @@ import { archiveItem } from '../../data/items.ts'
 import { createLocation } from '../../data/locations.ts'
 import { decideMembership, requestMembership } from '../../data/members.ts'
 import type { Collectif } from '../../data/tables.ts'
+import { setUserRole } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
 import { inventoryHeaderRow } from '../imports/format.ts'
 
@@ -45,7 +46,7 @@ describe('export equipment as CSV (US-0.10.4)', () => {
       { collectifId: frog.id },
       { name: 'Local', city: 'Rennes', address: '12 rue Secrète', notes: 'Code 4521' },
     )
-    const ritaHome = await createTestLocation(db, { userId: ritaUser.id }, 'Chez Rita')
+    const ritaHome = await createTestLocation(db, { userId: ritaUser.id }, 'Garage')
     await createTestItem(db, {
       locationId: local.id,
       owner: { collectifId: frog.id },
@@ -89,6 +90,7 @@ describe('export equipment as CSV (US-0.10.4)', () => {
     const response = await exportFrog(rita)
     assert.equal(response.status, 200)
     assert.equal(response.headers.get('Content-Type'), 'text/csv; charset=utf-8')
+    assert.deepEqual([...response.bytes.slice(0, 3)], [0xef, 0xbb, 0xbf], 'a UTF-8 BOM')
     assert.equal(response.headers.get('Cache-Control'), 'no-store')
     assert.match(
       response.headers.get('Content-Disposition') ?? '',
@@ -104,8 +106,7 @@ describe('export equipment as CSV (US-0.10.4)', () => {
 
   it('never writes an address, notes or a person', async () => {
     const text = (await exportFrog(rita)).text
-    // Location names are fine (« Chez Rita » is one); no city, address, notes, owner or e-mail.
-    assert.doesNotMatch(text, /Secrète|4521|Rennes|Paul|@example/)
+    assert.doesNotMatch(text, /Secrète|4521|Rennes|Paul|Rita|@example/)
   })
 
   it('logs the export with its count only', async () => {
@@ -124,6 +125,36 @@ describe('export equipment as CSV (US-0.10.4)', () => {
     const paul = app.client()
     await signIn(app, paul, 'paul@example.org')
     assert.equal((await exportFrog(paul)).status, 404)
+  })
+
+  it('lets an admin export any collectif, and refuses a moderator', async () => {
+    await createActiveUser(db, 'Boss', 'boss@example.org')
+    const mona = await createActiveUser(db, 'Mona', 'mona@example.org')
+    await setUserRole(db, mona.id, 'moderator')
+    const staffApp = createTestApp(db, { adminEmails: ['boss@example.org'] })
+    const boss = staffApp.client()
+    await signIn(staffApp, boss, 'boss@example.org')
+    assert.equal((await exportFrog(boss)).status, 200)
+    const moderator = staffApp.client()
+    await signIn(staffApp, moderator, 'mona@example.org')
+    assert.equal((await exportFrog(moderator)).status, 403)
+  })
+
+  it('tells a visitor nothing about which collectifs exist', async () => {
+    const visitor = app.client()
+    const existing = await visitor.post(routes.exports.collectif.href({ slug: frog.slug }))
+    const missing = await visitor.post(routes.exports.collectif.href({ slug: 'nexiste-pas' }))
+    assert.equal(existing.status, 303)
+    assert.equal(missing.status, existing.status)
+    assert.equal(missing.location, existing.location)
+  })
+
+  it('refuses a post from another origin', async () => {
+    const response = await rita.postRaw(routes.exports.mine.href(), new URLSearchParams(), {
+      Origin: 'https://evil.example',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    })
+    assert.equal(response.status, 403)
   })
 
   it("exports one's own equipment, wherever it is stored", async () => {

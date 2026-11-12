@@ -242,7 +242,7 @@ export function canStoreItemsIn(
 
 /**
  * "Export an owner's equipment" (US-0.10.4): the person their own, a responsible of the collectif,
- * an admin. Members and moderators export only their own for now (ADR 0026); one line to change.
+ * an admin. Members and moderators export only their own for now (ADR 0027); one line to change.
  */
 export function canExportInventoryOf(
   actor: Actor,

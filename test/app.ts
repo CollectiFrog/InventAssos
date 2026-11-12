@@ -157,13 +157,16 @@ export class TestClient {
         this.#cookies.set(name, value)
       }
     }
-    const text = await response.text()
+    const bytes = new Uint8Array(await response.arrayBuffer())
+    // Decoded like a browser: a UTF-8 BOM is dropped from `text`, kept in `bytes`.
+    const text = new TextDecoder().decode(bytes)
     const token = /name="_csrf" value="([^"]+)"/.exec(text)?.[1]
     if (token) this.#csrfToken = token
     return {
       status: response.status,
       headers: response.headers,
       text,
+      bytes,
       location: response.headers.get('Location'),
     }
   }
@@ -174,5 +177,7 @@ export interface TestResponse {
   status: number
   headers: Headers
   text: string
+  /** The body as sent, e.g. to check a BOM. */
+  bytes: Uint8Array
   location: string | null
 }

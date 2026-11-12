@@ -64,6 +64,8 @@ describe('CSV (ADR 0026)', () => {
     assert.equal(neutralizeFormula('Console'), 'Console')
     assert.equal(restoreNeutralized("'=1+1"), '=1+1')
     assert.equal(restoreNeutralized("'Console"), "'Console")
+    // A value that really starts with « '= » survives the round trip.
+    assert.equal(restoreNeutralized(neutralizeFormula("'=apos")), "'=apos")
   })
 
   it('stays linear on a file of quotes, a huge cell or many columns', () => {
