@@ -239,6 +239,14 @@ describe('item reference, unique per owner (US-0.10.3)', () => {
     assert.equal((await findItemById(db, amp.id))?.name, 'Ampli')
   })
 
+  it('measures the reference after NFC, which can lengthen it', async () => {
+    const lengthening = '\u0958'.repeat(31)
+    assert.equal(lengthening.normalize('NFC').length, 62)
+    const response = await add({ name: 'Pied', ref: lengthening })
+    assert.equal(response.status, 400)
+    assert.match(response.text, /60 caractères au maximum/)
+  })
+
   it('refuses a reference on several lines or longer than 60 characters', async () => {
     assert.equal((await add({ ref: 'A\nB' })).status, 400)
     const long = await add({ ref: 'x'.repeat(61) })

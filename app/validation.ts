@@ -35,12 +35,14 @@ export function requiredText(max: number) {
  * references are compared with `inv_fold`, which only knows precomposed letters.
  */
 export function optionalLine(max: number) {
-  return optionalText(max)
-    .transform((value) => (value === null ? null : value.normalize('NFC')))
-    .refine(
-      (value) => value === null || !hasControlCharacter(value),
-      'Une seule ligne, sans retour à la ligne.',
-    )
+  // Normalised before it is measured: NFC can lengthen a few characters, and the database checks
+  // the stored length.
+  return s
+    .defaulted(s.string(), '')
+    .transform((value) => value.trim().normalize('NFC'))
+    .refine((value) => value.length <= max, `${max} caractères au maximum.`)
+    .refine((value) => !hasControlCharacter(value), 'Une seule ligne, sans retour à la ligne.')
+    .transform((value) => (value === '' ? null : value))
 }
 
 /** An optional, trimmed text: blank becomes null. */
