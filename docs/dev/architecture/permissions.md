@@ -5,6 +5,11 @@ sidebar:
   order: 3
 ---
 
+**Moderator** means: an active account an admin named on `/admin/moderateurs` (`users.role`,
+US-0.8.1). A listed admin is never treated as a moderator. A moderator never acts on an admin or
+another moderator, and sees every inventory like an admin
+([ADR 0025](../../adr/0025-staff-see-every-inventory/)), without any manager right.
+
 **Platform admin** means: the account's e-mail is listed in `PLATFORM_ADMIN_EMAILS`. The variable
 is read once at startup (`loadConfig()`), and every request checks the signed-in e-mail against
 that list (`context.currentUser.isAdmin`). A listed e-mail becomes an active account at its first
@@ -14,8 +19,8 @@ loses the rights at its next request. `users.is_platform_admin` only records the
 
 Each row is a function in `app/permissions.ts`, tested in `app/permissions.test.ts`; controllers
 call it before acting and answer 403 otherwise. `app/permissions.matrix.test.ts` then plays every
-implemented row through the real router for six actors (admin, responsible of C, responsible of
-another collectif, validated user, pending user, visitor) and checks the effect happened or not:
+implemented row through the real router for seven actors (admin, moderator, responsible of C,
+responsible of another collectif, validated user, pending user, visitor) and checks the effect happened or not:
 each verb of a row ("create, edit, delete"), and each "if …" branch of the responsible and
 validated-user columns, is a separate case. A new row, verb or branch needs a new matrix entry.
 
@@ -27,37 +32,39 @@ C, and from V0.8 a member too; a user who belongs to several collectifs gets the
 rows. Every listing (dashboard, search, collectif page, person page, history, export) filters with
 the same rule as `canSeeItem`, in SQL; a page for an item or a person one may not see answers 404,
 not 403, so that its existence does not leak. `itemScopeOf(actor)` gives the listings the same
-rule, and `app/data/items.visibility.test.ts` checks both sides agree on every branch. Admins keep
-seeing everything (open point of ADR 0021).
+rule, and `app/data/items.visibility.test.ts` checks both sides agree on every branch. Admins and
+moderators see everything ([ADR 0025](../../adr/0025-staff-see-every-inventory/)).
 
 Everything is denied unless a row below allows it. Pending, rejected, disabled and deleted users
 can only see their status page and sign out.
 
-| Action                                           | Platform admin | Responsible of C                                      | Validated user               |
-|--------------------------------------------------|----------------|-------------------------------------------------------|------------------------------|
-| Approve or reject an account                     | yes            | no                                                    | no                           |
-| Add, rename, reorder, delete an unused category  | yes            | no                                                    | no                           |
-| Disable an account                               | yes            | no                                                    | no                           |
-| Re-enable a disabled account                     | yes            | no                                                    | no                           |
-| Edit own profile (name, phone)                   | yes            | yes                                                   | yes                          |
-| Request a new collectif                          | yes            | yes                                                   | yes                          |
-| Approve or reject a collectif                    | yes            | no                                                    | no                           |
-| Request to become responsible of C               | —              | —                                                     | yes                          |
-| Approve, reject or remove a responsible of C     | yes            | no                                                    | no                           |
-| Edit C's profile                                 | yes            | yes                                                   | no                           |
-| Create, edit, delete C's locations               | yes            | yes                                                   | no                           |
-| Create, edit, delete own personal locations      | yes            | yes                                                   | yes                          |
-| Add an item to a location                        | yes            | if C's location                                       | if own location              |
-| Edit, move, archive an item                      | yes            | if in C's location or owned by C                      | if owner, or in own location |
-| Move an item to a location                       | yes            | if C's location                                       | if own location              |
-| Edit, move or archive an archived item           | no             | no                                                    | no                           |
-| See the collectifs directory (name, city, text)  | yes            | yes                                                   | yes                          |
-| See C's equipment, locations and people          | yes            | yes                                                   | no                           |
-| See an item, its owner, the city of its location | yes            | if owned by C or by a person of C, or in C's location | if owner, or in own location |
-| See a person's page and phone                    | yes            | if the person belongs to C                            | if it is their own           |
-| See a location (name, city)                      | yes            | if C's location, or it stores an item seen            | if own, or stores one seen   |
-| See a location's full address                    | yes            | if C's location                                       | if own location              |
-| Import into / export from a location             | yes            | if C's location                                       | if own location              |
+| Action                                           | Platform admin | Moderator                           | Responsible of C                                      | Validated user               |
+|--------------------------------------------------|----------------|-------------------------------------|-------------------------------------------------------|------------------------------|
+| Approve or reject an account                     | yes            | yes                                 | no                                                    | no                           |
+| Add, rename, reorder, delete an unused category  | yes            | yes                                 | no                                                    | no                           |
+| Disable an account                               | yes            | yes, except an admin or a moderator | no                                                    | no                           |
+| Re-enable a disabled account                     | yes            | yes, except a moderator             | no                                                    | no                           |
+| Name or remove a moderator                       | yes            | no                                  | no                                                    | no                           |
+| Edit own profile (name, phone)                   | yes            | yes                                 | yes                                                   | yes                          |
+| Request a new collectif                          | yes            | yes                                 | yes                                                   | yes                          |
+| Approve or reject a collectif                    | yes            | yes                                 | no                                                    | no                           |
+| Request to become responsible of C               | —              | yes                                 | —                                                     | yes                          |
+| Approve, reject or remove a responsible of C     | yes            | yes                                 | no                                                    | no                           |
+| Edit C's profile                                 | yes            | no                                  | yes                                                   | no                           |
+| Create, edit, delete C's locations               | yes            | no                                  | yes                                                   | no                           |
+| Create, edit, delete own personal locations      | yes            | yes                                 | yes                                                   | yes                          |
+| Add an item to a location                        | yes            | if own location                     | if C's location                                       | if own location              |
+| Edit, move, archive an item                      | yes            | if owner, or in own location        | if in C's location or owned by C                      | if owner, or in own location |
+| Move an item to a location                       | yes            | if own location                     | if C's location                                       | if own location              |
+| Edit, move or archive an archived item           | no             | no                                  | no                                                    | no                           |
+| Archive an abusive item (owner e-mailed)         | yes            | yes                                 | no                                                    | no                           |
+| See the collectifs directory (name, city, text)  | yes            | yes                                 | yes                                                   | yes                          |
+| See C's equipment, locations and people          | yes            | yes                                 | yes                                                   | no                           |
+| See an item, its owner, the city of its location | yes            | yes                                 | if owned by C or by a person of C, or in C's location | if owner, or in own location |
+| See a person's page and phone                    | yes            | yes                                 | if the person belongs to C                            | if it is their own           |
+| See a location (name, city)                      | yes            | yes                                 | if C's location, or it stores an item seen            | if own, or stores one seen   |
+| See a location's full address                    | yes            | if own location                     | if C's location                                       | if own location              |
+| Import into / export from a location             | yes            | if own location                     | if C's location                                       | if own location              |
 
 An admin can never disable their own account, nor the account of another admin listed in
 `PLATFORM_ADMIN_EMAILS` (one admin must not lock the others out; remove them from the list instead). A location's notes follow the full-address rule

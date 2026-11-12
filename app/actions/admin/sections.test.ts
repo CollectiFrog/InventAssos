@@ -56,6 +56,7 @@ describe('Administration sections at their own URLs (US-0.7.13)', () => {
         '*Demandes /admin/demandes',
         'Comptes /admin/comptes',
         'Collectifs /admin/collectifs',
+        'Modérateurs /admin/moderateurs',
         'Catégories /admin/categories',
       ])
     }

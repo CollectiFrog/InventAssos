@@ -22,7 +22,7 @@ export function AdminCollectifsPage(
     return (
       <Layout title="Collectifs" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
-        <AdminTabs current="collectifs" />
+        <AdminTabs current="collectifs" viewer={viewer} />
         <p class="status">
           Les collectifs validés. Un collectif sans responsable n’est plus géré : nommez-en un
           depuis son onglet Responsables.

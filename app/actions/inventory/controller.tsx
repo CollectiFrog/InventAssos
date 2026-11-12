@@ -9,7 +9,7 @@ import {
   listInventory,
   listInventoryCities,
 } from '../../data/items.ts'
-import { isValidatedUser, itemScopeOf } from '../../permissions.ts'
+import { isActiveStaff, isValidatedUser, itemScopeOf } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { type ActiveFilter, parseItemSort, parseItemView, sortParam } from '../../ui/item-table.tsx'
 import { forbidden, requireUser } from '../guards.tsx'
@@ -64,9 +64,9 @@ export default createController(routes.inventory, {
         value: c.id,
         label: `${c.name} (${counts.byCategory.get(c.id) ?? 0})`,
       }))
-      // The collectif filter offers my collectifs only; admins still see them all (ADR 0021).
+      // The collectif filter offers my collectifs only; admins and moderators see them all (ADR 0021).
       const collectifs = (
-        actor.isAdmin ? await listCollectifs(db, 'active') : actor.collectifs
+        isActiveStaff(actor) ? await listCollectifs(db, 'active') : actor.collectifs
       ).map((c) => ({ value: c.id, label: c.name }))
       const cities = (await listInventoryCities(db, scope)).map((city) => ({
         value: city,

@@ -150,8 +150,9 @@ It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
 - `/compte/supprimer`, a confirmation page instead of a modal window; until US-1.0.4 (V1.0) it only
   explains what deleting will do;
 - `/admin/demandes` (also `/admin`), `/admin/comptes`, `/admin/collectifs`, `/admin/moderateurs`,
-  `/admin/categories`, `/admin/instance`. In V0.7: demandes, comptes, collectifs and categories;
-  `/admin/moderateurs` comes with moderators (V0.8); `/admin/instance` waits for a story.
+  `/admin/categories`, `/admin/instance`. Demandes, comptes, collectifs and categories are open to
+  admins and moderators; `/admin/moderateurs` (V0.8) to admins only; `/admin/instance` waits for a
+  story.
 
 ## Page templates
 

@@ -76,6 +76,7 @@ describe('item visibility: SQL listings match canSeeItem (ADR 0021)', () => {
       email: user.email,
       status: 'active',
       isAdmin: isAdmin(user),
+      isModerator: false,
       managedCollectifIds: new Set(collectifs.map((collectif) => collectif.id)),
       collectifs,
     }

@@ -63,6 +63,11 @@ export const routes = route({
       approve: post('/admin/collectifs/:collectifId/accepter'),
       reject: post('/admin/collectifs/:collectifId/refuser'),
     },
+    moderators: {
+      index: get('/admin/moderateurs'),
+      name: post('/admin/moderateurs'),
+      remove: post('/admin/moderateurs/:userId/retirer'),
+    },
     categories: {
       index: get('/admin/categories'),
       create: post('/admin/categories'),

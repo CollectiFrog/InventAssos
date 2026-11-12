@@ -143,7 +143,7 @@ export function RequestCollectifPage(handle: Handle<RequestCollectifPageProps>) 
       <Layout title="Déclarer un collectif" viewer={viewer} section="collectifs">
         <h1>Déclarer un collectif</h1>
         <p>
-          Un administrateur de la plateforme vérifie chaque demande. Une fois le collectif validé,
+          Un administrateur ou un modérateur vérifie chaque demande. Une fois le collectif validé,
           vous en devenez responsable.
         </p>
         <ErrorSummary errors={errors} />

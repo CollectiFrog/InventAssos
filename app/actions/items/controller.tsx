@@ -13,7 +13,14 @@ import {
 import { sendSafely } from '../../mail/mailer.ts'
 import { itemContactMail } from '../../mail/messages.ts'
 import type { CurrentUser } from '../../middleware/current-user.ts'
-import { canEditItem, canSeeItem, canSeePerson, isValidatedUser } from '../../permissions.ts'
+import {
+  canEditItem,
+  canModerateItem,
+  canSeeItem,
+  canSeePerson,
+  isActiveStaff,
+  isValidatedUser,
+} from '../../permissions.ts'
 import { hitContact } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
@@ -77,9 +84,12 @@ export default createController(routes.items, {
 
       const item = await findItemDetails(context.db, context.params.itemId)
       // 404 rather than 403, so that an item's existence does not leak (ADR 0021). An archived
-      // item stays visible to those who manage it, for its history (US-0.5.5).
+      // item stays visible to those who manage it, for its history (US-0.5.5), and to the staff
+      // who may have archived it (US-0.8.2).
       if (item === null || !canSeeItem(actor, item)) return notFound(context)
-      if (item.archived_at && !canEditItem(actor, item)) return notFound(context)
+      if (item.archived_at && !canEditItem(actor, item) && !isActiveStaff(actor)) {
+        return notFound(context)
+      }
       const notice = context.session.get('notice')
       return context.render(
         <ItemPage
@@ -92,6 +102,7 @@ export default createController(routes.items, {
               : routes.inventory.index.href(),
           )}
           canEdit={canEditItem(actor, item)}
+          canModerate={canModerateItem(actor, item)}
           contact={
             ownsItem(actor, item)
               ? undefined

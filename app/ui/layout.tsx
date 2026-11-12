@@ -5,7 +5,10 @@ import { routes } from '../routes.ts'
 /** What the shell needs to know about the signed-in person; null for a visitor. */
 export type Viewer = {
   name: string
+  /** Listed in PLATFORM_ADMIN_EMAILS: names moderators (US-0.8.1). */
   isAdmin: boolean
+  /** Admin or moderator: sees Administration (US-0.8.2). */
+  isStaff: boolean
   /** Only active accounts get the navigation; pending and rejected ones see their status page. */
   isActive: boolean
   csrfToken: string
@@ -142,7 +145,7 @@ export function Layout(handle: Handle<LayoutProps>) {
                       <a class="button top-add" href={routes.items.create.index.href()}>
                         Ajouter du matériel
                       </a>
-                      {viewer.isAdmin ? (
+                      {viewer.isStaff ? (
                         // Phones only: from 720 px Administration sits at the bottom of the sidebar.
                         <a
                           class="phone-admin"
@@ -284,7 +287,7 @@ function Sidebar(
             </nav>
           </>
         ) : null}
-        {viewer.isAdmin ? (
+        {viewer.isStaff ? (
           <div class="side-foot">
             <a
               href={routes.admin.index.href()}

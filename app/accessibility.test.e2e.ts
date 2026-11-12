@@ -140,7 +140,13 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
       const page = await t.serve(server)
       await page.setViewportSize(size)
       await signInWithBrowser(page, app, 'boss@example.org')
-      await audit(page, ['/admin', '/admin/comptes', '/admin/collectifs', '/admin/categories'])
+      await audit(page, [
+        '/admin',
+        '/admin/comptes',
+        '/admin/collectifs',
+        '/admin/moderateurs',
+        '/admin/categories',
+      ])
     })
   }
 

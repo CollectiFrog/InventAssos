@@ -18,7 +18,7 @@ export function signUpReceivedMail(to: string, appUrl: string): Mail {
     to,
     subject: 'Votre demande de compte InventAssos',
     text:
-      'Bonjour,\n\nVotre demande de compte est enregistrée. Un administrateur va l’examiner ; ' +
+      'Bonjour,\n\nVotre demande de compte est enregistrée. Un administrateur ou un modérateur va l’examiner ; ' +
       `vous recevrez un e-mail quand ce sera fait.\n\n${appUrl}${signature}`,
   }
 }
@@ -150,7 +150,7 @@ export function responsibleRemovedMail(to: string, collectifName: string): Mail 
   return {
     to,
     subject: `Vous n’êtes plus responsable de « ${collectifName} »`,
-    text: `Bonjour,\n\nUn administrateur vous a retiré du rôle de responsable du collectif « ${collectifName} ».${signature}`,
+    text: `Bonjour,\n\nLa plateforme vous a retiré du rôle de responsable du collectif « ${collectifName} ».${signature}`,
   }
 }
 
@@ -171,6 +171,24 @@ export function itemContactMail(input: {
       `Bonjour,\n\n${input.senderName} (${input.senderEmail}) vous écrit au sujet de ` +
       `« ${input.itemName} » :\n${input.itemUrl}\n\n---\n${input.message}\n---\n\n` +
       'Répondez directement à cet e-mail pour lui écrire.' +
+      signature,
+  }
+}
+
+/** To an item's owner (or its collectif's responsibles): a moderator archived it (US-0.8.2). */
+export function itemModeratedMail(input: {
+  to: string[]
+  itemName: string
+  itemUrl: string
+  message: string
+}): Mail {
+  return {
+    to: input.to,
+    subject: `« ${input.itemName} » retiré par la modération`,
+    text:
+      `Bonjour,\n\nLa modération d’InventAssos a retiré « ${input.itemName} » de l’inventaire. ` +
+      `Il est archivé : sa page et son historique restent visibles.\n${input.itemUrl}\n\n` +
+      `Motif :\n---\n${input.message}\n---` +
       signature,
   }
 }
