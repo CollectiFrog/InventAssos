@@ -539,13 +539,19 @@ const rules: Rule[] = [
     // US-0.8.9: final, so a member of C asks instead (next rows).
     row: 'Delete an item',
     allowed: ['admin', 'moderator', 'responsibleOfC'],
-    act: (c, w) => c.post(routes.items.remove.action.href({ itemId: w.item.id })),
+    act: (c, w) =>
+      c.post(routes.items.remove.action.href({ itemId: w.item.id }), {
+        message: 'Saisi par erreur.',
+      }),
     happened: async (db, w) => (await findItemById(db, w.item.id)) === null,
   },
   {
     row: 'Delete an item (own item)',
     allowed: ['admin', 'moderator', 'validated'],
-    act: (c, w) => c.post(routes.items.remove.action.href({ itemId: w.valOwn.id })),
+    act: (c, w) =>
+      c.post(routes.items.remove.action.href({ itemId: w.valOwn.id }), {
+        message: 'Saisi par erreur.',
+      }),
     happened: async (db, w) => (await findItemById(db, w.valOwn.id)) === null,
   },
   {

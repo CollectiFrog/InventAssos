@@ -17,9 +17,14 @@ import {
   responsibleDemotedMail,
   responsibleRejectedMail,
 } from '../../../mail/messages.ts'
-import { canMakeResponsibleByPlatform, canManageResponsibles } from '../../../permissions.ts'
+import {
+  canMakeResponsibleByPlatform,
+  canManageResponsibles,
+  canRemoveResponsibleByPlatform,
+} from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { optionalText, parseForm } from '../../../validation.ts'
+import { accountTargetOf } from '../../account-target.ts'
 import { forbidden, requireUser } from '../../guards.tsx'
 
 const queueUrl = routes.admin.index.href()
@@ -111,13 +116,17 @@ export default createController(routes.admin.responsibles, {
       if (actor instanceof Response) return actor
       if (!canManageResponsibles(actor)) return forbidden(context)
 
-      const { db, mailer, session, params } = context
+      const { db, mailer, session, settings, params } = context
       const collectif = await findCollectifById(db, params.collectifId)
       const user = await findUserById(db, params.userId)
       const link = await findResponsible(db, params.userId, params.collectifId)
       if (collectif === null || user === null || link?.status !== 'active') {
         session.flash('notice', 'Cette personne n’est pas responsable de ce collectif.')
         return redirect(queueUrl, 303)
+      }
+      // A moderator never takes the role from an admin or another moderator.
+      if (!canRemoveResponsibleByPlatform(actor, accountTargetOf(user, settings.adminEmails))) {
+        return forbidden(context)
       }
       const backUrl =
         collectif.status === 'active'

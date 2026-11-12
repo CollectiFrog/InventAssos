@@ -1,14 +1,17 @@
 // Regressions for the security review of V0.8 (2026-11-12): each case reproduces a finding.
 import * as assert from 'remix/assert'
-import type { Database } from 'remix/data-table'
+import { type Database, sql } from 'remix/data-table'
 import { after, before, beforeEach, describe, it } from 'remix/test'
 
 import { createTestApp, type TestApp, type TestClient } from '../test/app.ts'
 import { signIn } from '../test/auth.ts'
 import { createActiveCollectif, createPendingCollectif } from '../test/collectifs.ts'
 import { openTestDatabase, resetDatabase } from '../test/database.ts'
+import { createTestItem } from '../test/items.ts'
+import { createTestLocation } from '../test/locations.ts'
 import { createActiveUser } from '../test/users.ts'
 import { findCollectifById } from './data/collectifs.ts'
+import { findItemById } from './data/items.ts'
 import {
   decideMembership,
   findMembership,
@@ -90,6 +93,96 @@ describe('security review of V0.8', () => {
     const url = routes.admin.collectifs.approve.href({ collectifId: pending.id })
     assert.equal((await monaClient.post(url)).status, 403)
     assert.equal((await findCollectifById(db, pending.id))?.status, 'pending')
+  })
+
+  it('F2: a moderator cannot take the responsible role from an admin or a moderator', async () => {
+    const boss = await createActiveUser(db, 'Boss', 'boss@example.org')
+    const max = await createActiveUser(db, 'Max', 'max@example.org')
+    await setUserRole(db, max.id, 'moderator')
+    for (const target of [boss, max]) {
+      await setResponsible(db, { userId: target.id, collectifId: frog.id, status: 'active' })
+      const demote = routes.collectifs.members.demote.href({ slug: frog.slug, userId: target.id })
+      assert.equal((await monaClient.post(demote)).status, 403)
+      const remove = routes.admin.responsibles.remove.href(ids(target))
+      assert.equal((await monaClient.post(remove)).status, 403)
+      assert.deepEqual(roleOf(await findMembership(db, target.id, frog.id)), [
+        'responsible',
+        'active',
+      ])
+    }
+    // Rita, responsible of the collectif, still decides within it.
+    await ritaClient.post(
+      routes.collectifs.members.demote.href({ slug: frog.slug, userId: max.id }),
+    )
+    assert.deepEqual(roleOf(await findMembership(db, max.id, frog.id)), ['member', 'active'])
+  })
+
+  it('F2: a moderator cannot archive or delete the item of an admin or a moderator', async () => {
+    const max = await createActiveUser(db, 'Max', 'max@example.org')
+    await setUserRole(db, max.id, 'moderator')
+    const home = await createTestLocation(db, { userId: max.id }, 'Chez Max')
+    const item = await createTestItem(db, {
+      locationId: home.id,
+      owner: { userId: max.id },
+      createdBy: max.id,
+      name: 'Ampli de Max',
+    })
+    const page = (await monaClient.get(routes.items.show.href({ itemId: item.id }))).text
+    assert.doesNotMatch(page, /Supprimer…|Retirer \(modération\)/)
+    const archive = await monaClient.post(routes.items.archive.action.href({ itemId: item.id }), {
+      reason: 'moderated',
+      message: 'Abus.',
+    })
+    assert.equal(archive.status, 403)
+    const remove = await monaClient.post(routes.items.remove.action.href({ itemId: item.id }), {
+      message: 'Abus.',
+    })
+    assert.equal(remove.status, 403)
+    assert.notEqual(await findItemById(db, item.id), null)
+  })
+
+  it('F2: the platform gives a reason to delete, e-mailed to each owner apart', async () => {
+    const cora = await createActiveUser(db, 'Cora', 'cora@example.org')
+    await setResponsible(db, { userId: cora.id, collectifId: frog.id, status: 'active' })
+    const local = await createTestLocation(db, { collectifId: frog.id }, 'Local')
+    const item = await createTestItem(db, {
+      locationId: local.id,
+      owner: { collectifId: frog.id },
+      createdBy: rita.id,
+      name: 'Annonce douteuse',
+    })
+    const url = routes.items.remove.action.href({ itemId: item.id })
+    const form = (await monaClient.get(routes.items.remove.index.href({ itemId: item.id }))).text
+    assert.match(form, /Message au propriétaire/)
+    const empty = await monaClient.post(url, { message: ' ' })
+    assert.equal(empty.status, 400)
+    assert.notEqual(await findItemById(db, item.id), null)
+
+    await monaClient.post(url, { message: 'Annonce commerciale.' })
+    assert.equal(await findItemById(db, item.id), null)
+    const mails = app.mailer.outbox.filter((m) => /supprimé par la modération/.test(m.subject))
+    assert.deepEqual(mails.map((m) => m.to).sort(), ['cora@example.org', 'rita@example.org'])
+    assert.match(mails[0]?.text ?? '', /Annonce commerciale\./)
+    const log = await db.exec(sql`select payload from audit_log where action = 'item.deleted'`)
+    assert.doesNotMatch(JSON.stringify(log.rows), /Annonce/)
+  })
+
+  it('F2: an owner deletes without a reason, and nobody is e-mailed', async () => {
+    const local = await createTestLocation(db, { collectifId: frog.id }, 'Local')
+    const item = await createTestItem(db, {
+      locationId: local.id,
+      owner: { collectifId: frog.id },
+      createdBy: rita.id,
+      name: 'Doublon',
+    })
+    const form = (await ritaClient.get(routes.items.remove.index.href({ itemId: item.id }))).text
+    assert.doesNotMatch(form, /Message au propriétaire/)
+    await ritaClient.post(routes.items.remove.action.href({ itemId: item.id }))
+    assert.equal(await findItemById(db, item.id), null)
+    assert.equal(
+      app.mailer.outbox.some((m) => /supprimé/.test(m.subject)),
+      false,
+    )
   })
 
   it('F3: a disabled co-responsible does not count: the last active one cannot leave', async () => {

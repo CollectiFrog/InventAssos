@@ -250,3 +250,20 @@ export function responsibleDemotedMail(to: string, collectifName: string): Mail 
       `membre : vous voyez et tenez à jour son matériel.${signature}`,
   }
 }
+
+/** To an item's owner (or its collectif's responsibles): the platform deleted it for good. */
+export function itemDeletedByPlatformMail(input: {
+  to: string
+  itemName: string
+  message: string
+}): Mail {
+  return {
+    to: input.to,
+    subject: `« ${input.itemName} » supprimé par la modération`,
+    text:
+      `Bonjour,\n\nLa modération d’InventAssos a supprimé « ${input.itemName} » de l’inventaire. ` +
+      `La suppression est définitive : l’objet et son historique n’existent plus.\n\n` +
+      `Motif :\n---\n${input.message}\n---` +
+      signature,
+  }
+}

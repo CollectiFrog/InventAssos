@@ -27,6 +27,7 @@ import {
 import { hitContact } from '../../rate-limits.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
+import { itemOwnerAccount } from '../account-target.ts'
 import { backHref } from '../back-link.ts'
 import { forbidden, notFound, requireUser, tooManyRequests } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
@@ -94,6 +95,7 @@ export default createController(routes.items, {
         return notFound(context)
       }
       const notice = context.session.get('notice')
+      const owner = await itemOwnerAccount(context.db, item, context.settings.adminEmails)
       return context.render(
         <ItemPage
           viewer={viewerOf(context)}
@@ -105,8 +107,8 @@ export default createController(routes.items, {
               : routes.inventory.index.href(),
           )}
           canEdit={canEditItem(actor, item)}
-          canModerate={canModerateItem(actor, item)}
-          canDelete={canDeleteItem(actor, item)}
+          canModerate={canModerateItem(actor, item, owner)}
+          canDelete={canDeleteItem(actor, item, owner)}
           deletion={
             canRequestItemDeletion(actor, item)
               ? {

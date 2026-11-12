@@ -22,6 +22,8 @@ import {
   canModerateItem,
   canNameModerators,
   canNameResponsibles,
+  canRemoveResponsible,
+  canRemoveResponsibleByPlatform,
   canRequestCollectif,
   canRequestItemDeletion,
   canRequestMembership,
@@ -34,6 +36,7 @@ import {
   canSeeLocation,
   canSeePerson,
   canStoreItemsIn,
+  deletesAsPlatform,
   itemScopeOf,
 } from './permissions.ts'
 
@@ -116,11 +119,11 @@ describe('permissions: accounts', () => {
   })
 
   it('"Archive an abusive item": admin and moderator, on an item still in the inventory', () => {
-    assert.equal(canModerateItem(user({ isAdmin: true }), { archived_at: null }), true)
-    assert.equal(canModerateItem(moderator(), { archived_at: null }), true)
-    assert.equal(canModerateItem(moderator(), { archived_at: new Date() }), false)
-    assert.equal(canModerateItem(user(), { archived_at: null }), false)
-    assert.equal(canModerateItem(null, { archived_at: null }), false)
+    assert.equal(canModerateItem(user({ isAdmin: true }), { archived_at: null }, null), true)
+    assert.equal(canModerateItem(moderator(), { archived_at: null }, null), true)
+    assert.equal(canModerateItem(moderator(), { archived_at: new Date() }, null), false)
+    assert.equal(canModerateItem(user(), { archived_at: null }, null), false)
+    assert.equal(canModerateItem(null, { archived_at: null }, null), false)
   })
 
   it('a moderator gets no manager rights: no location, no item edit', () => {
@@ -425,13 +428,13 @@ describe('permissions: visibility (ADR 0021)', () => {
   it('"Delete an item": personal owner, responsible of the owner, admin, moderator', () => {
     const ofC = { owner_collectif_id: 'c1', owner_user_id: null }
     const ofU1 = { owner_collectif_id: null, owner_user_id: 'u1' }
-    assert.equal(canDeleteItem(user({ managedCollectifIds: new Set(['c1']) }), ofC), true)
-    assert.equal(canDeleteItem(user({ memberCollectifIds: new Set(['c1']) }), ofC), false)
-    assert.equal(canDeleteItem(user(), ofU1), true)
-    assert.equal(canDeleteItem(user({ id: 'u2' }), ofU1), false)
-    assert.equal(canDeleteItem(user({ id: 'u2', isAdmin: true }), ofU1), true)
-    assert.equal(canDeleteItem(moderator({ id: 'u2' }), ofC), true)
-    assert.equal(canDeleteItem(user({ status: 'pending' }), ofU1), false)
+    assert.equal(canDeleteItem(user({ managedCollectifIds: new Set(['c1']) }), ofC, null), true)
+    assert.equal(canDeleteItem(user({ memberCollectifIds: new Set(['c1']) }), ofC, null), false)
+    assert.equal(canDeleteItem(user(), ofU1, null), true)
+    assert.equal(canDeleteItem(user({ id: 'u2' }), ofU1, null), false)
+    assert.equal(canDeleteItem(user({ id: 'u2', isAdmin: true }), ofU1, null), true)
+    assert.equal(canDeleteItem(moderator({ id: 'u2' }), ofC, null), true)
+    assert.equal(canDeleteItem(user({ status: 'pending' }), ofU1, null), false)
   })
 
   it('"Ask to delete an item of C": a member of C only; its responsibles decide', () => {
@@ -445,6 +448,42 @@ describe('permissions: visibility (ADR 0021)', () => {
     )
     assert.equal(canDecideItemDeletion(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
     assert.equal(canDecideItemDeletion(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+  })
+
+  it('a moderator never acts on an admin or another moderator: roles and items too', () => {
+    const anAdmin = { id: 'u7', isListedAdmin: true, isModerator: false }
+    const aModerator = { id: 'u8', isListedAdmin: false, isModerator: true }
+    const aMember = { id: 'u9', isListedAdmin: false, isModerator: false }
+    const theirItem = { owner_collectif_id: null, owner_user_id: 'u7' }
+    for (const target of [anAdmin, aModerator]) {
+      assert.equal(canRemoveResponsible(moderator(), 'c1', target), false)
+      assert.equal(canRemoveResponsibleByPlatform(moderator(), target), false)
+      assert.equal(canModerateItem(moderator(), { archived_at: null }, target), false)
+      assert.equal(canDeleteItem(moderator(), theirItem, target), false)
+    }
+    assert.equal(canRemoveResponsible(moderator(), 'c1', aMember), true)
+    assert.equal(canRemoveResponsibleByPlatform(moderator(), aMember), true)
+    assert.equal(canModerateItem(moderator(), { archived_at: null }, aMember), true)
+    assert.equal(canDeleteItem(moderator(), theirItem, aMember), true)
+    // An admin may; so may a responsible of the collectif, within it.
+    assert.equal(canRemoveResponsible(user({ isAdmin: true }), 'c1', aModerator), true)
+    assert.equal(canDeleteItem(user({ isAdmin: true }), theirItem, aModerator), true)
+    const responsible = user({ managedCollectifIds: new Set(['c1']) })
+    assert.equal(canRemoveResponsible(responsible, 'c1', anAdmin), true)
+    assert.equal(canRemoveResponsible(user(), 'c1', aMember), false)
+  })
+
+  it('tells a deletion by the platform from one by the owner', () => {
+    const ofC = { owner_collectif_id: 'c1', owner_user_id: null }
+    assert.equal(deletesAsPlatform(moderator(), ofC), true)
+    assert.equal(deletesAsPlatform(user({ isAdmin: true }), ofC), true)
+    const adminResponsible = user({ isAdmin: true, managedCollectifIds: new Set(['c1']) })
+    assert.equal(deletesAsPlatform(adminResponsible, ofC), false)
+    assert.equal(deletesAsPlatform(user({ managedCollectifIds: new Set(['c1']) }), ofC), false)
+    assert.equal(
+      deletesAsPlatform(moderator(), { owner_collectif_id: null, owner_user_id: 'u1' }),
+      false,
+    )
   })
 
   it('lets a member of C see like a responsible, without managing anything', () => {

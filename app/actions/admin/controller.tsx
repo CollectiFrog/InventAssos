@@ -26,20 +26,12 @@ import {
 } from '../../permissions.ts'
 import { routes } from '../../routes.ts'
 import { optionalText, parseForm } from '../../validation.ts'
+import { accountTargetOf } from '../account-target.ts'
 import { forbidden, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { type AccountRow, AccountsPage, QueuePage } from './queue-page.tsx'
 
 const rejectSchema = f.object({ reason: f.field(optionalText(500)) })
-
-/** The account as the account rules see it (`canDisableAccount`, `canEnableAccount`). */
-function targetOf(user: User, adminEmails: ReadonlySet<string>): AccountTarget {
-  return {
-    id: user.id,
-    isListedAdmin: adminEmails.has(user.email),
-    isModerator: user.role === 'moderator',
-  }
-}
 
 /** Administration › Demandes, at /admin and /admin/demandes (ADR 0022). */
 async function renderRequests(context: AppContext) {
@@ -74,7 +66,7 @@ export default createController(routes.admin, {
       const { adminEmails } = context.settings
       // Each row says who the account is and whether this viewer may act on it (US-0.8.2).
       const rowOf = (user: User): AccountRow => {
-        const target = targetOf(user, adminEmails)
+        const target = accountTargetOf(user, adminEmails)
         return {
           user,
           role:
@@ -166,7 +158,7 @@ export default createController(routes.admin, {
 
       const { db, session, settings } = context
       const user = await findUserById(db, context.params.userId)
-      if (user !== null && !canDisableAccount(actor, targetOf(user, settings.adminEmails))) {
+      if (user !== null && !canDisableAccount(actor, accountTargetOf(user, settings.adminEmails))) {
         return forbidden(context)
       }
       if (user === null || user.status !== 'active') {
@@ -204,7 +196,7 @@ export default createController(routes.admin, {
 
       const { db, session, settings } = context
       const user = await findUserById(db, context.params.userId)
-      if (user !== null && !canEnableAccount(actor, targetOf(user, settings.adminEmails))) {
+      if (user !== null && !canEnableAccount(actor, accountTargetOf(user, settings.adminEmails))) {
         return forbidden(context)
       }
       if (user === null || user.status !== 'disabled') {

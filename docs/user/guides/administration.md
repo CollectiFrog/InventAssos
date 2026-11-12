@@ -113,3 +113,9 @@ Sur la page d'un objet, un modérateur trouve **Retirer (modération)** ; un adm
 matériel est retiré : ce message lui est envoyé par e-mail (aux responsables du collectif s'il
 appartient à un collectif) et n'est pas conservé. L'objet est archivé, pas supprimé : sa page et son
 historique restent visibles de ceux qui le gèrent.
+
+**Supprimer…** efface définitivement un objet. Quand ce n'est ni le vôtre ni celui de l'un de vos
+collectifs, vous devez écrire le motif, envoyé de la même façon au propriétaire.
+
+Un modérateur ne peut ni retirer ni supprimer le matériel personnel d'un administrateur ou d'un
+autre modérateur, ni leur retirer le rôle de responsable d'un collectif.

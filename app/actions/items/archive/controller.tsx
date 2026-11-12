@@ -14,12 +14,18 @@ import { type ArchiveReason, archiveReasons, ownerArchiveReasons } from '../../.
 import { sendSafely } from '../../../mail/mailer.ts'
 import { itemModeratedMail } from '../../../mail/messages.ts'
 import type { AppContext } from '../../../middleware/index.ts'
-import { canChangeItem, canModerateItem, canSeeItem } from '../../../permissions.ts'
+import {
+  type AccountTarget,
+  canChangeItem,
+  canModerateItem,
+  canSeeItem,
+} from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, type FieldErrors, SelectField, TextArea } from '../../../ui/form.tsx'
 import { archiveReasonLabels } from '../../../ui/labels.ts'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
 import { formValue } from '../../../validation.ts'
+import { itemOwnerAccount } from '../../account-target.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 
@@ -94,10 +100,11 @@ function ArchiveItemPage(handle: Handle<ArchivePageProps>) {
 function reasonsFor(
   actor: Parameters<typeof canChangeItem>[0],
   item: ItemDetails,
+  owner: AccountTarget | null,
 ): ArchiveReason[] {
   return [
     ...(canChangeItem(actor, item) ? ownerArchiveReasons : []),
-    ...(canModerateItem(actor, item) ? (['moderated'] as const) : []),
+    ...(canModerateItem(actor, item, owner) ? (['moderated'] as const) : []),
   ]
 }
 
@@ -107,7 +114,8 @@ async function loadItem(context: AppContext, itemId: string) {
   if (actor instanceof Response) return actor
   const item = await findItemDetails(context.db, itemId)
   if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
-  const reasons = reasonsFor(actor, item)
+  const owner = await itemOwnerAccount(context.db, item, context.settings.adminEmails)
+  const reasons = reasonsFor(actor, item, owner)
   if (reasons.length === 0) return forbidden(context)
   return { actor, item, reasons }
 }

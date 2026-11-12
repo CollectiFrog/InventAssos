@@ -26,8 +26,10 @@ import {
   canManageMembers,
   canNameResponsibles,
   canPromoteToResponsible,
+  canRemoveResponsible,
 } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
+import { accountTargetOf } from '../../account-target.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 
 /** What each decision expects of the row, sets, logs, mails and tells the responsible. */
@@ -168,6 +170,12 @@ async function changeRole(
   if (row?.status !== 'active' || row.role !== from || user?.status !== 'active') {
     session.flash('notice', 'Ce changement a déjà été fait.')
     return redirect(membersUrl, 303)
+  }
+
+  // A moderator never takes the role from an admin or another moderator.
+  const target = accountTargetOf(user, settings.adminEmails)
+  if (role === 'member' && !canRemoveResponsible(actor, collectif.id, target)) {
+    return forbidden(context)
   }
 
   try {

@@ -7,7 +7,8 @@ sidebar:
 
 **Moderator** means: an active account an admin named on `/admin/moderateurs` (`users.role`,
 US-0.8.1). A listed admin is never treated as a moderator. A moderator never acts on an admin or
-another moderator, and sees every inventory like an admin
+another moderator: not on their account (disable, re-enable), nor on their responsible role, nor on
+the items they personally own (archive as abusive, delete). A moderator sees every inventory like an admin
 ([ADR 0025](../../adr/0025-staff-see-every-inventory/)), without any manager right.
 
 **Platform admin** means: the account's e-mail is listed in `PLATFORM_ADMIN_EMAILS`. The variable
@@ -77,6 +78,10 @@ Nobody but an admin gives themselves a collectif: a moderator never approves the
 become responsible or their own collectif, never names themselves as a replacement, and never
 promotes themselves in a collectif they belong to (`canMakeResponsibleByPlatform`,
 `canApproveCollectif`, `canPromoteToResponsible`; security review of V0.8).
+
+When an admin or a moderator deletes an item that is neither theirs nor their collectif's
+(`deletesAsPlatform`), they give a reason, e-mailed to the owner (each responsible apart for a
+collectif) and stored nowhere, as for the moderation archive.
 
 A collectif always keeps one active responsible **with an active account**: a disabled responsible
 does not count, and disabling the only one tells the staff which collectifs need another. Decisions
