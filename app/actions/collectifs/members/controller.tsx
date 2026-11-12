@@ -4,9 +4,10 @@ import { createController } from 'remix/router'
 import { logAction } from '../../../data/audit-log.ts'
 import { findActiveCollectifBySlug } from '../../../data/collectifs.ts'
 import {
-  countActiveResponsiblesForUpdate,
+  countOtherResponsiblesForUpdate,
   decideMembership,
   findMembership,
+  lockActiveRole,
   setMembershipRole,
 } from '../../../data/members.ts'
 import type { Collectif, MembershipStatus, User } from '../../../data/tables.ts'
@@ -20,7 +21,12 @@ import {
   responsibleNamedMail,
 } from '../../../mail/messages.ts'
 import type { AppContext } from '../../../middleware/index.ts'
-import { canLeaveCollectif, canManageMembers, canNameResponsibles } from '../../../permissions.ts'
+import {
+  canLeaveCollectif,
+  canManageMembers,
+  canNameResponsibles,
+  canPromoteToResponsible,
+} from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 
@@ -85,13 +91,16 @@ async function decide(
     return redirect(membersUrl, 303)
   }
 
-  await db.transaction(async (tx) => {
-    await decideMembership(tx, {
+  const applied = await db.transaction(async (tx) => {
+    const changed = await decideMembership(tx, {
       userId: user.id,
       collectifId: collectif.id,
+      from: { role: 'member', status: decision.from },
       status: decision.to,
       decidedBy: actor.id,
     })
+    // Someone else decided in the meantime: nothing to log, nobody to e-mail.
+    if (!changed) return false
     await logAction(tx, {
       actorId: actor.id,
       action: decision.action,
@@ -99,7 +108,12 @@ async function decide(
       entityId: collectif.id,
       payload: { userId: user.id },
     })
+    return true
   })
+  if (!applied) {
+    session.flash('notice', 'Cette demande a déjà été traitée.')
+    return redirect(membersUrl, 303)
+  }
   const showUrl = settings.appUrl + routes.collectifs.show.href({ slug: collectif.slug })
   await sendSafely(mailer, decision.mail(user, collectif, showUrl))
   session.flash('notice', decision.notice(user))
@@ -109,9 +123,21 @@ async function decide(
 /** Thrown inside a transaction to roll it back when it would leave C without a responsible. */
 class LastResponsible extends Error {}
 
-/** Locks C's responsibles and refuses to go on if the one leaving the role is the last one. */
-async function keepOneResponsible(db: AppContext['db'], collectifId: string): Promise<void> {
-  if ((await countActiveResponsiblesForUpdate(db, collectifId)) <= 1) throw new LastResponsible()
+/** Thrown inside a transaction when the row changed since the page was shown. */
+class AlreadyDone extends Error {}
+
+/**
+ * Locks C's responsibles and refuses to go on if C would keep none with an active account once
+ * this person leaves the role.
+ */
+async function keepOneResponsible(
+  db: AppContext['db'],
+  collectifId: string,
+  leavingUserId: string,
+): Promise<void> {
+  if ((await countOtherResponsiblesForUpdate(db, collectifId, leavingUserId)) < 1) {
+    throw new LastResponsible()
+  }
 }
 
 /**
@@ -130,6 +156,10 @@ async function changeRole(
   const collectif = await findActiveCollectifBySlug(db, params.slug)
   if (collectif === null) return notFound(context)
   if (!canNameResponsibles(actor, collectif.id)) return forbidden(context)
+  // A moderator who is a member of C never promotes themselves (security review of V0.8).
+  if (role === 'responsible' && !canPromoteToResponsible(actor, collectif.id, params.userId)) {
+    return forbidden(context)
+  }
 
   const membersUrl = routes.collectifs.people.href({ slug: collectif.slug })
   const row = await findMembership(db, params.userId, collectif.id)
@@ -142,13 +172,14 @@ async function changeRole(
 
   try {
     await db.transaction(async (tx) => {
-      if (role === 'member') await keepOneResponsible(tx, collectif.id)
-      await setMembershipRole(tx, {
+      if (role === 'member') await keepOneResponsible(tx, collectif.id, user.id)
+      const changed = await setMembershipRole(tx, {
         userId: user.id,
         collectifId: collectif.id,
         role,
         decidedBy: actor.id,
       })
+      if (!changed) throw new AlreadyDone()
       await logAction(tx, {
         actorId: actor.id,
         action: role === 'responsible' ? 'responsible.named' : 'responsible.removed',
@@ -158,6 +189,10 @@ async function changeRole(
       })
     })
   } catch (error) {
+    if (error instanceof AlreadyDone) {
+      session.flash('notice', 'Ce changement a déjà été fait.')
+      return redirect(membersUrl, 303)
+    }
     if (!(error instanceof LastResponsible)) throw error
     session.flash(
       'notice',
@@ -192,13 +227,15 @@ async function leave(context: AppContext, slug: string) {
   if (collectif === null) return notFound(context)
   if (!canLeaveCollectif(actor, collectif.id)) return forbidden(context)
 
-  const row = await findMembership(db, actor.id, collectif.id)
   try {
     await db.transaction(async (tx) => {
-      if (row?.role === 'responsible') await keepOneResponsible(tx, collectif.id)
+      // The role is read under lock: a promotion a moment ago must not slip past the check.
+      const role = await lockActiveRole(tx, actor.id, collectif.id)
+      if (role === 'responsible') await keepOneResponsible(tx, collectif.id, actor.id)
       await decideMembership(tx, {
         userId: actor.id,
         collectifId: collectif.id,
+        from: { status: 'active' },
         status: 'removed',
         decidedBy: actor.id,
       })

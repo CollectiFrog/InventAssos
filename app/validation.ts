@@ -3,12 +3,25 @@ import * as s from 'remix/data-schema'
 
 import type { FieldErrors } from './ui/form.tsx'
 
-/** A required, trimmed text of at most `max` characters. */
+/** True when the text holds a line break or another control character. */
+function hasControlCharacter(value: string): boolean {
+  for (const character of value) {
+    const code = character.charCodeAt(0)
+    if (code < 32 || code === 127) return true
+  }
+  return false
+}
+
+/**
+ * A required, trimmed, single-line text of at most `max` characters. Names end up in e-mail
+ * subjects and bodies: a line break in one would let its author shape the message.
+ */
 export function requiredText(max: number) {
   return s
     .defaulted(s.string(), '')
     .transform((value) => value.trim())
     .refine((value) => value.length > 0, 'Ce champ est obligatoire.')
+    .refine((value) => !hasControlCharacter(value), 'Une seule ligne, sans retour à la ligne.')
     .refine((value) => value.length <= max, `${max} caractères au maximum.`)
 }
 

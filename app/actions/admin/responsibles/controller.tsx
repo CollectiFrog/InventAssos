@@ -5,7 +5,7 @@ import { createController } from 'remix/router'
 import { logAction } from '../../../data/audit-log.ts'
 import { findCollectifById } from '../../../data/collectifs.ts'
 import {
-  countActiveResponsiblesForUpdate,
+  countOtherResponsiblesForUpdate,
   findResponsible,
   setMembershipRole,
   setResponsible,
@@ -17,7 +17,7 @@ import {
   responsibleDemotedMail,
   responsibleRejectedMail,
 } from '../../../mail/messages.ts'
-import { canManageResponsibles } from '../../../permissions.ts'
+import { canMakeResponsibleByPlatform, canManageResponsibles } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { optionalText, parseForm } from '../../../validation.ts'
 import { forbidden, requireUser } from '../../guards.tsx'
@@ -48,6 +48,8 @@ export default createController(routes.admin.responsibles, {
         session.flash('notice', 'Cette demande a déjà été traitée.')
         return redirect(queueUrl, 303)
       }
+      // A moderator never approves their own request (security review of V0.8).
+      if (!canMakeResponsibleByPlatform(actor, user.id)) return forbidden(context)
 
       await db.transaction(async (tx) => {
         await setResponsible(tx, {
@@ -129,6 +131,10 @@ export default createController(routes.admin.responsibles, {
         session.flash('notice', 'Le remplaçant doit être un autre utilisateur validé.')
         return redirect(backUrl, 303)
       }
+      // Nor names themselves as the replacement.
+      if (replacement && !canMakeResponsibleByPlatform(actor, replacement.id)) {
+        return forbidden(context)
+      }
 
       try {
         await db.transaction(async (tx) => {
@@ -140,7 +146,7 @@ export default createController(routes.admin.responsibles, {
               validatedBy: actor.id,
             })
           }
-          const remaining = (await countActiveResponsiblesForUpdate(tx, collectif.id)) - 1
+          const remaining = await countOtherResponsiblesForUpdate(tx, collectif.id, user.id)
           if (collectif.status === 'active' && remaining < 1) throw new RemovalRefused()
 
           // A removed responsible stays a member of the collectif (US-0.8.6).

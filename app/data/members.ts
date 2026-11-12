@@ -107,16 +107,46 @@ export async function requestMembership(
     )
 }
 
-/** Decides on a membership: accepted, rejected or removed by a responsible (US-0.8.4). */
+/**
+ * Decides on a membership: accepted, rejected or removed by a responsible (US-0.8.4), or left by
+ * the person (US-0.8.8). The expected state is part of the update, so two decisions at once cannot
+ * both apply; false when the row was no longer in that state.
+ */
 export async function decideMembership(
   db: Database,
-  input: { userId: string; collectifId: string; status: MembershipStatus; decidedBy: string },
-): Promise<void> {
-  await db.exec(sql`
+  input: {
+    userId: string
+    collectifId: string
+    /** The row must hold this role (when given) and this status. */
+    from: { role?: MembershipRole; status: MembershipStatus }
+    status: MembershipStatus
+    decidedBy: string
+  },
+): Promise<boolean> {
+  const role = input.from.role ?? null
+  const result = await db.exec(sql`
     update collectif_members
     set status = ${input.status}, validated_by = ${input.decidedBy}, validated_at = now()
     where user_id = ${input.userId} and collectif_id = ${input.collectifId}
+      and status = ${input.from.status} and (${role}::text is null or role = ${role})
+    returning user_id
   `)
+  return (result.rows?.length ?? 0) > 0
+}
+
+/** The person's active role in a collectif, with the row locked until the transaction ends. */
+export async function lockActiveRole(
+  db: Database,
+  userId: string,
+  collectifId: string,
+): Promise<MembershipRole | null> {
+  const result = await db.exec(sql`
+    select role from collectif_members
+    where user_id = ${userId} and collectif_id = ${collectifId} and status = 'active'
+    for update
+  `)
+  const role = result.rows?.[0]?.role
+  return role === 'responsible' || role === 'member' ? role : null
 }
 
 /** A person of a collectif, as its Membres tab lists them. */
@@ -193,19 +223,23 @@ export async function listActiveResponsibles(
 }
 
 /**
- * Counts active responsibles, locking their rows until the transaction ends, so two admins
- * removing the last two responsibles at once cannot both succeed.
+ * Counts the responsibles a collectif would keep without this person, locking every responsible
+ * row until the transaction ends, so two removals at once cannot both succeed. Only active accounts
+ * count: a disabled responsible cannot run the collectif (security review of V0.8).
  */
-export async function countActiveResponsiblesForUpdate(
+export async function countOtherResponsiblesForUpdate(
   db: Database,
   collectifId: string,
+  exceptUserId: string,
 ): Promise<number> {
   const result = await db.exec(sql`
-    select user_id from collectif_members
-    where collectif_id = ${collectifId} and role = 'responsible' and status = 'active'
-    for update
+    select m.user_id, u.status from collectif_members m join users u on u.id = m.user_id
+    where m.collectif_id = ${collectifId} and m.role = 'responsible' and m.status = 'active'
+    for update of m
   `)
-  return result.rows?.length ?? 0
+  return (result.rows ?? []).filter(
+    (row) => row.status === 'active' && String(row.user_id) !== exceptUserId,
+  ).length
 }
 
 /** A pending responsible request, with what the admin needs to decide. */
@@ -242,20 +276,44 @@ export async function listPendingResponsibles(db: Database): Promise<PendingResp
 /** How many active responsibles each collectif has; a collectif with none is absent. */
 export async function countActiveResponsibles(db: Database): Promise<Map<string, number>> {
   const result = await db.exec(sql`
-    select collectif_id, count(*)::int as n from collectif_members
-    where role = 'responsible' and status = 'active' group by collectif_id
+    select m.collectif_id, count(*)::int as n from collectif_members m
+    join users u on u.id = m.user_id and u.status = 'active'
+    where m.role = 'responsible' and m.status = 'active' group by m.collectif_id
   `)
   return new Map((result.rows ?? []).map((row) => [String(row.collectif_id), Number(row.n)]))
 }
 
-/** Changes an active person's role in a collectif (US-0.8.6): member ↔ responsible. */
+/**
+ * Changes an active person's role in a collectif (US-0.8.6): member ↔ responsible. False when the
+ * person no longer held the other role, so a concurrent change is never applied twice.
+ */
 export async function setMembershipRole(
   db: Database,
   input: { userId: string; collectifId: string; role: MembershipRole; decidedBy: string },
-): Promise<void> {
-  await db.exec(sql`
+): Promise<boolean> {
+  const from: MembershipRole = input.role === 'responsible' ? 'member' : 'responsible'
+  const result = await db.exec(sql`
     update collectif_members
     set role = ${input.role}, validated_by = ${input.decidedBy}, validated_at = now()
     where user_id = ${input.userId} and collectif_id = ${input.collectifId} and status = 'active'
+      and role = ${from}
+    returning user_id
   `)
+  return (result.rows?.length ?? 0) > 0
+}
+
+/** Active collectifs whose only active responsible (with an active account) is this person. */
+export async function listCollectifsRelyingOn(db: Database, userId: string): Promise<string[]> {
+  const result = await db.exec(sql`
+    select c.name from collectif_members m join collectifs c on c.id = m.collectif_id
+    where m.user_id = ${userId} and m.role = 'responsible' and m.status = 'active'
+      and c.status = 'active'
+      and not exists (
+        select 1 from collectif_members o join users u on u.id = o.user_id
+        where o.collectif_id = m.collectif_id and o.user_id <> m.user_id
+          and o.role = 'responsible' and o.status = 'active' and u.status = 'active'
+      )
+    order by lower(c.name)
+  `)
+  return (result.rows ?? []).map((row) => String(row.name))
 }

@@ -109,6 +109,15 @@ export function canNameResponsibles(actor: Actor, collectifId: string): boolean 
   )
 }
 
+/** "Make a member of C responsible": as above, and never oneself unless admin. */
+export function canPromoteToResponsible(
+  actor: Actor,
+  collectifId: string,
+  userId: string,
+): boolean {
+  return canNameResponsibles(actor, collectifId) && decidesForSomeoneElse(actor, userId)
+}
+
 /** "Leave C" (US-0.8.8): any person of C; the last responsible names another one first. */
 export function canLeaveCollectif(actor: Actor, collectifId: string): boolean {
   return isValidatedUser(actor) && actor.memberCollectifIds.has(collectifId)
@@ -125,6 +134,26 @@ export function canManageMembers(actor: Actor, collectifId: string): boolean {
 /** "Approve, reject or remove a responsible of C": admin or moderator. */
 export function canManageResponsibles(actor: Actor): boolean {
   return isActiveStaff(actor)
+}
+
+/**
+ * Nobody but an admin, who holds every right anyway, gives themselves a collectif: a moderator
+ * never approves their own request, names themselves as a replacement or promotes themselves
+ * (security review of V0.8). Moderators keep no manager right (ADR 0025).
+ */
+function decidesForSomeoneElse(actor: Actor, userId: string | null): boolean {
+  if (actor === null || actor.isAdmin) return actor !== null
+  return actor.id !== userId
+}
+
+/** "Approve a responsible of C" / name a replacement: staff, never for themselves (admins may). */
+export function canMakeResponsibleByPlatform(actor: Actor, userId: string): boolean {
+  return canManageResponsibles(actor) && decidesForSomeoneElse(actor, userId)
+}
+
+/** "Approve a collectif": staff, never the one they asked for themselves (admins may). */
+export function canApproveCollectif(actor: Actor, requestedBy: string | null): boolean {
+  return canReviewCollectifs(actor) && decidesForSomeoneElse(actor, requestedBy)
 }
 
 /** "Edit C's profile": platform admin, or an active responsible of C. */

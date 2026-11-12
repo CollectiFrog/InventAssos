@@ -36,6 +36,7 @@ describe('delete an item (US-0.8.9, US-0.8.10)', () => {
     await decideMembership(db, {
       userId: samiUser.id,
       collectifId: frog.id,
+      from: { status: 'pending' },
       status: 'active',
       decidedBy: ritaUser.id,
     })
