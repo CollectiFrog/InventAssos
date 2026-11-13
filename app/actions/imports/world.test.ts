@@ -96,7 +96,7 @@ describe('the world of an import, from the database (ADR 0027)', () => {
     header: inventoryHeaderRow(),
     rows: rows.map((cells, index) => ({
       n: index + 2,
-      cells: columns.map((field, column) =>
+      cells: columns.map((field) =>
         field === 'ref'
           ? (cells[0] ?? '')
           : field === 'name'
