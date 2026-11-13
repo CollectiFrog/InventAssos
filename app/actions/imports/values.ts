@@ -622,17 +622,14 @@ export function guessCondition(
       return { condition, source: 'exact' }
     }
   }
-  // In a negative sentence a word may mean its opposite (« pas bon », « sans défaut »): only a
-  // phrase that carries the negation itself (« ne fonctionne plus », « jamais servi ») counts.
-  const negative = valueWords.some((word) => negations.has(word))
+  // In a negative sentence a word may mean its opposite (« pas bon », « jamais servi mais
+  // cassé »): no guess at all, the person chooses. Exact phrases were matched above.
+  if (valueWords.some((word) => negations.has(word))) return { condition: null, source: 'fallback' }
   for (const condition of severity) {
     const phrases = conditionPhrases.get(condition) ?? []
-    const found = phrases.some(
-      (phrase) =>
-        containsPhrase(valueWords, phrase) &&
-        (!negative || phrase.some((word) => negations.has(word))),
-    )
-    if (found) return { condition, source: 'vocabulary' }
+    if (phrases.some((phrase) => containsPhrase(valueWords, phrase))) {
+      return { condition, source: 'vocabulary' }
+    }
   }
   return { condition: null, source: 'fallback' }
 }

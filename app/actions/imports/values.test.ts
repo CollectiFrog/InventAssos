@@ -94,9 +94,9 @@ describe('guessing categories, conditions and locations (ADR 0026)', () => {
     assert.equal(condition("Hors d'usage"), 'broken')
     assert.equal(condition('marche mal'), 'repair')
     assert.equal(condition('To be checked'), 'repair')
-    // A phrase that carries the negation still counts.
-    assert.equal(condition('HS, ne fonctionne plus'), 'broken')
-    assert.equal(condition('neuf, jamais servi'), 'new')
+    // Exact negative phrases are still read; anything longer is left to the person.
+    assert.equal(condition('ne fonctionne plus'), 'broken')
+    assert.equal(condition('jamais servi'), 'new')
     for (const value of [
       'pas bon',
       'sans défaut',
@@ -107,6 +107,10 @@ describe('guessing categories, conditions and locations (ADR 0026)', () => {
       'jamais bon',
       'jamais fonctionné',
       'en panne, plus de son',
+      'jamais utilisé car en panne',
+      'jamais servi mais cassé',
+      'plus jamais utilisé',
+      'HS, ne fonctionne plus',
     ]) {
       assert.equal(condition(value), null, value)
     }
