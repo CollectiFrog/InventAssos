@@ -40,7 +40,7 @@ const sold = existing({ id: soldId, ref: 'OLD-1', name: 'Vieux pied', archived: 
 const locked = existing({ id: lockedId, ref: 'LOCK-1', name: 'Câble', changeable: false })
 
 /** The database's view, as the loader builds it; references folded like `inv_fold`. */
-function world(refs: string[]): ImportWorld {
+function world(refs: string[], options: { maySetRef?: boolean } = {}): ImportWorld {
   const items = [amp, sold, locked]
   return {
     defaultLocation: { id: 'local', name: 'Local' },
@@ -64,6 +64,7 @@ function world(refs: string[]): ImportWorld {
     ),
     itemsById: new Map(items.map((item) => [item.id, item])),
     namesByLocation: new Map([['local', new Set(['ampli', 'cable'])]]),
+    maySetRef: options.maySetRef ?? true,
   }
 }
 
@@ -91,14 +92,19 @@ function row(n: number, cells: Partial<Record<(typeof columns)[number] & string,
 
 function plan(
   rows: ReturnType<typeof row>[],
-  options: { values?: ValueMapping; forced?: number[]; mapping?: ColumnMapping } = {},
+  options: {
+    values?: ValueMapping
+    forced?: number[]
+    mapping?: ColumnMapping
+    maySetRef?: boolean
+  } = {},
 ) {
   const refs = rows.map((r) => r.cells[0] ?? '').filter((ref) => ref.trim() !== '')
   return planImport(
     { header, rows },
     options.mapping ?? columns,
     options.values ?? noValues,
-    world(refs),
+    world(refs, { maySetRef: options.maySetRef }),
     new Set(options.forced ?? []),
   )
 }
@@ -251,6 +257,57 @@ describe('planning an import, row by row (US-0.10.2, ADR 0027)', () => {
       warnings: 0,
     })
     assert.equal(plan([row(2, { ref: 'AMP-01' })]).confirmable, false)
+  })
+
+  it('refuses two rows aimed at one item, by Identifiant and by reference', () => {
+    const result = plan([
+      row(2, { id: ampId, quantity: '3' }),
+      row(3, { ref: 'AMP-01', quantity: '5' }),
+    ])
+    assert.deepEqual(
+      result.rows.map((r) => r.state),
+      ['invalid', 'invalid'],
+    )
+    assert.match(result.rows[0]?.errors[0] ?? '', /aussi visé ligne 3 : une seule ligne par objet/)
+    const swap = plan([row(2, { id: ampId, ref: 'NEW-9' }), row(3, { ref: 'AMP-01', name: 'X' })])
+    assert.equal(swap.confirmable, false)
+  })
+
+  it('cuts long lists of other rows short', () => {
+    const rows = Array.from({ length: 12 }, (_, i) => row(i + 2, { ref: 'SAME', name: `N${i}` }))
+    const [first] = plan(rows).rows
+    assert.match(first?.errors[0] ?? '', /aussi ligne 3, 4, 5, 6, 7 et 6 autres/)
+  })
+
+  it('lets only the owner set references (`canSetItemRef`)', () => {
+    const created = plan([row(2, { name: 'Lyre', ref: 'L-1' })], { maySetRef: false }).rows[0]
+    assert.match(created?.errors.join(' ') ?? '', /seul le propriétaire/)
+    const renamed = plan([row(2, { id: ampId, ref: 'AMP-02' })], { maySetRef: false }).rows[0]
+    assert.equal(renamed?.state, 'invalid')
+    // Finding an item by its reference does not set it: allowed.
+    const found = plan([row(2, { ref: 'AMP-01', quantity: '4' })], { maySetRef: false }).rows[0]
+    assert.equal(found?.state, 'update')
+  })
+
+  it('names the field of a present but invalid name', () => {
+    const [long] = plan([row(2, { name: 'x'.repeat(121) })]).rows
+    assert.deepEqual(long?.errors, ['Nom : 120 caractères au maximum.'])
+  })
+
+  it('keeps an update’s category, value and description when their cells are blank', () => {
+    const [same] = plan([
+      row(2, { ref: 'AMP-01', category: '', estimatedValue: '', description: '' }),
+    ]).rows
+    assert.equal(same?.state, 'unchanged')
+    assert.equal(same?.fields?.categoryId, 'sound')
+    assert.equal(same?.fields?.estimatedValue, 150)
+    assert.equal(same?.fields?.description, 'Gris')
+  })
+
+  it('adds a forced archived row found by Identifiant without its reference', () => {
+    const [forced] = plan([row(2, { id: soldId, name: 'Pied neuf' })], { forced: [2] }).rows
+    assert.equal(forced?.state, 'create')
+    assert.equal(forced?.fields?.ref, null)
   })
 
   it('ignores unmapped columns', () => {

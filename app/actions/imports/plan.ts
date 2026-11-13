@@ -68,6 +68,8 @@ export interface ImportWorld {
   itemsById: ReadonlyMap<string, ExistingItem>
   /** Folded names of the active items in each location, for the « already there » warning. */
   namesByLocation: ReadonlyMap<string, ReadonlySet<string>>
+  /** Whether the person importing may give items references (`canSetItemRef`). */
+  maySetRef: boolean
 }
 
 /** What happens to a row. `archived` rows are skipped unless the person forces them (ADR 0027). */
@@ -146,9 +148,20 @@ const fieldColumns: Record<keyof ItemFields, string> = {
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-/** A reference as it is stored: trimmed and NFC, so the database compares it as the form does. */
+/**
+ * A reference as it is stored and looked up: one line (runs of spaces, tabs and no-break spaces
+ * become one space), trimmed, NFC. The loader and the plan both use it, so a reference is never
+ * looked up under another key than the one it was loaded with.
+ */
 export function normaliseRef(cell: string): string {
-  return cell.trim().normalize('NFC')
+  return cell.replace(/\s+/g, ' ').trim().normalize('NFC')
+}
+
+/** « 3, 4, 5 et 1 996 autres »: other row numbers, the list cut short. */
+function rowList(numbers: readonly number[]): string {
+  const shown = numbers.slice(0, 5).join(', ')
+  const rest = numbers.length - 5
+  return rest > 0 ? `${shown} et ${rest.toLocaleString('fr-FR')} autres` : shown
 }
 
 /** Runs of spaces and line breaks become one space, except in the description. */
@@ -183,8 +196,14 @@ function sameValue(field: keyof ItemFields, before: ExistingItem, after: ItemFie
 }
 
 /**
- * Plans the import of every row. `forced` holds the row numbers the person chose to add although
- * their reference is an archived item's: they become new items, without that reference.
+ * Plans the import of every row.
+ *
+ * Locations: a created item goes to the location its cell names (as mapped on the values step),
+ * else to the import's. An updated item moves only when its cell names another of the owner's
+ * locations; a value left on « the import's location », or unknown, never moves it.
+ *
+ * `forced` holds the row numbers the person chose to add although their reference is an archived
+ * item's: they become new items, without that reference.
  */
 export function planImport(
   file: ImportRows,
@@ -205,15 +224,17 @@ export function planImport(
   const categoryName = new Map(world.categories.map((c) => [c.id, c.name]))
   const locationName = new Map(world.locations.map((l) => [l.id, l.name]))
 
-  // Rows sharing a reference or an identifier: each is told the others' numbers.
+  // Rows sharing a reference, or aimed at the same item (by Identifiant or by reference): each is
+  // told the others' numbers, so no item is written twice by one file.
   const byRefKey = new Map<string, number[]>()
-  const byId = new Map<string, number[]>()
+  const byItem = new Map<string, number[]>()
   for (const { n, cells } of file.rows) {
     const ref = cellOf(cells, 'ref')
-    const key = ref ? world.refs.get(normaliseRef(ref))?.key : undefined
-    if (key) byRefKey.set(key, [...(byRefKey.get(key) ?? []), n])
-    const id = cellOf(cells, 'id')?.toLowerCase()
-    if (id) byId.set(id, [...(byId.get(id) ?? []), n])
+    const entry = ref ? world.refs.get(normaliseRef(ref)) : undefined
+    if (entry?.key) byRefKey.set(entry.key, [...(byRefKey.get(entry.key) ?? []), n])
+    const id = cellOf(cells, 'id')?.toLowerCase() ?? ''
+    const target = id !== '' ? world.itemsById.get(id)?.id : entry?.item?.id
+    if (target) byItem.set(target, [...(byItem.get(target) ?? []), n])
   }
   const others = (map: Map<string, number[]>, key: string | undefined, n: number) =>
     key === undefined ? [] : (map.get(key) ?? []).filter((other) => other !== n)
@@ -261,8 +282,6 @@ export function planImport(
         return row
       }
       item = found
-      const twins = others(byId, idCell.toLowerCase(), n)
-      if (twins.length > 0) errors.push(`Identifiant en double (aussi ligne ${twins.join(', ')}).`)
       if (item && refEntry?.item && refEntry.item.id !== item.id) {
         errors.push(`La référence « ${ref} » est déjà celle d’un autre objet.`)
       }
@@ -271,8 +290,15 @@ export function planImport(
       const twins = others(byRefKey, refEntry?.key, n)
       if (twins.length > 0) {
         errors.push(
-          `Référence « ${ref} » en double dans le fichier (aussi ligne ${twins.join(', ')}).`,
+          `Référence « ${ref} » en double dans le fichier (aussi ligne ${rowList(twins)}).`,
         )
+      }
+    }
+    if (item) {
+      const refTwins = new Set(others(byRefKey, refEntry?.key, n))
+      const twins = others(byItem, item.id, n).filter((other) => !refTwins.has(other))
+      if (twins.length > 0) {
+        errors.push(`Cet objet est aussi visé ligne ${rowList(twins)} : une seule ligne par objet.`)
       }
     }
 
@@ -292,6 +318,13 @@ export function planImport(
       item = null
     }
     if (item && !item.changeable) errors.push('Vous ne pouvez pas modifier cet objet.')
+    // A reference lives in its owner's namespace: only the owner sets it (US-0.10.3).
+    const setsRef = item
+      ? idCell !== '' && ref !== '' && ref !== item.ref
+      : ref !== '' && !archivedTwin
+    if (setsRef && !world.maySetRef) {
+      errors.push('Référence : seul le propriétaire de l’objet choisit sa référence.')
+    }
 
     // The fields as the item form would receive them: the existing values, then the cells.
     const base: Record<keyof ItemFields, string> = item
@@ -328,7 +361,7 @@ export function planImport(
     const quantityCell = cellOf(cells, 'quantity') ?? ''
     const quantity = parseQuantity(quantityCell)
     if (quantity === null) {
-      errors.push(`Quantité « ${quantityCell} » : indiquez un nombre entier d’au moins 1.`)
+      errors.push(`Quantité « ${quantityCell} » : indiquez un nombre entier de 1 à 999 999.`)
     } else if (!quantity.blank) set('quantity', String(quantity.value))
 
     const valueCell = cellOf(cells, 'estimatedValue') ?? ''
@@ -379,7 +412,9 @@ export function planImport(
     if (!parsed.ok) {
       for (const [field, message] of Object.entries(parsed.errors)) {
         const label = fieldLabels[field as keyof ItemFields] ?? field
-        errors.push(field === 'name' && !item ? 'Nom manquant.' : `${label} : ${message}`)
+        errors.push(
+          field === 'name' && base.name === '' ? 'Nom manquant.' : `${label} : ${message}`,
+        )
       }
     }
     const fields = parsed.ok ? parsed.value : null

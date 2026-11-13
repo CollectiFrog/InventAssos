@@ -241,6 +241,18 @@ export function canStoreItemsIn(
 }
 
 /**
+ * "Import a file into a location" (US-0.10.1, US-0.10.5): whoever manages it, so a responsible of
+ * C for C's locations and anyone for their own; the admins for any collectif's. Members may come
+ * later (ADR 0027): change this line only.
+ */
+export function canImportInto(
+  actor: Actor,
+  location: { collectif_id: string | null; user_id: string | null },
+): boolean {
+  return isValidatedUser(actor) && canManageLocation(actor, location)
+}
+
+/**
  * "Export an owner's equipment" (US-0.10.4): the person their own, a responsible of the collectif,
  * an admin. Members and moderators export only their own for now (ADR 0027); one line to change.
  */

@@ -12,7 +12,13 @@ import {
 } from '../../data/items.ts'
 import { listCollectifLocations, listLocationsOwnedBy } from '../../data/locations.ts'
 import type { Location } from '../../data/tables.ts'
-import { type Actor, canChangeItem, canStoreItemsIn } from '../../permissions.ts'
+import {
+  type Actor,
+  canChangeItem,
+  canImportInto,
+  canSetItemRef,
+  canStoreItemsIn,
+} from '../../permissions.ts'
 import { fold } from './fold.ts'
 import type { ColumnMapping, ExistingItem, ImportRows, ImportWorld } from './plan.ts'
 import { normaliseRef } from './plan.ts'
@@ -60,6 +66,10 @@ export async function loadImportWorld(
   file: ImportRows,
   columns: ColumnMapping,
 ): Promise<ImportWorld> {
+  // Deny by default: the pages check it first, the world refuses to exist without it.
+  if (!canImportInto(actor, location)) {
+    throw new Error('This person may not import into this location')
+  }
   const owner = ownerOfLocation(location)
   const ownerLocations =
     'collectifId' in owner
@@ -74,7 +84,14 @@ export async function loadImportWorld(
     if (index < 0) return []
     return file.rows.map((row) => (row.cells[index] ?? '').trim()).filter((cell) => cell !== '')
   }
-  const refs = await matchRefs(db, owner, cellsOf('ref').map(normaliseRef))
+  // A NUL cannot reach PostgreSQL text; such a reference is refused by the plan's field check.
+  const refs = await matchRefs(
+    db,
+    owner,
+    cellsOf('ref')
+      .map(normaliseRef)
+      .filter((ref) => !ref.includes('\u0000')),
+  )
   const byId = await findOwnerItems(db, owner, cellsOf('id'))
   const names = await listActiveItemNames(
     db,
@@ -103,5 +120,6 @@ export async function loadImportWorld(
     ),
     itemsById: new Map(byId.map((candidate) => [candidate.item.id, toExisting(actor, candidate)])),
     namesByLocation,
+    maySetRef: canSetItemRef(actor, owner),
   }
 }

@@ -131,6 +131,65 @@ describe('the world of an import, from the database (ADR 0027)', () => {
     assert.equal(world.itemsById.size, 1)
   })
 
+  it('looks a reference up under the key it was loaded with: spaces collapsed', async () => {
+    const owner = { collectifId: frog.id }
+    await createTestItem(db, {
+      locationId: local.id,
+      owner,
+      createdBy: rita.id,
+      name: 'Mix',
+      ref: 'MIX 01',
+    })
+    const rows = file([
+      ['MIX  01', 'Mix'],
+      ['mix\u00a001', 'Mix bis'],
+    ])
+    const world = await loadImportWorld(db, await actor(), local, rows, columns)
+    const plan = planImport(rows, columns, { category: {}, condition: {}, location: {} }, world)
+    assert.deepEqual(
+      plan.rows.map((row) => row.state),
+      ['invalid', 'invalid'],
+      'both name the same existing item',
+    )
+  })
+
+  it('never reaches another owner’s item by Identifiant, nor archived names', async () => {
+    const other = await createActiveCollectif(db, 'Tiers', rita.id)
+    const theirs = await createTestLocation(db, { collectifId: other.id }, 'Ailleurs 2')
+    const foreign = await createTestItem(db, {
+      locationId: theirs.id,
+      owner: { collectifId: other.id },
+      createdBy: rita.id,
+    })
+    const rows = file([['', '', foreign.id]])
+    const world = await loadImportWorld(db, await actor(), local, rows, columns)
+    assert.equal(world.itemsById.size, 0)
+    assert.equal(world.namesByLocation.get(cave.id)?.has('pied') ?? false, false, 'archived')
+  })
+
+  it('works for a person’s own locations, and refuses someone without rights', async () => {
+    const garage = await createTestLocation(db, { userId: rita.id }, 'Garage')
+    const mine = await createTestItem(db, {
+      locationId: garage.id,
+      owner: { userId: rita.id },
+      createdBy: rita.id,
+      ref: 'PERSO-1',
+    })
+    const rows = file([['perso-1']])
+    const world = await loadImportWorld(db, await actor(), garage, rows, columns)
+    assert.equal(world.refs.get('perso-1')?.item?.id, mine.id)
+    assert.equal(world.maySetRef, true)
+    const lou = await createActiveUser(db, 'Lou', 'lou@example.org')
+    const outsider: CurrentUser = {
+      ...(await actor()),
+      id: lou.id,
+      managedCollectifIds: new Set(),
+      memberCollectifIds: new Set(),
+      collectifs: [],
+    }
+    await assert.rejects(() => loadImportWorld(db, outsider, local, rows, columns))
+  })
+
   it('plans with the real world: an update, an archived row, a creation', async () => {
     const rows = file([
       ['ete-1', 'Ampli rouge'],
