@@ -167,6 +167,14 @@ describe('the world of an import, from the database (ADR 0027)', () => {
     assert.equal(world.namesByLocation.get(cave.id)?.has('pied') ?? false, false, 'archived')
   })
 
+  it('never sends a NUL to the database; the row is refused by its field check', async () => {
+    const rows = file([['A\u0000B', 'Pied']])
+    const world = await loadImportWorld(db, await actor(), local, rows, columns)
+    assert.equal(world.refs.size, 0)
+    const plan = planImport(rows, columns, { category: {}, condition: {}, location: {} }, world)
+    assert.equal(plan.rows[0]?.state, 'invalid')
+  })
+
   it('works for a person’s own locations, and refuses someone without rights', async () => {
     const garage = await createTestLocation(db, { userId: rita.id }, 'Garage')
     const mine = await createTestItem(db, {

@@ -185,7 +185,7 @@ describe('planning an import, row by row (US-0.10.2, ADR 0027)', () => {
     ]).rows
     assert.equal(bad?.state, 'invalid')
     const text = bad?.errors.join(' | ') ?? ''
-    assert.match(text, /Quantité « deux » : indiquez un nombre entier/)
+    assert.match(text, /Quantité « deux » : indiquez un nombre entier de 1 à 999 999\./)
     assert.match(text, /Valeur « beaucoup » : montant non reconnu/)
     assert.match(text, /Nom manquant\./)
     assert.match(text, /Marque : 120 caractères au maximum\./)
@@ -271,6 +271,18 @@ describe('planning an import, row by row (US-0.10.2, ADR 0027)', () => {
     assert.match(result.rows[0]?.errors[0] ?? '', /aussi visé ligne 3 : une seule ligne par objet/)
     const swap = plan([row(2, { id: ampId, ref: 'NEW-9' }), row(3, { ref: 'AMP-01', name: 'X' })])
     assert.equal(swap.confirmable, false)
+  })
+
+  it('sets two rows on one archived item aside, without calling them duplicates', () => {
+    const result = plan([row(2, { id: soldId }), row(3, { ref: 'OLD-1' })])
+    assert.deepEqual(
+      result.rows.map((r) => r.state),
+      ['archived', 'archived'],
+    )
+    const singular = plan(
+      Array.from({ length: 7 }, (_, i) => row(i + 2, { ref: 'ONE', name: 'N' })),
+    )
+    assert.match(singular.rows[0]?.errors[0] ?? '', /et 1 autre\)/)
   })
 
   it('cuts long lists of other rows short', () => {

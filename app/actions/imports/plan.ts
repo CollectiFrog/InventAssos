@@ -161,7 +161,8 @@ export function normaliseRef(cell: string): string {
 function rowList(numbers: readonly number[]): string {
   const shown = numbers.slice(0, 5).join(', ')
   const rest = numbers.length - 5
-  return rest > 0 ? `${shown} et ${rest.toLocaleString('fr-FR')} autres` : shown
+  if (rest <= 0) return shown
+  return `${shown} et ${rest.toLocaleString('fr-FR')} ${rest > 1 ? 'autres' : 'autre'}`
 }
 
 /** Runs of spaces and line breaks become one space, except in the description. */
@@ -294,7 +295,8 @@ export function planImport(
         )
       }
     }
-    if (item) {
+    // An archived item is never written: rows naming it are set aside or forced in as new items.
+    if (item && !item.archived) {
       const refTwins = new Set(others(byRefKey, refEntry?.key, n))
       const twins = others(byItem, item.id, n).filter((other) => !refTwins.has(other))
       if (twins.length > 0) {
