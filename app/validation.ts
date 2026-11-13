@@ -37,12 +37,15 @@ export function requiredText(max: number) {
 export function optionalLine(max: number) {
   // Normalised before it is measured: NFC can lengthen a few characters, and the database checks
   // the stored length.
-  return s
-    .defaulted(s.string(), '')
-    .transform((value) => value.trim().normalize('NFC'))
-    .refine((value) => value.length <= max, `${max} caractères au maximum.`)
-    .refine((value) => !hasControlCharacter(value), 'Une seule ligne, sans retour à la ligne.')
-    .transform((value) => (value === '' ? null : value))
+  return (
+    s
+      .defaulted(s.string(), '')
+      // Runs of spaces become one, as the import does: « DBL  01 » and « DBL 01 » are one reference.
+      .transform((value) => value.replace(/\s+/g, ' ').trim().normalize('NFC'))
+      .refine((value) => value.length <= max, `${max} caractères au maximum.`)
+      .refine((value) => !hasControlCharacter(value), 'Une seule ligne, sans retour à la ligne.')
+      .transform((value) => (value === '' ? null : value))
+  )
 }
 
 /** An optional, trimmed text: blank becomes null. */

@@ -79,6 +79,96 @@ export async function refTaken(
   return (result.rows?.length ?? 0) > 0
 }
 
+/** An owner's item as an import needs it, with where it is stored (for `canChangeItem`). */
+export interface ImportCandidate {
+  item: Item
+  locationName: string
+  locationCollectifId: string | null
+  locationUserId: string | null
+}
+
+const candidateColumns = sql`
+  i.*, l.name as location_name, l.collectif_id as location_collectif_id,
+  l.user_id as location_user_id
+`
+
+function toCandidate(row: Record<string, unknown>): ImportCandidate {
+  const { location_name, location_collectif_id, location_user_id, ...item } = row
+  return {
+    item: item as unknown as Item,
+    locationName: String(location_name),
+    locationCollectifId: location_collectif_id == null ? null : String(location_collectif_id),
+    locationUserId: location_user_id == null ? null : String(location_user_id),
+  }
+}
+
+function ownerCondition(owner: ItemOwner) {
+  return 'collectifId' in owner
+    ? sql`i.owner_collectif_id = ${owner.collectifId}`
+    : sql`i.owner_user_id = ${owner.userId}`
+}
+
+/**
+ * The references of a file, each with the key the database compares it by (`inv_fold`) and the
+ * owner's item that holds it, archived or not (US-0.10.3). Compared in SQL only, as the unique
+ * index does, so the import never disagrees with the database.
+ */
+export async function matchRefs(
+  db: Database,
+  owner: ItemOwner,
+  refs: readonly string[],
+): Promise<Map<string, { key: string; candidate: ImportCandidate | null }>> {
+  const distinct = [...new Set(refs)]
+  const matches = new Map<string, { key: string; candidate: ImportCandidate | null }>()
+  if (distinct.length === 0) return matches
+  const result = await db.exec(sql`
+    select r.ref as file_ref, inv_fold(r.ref) as file_key, ${candidateColumns}
+    from unnest(${distinct}::text[]) as r(ref)
+    left join items i on ${ownerCondition(owner)} and i.ref is not null
+      and inv_fold(i.ref) = inv_fold(r.ref)
+    left join locations l on l.id = i.location_id
+  `)
+  for (const row of result.rows ?? []) {
+    const { file_ref, file_key, ...rest } = row
+    matches.set(String(file_ref), {
+      key: String(file_key),
+      candidate: rest.id == null ? null : toCandidate(rest),
+    })
+  }
+  return matches
+}
+
+/** The owner's items among these IDs, archived or not (the « Identifiant » column, ADR 0027). */
+export async function findOwnerItems(
+  db: Database,
+  owner: ItemOwner,
+  ids: readonly string[],
+): Promise<ImportCandidate[]> {
+  const valid = [...new Set(ids.map((id) => id.toLowerCase()).filter(isUuid))]
+  if (valid.length === 0) return []
+  const result = await db.exec(sql`
+    select ${candidateColumns} from items i join locations l on l.id = i.location_id
+    where ${ownerCondition(owner)} and i.id = any(${valid}::uuid[])
+  `)
+  return (result.rows ?? []).map(toCandidate)
+}
+
+/** Names of the active items in these locations, for the « already there » warning. */
+export async function listActiveItemNames(
+  db: Database,
+  locationIds: readonly string[],
+): Promise<{ locationId: string; name: string }[]> {
+  if (locationIds.length === 0) return []
+  const result = await db.exec(sql`
+    select location_id, name from items
+    where archived_at is null and location_id = any(${[...locationIds]}::uuid[])
+  `)
+  return (result.rows ?? []).map((row) => ({
+    locationId: String(row.location_id),
+    name: String(row.name),
+  }))
+}
+
 /** True when a write failed on the per-owner reference index (a race after `refTaken`). */
 export function isRefConflict(error: unknown): boolean {
   const code = (error as { code?: unknown } | null)?.code

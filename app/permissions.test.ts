@@ -14,6 +14,7 @@ import {
   canEditOwnProfile,
   canEnableAccount,
   canExportInventoryOf,
+  canImportInto,
   canLeaveCollectif,
   canManageCategories,
   canManageCollectifLocations,
@@ -484,6 +485,20 @@ describe('permissions: visibility (ADR 0021)', () => {
     assert.equal(deletesAsPlatform(user({ managedCollectifIds: new Set(['c1']) }), ofC), false)
     assert.equal(
       deletesAsPlatform(moderator(), { owner_collectif_id: null, owner_user_id: 'u1' }),
+      false,
+    )
+  })
+
+  it('"Import a file into a location": whoever manages it; not a member, not a moderator', () => {
+    const local = { collectif_id: 'c1', user_id: null }
+    assert.equal(canImportInto(user({ managedCollectifIds: new Set(['c1']) }), local), true)
+    assert.equal(canImportInto(user({ memberCollectifIds: new Set(['c1']) }), local), false)
+    assert.equal(canImportInto(moderator(), local), false)
+    assert.equal(canImportInto(user({ isAdmin: true }), local), true)
+    assert.equal(canImportInto(user(), { collectif_id: null, user_id: 'u1' }), true)
+    assert.equal(canImportInto(user(), { collectif_id: null, user_id: 'u2' }), false)
+    assert.equal(
+      canImportInto(user({ status: 'pending' }), { collectif_id: null, user_id: 'u1' }),
       false,
     )
   })

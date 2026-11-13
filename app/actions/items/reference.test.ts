@@ -247,8 +247,14 @@ describe('item reference, unique per owner (US-0.10.3)', () => {
     assert.match(response.text, /60 caractères au maximum/)
   })
 
+  it('stores a reference with one space where several were typed', async () => {
+    const response = await add({ name: 'Mix', ref: 'DBL \u00a0 01' })
+    const itemId = /\/materiel\/([0-9a-f-]{36})$/.exec(response.location ?? '')?.[1] ?? ''
+    assert.equal((await findItemById(db, itemId))?.ref, 'DBL 01')
+  })
+
   it('refuses a reference on several lines or longer than 60 characters', async () => {
-    assert.equal((await add({ ref: 'A\nB' })).status, 400)
+    assert.equal((await add({ ref: 'A\u0007B' })).status, 400)
     const long = await add({ ref: 'x'.repeat(61) })
     assert.equal(long.status, 400)
     assert.match(long.text, /60 caractères au maximum/)
