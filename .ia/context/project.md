@@ -35,7 +35,7 @@ visibility. Open source (MIT), self-hosted.
 - One responsive interface, rules in `docs/dev/architecture/ui.md`: [ADR 0019](../../docs/adr/0019-interface-conventions.md).
 - PostgreSQL: [ADR 0007](../../docs/adr/0007-postgresql.md).
 - Accounts managed by the app, sign-in by e-mail link: [ADR 0008](../../docs/adr/0008-app-managed-accounts.md).
-- Photos in MinIO (S3) from V0.9. E-mail through the Collecti'FROG Zimbra SMTP (`noreply@collecti-frog.fr`).
+- Photos from V0.11, once storage and backups are re-architected (MinIO or another store). E-mail through the Collecti'FROG Zimbra SMTP (`noreply@collecti-frog.fr`).
 
 ## Deployment
 

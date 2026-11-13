@@ -32,7 +32,7 @@ per story when its version is planned; the issue links back here.
 | UC18 | Browse and search the inventory                 | Validated user                | V0.6    |
 | UC30 | Browse the collectifs directory                 | Validated user                | V0.7    |
 | UC19 | See an item and contact its owner               | Validated user                | V0.6    |
-| UC20 | Add or change an item's photo                   | Owner, location manager       | V0.9    |
+| UC20 | Add or change an item's photo                   | Owner, location manager       | V0.11   |
 | UC21 | Import a CSV or Excel inventory                 | Responsible, validated user   | V0.10   |
 | UC22 | Export an inventory                             | Responsible, validated user   | V0.10   |
 | UC23 | Export own data or delete own account           | Validated user                | V1.0    |
@@ -293,13 +293,6 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
   Kubernetes (image, environment, secrets, probes, migrations, first admin), so that V0.8 can be
   put in production from the docs alone.
 
-## V0.9 — Photos
-
-- **US-0.9.1 Item photo.** As the owner or the manager of its location, I want to add or replace an
-  item's photo, also from my phone, so that it is recognisable.
-    - JPEG, PNG, WebP; size limit; resized; metadata (GPS included) stripped; stored in MinIO;
-      deleted with the item.
-
 ## V0.10 — Import / export
 
 - **US-0.10.1 Import.** As a responsible, I want to import a CSV or Excel file into my collectif's
@@ -318,6 +311,15 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
     - An export never holds an item its author may not see (ADR 0021).
 - **US-0.10.5 Import for myself.** As a validated user, I want to import into my personal
   locations, so that I list my own equipment at once.
+
+## V0.11 — Photos
+
+Moved from V0.9: photos wait for the re-architecture of storage and backups (the store, MinIO or
+another, is chosen then).
+
+- **US-0.11.1 Item photo.** As the owner or the manager of its location, I want to add or replace an
+  item's photo, also from my phone, so that it is recognisable.
+    - JPEG, PNG, WebP; size limit; resized; metadata (GPS included) stripped; deleted with the item.
 
 ## V1.0 — Compliance
 

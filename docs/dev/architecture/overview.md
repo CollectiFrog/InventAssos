@@ -16,7 +16,7 @@ flowchart LR
   admin([Platform admin]) -- HTTPS --> app
   app --> db[(PostgreSQL)]
   app -- SMTP --> mail[Zimbra<br/>noreply@collecti-frog.fr]
-  app -. V0.9 .-> s3[(MinIO · photos)]
+  app -. V0.11 .-> s3[(object store · photos)]
   gh[GitHub Actions] -- image vX.Y.Z --> ghcr[(GHCR)]
   ghcr -- pulled by --> app
 ```
@@ -71,7 +71,7 @@ See [Data model](../data-model/) for entities and constraints, and
 ## Configuration
 
 Everything comes from environment variables, documented in `.env.example`: database URL, SMTP,
-session secret, `PLATFORM_ADMIN_EMAILS`, S3 (from V0.9). No deployment value lives in the code.
+session secret, `PLATFORM_ADMIN_EMAILS`, the photo store (from V0.11). No deployment value lives in the code.
 
 ## Decisions
 

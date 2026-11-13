@@ -172,7 +172,7 @@ the same DOM order.
 | Wizard   | import, add and edit forms               | steps or section cards, two fields per row, sticky summary with the save button        |
 
 - Lists are **dense tables by default on computers** (`?vue=liste`), cards with `?vue=grille`;
-  photos (V0.9) may change the default later. Below 720 px they are cards.
+  photos (V0.11) may change the default later. Below 720 px they are cards.
 - No modal window: a confirmation is a page or a `<details>` in place.
 
 ## Components
