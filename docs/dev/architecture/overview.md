@@ -83,7 +83,7 @@ session secret, `PLATFORM_ADMIN_EMAILS`, the photo store (from V0.11). No deploy
 | Accounts and sign-in    | [0008](../../adr/0008-app-managed-accounts/)                                                                          |
 | Ownership and locations | [0009](../../adr/0009-ownership-and-locations/)                                                                       |
 | Personal data retention | [0010](../../adr/0010-personal-data-retention/)                                                                       |
-| Roles                   | [0020](../../adr/0020-platform-and-collectif-roles/)                                                                  |
+| Roles                   | [0020](../../adr/0020-platform-and-collectif-roles/), [0028](../../adr/0028-admins-named-in-the-app/)                 |
 | Inventory visibility    | [0021](../../adr/0021-inventory-within-collectifs/), [0023](../../adr/0023-collectif-city/)                           |
 | Deployment              | [0005](../../adr/0005-deployment/)                                                                                    |
 | Tests                   | [0012](../../adr/0012-testing-with-remix-test/)                                                                       |

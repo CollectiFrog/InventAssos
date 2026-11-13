@@ -5,8 +5,8 @@ sidebar:
   order: 3
 ---
 
-**Moderator** means: an active account an admin named on `/admin/moderateurs` (`users.role`,
-US-0.8.1). A listed admin is never treated as a moderator. A moderator never acts on an admin or
+**Moderator** means: an active account an admin named on `/admin/equipe` (`users.role`,
+US-0.8.1). An admin is never treated as a moderator. A moderator never acts on an admin or
 another moderator: not on their account (disable, re-enable), nor on their responsible role, nor on
 the items they personally own (archive as abusive, delete). A moderator sees every inventory like an admin
 ([ADR 0025](../../adr/0025-staff-see-every-inventory/)), without any manager right.
@@ -17,10 +17,13 @@ that list (`context.currentUser.isAdmin`). A listed e-mail becomes an active acc
 sign-in, without approval. Adding or removing an e-mail takes effect when the app restarts, which
 is how a changed environment variable reaches a container anyway; from then on, a removed e-mail
 loses the rights at its next request. `users.is_platform_admin` only records the last known state.
+An admin may also be **named in the app** (`users.role = 'admin'`, US-0.10.7,
+[ADR 0028](../../adr/0028-admins-named-in-the-app/)), with the same rights; "Platform admin" below
+means both. Nobody changes their own role, and a listed admin is never removed from the app.
 
 Each row is a function in `app/permissions.ts`, tested in `app/permissions.test.ts`; controllers
 call it before acting and answer 403 otherwise. `app/permissions.matrix.test.ts` then plays every
-implemented row through the real router for eight actors (admin, moderator, responsible of C,
+implemented row through the real router for nine actors (listed admin, named admin, moderator, responsible of C,
 responsible of another collectif, member of C, validated user, pending user, visitor) and checks the effect happened or not:
 each verb of a row ("create, edit, delete"), and each "if …" branch of the responsible and
 member and validated-user columns, is a separate case. A new row, verb or branch needs a new matrix entry.
@@ -47,8 +50,8 @@ can only see their status page and sign out.
 | Approve or reject an account                              | yes                              | yes                                 | no                                                    | no                                                    | no                           |
 | Add, rename, reorder, delete an unused category           | yes                              | yes                                 | no                                                    | no                                                    | no                           |
 | Disable an account                                        | yes                              | yes, except an admin or a moderator | no                                                    | no                                                    | no                           |
-| Re-enable a disabled account                              | yes                              | yes, except a moderator             | no                                                    | no                                                    | no                           |
-| Name or remove a moderator                                | yes                              | no                                  | no                                                    | no                                                    | no                           |
+| Re-enable a disabled account                              | yes, except a listed admin       | yes, except an admin or a moderator | no                                                    | no                                                    | no                           |
+| Name or remove a moderator or an admin                    | except self or a listed admin    | no                                  | no                                                    | no                                                    | no                           |
 | Edit own profile (name, phone)                            | yes                              | yes                                 | yes                                                   | yes                                                   | yes                          |
 | Request a new collectif                                   | yes                              | yes                                 | yes                                                   | yes                                                   | yes                          |
 | Approve or reject a collectif                             | yes                              | yes                                 | no                                                    | no                                                    | no                           |
@@ -97,7 +100,8 @@ one leaving, is refused until another member is named (checked in the transactio
 `FOR UPDATE`). A removed responsible stays a member of the collectif (US-0.8.6).
 
 An admin can never disable their own account, nor the account of another admin listed in
-`PLATFORM_ADMIN_EMAILS` (one admin must not lock the others out; remove them from the list instead). A location's notes follow the full-address rule
+`PLATFORM_ADMIN_EMAILS` (one admin must not lock the others out; remove them from the list instead).
+An admin named in the app may be disabled by another admin, never by a moderator. A location's notes follow the full-address rule
 (they often hold access codes): `redactLocation()` blanks both before rendering.
 
 Rules from ADR 0009: the owner of an item stored in a collectif's location may edit it without

@@ -30,6 +30,7 @@ import { routes } from './routes.ts'
 
 type Actor =
   | 'admin'
+  | 'namedAdmin'
   | 'moderator'
   | 'responsibleOfC'
   | 'responsibleOfD'
@@ -39,6 +40,7 @@ type Actor =
   | 'visitor'
 const actors: Actor[] = [
   'admin',
+  'namedAdmin',
   'moderator',
   'responsibleOfC',
   'responsibleOfD',
@@ -50,6 +52,7 @@ const actors: Actor[] = [
 
 const emails: Record<Exclude<Actor, 'visitor'>, string> = {
   admin: 'admin@example.org',
+  namedAdmin: 'nina@example.org',
   moderator: 'mona@example.org',
   responsibleOfC: 'rita@example.org',
   responsibleOfD: 'otto@example.org',
@@ -58,7 +61,7 @@ const emails: Record<Exclude<Actor, 'visitor'>, string> = {
   pending: 'pat@example.org',
 }
 
-/** A second platform admin, listed in PLATFORM_ADMIN_EMAILS but not one of the six actors. */
+/** A second platform admin, listed in PLATFORM_ADMIN_EMAILS but not one of the actors. */
 const coAdminEmail = 'ada@example.org'
 
 /** The world every case starts from. */
@@ -70,6 +73,8 @@ async function seed(db: Database) {
   const target = await createUser(db, { name: 'Tess', email: 'tess@example.org' })
   const zed = await createActiveUser(db, 'Zed', 'zed@example.org')
   const coAdmin = await createActiveUser(db, 'Ada', coAdminEmail)
+  // Also named in the app: the e-mail list must still keep her out of reach (ADR 0028).
+  await setUserRole(db, coAdmin.id, 'admin')
   const gone = await createActiveUser(db, 'Gus', 'gus@example.org')
   await setUserStatus(db, gone.id, 'disabled')
   // Moderators (US-0.8.1): Mona acts; Max is active and Gil disabled, both out of her reach.
@@ -80,6 +85,14 @@ async function seed(db: Database) {
   const gil = await createActiveUser(db, 'Gil', 'gil@example.org')
   await setUserRole(db, gil.id, 'moderator')
   await setUserStatus(db, gil.id, 'disabled')
+  // Admins named in the app (US-0.10.7): Nina acts; Nora is active, Ned disabled.
+  const nina = await createActiveUser(db, 'Nina', emails.namedAdmin)
+  await setUserRole(db, nina.id, 'admin')
+  const nora = await createActiveUser(db, 'Nora', 'nora@example.org')
+  await setUserRole(db, nora.id, 'admin')
+  const ned = await createActiveUser(db, 'Ned', 'ned@example.org')
+  await setUserRole(db, ned.id, 'admin')
+  await setUserStatus(db, ned.id, 'disabled')
   const c = await createActiveCollectif(db, 'Collectif C', rita.id)
   await createActiveCollectif(db, 'Collectif D', otto.id)
   const pendingCollectif = await createPendingCollectif(db, 'Collectif E', zed.id)
@@ -151,6 +164,8 @@ async function seed(db: Database) {
     pia,
     max,
     gil,
+    nora,
+    ned,
     cora,
     coraItem,
     coraHome,
@@ -256,16 +271,48 @@ const rules: Rule[] = [
     happened: async (db, w) => (await findUserById(db, w.gil.id))?.status === 'active',
   },
   {
-    row: 'Name or remove a moderator (name)',
+    row: 'Name or remove a moderator or an admin (name a moderator)',
     allowed: ['admin'],
-    act: (c) => c.post(routes.admin.moderators.name.href(), { email: emails.validated }),
+    act: (c) =>
+      c.post(routes.admin.team.name.href(), { email: emails.validated, role: 'moderator' }),
     happened: async (db, w) => (await findUserById(db, w.val.id))?.role === 'moderator',
   },
   {
-    row: 'Name or remove a moderator (remove)',
+    row: 'Name or remove a moderator or an admin (remove a moderator)',
     allowed: ['admin'],
-    act: (c, w) => c.post(routes.admin.moderators.remove.href({ userId: w.max.id })),
+    act: (c, w) => c.post(routes.admin.team.remove.href({ userId: w.max.id })),
     happened: async (db, w) => (await findUserById(db, w.max.id))?.role === 'member',
+  },
+  {
+    row: 'Name or remove a moderator or an admin (name an admin)',
+    allowed: ['admin'],
+    act: (c) => c.post(routes.admin.team.name.href(), { email: emails.validated, role: 'admin' }),
+    happened: async (db, w) => (await findUserById(db, w.val.id))?.role === 'admin',
+  },
+  {
+    row: 'Name or remove a moderator or an admin (remove an admin)',
+    allowed: ['admin'],
+    act: (c, w) => c.post(routes.admin.team.remove.href({ userId: w.nora.id })),
+    happened: async (db, w) => (await findUserById(db, w.nora.id))?.role === 'member',
+  },
+  {
+    // Rights from PLATFORM_ADMIN_EMAILS are out of the app's reach, even with a stored role.
+    row: 'Name or remove a moderator or an admin (a listed admin)',
+    allowed: [],
+    act: (c, w) => c.post(routes.admin.team.remove.href({ userId: w.coAdmin.id })),
+    happened: async (db, w) => (await findUserById(db, w.coAdmin.id))?.role === 'member',
+  },
+  {
+    row: 'Disable an account (an admin named in the app)',
+    allowed: ['admin'],
+    act: (c, w) => c.post(routes.admin.disableAccount.href({ userId: w.nora.id })),
+    happened: async (db, w) => (await findUserById(db, w.nora.id))?.status === 'disabled',
+  },
+  {
+    row: 'Re-enable a disabled account (an admin named in the app)',
+    allowed: ['admin'],
+    act: (c, w) => c.post(routes.admin.enableAccount.href({ userId: w.ned.id })),
+    happened: async (db, w) => (await findUserById(db, w.ned.id))?.status === 'active',
   },
   {
     row: 'Edit own profile (name, phone)',
@@ -804,7 +851,8 @@ describe('permissions matrix (US-0.5.7)', () => {
 
   for (const rule of rules) {
     for (const actor of actors) {
-      const expected = rule.allowed.includes(actor)
+      // An admin named in the app holds every right of a listed one (ADR 0028).
+      const expected = rule.allowed.includes(actor === 'namedAdmin' ? 'admin' : actor)
       it(`${rule.row}: ${actor} → ${expected ? 'allowed' : 'denied'}`, async () => {
         const client = app.client()
         if (actor !== 'visitor') await signIn(app, client, emails[actor])

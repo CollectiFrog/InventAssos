@@ -1,5 +1,5 @@
 // Data access for accounts: the only module that reads or writes the `users` table.
-import type { Database } from 'remix/data-table'
+import { and, type Database, inList } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
 import { type User, type UserRole, type UserStatus, users } from './tables.ts'
@@ -93,18 +93,35 @@ export async function listActiveUsers(db: Database): Promise<User[]> {
   return db.findMany(users, { where: { status: 'active' }, orderBy: ['name', 'asc'] })
 }
 
-/** Names or removes a moderator (US-0.8.1). */
+/** Names or removes a moderator or an admin (US-0.8.1, US-0.10.7). */
 export async function setUserRole(db: Database, id: string, role: UserRole): Promise<User> {
   return db.update(users, id, { role, updated_at: new Date() })
 }
 
-/** Moderators, by name, whatever their status (a disabled one is still listed, to be removed). */
-export async function listModerators(db: Database): Promise<User[]> {
-  return db.findMany(users, { where: { role: 'moderator' }, orderBy: ['name', 'asc'] })
+/** Accounts holding a platform role, by name, whatever their status (a disabled one stays listed). */
+export async function listUsersWithRole(
+  db: Database,
+  role: Exclude<UserRole, 'member'>,
+): Promise<User[]> {
+  return db.findMany(users, { where: { role }, orderBy: ['name', 'asc'] })
 }
 
-/** E-mails of the active moderators, who receive the new-request notices with the admins. */
-export async function listActiveModeratorEmails(db: Database): Promise<string[]> {
-  const rows = await db.findMany(users, { where: { role: 'moderator', status: 'active' } })
+/** Accounts listed in PLATFORM_ADMIN_EMAILS that exist yet, by name. */
+export async function listListedAdmins(
+  db: Database,
+  adminEmails: ReadonlySet<string>,
+): Promise<User[]> {
+  if (adminEmails.size === 0) return []
+  return db.findMany(users, {
+    where: inList(users.email, [...adminEmails]),
+    orderBy: ['name', 'asc'],
+  })
+}
+
+/** E-mails of the active staff named in the app, who receive the new-request notices too. */
+export async function listActiveStaffEmails(db: Database): Promise<string[]> {
+  const rows = await db.findMany(users, {
+    where: and({ status: 'active' }, inList(users.role, ['moderator', 'admin'])),
+  })
   return rows.map((user) => user.email)
 }

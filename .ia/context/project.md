@@ -20,7 +20,7 @@ visibility. Open source (MIT), self-hosted.
 | Collectif member | validated user who keeps a collectif's equipment (from V0.8)                   |
 | Responsible      | validated user who manages one or more collectifs, their locations and members |
 | Moderator        | handles the approval queue and moderation; named by an admin (from V0.8)       |
-| Platform admin   | approves accounts and collectifs, names moderators; listed in an env variable  |
+| Platform admin   | everything a moderator does, names admins and moderators; env list or in app   |
 
 ## Languages
 
@@ -62,6 +62,6 @@ visibility. Open source (MIT), self-hosted.
 | Location       | a place where equipment is stored, owned by a collectif or by a person                                                |
 | Item           | one piece of equipment, or a batch of identical ones (`quantity` ≥ 1)                                                 |
 | Owner          | the collectif or the person an item belongs to; may differ from the location                                          |
-| Platform admin | listed in `PLATFORM_ADMIN_EMAILS`; names moderators ([ADR 0020](../../docs/adr/0020-platform-and-collectif-roles.md)) |
+| Platform admin | listed in `PLATFORM_ADMIN_EMAILS` or named in the app ([ADR 0028](../../docs/adr/0028-admins-named-in-the-app.md))    |
 | Moderator      | approves accounts and collectifs, moderates content (from V0.8)                                                       |
 | Member         | of a collectif: keeps its equipment, approved by its responsibles (from V0.8)                                         |

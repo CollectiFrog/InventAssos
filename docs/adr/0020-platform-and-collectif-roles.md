@@ -3,9 +3,9 @@ title: "0020: Platform roles (admin, moderator, member) and collectif roles (res
 description: Moderators share the approval queue; responsibles approve their own members.
 ---
 
-| Status   | Date       | Deciders   |
-|----------|------------|------------|
-| Accepted | 2026-11-09 | @tritriper |
+| Status             | Date       | Deciders   |
+|--------------------|------------|------------|
+| Superseded by 0028 | 2026-11-09 | @tritriper |
 
 Supersedes [0011](../0011-platform-admin-validation/).
 
