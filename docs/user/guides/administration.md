@@ -9,8 +9,9 @@ Les premiers administrateurs de la plateforme sont les adresses e-mail listées 
 la configuration (`PLATFORM_ADMIN_EMAILS`). À la première connexion, leur compte est créé et validé
 automatiquement. La liste est lue au démarrage de l'application : un ajout ou un retrait prend effet
 après son redémarrage. Tout administrateur peut ensuite nommer d'autres **administrateurs** et des
-**modérateurs** dans l'application (voir [L'équipe](#léquipe)). Un lien **Administration** apparaît
-en bas de la colonne de gauche sur un ordinateur, en haut de la page sur un téléphone.
+**modérateurs** dans l'application (voir [L'équipe](#léquipe)). L'administration s'ouvre depuis
+**Mon compte** (le rond avec vos initiales), section **Administration**, qui indique aussi le nombre
+de demandes en attente ; l'accueil affiche ces demandes avec un lien direct.
 
 ## La file d'attente
 
@@ -97,8 +98,8 @@ Chaque changement est inscrit au journal, sans le nom de la catégorie.
 modérateurs.
 
 - **Nommer** : indiquez l'adresse e-mail d'un compte validé et choisissez le rôle, **Modérateur** ou
-  **Administrateur**. La personne garde son matériel et ses collectifs ; le lien **Administration**
-  apparaît à sa prochaine page. Nommer administrateur un modérateur change simplement son rôle.
+  **Administrateur**. La personne garde son matériel et ses collectifs ; la section
+  **Administration** apparaît dans son compte à sa prochaine page. Nommer administrateur un modérateur change simplement son rôle.
 - **Retirer** : la personne redevient un utilisateur ordinaire, aussitôt.
 
 Un administrateur nommé dans l'application a exactement les mêmes droits que ceux de la

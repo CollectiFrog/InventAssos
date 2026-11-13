@@ -96,8 +96,7 @@ main > p,
 .top-add,
 .side-brand,
 .side-heading,
-.my-collectifs,
-.side-foot {
+.my-collectifs {
   display: none;
 }
 .header-links {
@@ -113,6 +112,20 @@ main > p,
 }
 .header-links a[aria-current="page"] {
   font-weight: 700;
+}
+/* A square button showing an icon; its name is in a visually hidden span (ADR 0030). */
+button.icon-button,
+.button.icon-button {
+  align-items: center;
+  justify-content: center;
+  width: var(--touch);
+  min-width: var(--touch);
+  min-height: var(--touch);
+  padding: 0;
+}
+/* Links keep their own display: the top bar's "+" stays hidden on phones. */
+button.icon-button {
+  display: inline-flex;
 }
 .header-links .avatar {
   justify-content: center;
@@ -138,8 +151,7 @@ main > p,
 .main-nav {
   display: flex;
 }
-.main-nav a,
-.side-foot a {
+.main-nav a {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -156,17 +168,14 @@ main > p,
   text-decoration: none;
 }
 .main-nav a:hover,
-.side-foot a:hover,
 .my-collectifs a:hover {
   color: var(--fg);
 }
-.main-nav a[aria-current="page"],
-.side-foot a[aria-current="page"] {
+.main-nav a[aria-current="page"] {
   color: var(--accent);
   font-weight: 600;
 }
-.main-nav svg,
-.side-foot svg {
+.main-nav svg {
   flex: none;
 }
 body.has-nav main {
@@ -197,13 +206,11 @@ body.has-nav main {
     flex-direction: column;
     gap: 0.15rem;
   }
-  .main-nav a,
-  .side-foot a {
+  .main-nav a {
     flex: none;
     min-height: 3.6rem;
   }
-  .main-nav a[aria-current="page"],
-  .side-foot a[aria-current="page"] {
+  .main-nav a[aria-current="page"] {
     background: var(--accent-soft);
   }
   .side-brand {
@@ -234,12 +241,6 @@ body.has-nav main {
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .side-foot {
-    display: block;
-    margin-top: auto;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-  }
   .has-nav .top-bar {
     position: sticky;
     top: 0;
@@ -248,8 +249,7 @@ body.has-nav main {
     min-height: 4rem;
     padding: 0.6rem clamp(1rem, 2.2vw, 2.5rem);
   }
-  .has-nav .top-bar > .brand,
-  .phone-admin {
+  .has-nav .top-bar > .brand {
     display: none;
   }
   .top-search {
@@ -269,7 +269,6 @@ body.has-nav main {
   }
   .header-links .top-add {
     display: inline-flex;
-    white-space: nowrap;
   }
   body.has-nav main {
     padding-bottom: 4rem;
@@ -295,7 +294,6 @@ body.has-nav main {
     clip-path: none;
   }
   .main-nav a,
-  .side-foot a,
   .my-collectifs a {
     flex-direction: row;
     justify-content: flex-start;
@@ -305,8 +303,7 @@ body.has-nav main {
     font-size: 1rem;
     text-align: left;
   }
-  .main-nav svg,
-  .side-foot svg {
+  .main-nav svg {
     width: 20px;
     height: 20px;
   }

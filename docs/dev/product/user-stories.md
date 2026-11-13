@@ -339,6 +339,11 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
     - The same answer for an unknown address, a wrong password or no password; 10 tries per address
       per hour.
     - Choosing a password closes the other sessions and e-mails the person.
+- **US-0.10.9 A lighter shell.** As a user, I want a quieter top bar, so that the page content
+  stands out ([ADR 0030](../../adr/0030-lighter-shell/)).
+    - The search button is a magnifier and « Ajouter du matériel » a « + », both with hidden names.
+    - Administration is a section of Mon compte for admins and moderators, with the pending count;
+      it leaves the sidebar and the phone's top bar.
 
 ## V0.11 — Photos
 

@@ -15,15 +15,15 @@ gauche (réduite à des icônes sur un écran étroit). L'entrée de la section 
 évidence.
 
 Sur un ordinateur, la colonne de gauche liste aussi **Mes collectifs** (les cinq premiers, puis
-**Tous**) et, en bas, **Administration** pour les administrateurs. La barre du haut garde sur
-chaque page un champ de **recherche** et le bouton **Ajouter du matériel**.
+**Tous**). La barre du haut garde sur chaque page un champ de **recherche** (la loupe lance la
+recherche) et le bouton **+** pour ajouter du matériel.
 
 Sur la page d'un objet, d'un collectif, d'un lieu ou d'une personne, un **fil d'Ariane** au-dessus
 du titre montre où vous êtes (Collectifs › Collecti'FROG › Console) sur un ordinateur ; sur un
 téléphone, **Retour** ramène à la page précédente.
 
-En haut à droite, le rond avec vos initiales ouvre **votre compte**. Sur un téléphone, les
-administrateurs trouvent le lien **Administration** à côté.
+En haut à droite, le rond avec vos initiales ouvre **votre compte**. Les administrateurs et les
+modérateurs y trouvent la section **Administration**.
 
 ## L'accueil
 
@@ -82,7 +82,8 @@ désactivé n'est plus affiché.
 
 Touchez le rond avec vos initiales, en haut à droite. **Mon compte** est rangé en sections, avec un
 sommaire : **Profil** (votre nom et un numéro de téléphone facultatif), **Mes collectifs**,
-**Mot de passe** (le choisir ou le changer), **Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
+**Administration** (administrateurs et modérateurs), **Mot de passe** (le choisir ou le changer),
+**Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
 compte**. La suppression elle-même arrive avec la version 1.0 : la page explique ce qu'elle fera.
 
 Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous
