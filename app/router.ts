@@ -33,7 +33,6 @@ import editLocationController from './actions/locations/edit/controller.tsx'
 import peopleController from './actions/people/controller.tsx'
 import signInController from './actions/sign-in/controller.tsx'
 import signInFormController from './actions/sign-in/form/controller.tsx'
-import signInLinkController from './actions/sign-in/link/controller.tsx'
 import signUpController from './actions/sign-up/controller.tsx'
 import signUpFormController from './actions/sign-up/form/controller.tsx'
 import { type AppDependencies, appMiddleware } from './middleware/index.ts'
@@ -75,7 +74,6 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.locations.edit, editLocationController)
   router.map(routes.signIn, signInController)
   router.map(routes.signIn.form, signInFormController)
-  router.map(routes.signIn.link, signInLinkController)
   router.map(routes.signUp, signUpController)
   router.map(routes.signUp.form, signUpFormController)
   return router

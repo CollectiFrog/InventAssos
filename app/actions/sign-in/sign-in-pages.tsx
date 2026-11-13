@@ -63,28 +63,6 @@ export function SignInSentPage() {
   )
 }
 
-/** Opened from the e-mail: a button confirms, so link scanners cannot use the token. */
-export function SignInLinkPage(
-  handle: Handle<{ csrfToken: string; token: string; returnPath?: string | null }>,
-) {
-  return () => (
-    <Layout title="Connexion">
-      <h1>Connexion</h1>
-      <form
-        method="post"
-        action={routes.signIn.link.action.href({ token: handle.props.token })}
-        class="stack"
-      >
-        <CsrfField token={handle.props.csrfToken} />
-        {handle.props.returnPath ? (
-          <input type="hidden" name={returnParam} value={handle.props.returnPath} />
-        ) : null}
-        <button type="submit">Me connecter</button>
-      </form>
-    </Layout>
-  )
-}
-
 /** The link is unknown, expired, already used, or its account cannot sign in. */
 export function SignInLinkInvalidPage() {
   return () => (

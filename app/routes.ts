@@ -10,7 +10,7 @@ export const routes = route({
   signIn: {
     form: form('/connexion'),
     sent: get('/connexion/envoyee'),
-    link: form('/connexion/lien/:token'),
+    link: get('/connexion/lien/:token'),
   },
   signOut: post('/deconnexion'),
   account: {

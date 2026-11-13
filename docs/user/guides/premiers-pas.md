@@ -28,8 +28,8 @@ connecter pour utiliser ce bouton, afin que seul le titulaire de l'adresse puiss
 AssoMatos n'utilise pas de mot de passe.
 
 1. Choisissez **Se connecter** et indiquez votre adresse e-mail.
-2. Ouvrez l'e-mail « Votre lien de connexion AssoMatos » et cliquez sur le lien.
-3. Sur la page qui s'ouvre, cliquez sur **Me connecter**.
+2. Ouvrez l'e-mail « Votre lien de connexion AssoMatos » et cliquez sur le lien : vous êtes
+   connecté et arrivez sur l'accueil.
 
 Si vous avez ouvert un lien vers une page de l'application (un objet, un collectif…) sans être
 connecté, vous arrivez sur cette page une fois connecté, et non sur l'accueil.

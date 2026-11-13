@@ -6,6 +6,10 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+### Changed
+
+- The link from the sign-in e-mail signs you in at once, without the « Me connecter » page.
+
 ## [0.10.0] - 2026-11-13
 
 ### Added

@@ -312,6 +312,15 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
 - **US-0.10.5 Import for myself.** As a validated user, I want to import into my personal
   locations, so that I list my own equipment at once.
 
+## V0.10.x — Field feedback
+
+Remarks gathered from the first weeks of use, shipped together as one patch.
+
+- **US-0.10.6 Sign in from the link at once.** As a user, I want the link from the sign-in e-mail
+  to sign me in without another click, so that signing in is quicker.
+    - Opening the link signs in and lands on the home page, or on the page asked for (US-0.7.8).
+    - The link stays single-use and valid 15 minutes; a used or expired link offers a new one.
+
 ## V0.11 — Photos
 
 Moved from V0.9: photos wait for the re-architecture of storage and backups (the store, MinIO or
