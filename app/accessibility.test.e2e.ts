@@ -107,12 +107,12 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
       createdBy: rita.id,
       locationId: local.id,
       fileName: 'inventaire.csv',
-      header: ['Désignation', 'Qté', 'Bizarre'],
+      header: ['Désignation', 'Qté', 'Famille', 'Bizarre'],
       rows: [
-        { n: 2, cells: ['Lyre', '2', 'x'] },
-        { n: 3, cells: ['Console', '1', ''] },
+        { n: 2, cells: ['Lyre', '2', 'Projo', 'x'] },
+        { n: 3, cells: ['Console', 'deux', 'Machin', ''] },
       ],
-      columnMapping: ['name', 'quantity', null],
+      columnMapping: ['name', 'quantity', 'category', null],
     })
     importPath = `/import/${importId}/colonnes`
   })
@@ -149,6 +149,8 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
         '/compte/supprimer',
         '/import',
         importPath,
+        importPath.replace('/colonnes', '/valeurs'),
+        importPath.replace('/colonnes', '/apercu'),
       ])
     })
 

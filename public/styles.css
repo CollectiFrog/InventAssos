@@ -812,6 +812,10 @@ button:disabled {
   padding: 0;
   list-style: none;
 }
+.chip[aria-current="page"] {
+  background: var(--accent);
+  color: var(--bg);
+}
 .chip {
   display: inline-flex;
   align-items: center;

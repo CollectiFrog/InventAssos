@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 import type { Handle } from 'remix/component'
 import type { Database } from 'remix/data-table'
 import { getCsrfToken } from 'remix/middleware/csrf'
@@ -62,8 +64,18 @@ function rowsOf(plan: ImportPlan, view: View): PlannedRow[] {
 
 /** The plan's fingerprint, posted back with the confirmation to detect a changed inventory. */
 function signatureOf(plan: ImportPlan): string {
-  const { create, update, moved, unchanged, archived } = plan.counts
-  return [create, update, moved, unchanged, archived].join('.')
+  // Every row's outcome, not only the counts: two plans with the same counts may write
+  // different things (another item changed in between).
+  const outcome = plan.rows.map((row) => [
+    row.n,
+    row.state,
+    row.itemId,
+    row.locationId,
+    row.fromLocationId,
+    row.changed,
+    row.fields,
+  ])
+  return createHash('sha256').update(JSON.stringify(outcome)).digest('base64url')
 }
 
 /** « 1 240 ». */
@@ -146,7 +158,11 @@ function PreviewPage(handle: Handle<PreviewPageProps>) {
         </p>
         <nav aria-label="Lignes à afficher" class="chips">
           {(Object.keys(views) as View[]).map((key) => (
-            <a href={href({ voir: key })} aria-current={key === view ? 'page' : undefined}>
+            <a
+              href={href({ voir: key })}
+              class="chip"
+              aria-current={key === view ? 'page' : undefined}
+            >
               {views[key].label} ({count(rowsOf(plan, key).length)})
             </a>
           ))}

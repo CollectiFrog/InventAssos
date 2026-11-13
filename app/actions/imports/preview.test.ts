@@ -142,7 +142,7 @@ describe('import, step 4: preview and confirmation (US-0.10.1 to US-0.10.3, ADR 
     assert.match(page, /Envoyer le fichier corrigé/)
     const forced = await client.post(routes.imports.preview.action.href({ importId }), {
       intent: 'confirmer',
-      plan: '1.0.0.0.0',
+      plan: 'tout-autre-chose',
     })
     assert.equal(forced.status, 400)
     const n = await db.exec(sql`select count(*)::int as n from items where name = 'Lyre'`)
@@ -193,13 +193,29 @@ describe('import, step 4: preview and confirmation (US-0.10.1 to US-0.10.3, ADR 
     )
   })
 
+  it('refuses a preview whose rows changed though the counts did not', async () => {
+    const { importId } = await upload([row({ ref: 'AMP-01', quantity: '3' })])
+    const page = (await client.get(routes.imports.preview.index.href({ importId }))).text
+    const plan = /name="plan" value="([^"]+)"/.exec(page)?.[1] ?? ''
+    // Still one update of the same item, but to another quantity: same counts, another plan.
+    await db.exec(
+      sql`update imports set rows = ${JSON.stringify([{ n: 2, c: row({ ref: 'AMP-01', quantity: '7' }) }])}::jsonb`,
+    )
+    const response = await client.post(routes.imports.preview.action.href({ importId }), {
+      intent: 'confirmer',
+      plan,
+    })
+    assert.equal(response.status, 409)
+    assert.equal((await findItemById(db, amp.id))?.quantity, 1)
+  })
+
   it('writes once even when confirmed twice', async () => {
     const { importId } = await upload([row({ name: 'Lyre' })])
     const first = await confirm(importId)
     assert.equal(first.status, 303)
     const again = await client.post(routes.imports.preview.action.href({ importId }), {
       intent: 'confirmer',
-      plan: '1.0.0.0.0',
+      plan: 'tout-autre-chose',
     })
     assert.equal(again.status, 404)
     const n = await db.exec(sql`select count(*)::int as n from items where name = 'Lyre'`)
