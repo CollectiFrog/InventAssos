@@ -580,21 +580,12 @@ const conditionTerms: Record<ItemCondition, string[]> = {
   ],
 }
 
-/** Words that turn a phrase around, as `words` writes them (« sans » becomes « san »). */
-const negations = new Set([
-  'non',
-  'pas',
-  'san',
-  'aucun',
-  'aucune',
-  'jamais',
-  'ne',
-  'n',
-  'plu',
-  'sauf',
-  'not',
-  'no',
-])
+/** Words that turn a phrase around, written as `words` writes them (« jamais » becomes « jamai »). */
+const negations = new Set(
+  ['non', 'pas', 'sans', 'aucun', 'aucune', 'jamais', 'ne', 'n', 'plus', 'sauf', 'not', 'no'].map(
+    (word) => words(word).join(' '),
+  ),
+)
 
 /** Most severe first: « bon état, à réviser » is to repair, « ne fonctionne pas » is broken. */
 const severity: ItemCondition[] = ['broken', 'repair', 'worn', 'new', 'good']
@@ -631,13 +622,17 @@ export function guessCondition(
       return { condition, source: 'exact' }
     }
   }
-  // A word found inside a negation means its opposite (« pas bon », « sans défaut »): no guess.
-  if (valueWords.some((word) => negations.has(word))) return { condition: null, source: 'fallback' }
+  // In a negative sentence a word may mean its opposite (« pas bon », « sans défaut »): only a
+  // phrase that carries the negation itself (« ne fonctionne plus », « jamais servi ») counts.
+  const negative = valueWords.some((word) => negations.has(word))
   for (const condition of severity) {
     const phrases = conditionPhrases.get(condition) ?? []
-    if (phrases.some((phrase) => containsPhrase(valueWords, phrase))) {
-      return { condition, source: 'vocabulary' }
-    }
+    const found = phrases.some(
+      (phrase) =>
+        containsPhrase(valueWords, phrase) &&
+        (!negative || phrase.some((word) => negations.has(word))),
+    )
+    if (found) return { condition, source: 'vocabulary' }
   }
   return { condition: null, source: 'fallback' }
 }
