@@ -20,6 +20,15 @@ export const inventoryFields = [
 ] as const
 export type InventoryField = (typeof inventoryFields)[number]
 
+/** A stored column mapping, each entry a known field or null: what the database holds is checked. */
+export function toColumnMapping(raw: readonly (string | null)[]): (InventoryField | null)[] {
+  return raw.map((field) =>
+    field !== null && (inventoryFields as readonly string[]).includes(field)
+      ? (field as InventoryField)
+      : null,
+  )
+}
+
 /** Column titles of the export, also the names the import recognises first. */
 export const inventoryHeaders: Record<InventoryField, string> = {
   ref: 'Référence',

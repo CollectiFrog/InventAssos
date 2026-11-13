@@ -62,9 +62,14 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
             <h1>Mon matériel</h1>
             <p class="status">Ce qui est rangé chez vous en ce moment, et à qui il appartient.</p>
           </div>
-          <a class="button" href={routes.items.create.index.href()}>
-            Ajouter du matériel
-          </a>
+          <div class="actions">
+            <a class="button secondary" href={routes.imports.start.index.href()}>
+              Importer un fichier
+            </a>
+            <a class="button" href={routes.items.create.index.href()}>
+              Ajouter du matériel
+            </a>
+          </div>
         </div>
         <MyStuffTabs current="items" />
         {notice ? (

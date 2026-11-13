@@ -21,6 +21,8 @@ export interface RateLimits {
   adminNotifications: RateLimit
   /** CSV exports by one user (US-0.10.4): each reads a whole inventory. */
   exportsPerUser: RateLimit
+  /** Files sent to the import by one user (US-0.10.1): each is parsed and stored for an hour. */
+  uploadsPerUser: RateLimit
 }
 
 const hour = 60 * 60
@@ -34,6 +36,7 @@ export const defaultRateLimits: RateLimits = {
   contactsPerUser: { limit: 10, windowSeconds: day },
   adminNotifications: { limit: 5, windowSeconds: hour },
   exportsPerUser: { limit: 30, windowSeconds: hour },
+  uploadsPerUser: { limit: 20, windowSeconds: hour },
 }
 
 function limits(settings: AppSettings): RateLimits {
@@ -65,6 +68,15 @@ export function hitExport(
   userId: string,
 ): Promise<RateLimitResult> {
   return hitRateLimit(db, `export:${userId}`, limits(settings).exportsPerUser)
+}
+
+/** One file sent to the import by a user (US-0.10.1). */
+export function hitUpload(
+  db: Database,
+  settings: AppSettings,
+  userId: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `import:${userId}`, limits(settings).uploadsPerUser)
 }
 
 /** One request that notifies the admins (new collectif, responsibility, re-application). */

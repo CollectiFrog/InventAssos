@@ -1046,3 +1046,39 @@ button:disabled {
 .recap .new-location {
   grid-column: 1 / -1;
 }
+
+/* Wizard steps (import, ADR 0022): a numbered list, the current step marked, done steps linked. */
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+.step {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch);
+}
+.step-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+}
+.step-current span {
+  font-weight: 700;
+  border-bottom: 3px solid var(--accent);
+}
+.step-todo span {
+  color: var(--muted);
+}
+
+/* Import columns: what the file holds beside what it will become. */
+.mapping-table select {
+  min-width: 12rem;
+}
+.sample {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}

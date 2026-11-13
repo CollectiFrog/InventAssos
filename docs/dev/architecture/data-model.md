@@ -32,6 +32,8 @@ erDiagram
 | `sign_in_tokens` | token_hash, user_id, expires_at, used_at, created_at                                                                                                                                                                   | only the SHA-256 of the token is stored; 15 min, single use                                                                                                                                                   |
 | `rate_limits`    | key_hash, hits, reset_at                                                                                                                                                                                               | key_hash is a SHA-256 of the limited key (no address stored); purged hourly once reset_at passed (ADR 0018)                                                                                                   |
 | `item_deletion_requests` | item_id, requested_by, requested_at                                                                                                                                                                                    | one open request per item (item_id primary key); deleted with the item (US-0.8.10)                                                                                                                            |
+| `imports`                | id, created_by, location_id, file_name, header, rows, row_count, column_mapping, value_mapping, forced_rows, created_at, expires_at                                                                                    | one per author (a new file replaces it); ≤ 2,000 rows; lives one hour, purged hourly; deleted with its author or location (ADR 0026)                                                                          |
+| `import_templates`       | id, collectif_id, user_id, column_map, value_map, updated_by, updated_at                                                                                                                                               | one per owner (collectif xor person); the choices validated last, merged, at most 100 titles and 300 values per kind (ADR 0027)                                                                               |
 | `audit_log`      | id, actor_id, action, entity, entity_id, payload (jsonb), at                                                                                                                                                           | append only; IDs only, no personal data (ADR 0010)                                                                                                                                                            |
 
 `audit_log` actions so far: `account.approved|rejected|disabled|enabled`,
@@ -39,7 +41,8 @@ erDiagram
 `member.requested|approved|rejected|removed|left`, `responsible.named`,
 `responsible.approved|rejected|removed`, `location.created|updated|deleted`,
 `item.created|updated|moved|archived|contacted|deleted|deletion_requested|deletion_rejected`. `inventory.exported` (entity `collectif` or `user`, payload: the item count) records each CSV
-export. A
+export. `import.confirmed` (entity `import`, payload: owner, location and counts) records each
+import; the items it creates, updates or moves carry `importId` in their own entries. A
 deleted item's entries stay in the log (IDs only, ADR 0010); its page and history are gone. Payloads hold IDs, enum values and field names
 only; `readHistory()` resolves names at display time. The item page shows an allow-list
 (`itemHistoryActions`): `item.contacted` stays in the log for admins and is never displayed.
@@ -49,7 +52,6 @@ Added later:
 | Version | Change                                                                                                                                         |
 |---------|------------------------------------------------------------------------------------------------------------------------------------------------|
 | V0.9    | `items.photo_key` (MinIO object key)                                                                                                           |
-| V0.10   | `import_templates` (the mapping saved per owner)                                                                                                |
 | V1.1    | sharing tables (defaults per collectif, circles, per-item overrides); until then visibility derives from membership (ADR 0021)                 |
 
 References are compared as `inv_fold` does: case and the accents of its list are ignored (`É`,

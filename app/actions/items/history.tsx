@@ -42,7 +42,9 @@ export function describe(entry: HistoryEntry): string {
   const p = entry.payload
   switch (entry.action) {
     case 'item.created':
-      return `Ajouté dans ${place(entry.locationNames.locationId)}`
+      return p.importId
+        ? `Ajouté par un import dans ${place(entry.locationNames.locationId)}`
+        : `Ajouté dans ${place(entry.locationNames.locationId)}`
     case 'item.updated': {
       const fields = String(p.fields ?? '')
         .split(',')

@@ -137,6 +137,7 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 | Item         | `/materiel/:itemId` and its `/modifier`, `/deplacer`, `/archiver`, `/contacter`                                              |
 | Mon matériel | `/materiel`, `/materiel/nouveau`, `/lieux`, `/lieux/nouveau`, `/lieux/:locationId` (+ `/modifier`, `/supprimer`)             |
 | Exports     | POST `/materiel/exporter` (one's own), POST `/collectifs/:slug/exporter` (its responsibles): CSV files, never links (US-0.10.4) |
+| Import      | `/import` (file), `/import/:importId/colonnes`, `/valeurs`, `/apercu` (preview, force an archived row, confirm), POST `/abandonner`; wizard steps, one import per person (US-0.10.1) |
 | Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/lieux`, `/responsables`, `/modifier`, `/devenir-responsable`) |
 | People       | `/personnes/:userId`                                                                                                         |
 | Account      | `/compte/profil` (sections: profil, collectifs, session, à propos, supprimer), `/compte/supprimer`, `/deconnexion`           |

@@ -17,7 +17,7 @@ the ones below are a complete starting point to copy there. The proof of concept
 | Image        | `ghcr.io/collectifrog/inventassos:X.Y.Z`, pushed by the `release` workflow for tag `vX.Y.Z`      |
 | PostgreSQL   | version 17 (the version CI tests against); one empty database and a user that owns it           |
 | SMTP         | an account that may send as `MAIL_FROM` (the Collecti'FROG Zimbra in production)                 |
-| Ingress      | TLS termination for the public host; it forwards plain HTTP to the container                     |
+| Ingress      | TLS termination for the public host; it forwards plain HTTP to the container; bodies up to 3 MB  |
 | A DNS record | the public host, which becomes `APP_URL`                                                         |
 
 The database user needs no superuser right and no extension: migrations only create tables,
@@ -135,6 +135,12 @@ spec:
             pathType: Prefix
             backend: { service: { name: inventassos, port: { name: http } } }
 ```
+
+The import accepts CSV files up to 2 MB (ADR 0026). An NGINX ingress refuses bodies over 1 MB by
+default: add `nginx.ingress.kubernetes.io/proxy-body-size: 3m` to the Ingress annotations (or the
+equivalent of your controller), else a large file fails before it reaches the app. Files being
+imported wait in the `imports` table for an hour; leave its data out of backups
+(`pg_dump --exclude-table-data=imports`).
 
 Adapt the namespace, the host, the TLS secret (or your cert-manager annotation) and the ingress
 class to the cluster. The resource figures are a starting point for a few associations: watch

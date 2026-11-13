@@ -178,6 +178,46 @@ export function isRefConflict(error: unknown): boolean {
   return cause !== undefined && cause !== error && isRefConflict(cause)
 }
 
+/** One item an import creates, with the ID chosen for it so the log can name it. */
+export interface NewItem {
+  id: string
+  fields: ItemFields
+  locationId: string
+  owner: ItemOwner
+  createdBy: string
+}
+
+/** Creates many items at once (an import, US-0.10.1), in chunks, inside the caller's transaction. */
+export async function createItems(db: Database, list: readonly NewItem[]): Promise<void> {
+  for (let start = 0; start < list.length; start += 500) {
+    await db.createMany(
+      items,
+      list.slice(start, start + 500).map((item) => ({
+        id: item.id,
+        ...toColumns(item.fields),
+        location_id: item.locationId,
+        owner_collectif_id: 'collectifId' in item.owner ? item.owner.collectifId : null,
+        owner_user_id: 'userId' in item.owner ? item.owner.userId : null,
+        created_by: item.createdBy,
+      })),
+    )
+  }
+}
+
+/** Writes an import's update of one item: its fields, and its location when it moves. */
+export async function updateImportedItem(
+  db: Database,
+  itemId: string,
+  fields: ItemFields,
+  locationId: string | null,
+): Promise<void> {
+  await db.update(items, itemId, {
+    ...toColumns(fields),
+    ...(locationId ? { location_id: locationId } : {}),
+    updated_at: new Date(),
+  })
+}
+
 /** Finds an item by ID, archived or not. */
 export async function findItemById(db: Database, id: string): Promise<Item | null> {
   return isUuid(id) ? db.find(items, id) : null

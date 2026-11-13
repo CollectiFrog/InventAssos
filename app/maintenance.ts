@@ -1,6 +1,7 @@
 // Housekeeping of rows that expire: run at startup, then on a timer while the server runs.
 import type { Database } from 'remix/data-table'
 
+import { deleteExpiredImports } from './data/imports.ts'
 import { deleteExpiredRateLimits } from './data/rate-limits.ts'
 import { deleteExpiredSessions } from './data/sessions.ts'
 import { deleteStaleSignInTokens } from './data/sign-in-tokens.ts'
@@ -8,11 +9,15 @@ import { deleteStaleSignInTokens } from './data/sign-in-tokens.ts'
 /** How often the server purges expired rows. */
 export const purgeIntervalMs = 60 * 60 * 1000
 
-/** Deletes expired sessions, used or expired sign-in tokens and ended rate-limit windows. */
+/**
+ * Deletes expired sessions, used or expired sign-in tokens, ended rate-limit windows and imports
+ * past their hour (ADR 0026).
+ */
 export async function purgeExpiredData(db: Database): Promise<void> {
   await deleteExpiredSessions(db)
   await deleteStaleSignInTokens(db)
   await deleteExpiredRateLimits(db)
+  await deleteExpiredImports(db)
 }
 
 /** Calls `run` every `intervalMs` until the returned function is called. Tests pass their own. */

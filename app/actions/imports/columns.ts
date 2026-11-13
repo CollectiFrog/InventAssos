@@ -310,10 +310,16 @@ export function guessColumns(
 ): ColumnGuess[] {
   const scores = { saved: 5, own: 4, exact: 3, contains: 2 } as const
   const candidates: { column: number; field: InventoryField; source: ColumnGuessSource }[] = []
+  const ignored = new Set<number>()
   headers.forEach((header, column) => {
     const key = headerKey(header)
     if (key === '') return
-    const remembered = saved[key]
+    const remembered = Object.hasOwn(saved, key) ? saved[key] : undefined
+    // The owner chose « Ne pas importer » for this title before: nothing is guessed for it.
+    if (remembered === '') {
+      ignored.add(column)
+      return
+    }
     if (remembered !== undefined && (fieldOrder as string[]).includes(remembered)) {
       candidates.push({ column, field: remembered as InventoryField, source: 'saved' })
     }
@@ -337,7 +343,10 @@ export function guessColumns(
       a.column - b.column ||
       fieldOrder.indexOf(a.field) - fieldOrder.indexOf(b.field),
   )
-  const guesses: ColumnGuess[] = headers.map(() => ({ field: null, source: null }))
+  const guesses: ColumnGuess[] = headers.map((_, column) => ({
+    field: null,
+    source: ignored.has(column) ? 'saved' : null,
+  }))
   const taken = new Set<InventoryField>()
   for (const { column, field, source } of candidates) {
     const guess = guesses[column]
