@@ -62,7 +62,8 @@ Agents may prepare steps 1 to 3. **Tagging (step 5) is the maintainer's call.**
 
 1. `git switch dev && git pull`, then `git switch -c release/vX.Y.Z`.
 2. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`, add an empty
-   `## [Unreleased]` above it, and the compare link at the bottom. Bump version files if any.
+   `## [Unreleased]` above it, and the compare link at the bottom. Bump `appVersion` in
+   `app/brand.ts` (shown on « Mon compte › À propos »).
    Only release fixes go on this branch, no features.
 3. Commit `chore(release): vX.Y.Z`, push, open a PR `release/vX.Y.Z` → `main`.
 4. Once green and approved: **merge commit** (not squash) into `main`.
