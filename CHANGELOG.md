@@ -49,6 +49,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ### Changed
 
+- The application is now called **AssoMatos**, at `assomatos.collecti-frog.fr`; « Mon compte › À propos » shows the version.
 - The account is reached from a round button with your initials; « Se déconnecter » moved to the account page.
 - Pages use the whole width of a computer screen instead of a narrow centred column.
 - « Mon matériel » lists what is stored at your places right now (yours, your collectifs', borrowed), with a Lieux tab for your own locations; a collectif's locations are on its page.

@@ -5,10 +5,10 @@ sidebar:
   order: 5
 ---
 
-This guide puts a released version of InventAssos in production on Kubernetes, from the docs alone
+This guide puts a released version of AssoMatos in production on Kubernetes, from the docs alone
 (US-0.8.11). The real manifests live in the infra repository ([ADR 0005](../../adr/0005-deployment/));
 the ones below are a complete starting point to copy there. The proof of concept runs at
-`https://inv.collecti-frog.fr`.
+`https://assomatos.collecti-frog.fr`.
 
 ## What you need
 
@@ -46,7 +46,7 @@ Use an immutable tag `X.Y.Z`, never `latest`. If the GHCR package is private, ad
 | `SMTP_URL`              | yes    | e.g. `smtps://noreply%40collecti-frog.fr:password@mail.example:465`              |
 | `APP_URL`               | no     | public origin, used in e-mail links and to check form origins (CSRF)            |
 | `PLATFORM_ADMIN_EMAILS` | no     | comma-separated e-mails that become admin at first sign-in; read at startup      |
-| `MAIL_FROM`             | no     | `InventAssos <noreply@collecti-frog.fr>`                                         |
+| `MAIL_FROM`             | no     | `AssoMatos <noreply@collecti-frog.fr>`                                         |
 | `TRUST_PROXY`           | no     | `true` behind the ingress, so rate limits see the visitor's address (ADR 0018)   |
 | `PORT`                  | no     | container port, default `3000`                                                   |
 
@@ -73,8 +73,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata: { name: inventassos, namespace: inventassos }
 data:
-  APP_URL: https://inv.collecti-frog.fr
-  MAIL_FROM: InventAssos <noreply@collecti-frog.fr>
+  APP_URL: https://assomatos.collecti-frog.fr
+  MAIL_FROM: AssoMatos <noreply@collecti-frog.fr>
   PLATFORM_ADMIN_EMAILS: admin@collecti-frog.fr
   TRUST_PROXY: "true"
 ---
@@ -126,9 +126,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata: { name: inventassos, namespace: inventassos }
 spec:
-  tls: [{ hosts: [inv.collecti-frog.fr], secretName: inventassos-tls }]
+  tls: [{ hosts: [assomatos.collecti-frog.fr], secretName: inventassos-tls }]
   rules:
-    - host: inv.collecti-frog.fr
+    - host: assomatos.collecti-frog.fr
       http:
         paths:
           - path: /
@@ -176,7 +176,7 @@ logs, fix forward with a `fix/…` release.
 1. Create the namespace, the `Secret` and the database, then apply the manifests with your e-mail
    in `PLATFORM_ADMIN_EMAILS`.
 2. Wait for the pods to be ready: `kubectl -n inventassos rollout status deploy/inventassos`.
-3. Check `curl -fsS https://inv.collecti-frog.fr/readyz`, then open the home page.
+3. Check `curl -fsS https://assomatos.collecti-frog.fr/readyz`, then open the home page.
 4. Choose **Se connecter** with the listed e-mail and follow the link received: the account is
    created and validated at once, as admin. If no e-mail arrives, the pod log names the SMTP error.
 5. In **Administration**, accept the first accounts and collectifs; name moderators in the

@@ -3,6 +3,7 @@ import * as http from 'node:http'
 import { createRequestListener, type FetchHandler } from 'remix/node-fetch-server'
 
 import { createBackgroundTasks } from './app/background.ts'
+import { appName } from './app/brand.ts'
 import { withClientAddress } from './app/client-address.ts'
 import { loadConfig } from './app/config.ts'
 import { migrateDatabase, openDatabase } from './app/db.ts'
@@ -40,7 +41,7 @@ const handler: FetchHandler = (request, client) =>
 const server = http.createServer(createRequestListener(handler, { trustProxy: config.trustProxy }))
 
 server.listen(config.port, () => {
-  console.log(`InventAssos listening on http://localhost:${config.port}`)
+  console.log(`${appName} listening on http://localhost:${config.port}`)
 })
 
 let shuttingDown = false

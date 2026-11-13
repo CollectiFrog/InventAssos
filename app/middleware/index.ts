@@ -29,7 +29,7 @@ export interface AppDependencies {
 /** The router middleware chain, in order. Kept apart from the router so its type has no cycle. */
 export function appMiddleware(deps: AppDependencies) {
   const appUrl = new URL(deps.settings.appUrl)
-  const sessionCookie = createCookie('inventassos_session', {
+  const sessionCookie = createCookie('assomatos_session', {
     secrets: [deps.sessionSecret],
     httpOnly: true,
     sameSite: 'lax',

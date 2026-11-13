@@ -15,7 +15,7 @@ const base = site === 'dev' && pagesUrl ? `${basePath}/dev` : basePath || '/';
 
 // Edit these per project.
 const project = {
-  name: 'InventAssos',
+  name: 'AssoMatos',
   repo: 'https://github.com/CollectiFrog/InventAssos',
   lang: 'fr', // language of the user documentation
 };

@@ -1,5 +1,5 @@
 import type { Handle, RemixNode } from 'remix/component'
-
+import { appName, appVersion } from '../../../brand.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../../ui/form.tsx'
 import { Layout, SignOutButton, type Viewer } from '../../../ui/layout.tsx'
@@ -133,7 +133,11 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
             >
               <SignOutButton csrfToken={csrfToken} />
             </SettingSection>
-            <SettingSection id="a-propos" title="À propos" text="InventAssos, version 0.7.">
+            <SettingSection
+              id="a-propos"
+              title="À propos"
+              text={`${appName}, version ${appVersion}.`}
+            >
               <p>
                 <a href={guideUrl}>Guide d’utilisation</a>
               </p>
