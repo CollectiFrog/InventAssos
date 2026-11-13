@@ -59,9 +59,10 @@ Both answers are a bare line of text: browsers never send such forms from our pa
 file names its own limits through `uploadFor`, and only an active user can reach it, since the
 gate runs first.
 
-The sign-in link opens a page with a button that POSTs the token: e-mail scanners that prefetch
-links cannot burn it. The token is consumed by a single `UPDATE … WHERE used_at IS NULL AND
-expires_at > now()`, so two clicks cannot both succeed.
+Opening the sign-in link (GET) signs in at once and redirects; a HEAD request leaves the token
+alone. A mail scanner that opens links before the person does uses the token up: the field asked
+for one click less, and the person can request a new link. The token is consumed by a single
+`UPDATE … WHERE used_at IS NULL AND expires_at > now()`, so two clicks cannot both succeed.
 
 ## Data
 

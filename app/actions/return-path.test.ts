@@ -69,13 +69,9 @@ describe('back where I was after signing in (US-0.7.8)', () => {
     assert.match(mail, /\/connexion\/lien\/[\w-]+\?suite=%2Finventaire%3Fq%3Dperceuse/)
 
     const token = lastSignInToken(app, 'camille@example.org') ?? ''
-    const confirm = (
-      await client.get(
-        `${routes.signIn.link.index.href({ token })}?suite=${encodeURIComponent(wanted)}`,
-      )
-    ).text
-    assert.match(confirm, /<input type="hidden" name="suite" value="\/inventaire\?q=perceuse"/)
-    const signedIn = await client.post(routes.signIn.link.action.href({ token }), { suite: wanted })
+    const signedIn = await client.get(
+      `${routes.signIn.link.href({ token })}?suite=${encodeURIComponent(wanted)}`,
+    )
     assert.equal(signedIn.location, wanted)
   })
 
@@ -84,7 +80,9 @@ describe('back where I was after signing in (US-0.7.8)', () => {
       const client = app.client()
       await client.post(routes.signIn.form.action.href(), { email: 'camille@example.org' })
       const token = lastSignInToken(app, 'camille@example.org') ?? ''
-      const response = await client.post(routes.signIn.link.action.href({ token }), { suite })
+      const response = await client.get(
+        `${routes.signIn.link.href({ token })}?suite=${encodeURIComponent(suite)}`,
+      )
       assert.equal(response.location, routes.home.href(), suite)
     }
   })
