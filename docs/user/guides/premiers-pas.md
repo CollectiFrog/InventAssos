@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-InventAssos est un service en ligne : rien à installer, un navigateur suffit.
+AssoMatos est un service en ligne : rien à installer, un navigateur suffit.
 
 ## Créer son compte
 
@@ -25,10 +25,10 @@ connecter pour utiliser ce bouton, afin que seul le titulaire de l'adresse puiss
 
 ## Se connecter
 
-InventAssos n'utilise pas de mot de passe.
+AssoMatos n'utilise pas de mot de passe.
 
 1. Choisissez **Se connecter** et indiquez votre adresse e-mail.
-2. Ouvrez l'e-mail « Votre lien de connexion InventAssos » et cliquez sur le lien.
+2. Ouvrez l'e-mail « Votre lien de connexion AssoMatos » et cliquez sur le lien.
 3. Sur la page qui s'ouvre, cliquez sur **Me connecter**.
 
 Si vous avez ouvert un lien vers une page de l'application (un objet, un collectif…) sans être

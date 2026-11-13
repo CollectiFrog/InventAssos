@@ -251,7 +251,10 @@ const synonyms: Record<InventoryField, { exact: string[]; contains: string[] }> 
     ],
     contains: ['lieu', 'emplacement', 'rangement', 'stockage', 'storage'],
   },
-  id: { exact: ['identifiant', 'identifiant inventassos', 'id', 'uuid'], contains: [] },
+  id: {
+    exact: ['identifiant', 'identifiant inventassos', 'identifiant assomatos', 'id', 'uuid'],
+    contains: [],
+  },
 }
 
 /** Field order, to break ties the same way every time. */

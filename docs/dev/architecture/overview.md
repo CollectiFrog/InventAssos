@@ -5,14 +5,14 @@ sidebar:
   order: 1
 ---
 
-InventAssos is one Remix 3 application backed by PostgreSQL, deployed as a single container on a
+AssoMatos (repository `InventAssos`) is one Remix 3 application backed by PostgreSQL, deployed as a single container on a
 self-hosted Kubernetes cluster. Every permission check runs on the server.
 
 ## Context
 
 ```mermaid
 flowchart LR
-  user([Volunteer]) -- HTTPS --> app[InventAssos<br/>Remix 3 · Node ≥ 24.3]
+  user([Volunteer]) -- HTTPS --> app[AssoMatos<br/>Remix 3 · Node ≥ 24.3]
   admin([Platform admin]) -- HTTPS --> app
   app --> db[(PostgreSQL)]
   app -- SMTP --> mail[Zimbra<br/>noreply@collecti-frog.fr]

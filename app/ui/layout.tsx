@@ -1,5 +1,5 @@
 import type { Handle, RemixNode } from 'remix/component'
-
+import { appInitials, appName } from '../brand.ts'
 import { routes } from '../routes.ts'
 
 /** What the shell needs to know about the signed-in person; null for a visitor. */
@@ -108,7 +108,7 @@ export function Layout(handle: Handle<LayoutProps>) {
           <meta name="color-scheme" content="light dark" />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
           <link rel="stylesheet" href="/styles.css" />
-          <title>{`${title} · InventAssos`}</title>
+          <title>{`${title} · ${appName}`}</title>
         </head>
         <body class={navigates ? 'has-nav' : undefined}>
           <a class="skip-link" href="#contenu">
@@ -121,7 +121,7 @@ export function Layout(handle: Handle<LayoutProps>) {
             <div class="shell-body">
               <header class="top-bar">
                 <a class="brand" href={routes.home.href()}>
-                  InventAssos
+                  {appName}
                 </a>
                 {navigates ? (
                   <form method="get" action={routes.inventory.index.href()} class="top-search">
@@ -250,9 +250,9 @@ function Sidebar(
       <aside class="sidebar">
         <a class="brand side-brand" href={routes.home.href()}>
           <span class="logo" aria-hidden="true">
-            IA
+            {appInitials}
           </span>
-          <span class="brand-name">InventAssos</span>
+          <span class="brand-name">{appName}</span>
         </a>
         <nav aria-label="Navigation principale" class="main-nav">
           {entries.map((entry) => (

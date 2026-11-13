@@ -1,5 +1,5 @@
 import type { Handle } from 'remix/component'
-
+import { appName } from '../brand.ts'
 import type { ItemSummary } from '../data/items.ts'
 import { routes } from '../routes.ts'
 import { Layout, type Viewer } from '../ui/layout.tsx'
@@ -40,7 +40,7 @@ export function HomePage(
     }
     return (
       <Layout title="Accueil" viewer={viewer} section="home">
-        <h1>InventAssos</h1>
+        <h1>{appName}</h1>
         {signedOut ? (
           <p class="notice notice-success" role="status">
             Vous êtes déconnecté. À bientôt !

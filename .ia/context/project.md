@@ -3,7 +3,7 @@
 ## What and why
 
 Volunteer associations doing scenography, sound, lighting and events each keep a private, more or
-less complete inventory of their equipment. InventAssos is a web platform where each association
+less complete inventory of their equipment. AssoMatos (repository `InventAssos`) is a web platform where each association
 (a *collectif*) keeps its inventory with its members and responsibles: what it owns, where it is
 stored, who holds it. Until V1.1 an inventory is seen only inside its collectifs
 ([ADR 0021](../../docs/adr/0021-inventory-within-collectifs.md)); sharing with other collectifs, so
@@ -42,7 +42,7 @@ visibility. Open source (MIT), self-hosted.
 - Container image: `ghcr.io/collectifrog/inventassos:X.Y.Z`, built on each `vX.Y.Z` tag.
 - Manifests: in Tristan's infra repository; the cluster pulls the image from GHCR. Tag updated by
   hand until Argo CD is ready ([ADR 0005](../../docs/adr/0005-deployment.md)).
-- Proof-of-concept URL: `inv.collecti-frog.fr`, published by Collecti'FROG, hosted by Tristan
+- Production URL: `assomatos.collecti-frog.fr` (first release v0.10.0), published by Collecti'FROG, hosted by Tristan
   (legal host) on servers maintained by TFGL (informal group, no legal entity).
 
 ## Boundaries

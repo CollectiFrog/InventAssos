@@ -1,4 +1,5 @@
 // Application configuration, read once from environment variables (see .env.example).
+import { appName } from './brand.ts'
 
 /** Settings the app needs at runtime. Production never falls back to a default secret. */
 export interface Config {
@@ -41,7 +42,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const smtpUrl = env.SMTP_URL?.trim() || null
   if (production && smtpUrl === null) errors.push('SMTP_URL is required in production')
 
-  const mailFrom = env.MAIL_FROM?.trim() || 'InventAssos <noreply@collecti-frog.fr>'
+  const mailFrom = env.MAIL_FROM?.trim() || `${appName} <noreply@collecti-frog.fr>`
 
   const trustProxy = (env.TRUST_PROXY ?? '').trim().toLowerCase()
   if (!['', 'true', 'false'].includes(trustProxy)) errors.push('TRUST_PROXY must be true or false')

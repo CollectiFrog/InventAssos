@@ -1,7 +1,9 @@
 // Texts of the e-mails the app sends, in French (the users' language).
+
+import { appName } from '../brand.ts'
 import type { Mail } from './mailer.ts'
 
-const signature = "\n\n— InventAssos, l'inventaire partagé entre associations"
+const signature = `\n\n— ${appName}, l'inventaire partagé entre associations`
 
 /** To the platform admins: a new account waits for approval. */
 export function newAccountRequestMail(to: string[], reviewUrl: string): Mail {
@@ -16,7 +18,7 @@ export function newAccountRequestMail(to: string[], reviewUrl: string): Mail {
 export function signUpReceivedMail(to: string, appUrl: string): Mail {
   return {
     to,
-    subject: 'Votre demande de compte InventAssos',
+    subject: `Votre demande de compte ${appName}`,
     text:
       'Bonjour,\n\nVotre demande de compte est enregistrée. Un administrateur ou un modérateur va l’examiner ; ' +
       `vous recevrez un e-mail quand ce sera fait.\n\n${appUrl}${signature}`,
@@ -27,7 +29,7 @@ export function signUpReceivedMail(to: string, appUrl: string): Mail {
 export function signInLinkMail(to: string, linkUrl: string): Mail {
   return {
     to,
-    subject: 'Votre lien de connexion InventAssos',
+    subject: `Votre lien de connexion ${appName}`,
     text:
       `Bonjour,\n\nPour vous connecter, ouvrez ce lien dans les 15 minutes :\n${linkUrl}\n\n` +
       'Il ne fonctionne qu’une fois. Si vous n’avez rien demandé, ignorez ce message : ' +
@@ -39,7 +41,7 @@ export function signInLinkMail(to: string, linkUrl: string): Mail {
 export function alreadyRegisteredMail(to: string, signInUrl: string): Mail {
   return {
     to,
-    subject: 'Vous avez déjà un compte InventAssos',
+    subject: `Vous avez déjà un compte ${appName}`,
     text:
       'Bonjour,\n\nQuelqu’un (sans doute vous) a demandé à créer un compte avec cette adresse, ' +
       'mais elle en a déjà un : aucun nouveau compte n’a été créé. ' +
@@ -51,7 +53,7 @@ export function alreadyRegisteredMail(to: string, signInUrl: string): Mail {
 export function reapplyBySignInMail(to: string, signInUrl: string): Mail {
   return {
     to,
-    subject: 'Votre demande de compte InventAssos',
+    subject: `Votre demande de compte ${appName}`,
     text:
       'Bonjour,\n\nQuelqu’un (sans doute vous) a demandé un compte avec cette adresse. Une ' +
       'demande précédente n’avait pas été acceptée. Pour en refaire une, connectez-vous avec ' +
@@ -64,7 +66,7 @@ export function reapplyBySignInMail(to: string, signInUrl: string): Mail {
 export function accountApprovedMail(to: string, signInUrl: string): Mail {
   return {
     to,
-    subject: 'Votre compte InventAssos est validé',
+    subject: `Votre compte ${appName} est validé`,
     text: `Bonjour,\n\nVotre compte est validé : vous pouvez vous connecter.\n${signInUrl}${signature}`,
   }
 }
@@ -73,7 +75,7 @@ export function accountApprovedMail(to: string, signInUrl: string): Mail {
 export function accountRejectedMail(to: string, reason: string | null): Mail {
   return {
     to,
-    subject: 'Votre demande de compte InventAssos',
+    subject: `Votre demande de compte ${appName}`,
     text:
       'Bonjour,\n\nVotre demande de compte n’a pas été acceptée.' +
       (reason ? `\n\nMotif : ${reason}` : '') +
@@ -177,7 +179,7 @@ export function itemModeratedMail(input: {
     to: input.to,
     subject: `« ${input.itemName} » retiré par la modération`,
     text:
-      `Bonjour,\n\nLa modération d’InventAssos a retiré « ${input.itemName} » de l’inventaire. ` +
+      `Bonjour,\n\nLa modération d’${appName} a retiré « ${input.itemName} » de l’inventaire. ` +
       `Il est archivé : sa page et son historique restent visibles.\n${input.itemUrl}\n\n` +
       `Motif :\n---\n${input.message}\n---` +
       signature,
@@ -261,7 +263,7 @@ export function itemDeletedByPlatformMail(input: {
     to: input.to,
     subject: `« ${input.itemName} » supprimé par la modération`,
     text:
-      `Bonjour,\n\nLa modération d’InventAssos a supprimé « ${input.itemName} » de l’inventaire. ` +
+      `Bonjour,\n\nLa modération d’${appName} a supprimé « ${input.itemName} » de l’inventaire. ` +
       `La suppression est définitive : l’objet et son historique n’existent plus.\n\n` +
       `Motif :\n---\n${input.message}\n---` +
       signature,

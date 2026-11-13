@@ -1,4 +1,7 @@
-# InventAssos
+# AssoMatos
+
+*Formerly InventAssos: the repository, the Docker image `ghcr.io/collectifrog/inventassos` and the
+databases keep that technical name. Production: <https://assomatos.collecti-frog.fr>.*
 
 Equipment inventory for volunteer associations doing scenography, sound, lighting and events:
 each collectif keeps its inventory with its members — what it owns, where it is, who holds it.
