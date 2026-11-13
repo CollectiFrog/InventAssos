@@ -125,7 +125,7 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
       const { server } = await startBrowserApp(db)
       const page = await t.serve(server)
       await page.setViewportSize(size)
-      await audit(page, ['/', '/connexion', '/inscription'])
+      await audit(page, ['/', '/connexion', '/inscription', '/mot-de-passe'])
     })
 
     it(`member pages at ${size.width} px`, async (t) => {

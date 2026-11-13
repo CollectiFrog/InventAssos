@@ -34,7 +34,7 @@ visibility. Open source (MIT), self-hosted.
 - Remix 3 for UI and server, Node ≥ 24.3: [ADR 0006](../../docs/adr/0006-remix-3-full-stack.md).
 - One responsive interface, rules in `docs/dev/architecture/ui.md`: [ADR 0019](../../docs/adr/0019-interface-conventions.md).
 - PostgreSQL: [ADR 0007](../../docs/adr/0007-postgresql.md).
-- Accounts managed by the app, sign-in by e-mail link: [ADR 0008](../../docs/adr/0008-app-managed-accounts.md).
+- Accounts managed by the app, sign-in by e-mail link or optional password: [ADR 0029](../../docs/adr/0029-password-sign-in.md).
 - Photos from V0.11, once storage and backups are re-architected (MinIO or another store). E-mail through the Collecti'FROG Zimbra SMTP (`noreply@collecti-frog.fr`).
 
 ## Deployment
@@ -51,7 +51,7 @@ visibility. Open source (MIT), self-hosted.
 - No sharing before V1.1: an item is seen only by the people of the collectifs that own or hold it
   (ADR 0021); every validated user sees the collectifs directory (name, city, description).
 - No exact address shown to others: only the city of a location.
-- No passwords stored; no SSO before V1.0.
+- Passwords are optional and stored as scrypt hashes only; no SSO before V1.0.
 
 ## Glossary
 

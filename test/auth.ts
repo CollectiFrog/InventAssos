@@ -11,6 +11,14 @@ export function lastSignInToken(app: TestApp, email: string): string | null {
   return mail ? (/\/connexion\/lien\/([\w-]+)/.exec(mail.text)?.[1] ?? null) : null
 }
 
+/** Extracts the token from the last password e-mail sent to `email`. */
+export function lastPasswordToken(app: TestApp, email: string): string | null {
+  const mail = app.mailer.outbox.findLast(
+    (m) => m.to === email && /Choisir votre mot de passe/.test(m.subject),
+  )
+  return mail ? (/\/mot-de-passe\/nouveau\/([\w-]+)/.exec(mail.text)?.[1] ?? null) : null
+}
+
 /** Requests a link for `email` and follows it; asserts that the sign-in succeeded. */
 export async function signIn(app: TestApp, client: TestClient, email: string): Promise<void> {
   await client.post('/connexion', { email })

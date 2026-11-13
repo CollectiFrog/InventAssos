@@ -45,6 +45,7 @@ per story when its version is planned; the issue links back here.
 | UC30 | Leave a collectif                               | Member, responsible           | V0.8    |
 | UC31 | Delete an item, or ask to delete it             | Responsible, owner, member    | V0.8    |
 | UC32 | Name or remove an admin                         | Admin                         | V0.10.x |
+| UC33 | Sign in with a password                         | User                          | V0.10.x |
 
 ## V0.1 — Foundations
 
@@ -329,6 +330,15 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
     - Admins of `PLATFORM_ADMIN_EMAILS` are shown but never removed nor disabled from the app;
       nobody changes their own role.
     - A named admin has every admin right; a moderator never acts on them. No e-mail is sent.
+- **US-0.10.8 Sign in with a password.** As a user, I want to sign in with a password, so that I
+  do not wait for an e-mail ([ADR 0029](../../adr/0029-password-sign-in/)).
+    - The e-mailed link keeps working; the sign-in page offers both with one e-mail field.
+    - A password is created or changed only through an e-mailed link (« Mot de passe oublié ou pas
+      encore créé ? », or Mon compte › Mot de passe), valid 30 minutes, single use.
+    - At least 12 characters, no other rule; no second factor, staff included.
+    - The same answer for an unknown address, a wrong password or no password; 10 tries per address
+      per hour.
+    - Choosing a password closes the other sessions and e-mails the person.
 
 ## V0.11 — Photos
 

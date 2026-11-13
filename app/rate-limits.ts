@@ -13,6 +13,8 @@ export interface RateLimits {
   mailsPerAddress: RateLimit
   /** Sign-in and sign-up forms posted from one client address. */
   formsPerClient: RateLimit
+  /** Password tries for one address, right or wrong (ADR 0029): bounds guessing one account. */
+  passwordTriesPerAddress: RateLimit
   /** New-collectif, responsibility and re-application requests by one user. */
   requestsPerUser: RateLimit
   /** Contact messages sent by one user (US-0.6.3). */
@@ -32,6 +34,7 @@ const day = 24 * hour
 export const defaultRateLimits: RateLimits = {
   mailsPerAddress: { limit: 5, windowSeconds: hour },
   formsPerClient: { limit: 20, windowSeconds: 15 * 60 },
+  passwordTriesPerAddress: { limit: 10, windowSeconds: hour },
   requestsPerUser: { limit: 5, windowSeconds: day },
   contactsPerUser: { limit: 10, windowSeconds: day },
   adminNotifications: { limit: 5, windowSeconds: hour },
@@ -59,6 +62,15 @@ export async function mayMailAddress(
   email: string,
 ): Promise<boolean> {
   return (await hitRateLimit(db, `mail:${email}`, limits(settings).mailsPerAddress)).allowed
+}
+
+/** One password try for an address, whether it has an account or not (ADR 0029). */
+export function hitPasswordTry(
+  db: Database,
+  settings: AppSettings,
+  email: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `password:${email}`, limits(settings).passwordTriesPerAddress)
 }
 
 /** One CSV export by a user (US-0.10.4). */

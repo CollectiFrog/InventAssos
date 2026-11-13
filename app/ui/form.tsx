@@ -15,7 +15,7 @@ export interface TextFieldProps {
   value?: string | null
   error?: string
   hint?: RemixNode
-  type?: 'text' | 'email' | 'tel' | 'number' | 'search'
+  type?: 'text' | 'email' | 'tel' | 'number' | 'search' | 'password'
   required?: boolean
   /** Required only when its section is used: no "(facultatif)", and the server checks it. */
   requiredIfUsed?: boolean

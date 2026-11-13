@@ -35,9 +35,9 @@ describe('Mon compte as a settings page (US-0.7.13)', () => {
     const toc = /<nav aria-label="Sur cette page"[^>]*>(.*?)<\/nav>/s.exec(html)?.[1] ?? ''
     assert.deepEqual(
       [...toc.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]),
-      ['profil', 'collectifs', 'session', 'a-propos', 'supprimer'],
+      ['profil', 'collectifs', 'mot-de-passe', 'session', 'a-propos', 'supprimer'],
     )
-    for (const id of ['profil', 'collectifs', 'session', 'a-propos', 'supprimer']) {
+    for (const id of ['profil', 'collectifs', 'mot-de-passe', 'session', 'a-propos', 'supprimer']) {
       assert.match(html, new RegExp(`<section id="${id}"[^>]*class="setting"`))
     }
     assert.match(html, /<a href="\/collectifs\/collecti-frog">Collecti'FROG<\/a>/)

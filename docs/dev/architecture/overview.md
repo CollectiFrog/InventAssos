@@ -30,7 +30,7 @@ flowchart LR
 | Router          | middleware chain and controller mapping                                           | `app/router.ts`, `app/middleware/`                             |
 | Controllers     | pages, forms, server actions; one folder per route map                            | `app/actions/<key>/controller.tsx`, nested maps in sub-folders |
 | Views           | server-rendered Remix components (ADR 0015), one responsive layout ([UI](../ui/)) | `app/actions/**/*-page.tsx`, `app/ui/`                         |
-| Auth            | sign-up, e-mail sign-in links, sessions, CSRF, current user                       | `app/actions/sign-{up,in}/`, `app/middleware/`                 |
+| Auth            | sign-up, e-mail links, passwords (ADR 0029), sessions, CSRF, current user         | `app/actions/{sign-up,sign-in,password}/`, `app/passwords.ts`  |
 | Permissions     | one function per action, deny by default                                          | `app/permissions.ts`, guards in `app/actions/guards.tsx`       |
 | Data access     | one module per entity, the only place with SQL                                    | `app/data/`                                                    |
 | Audit log       | append-only, IDs only (ADR 0010)                                                  | `app/data/audit-log.ts`                                        |
@@ -80,7 +80,7 @@ session secret, `PLATFORM_ADMIN_EMAILS`, the photo store (from V0.11). No deploy
 |-------------------------|-----------------------------------------------------------------------------------------------------------------------|
 | Framework               | [0006](../../adr/0006-remix-3-full-stack/)                                                                            |
 | Database                | [0007](../../adr/0007-postgresql/)                                                                                    |
-| Accounts and sign-in    | [0008](../../adr/0008-app-managed-accounts/)                                                                          |
+| Accounts and sign-in    | [0008](../../adr/0008-app-managed-accounts/), [0029](../../adr/0029-password-sign-in/)                                |
 | Ownership and locations | [0009](../../adr/0009-ownership-and-locations/)                                                                       |
 | Personal data retention | [0010](../../adr/0010-personal-data-retention/)                                                                       |
 | Roles                   | [0020](../../adr/0020-platform-and-collectif-roles/), [0028](../../adr/0028-admins-named-in-the-app/)                 |

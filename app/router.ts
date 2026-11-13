@@ -30,6 +30,9 @@ import deleteItemController from './actions/items/remove/controller.tsx'
 import locationsController from './actions/locations/controller.tsx'
 import createLocationController from './actions/locations/create/controller.tsx'
 import editLocationController from './actions/locations/edit/controller.tsx'
+import passwordChooseController from './actions/password/choose/controller.tsx'
+import passwordController from './actions/password/controller.tsx'
+import passwordRequestController from './actions/password/request/controller.tsx'
 import peopleController from './actions/people/controller.tsx'
 import signInController from './actions/sign-in/controller.tsx'
 import signInFormController from './actions/sign-in/form/controller.tsx'
@@ -69,6 +72,9 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.items.archive, archiveItemController)
   router.map(routes.items.remove, deleteItemController)
   router.map(routes.locations, locationsController)
+  router.map(routes.password, passwordController)
+  router.map(routes.password.request, passwordRequestController)
+  router.map(routes.password.choose, passwordChooseController)
   router.map(routes.people, peopleController)
   router.map(routes.locations.create, createLocationController)
   router.map(routes.locations.edit, editLocationController)

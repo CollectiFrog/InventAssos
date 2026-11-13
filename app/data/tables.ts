@@ -9,6 +9,10 @@ export type UserStatus = (typeof userStatuses)[number]
 export const userRoles = ['member', 'moderator', 'admin'] as const
 export type UserRole = (typeof userRoles)[number]
 
+/** What an e-mailed token is for: signing in, or choosing a password (ADR 0029). */
+export const tokenPurposes = ['sign_in', 'password_reset'] as const
+export type TokenPurpose = (typeof tokenPurposes)[number]
+
 export const users = table({
   name: 'users',
   columns: {
@@ -19,6 +23,8 @@ export const users = table({
     status: c.enum(userStatuses),
     is_platform_admin: c.boolean(),
     role: c.enum(userRoles),
+    /** scrypt hash of the password (ADR 0029); null until the person chooses one. */
+    password_hash: c.text().nullable(),
     rejection_reason: c.text().nullable(),
     created_at: c.timestamp({ withTimezone: true }),
     updated_at: c.timestamp({ withTimezone: true }),
@@ -55,6 +61,7 @@ export const signInTokens = table({
   columns: {
     token_hash: c.text(),
     user_id: c.uuid(),
+    purpose: c.enum(tokenPurposes),
     expires_at: c.timestamp({ withTimezone: true }),
     used_at: c.timestamp({ withTimezone: true }).nullable(),
     created_at: c.timestamp({ withTimezone: true }),

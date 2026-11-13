@@ -93,6 +93,11 @@ export async function listActiveUsers(db: Database): Promise<User[]> {
   return db.findMany(users, { where: { status: 'active' }, orderBy: ['name', 'asc'] })
 }
 
+/** Stores a new password hash (ADR 0029). */
+export async function setPasswordHash(db: Database, id: string, hash: string): Promise<User> {
+  return db.update(users, id, { password_hash: hash, updated_at: new Date() })
+}
+
 /** Names or removes a moderator or an admin (US-0.8.1, US-0.10.7). */
 export async function setUserRole(db: Database, id: string, role: UserRole): Promise<User> {
   return db.update(users, id, { role, updated_at: new Date() })

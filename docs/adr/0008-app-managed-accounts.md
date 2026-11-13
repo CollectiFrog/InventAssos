@@ -3,9 +3,9 @@ title: "0008: App-managed accounts with e-mail sign-in links"
 description: No passwords and no SSO until V1.0; OIDC can be added later.
 ---
 
-| Status   | Date       | Deciders   |
-|----------|------------|------------|
-| Accepted | 2026-11-06 | @tritriper |
+| Status             | Date       | Deciders   |
+|--------------------|------------|------------|
+| Superseded by 0029 | 2026-11-06 | @tritriper |
 
 ## Context
 

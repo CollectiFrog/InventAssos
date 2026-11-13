@@ -8,11 +8,16 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ### Added
 
+- Sign in with a password if you want one, chosen or changed through a link sent by e-mail; the e-mailed sign-in link keeps working.
 - Admins can name and remove other admins in the app, on Administration › Équipe (formerly Modérateurs); admins from the server configuration stay out of reach.
 
 ### Changed
 
 - The link from the sign-in e-mail signs you in at once, without the « Me connecter » page.
+
+### Security
+
+- After signing in, a crafted return address can no longer send you to another site.
 
 ## [0.10.0] - 2026-11-13
 

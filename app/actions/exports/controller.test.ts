@@ -183,6 +183,7 @@ describe('export equipment as CSV (US-0.10.4)', () => {
       rateLimits: {
         mailsPerAddress: { limit: 100, windowSeconds: 60 },
         formsPerClient: { limit: 100, windowSeconds: 60 },
+        passwordTriesPerAddress: { limit: 100, windowSeconds: 60 },
         requestsPerUser: { limit: 100, windowSeconds: 60 },
         contactsPerUser: { limit: 100, windowSeconds: 60 },
         adminNotifications: { limit: 100, windowSeconds: 60 },

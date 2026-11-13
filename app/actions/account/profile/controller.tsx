@@ -32,6 +32,7 @@ export default createController(routes.account.profile, {
           email={user.email}
           values={{ name: user.name, phone: user.phone ?? '' }}
           collectifs={actor.collectifs}
+          hasPassword={user.password_hash !== null}
           saved={context.session.get('profileSaved') === true}
         />,
       )
@@ -44,6 +45,7 @@ export default createController(routes.account.profile, {
 
       const parsed = parseForm(profileSchema, context.formData)
       if (!parsed.ok) {
+        const user = await findUserById(context.db, actor.id)
         return context.render(
           <ProfilePage
             viewer={viewerOf(context)}
@@ -54,6 +56,7 @@ export default createController(routes.account.profile, {
               phone: formValue(context.formData, 'phone'),
             }}
             collectifs={actor.collectifs}
+            hasPassword={user?.password_hash != null}
             errors={parsed.errors}
           />,
           { status: 400 },

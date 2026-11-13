@@ -1,11 +1,14 @@
 import type { Handle } from 'remix/component'
-
+import { passwordMaxLength } from '../../passwords.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../ui/form.tsx'
 import { Layout } from '../../ui/layout.tsx'
 import { returnParam } from '../return-path.ts'
 
-/** E-mail form asking for a sign-in link (US-0.2.2). */
+/**
+ * Sign in with a password, or ask for a link with the same e-mail field (US-0.2.2, US-0.10.8): the
+ * second button posts the form to the link request instead.
+ */
 export function SignInPage(
   handle: Handle<{
     csrfToken: string
@@ -20,10 +23,10 @@ export function SignInPage(
     return (
       <Layout title="Se connecter">
         <h1>Se connecter</h1>
-        <p>Pas de mot de passe : nous vous envoyons un lien de connexion par e-mail.</p>
+        <p>Avec votre mot de passe, ou sans : recevez un lien de connexion par e-mail.</p>
         <ErrorSummary errors={errors} />
         {returnPath ? <p class="status">Connectez-vous pour ouvrir la page demandée.</p> : null}
-        <form method="post" action={routes.signIn.form.action.href()} class="stack">
+        <form method="post" action={routes.signIn.password.href()} class="stack">
           <CsrfField token={csrfToken} />
           {returnPath ? <input type="hidden" name={returnParam} value={returnPath} /> : null}
           <TextField
@@ -33,10 +36,28 @@ export function SignInPage(
             value={email}
             error={errors.email}
             required
-            autoComplete="email"
+            autoComplete="username"
             maxLength={254}
           />
-          <button type="submit">Recevoir le lien</button>
+          <TextField
+            name="password"
+            label="Mot de passe"
+            type="password"
+            error={errors.password}
+            autoComplete="current-password"
+            maxLength={passwordMaxLength}
+            hint={
+              <a href={routes.password.request.index.href()}>
+                Mot de passe oublié ou pas encore créé ?
+              </a>
+            }
+          />
+          <div class="actions">
+            <button type="submit">Se connecter</button>
+            <button type="submit" class="secondary" formAction={routes.signIn.form.action.href()}>
+              Recevoir un lien par e-mail
+            </button>
+          </div>
         </form>
         <p>
           Pas encore de compte ? <a href={routes.signUp.form.index.href()}>Créer un compte</a>
@@ -68,11 +89,17 @@ export function SignInLinkInvalidPage() {
   return () => (
     <Layout title="Lien invalide">
       <h1>Ce lien ne fonctionne plus</h1>
-      <p>Il a expiré, a déjà servi, ou le compte n’est plus actif.</p>
+      <p>
+        Il a expiré, a déjà servi, ou le compte n’est plus actif. Certaines messageries ouvrent les
+        liens avant vous : si cela se répète, connectez-vous avec un mot de passe.
+      </p>
       <p>
         <a class="button" href={routes.signIn.form.index.href()}>
           Demander un nouveau lien
         </a>
+      </p>
+      <p>
+        <a href={routes.password.request.index.href()}>Choisir un mot de passe</a>
       </p>
     </Layout>
   )

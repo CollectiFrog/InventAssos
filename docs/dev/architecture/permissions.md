@@ -43,7 +43,8 @@ rule, and `app/data/items.visibility.test.ts` checks both sides agree on every b
 moderators see everything ([ADR 0025](../../adr/0025-staff-see-every-inventory/)).
 
 Everything is denied unless a row below allows it. Pending, rejected, disabled and deleted users
-can only see their status page and sign out.
+can only see their status page and sign out; pending and rejected ones may also sign in again and
+choose a password (ADR 0029).
 
 | Action                                                    | Platform admin                   | Moderator                           | Responsible of C                                      | Member of C                                           | Validated user               |
 |-----------------------------------------------------------|----------------------------------|-------------------------------------|-------------------------------------------------------|-------------------------------------------------------|------------------------------|

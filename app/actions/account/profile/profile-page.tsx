@@ -15,6 +15,8 @@ export interface ProfilePageProps {
   values: { name: string; phone: string }
   /** Collectifs the person is responsible of. */
   collectifs: readonly { name: string; slug: string; city: string }[]
+  /** Whether the person has chosen a password (US-0.10.8). */
+  hasPassword: boolean
   errors?: FieldErrors
   saved?: boolean
 }
@@ -46,6 +48,7 @@ function SettingSection(
 const sections = [
   { id: 'profil', title: 'Profil' },
   { id: 'collectifs', title: 'Mes collectifs' },
+  { id: 'mot-de-passe', title: 'Mot de passe' },
   { id: 'session', title: 'Session' },
   { id: 'a-propos', title: 'À propos' },
   { id: 'supprimer', title: 'Supprimer mon compte' },
@@ -54,7 +57,16 @@ const sections = [
 /** Mon compte (US-0.2.6, US-0.7.13), settings template: contents, then one section per topic. */
 export function ProfilePage(handle: Handle<ProfilePageProps>) {
   return () => {
-    const { viewer, csrfToken, email, values, collectifs, errors = {}, saved } = handle.props
+    const {
+      viewer,
+      csrfToken,
+      email,
+      values,
+      collectifs,
+      hasPassword,
+      errors = {},
+      saved,
+    } = handle.props
     return (
       <Layout title="Mon compte" viewer={viewer} headerLink="account">
         <h1>Mon compte</h1>
@@ -124,6 +136,22 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
               )}
               <p>
                 <a href={routes.collectifs.index.href()}>Rejoindre ou déclarer un collectif</a>
+              </p>
+            </SettingSection>
+            <SettingSection
+              id="mot-de-passe"
+              title="Mot de passe"
+              text="Pour vous connecter sans attendre d’e-mail. Le lien de connexion reste possible."
+            >
+              <p>
+                {hasPassword
+                  ? 'Vous avez un mot de passe.'
+                  : 'Vous n’avez pas encore de mot de passe.'}
+              </p>
+              <p>
+                <a href={routes.password.request.index.href()}>
+                  {hasPassword ? 'Changer mon mot de passe' : 'Choisir un mot de passe'}
+                </a>
               </p>
             </SettingSection>
             <SettingSection
