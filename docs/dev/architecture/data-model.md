@@ -51,7 +51,7 @@ Added later:
 
 | Version | Change                                                                                                                                         |
 |---------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| V0.9    | `items.photo_key` (MinIO object key)                                                                                                           |
+| V0.11   | `items.photo_key` (object key in the photo store, chosen with the storage re-architecture)                                                     |
 | V1.1    | sharing tables (defaults per collectif, circles, per-item overrides); until then visibility derives from membership (ADR 0021)                 |
 
 References are compared as `inv_fold` does: case and the accents of its list are ignored (`É`,
