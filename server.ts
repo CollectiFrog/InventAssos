@@ -3,6 +3,7 @@ import * as http from 'node:http'
 import { createRequestListener, type FetchHandler } from 'remix/node-fetch-server'
 
 import { createBackgroundTasks } from './app/background.ts'
+import { appName } from './app/brand.ts'
 import { withClientAddress } from './app/client-address.ts'
 import { loadConfig } from './app/config.ts'
 import { migrateDatabase, openDatabase } from './app/db.ts'
@@ -40,7 +41,7 @@ const handler: FetchHandler = (request, client) =>
 const server = http.createServer(createRequestListener(handler, { trustProxy: config.trustProxy }))
 
 server.listen(config.port, () => {
-  console.log(`InventAssos listening on http://localhost:${config.port}`)
+  console.log(`${appName} listening on http://localhost:${config.port}`)
 })
 
 let shuttingDown = false
@@ -48,11 +49,10 @@ let shuttingDown = false
 function shutdown() {
   if (shuttingDown) return
   shuttingDown = true
-  stopPurge()
+  const purgeStopped = stopPurge()
   server.close(() => {
-    // E-mails still being sent after their response finish before the database closes.
-    background
-      .idle()
+    // E-mails still being sent after their response, and a running purge, finish before the database closes.
+    Promise.all([background.idle(), purgeStopped])
       .then(() => db.close())
       .catch((error: unknown) => console.error('Error while closing the database', error))
       .finally(() => process.exit(0))

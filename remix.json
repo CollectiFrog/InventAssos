@@ -1,10 +1,13 @@
 {
   "$schema": "./node_modules/remix/schema/remix.json",
   "test": {
-    "exclude": ["node_modules/**", "docs/**", "dist/**"],
+    "exclude": ["node_modules/**", "docs/**", "dist/**", ".claude/**"],
     // One file at a time: test files share one PostgreSQL database.
     "concurrency": 1,
-    "setup": "./test/setup.ts"
+    "setup": "./test/setup.ts",
+    // `make test` runs the server tests; `make a11y` the browser ones (ADR 0024).
+    "type": ["server"],
+    "playwright": { "projects": ["chromium"] }
   },
   "db": {
     "adapter": { "type": "postgres", "connectionString": { "env": "DATABASE_URL" } },

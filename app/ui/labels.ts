@@ -16,6 +16,7 @@ export const archiveReasonLabels: Record<ArchiveReason, string> = {
   lost: 'Perdu',
   broken: 'Cassé',
   other: 'Autre raison',
+  moderated: 'Retiré par la modération',
 }
 
 const euros = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })

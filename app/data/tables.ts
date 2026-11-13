@@ -5,6 +5,10 @@ import { column as c, type TableRow, table } from 'remix/data-table'
 export const userStatuses = ['pending', 'active', 'rejected', 'disabled', 'deleted'] as const
 export type UserStatus = (typeof userStatuses)[number]
 
+/** Platform roles stored on the account (ADR 0020); admins come from PLATFORM_ADMIN_EMAILS only. */
+export const userRoles = ['member', 'moderator'] as const
+export type UserRole = (typeof userRoles)[number]
+
 export const users = table({
   name: 'users',
   columns: {
@@ -14,6 +18,7 @@ export const users = table({
     phone: c.text().nullable(),
     status: c.enum(userStatuses),
     is_platform_admin: c.boolean(),
+    role: c.enum(userRoles),
     rejection_reason: c.text().nullable(),
     created_at: c.timestamp({ withTimezone: true }),
     updated_at: c.timestamp({ withTimezone: true }),
@@ -79,6 +84,8 @@ export const collectifs = table({
     name: c.text(),
     slug: c.text(),
     description: c.text(),
+    /** Empty only for a collectif created before V0.7 with no location (migration 0010). */
+    city: c.text(),
     contact_phone: c.text().nullable(),
     status: c.enum(collectifStatuses),
     requested_by: c.uuid().nullable(),
@@ -92,23 +99,29 @@ export const collectifs = table({
 
 export type Collectif = TableRow<typeof collectifs>
 
-export const responsibleStatuses = ['pending', 'active', 'rejected', 'removed'] as const
-export type ResponsibleStatus = (typeof responsibleStatuses)[number]
+/** Statuses of a membership row: a request, then its outcome (ADR 0020). */
+export const membershipStatuses = ['pending', 'active', 'rejected', 'removed'] as const
+export type MembershipStatus = (typeof membershipStatuses)[number]
 
-export const responsibles = table({
-  name: 'responsibles',
+/** Roles within a collectif (ADR 0020): a responsible can do everything a member can. */
+export const membershipRoles = ['member', 'responsible'] as const
+export type MembershipRole = (typeof membershipRoles)[number]
+
+export const collectifMembers = table({
+  name: 'collectif_members',
   primaryKey: ['user_id', 'collectif_id'],
   columns: {
     user_id: c.uuid(),
     collectif_id: c.uuid(),
-    status: c.enum(responsibleStatuses),
+    role: c.enum(membershipRoles),
+    status: c.enum(membershipStatuses),
     requested_at: c.timestamp({ withTimezone: true }),
     validated_by: c.uuid().nullable(),
     validated_at: c.timestamp({ withTimezone: true }).nullable(),
   },
 })
 
-export type Responsible = TableRow<typeof responsibles>
+export type Membership = TableRow<typeof collectifMembers>
 
 export const locations = table({
   name: 'locations',
@@ -144,8 +157,11 @@ export const itemConditions = ['new', 'good', 'worn', 'repair', 'broken'] as con
 export type ItemCondition = (typeof itemConditions)[number]
 
 /** Why an item left the inventory (US-0.5.5). */
-export const archiveReasons = ['sold', 'lost', 'broken', 'other'] as const
+export const archiveReasons = ['sold', 'lost', 'broken', 'other', 'moderated'] as const
 export type ArchiveReason = (typeof archiveReasons)[number]
+
+/** The reasons a manager picks; `moderated` is set only by a moderation (US-0.8.2). */
+export const ownerArchiveReasons = ['sold', 'lost', 'broken', 'other'] as const
 
 export const items = table({
   name: 'items',
@@ -157,6 +173,7 @@ export const items = table({
     brand: c.text().nullable(),
     model: c.text().nullable(),
     serial_number: c.text().nullable(),
+    ref: c.text().nullable(),
     quantity: c.integer(),
     condition: c.enum(itemConditions).nullable(),
     estimated_value: c.decimal(10, 2).nullable(),

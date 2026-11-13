@@ -69,12 +69,12 @@ describe('archive an item (US-0.5.5)', () => {
     assert.equal((await lou.get(routes.items.show.href({ itemId: item.id }))).status, 404)
   })
 
-  it('refuses someone who may not edit the item (403)', async () => {
+  it('hides the item from someone outside its collectifs (404, ADR 0021)', async () => {
     const lou = await clientFor('lou@example.org')
     const response = await lou.post(routes.items.archive.action.href({ itemId: item.id }), {
       reason: 'lost',
     })
-    assert.equal(response.status, 403)
+    assert.equal(response.status, 404)
     assert.equal((await findItemById(db, item.id))?.archived_at, null)
   })
 

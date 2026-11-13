@@ -2,7 +2,7 @@
 import type { Database } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
-import { type User, type UserStatus, users } from './tables.ts'
+import { type User, type UserRole, type UserStatus, users } from './tables.ts'
 
 /** E-mails are compared case-insensitively: store and look them up in this form. */
 export function normalizeEmail(email: string): string {
@@ -91,4 +91,20 @@ export async function listDisabledUsers(db: Database): Promise<User[]> {
 /** Active accounts, by name. */
 export async function listActiveUsers(db: Database): Promise<User[]> {
   return db.findMany(users, { where: { status: 'active' }, orderBy: ['name', 'asc'] })
+}
+
+/** Names or removes a moderator (US-0.8.1). */
+export async function setUserRole(db: Database, id: string, role: UserRole): Promise<User> {
+  return db.update(users, id, { role, updated_at: new Date() })
+}
+
+/** Moderators, by name, whatever their status (a disabled one is still listed, to be removed). */
+export async function listModerators(db: Database): Promise<User[]> {
+  return db.findMany(users, { where: { role: 'moderator' }, orderBy: ['name', 'asc'] })
+}
+
+/** E-mails of the active moderators, who receive the new-request notices with the admins. */
+export async function listActiveModeratorEmails(db: Database): Promise<string[]> {
+  const rows = await db.findMany(users, { where: { role: 'moderator', status: 'active' } })
+  return rows.map((user) => user.email)
 }

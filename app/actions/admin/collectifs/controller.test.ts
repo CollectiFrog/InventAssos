@@ -9,7 +9,7 @@ import { openTestDatabase, resetDatabase } from '../../../../test/database.ts'
 import { createActiveUser } from '../../../../test/users.ts'
 import { listEntityHistory } from '../../../data/audit-log.ts'
 import { findCollectifById } from '../../../data/collectifs.ts'
-import { findResponsible } from '../../../data/responsibles.ts'
+import { findResponsible } from '../../../data/members.ts'
 import type { Collectif, User } from '../../../data/tables.ts'
 import { setUserStatus } from '../../../data/users.ts'
 import { routes } from '../../../routes.ts'
@@ -57,7 +57,7 @@ describe('accept or reject a collectif (US-0.3.2)', () => {
     await signIn(app, rita, 'rita@example.org')
     assert.match(
       (await rita.get(routes.collectifs.index.href())).text,
-      /Collectifs inscrits[\s\S]*Les Grenouilles/,
+      /Mes collectifs<\/h2>[\s\S]*Les Grenouilles/,
     )
   })
 

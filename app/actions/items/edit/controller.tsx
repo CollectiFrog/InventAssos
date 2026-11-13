@@ -4,15 +4,17 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../../data/audit-log.ts'
+import { listCategories } from '../../../data/categories.ts'
 import {
   findItemById,
   findItemDetails,
   type ItemDetails,
-  listCategories,
+  isRefConflict,
+  refTaken,
   updateItemFields,
 } from '../../../data/items.ts'
 import type { AppContext } from '../../../middleware/index.ts'
-import { canChangeItem } from '../../../permissions.ts'
+import { canChangeItem, canSeeItem, canSetItemRef } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors } from '../../../ui/form.tsx'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
@@ -20,7 +22,13 @@ import { formValue, parseForm } from '../../../validation.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 import { ItemFields } from '../item-fields.tsx'
-import { type ItemFormValues, itemFieldNames, itemFieldsSchema } from '../schema.ts'
+import {
+  type ItemFormValues,
+  itemFieldNames,
+  itemFieldsSchema,
+  refOwnerOnlyMessage,
+  refTakenMessage,
+} from '../schema.ts'
 
 /** Edit form of an item (US-0.5.3). */
 function EditItemPage(
@@ -42,7 +50,7 @@ function EditItemPage(
         <form
           method="post"
           action={routes.items.edit.action.href({ itemId: item.id })}
-          class="stack"
+          class="stack form-wide"
         >
           <CsrfField token={csrfToken} />
           <ItemFields values={values} errors={errors} categories={categories} />
@@ -66,6 +74,7 @@ function valuesOf(item: ItemDetails): ItemFormValues {
     brand: item.brand ?? '',
     model: item.model ?? '',
     serialNumber: item.serial_number ?? '',
+    ref: item.ref ?? '',
     condition: item.condition ?? '',
     estimatedValue:
       item.estimated_value === null ? '' : String(item.estimated_value).replace('.', ','),
@@ -100,7 +109,7 @@ export default createController(routes.items.edit, {
       const actor = requireUser(context)
       if (actor instanceof Response) return actor
       const item = await findItemDetails(context.db, context.params.itemId)
-      if (item === null || item.archived_at) return notFound(context)
+      if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
       if (!canChangeItem(actor, item)) return forbidden(context)
       return render(context, item, valuesOf(item))
     },
@@ -110,7 +119,7 @@ export default createController(routes.items.edit, {
       if (actor instanceof Response) return actor
       const { db, formData, session } = context
       const item = await findItemDetails(db, context.params.itemId)
-      if (item === null || item.archived_at) return notFound(context)
+      if (item === null || item.archived_at || !canSeeItem(actor, item)) return notFound(context)
       if (!canChangeItem(actor, item)) return forbidden(context)
 
       const parsed = parseForm(itemFieldsSchema, formData)
@@ -119,25 +128,51 @@ export default createController(routes.items.edit, {
       if (parsed.ok && !categoryIds.has(parsed.value.categoryId)) {
         errors.categoryId = 'Catégorie inconnue.'
       }
-      if (!parsed.ok || Object.keys(errors).length > 0) {
+      // US-0.10.3: a reference names one object of its owner, archived ones included.
+      const owner = item.owner_collectif_id
+        ? { collectifId: item.owner_collectif_id }
+        : { userId: item.owner_user_id ?? '' }
+      if (parsed.ok && parsed.value.ref !== item.ref) {
+        // Checked before uniqueness, so editing a deposit never tells which references are used.
+        if (!canSetItemRef(actor, owner)) errors.ref = refOwnerOnlyMessage
+        else if (
+          parsed.value.ref !== null &&
+          (await refTaken(db, owner, parsed.value.ref, item.id))
+        ) {
+          errors.ref = refTakenMessage
+        }
+      }
+      const redisplay = () => {
         const values = Object.fromEntries(itemFieldNames.map((n) => [n, formValue(formData, n)]))
         return render(context, item, values as ItemFormValues, errors)
       }
+      if (!parsed.ok || Object.keys(errors).length > 0) return redisplay()
 
-      await db.transaction(async (tx) => {
-        const current = await findItemById(tx, item.id)
-        if (current === null) return
-        const changed = await updateItemFields(tx, current, parsed.value)
-        if (changed.length === 0) return
-        // Field names only: the values may be free text typed by a person (ADR 0010).
-        await logAction(tx, {
-          actorId: actor.id,
-          action: 'item.updated',
-          entity: 'item',
-          entityId: item.id,
-          payload: { fields: changed.join(',') },
+      const saved = await db
+        .transaction(async (tx) => {
+          const current = await findItemById(tx, item.id)
+          if (current === null) return
+          const changed = await updateItemFields(tx, current, parsed.value)
+          if (changed.length === 0) return
+          // Field names only: the values may be free text typed by a person (ADR 0010).
+          await logAction(tx, {
+            actorId: actor.id,
+            action: 'item.updated',
+            entity: 'item',
+            entityId: item.id,
+            payload: { fields: changed.join(',') },
+          })
         })
-      })
+        .then(
+          () => true,
+          (error: unknown) => {
+            // Another request took the reference meanwhile: same message as the check above.
+            if (!isRefConflict(error)) throw error
+            errors.ref = refTakenMessage
+            return false
+          },
+        )
+      if (!saved) return redisplay()
       session.flash('notice', 'Modifications enregistrées.')
       return redirect(routes.items.show.href({ itemId: item.id }), 303)
     },

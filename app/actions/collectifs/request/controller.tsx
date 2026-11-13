@@ -25,6 +25,7 @@ import { RequestCollectifPage } from '../collectifs-pages.tsx'
 
 const requestSchema = f.object({
   name: f.field(requiredText(120).refine((name) => slugify(name) !== '', 'Nom invalide.')),
+  city: f.field(requiredText(120)),
   description: f.field(optionalText(2000)),
   contactPhone: f.field(optionalPhone()),
 })
@@ -59,6 +60,7 @@ export default createController(routes.collectifs.request, {
             csrfToken={getCsrfToken(context)}
             values={{
               name: formValue(formData, 'name'),
+              city: formValue(formData, 'city'),
               description: formValue(formData, 'description'),
               contactPhone: formValue(formData, 'contactPhone'),
             }}
@@ -73,6 +75,7 @@ export default createController(routes.collectifs.request, {
 
       await createCollectifRequest(db, {
         name: parsed.value.name,
+        city: parsed.value.city,
         description: parsed.value.description ?? '',
         contactPhone: parsed.value.contactPhone,
         requestedBy: actor.id,

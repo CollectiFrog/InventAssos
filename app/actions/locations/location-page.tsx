@@ -9,14 +9,37 @@ export interface LocationPageProps {
   viewer: Viewer
   location: Location & { ownerName: string; ownerSlug: string | null }
   canManage: boolean
+  /** « Retour » on phones (`backHref`). */
+  back: string
 }
 
 /** A storage location: the city for everybody, the address for its managers and admins. */
 export function LocationPage(handle: Handle<LocationPageProps>) {
   return () => {
-    const { viewer, location, canManage } = handle.props
+    const { viewer, location, canManage, back } = handle.props
+    // A collectif's place sits under its Lieux tab; a personal one under Mon matériel › Lieux.
+    const trail = location.ownerSlug
+      ? [
+          { label: 'Collectifs', href: routes.collectifs.index.href() },
+          {
+            label: location.ownerName,
+            href: routes.collectifs.places.href({ slug: location.ownerSlug }),
+          },
+          { label: location.name },
+        ]
+      : [
+          { label: 'Mon matériel', href: routes.items.index.href() },
+          { label: 'Lieux', href: routes.locations.index.href() },
+          { label: location.name },
+        ]
     return (
-      <Layout title={location.name} viewer={viewer}>
+      <Layout
+        title={location.name}
+        viewer={viewer}
+        section={location.ownerSlug ? 'collectifs' : 'mine'}
+        trail={trail}
+        back={back}
+      >
         <h1>{location.name}</h1>
         <dl class="facts">
           <dt>Ville</dt>

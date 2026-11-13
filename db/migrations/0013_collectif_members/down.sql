@@ -1,0 +1,10 @@
+delete from collectif_members where role <> 'responsible';
+alter table collectif_members drop constraint collectif_members_role_ck;
+alter table collectif_members drop column role;
+alter index collectif_members_collectif_idx rename to responsibles_collectif_idx;
+alter table collectif_members rename constraint collectif_members_validated_by_fkey to responsibles_validated_by_fkey;
+alter table collectif_members rename constraint collectif_members_collectif_id_fkey to responsibles_collectif_id_fkey;
+alter table collectif_members rename constraint collectif_members_user_id_fkey to responsibles_user_id_fkey;
+alter table collectif_members rename constraint collectif_members_status_ck to responsibles_status_ck;
+alter table collectif_members rename constraint collectif_members_pkey to responsibles_pkey;
+alter table collectif_members rename to responsibles;

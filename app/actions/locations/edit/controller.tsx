@@ -10,6 +10,7 @@ import { formValue, parseForm } from '../../../validation.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 import { LocationEditorPage } from '../locations-pages.tsx'
+import { listPageOf } from '../owners.ts'
 import { locationSchema } from '../schema.ts'
 
 /** Edit a location's name, city, address and notes. */
@@ -80,7 +81,7 @@ export default createController(routes.locations.edit, {
         })
       })
       session.flash('notice', `Lieu « ${parsed.value.name} » enregistré.`)
-      return redirect(routes.locations.index.href(), 303)
+      return redirect(await listPageOf(db, location), 303)
     },
   },
 })

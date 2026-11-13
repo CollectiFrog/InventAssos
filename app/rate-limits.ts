@@ -1,7 +1,9 @@
-// Limits on everything that sends e-mail on someone's request (ADR 0018, issue #70).
+// Limits on what someone can make the server do repeatedly: e-mails sent on their request (ADR 0018,
+// issue #70) and whole-inventory exports (US-0.10.4).
 import type { Database } from 'remix/data-table'
 
 import { hitRateLimit, type RateLimit, type RateLimitResult } from './data/rate-limits.ts'
+import { listActiveModeratorEmails } from './data/users.ts'
 import { type Mail, type Mailer, sendSafely } from './mail/mailer.ts'
 import type { AppSettings } from './middleware/services.ts'
 
@@ -17,6 +19,10 @@ export interface RateLimits {
   contactsPerUser: RateLimit
   /** "New request" e-mails to the admins, per kind; the admin queue lists every request anyway. */
   adminNotifications: RateLimit
+  /** CSV exports by one user (US-0.10.4): each reads a whole inventory. */
+  exportsPerUser: RateLimit
+  /** Files sent to the import by one user (US-0.10.1): each is parsed and stored for an hour. */
+  uploadsPerUser: RateLimit
 }
 
 const hour = 60 * 60
@@ -29,6 +35,8 @@ export const defaultRateLimits: RateLimits = {
   requestsPerUser: { limit: 5, windowSeconds: day },
   contactsPerUser: { limit: 10, windowSeconds: day },
   adminNotifications: { limit: 5, windowSeconds: hour },
+  exportsPerUser: { limit: 30, windowSeconds: hour },
+  uploadsPerUser: { limit: 20, windowSeconds: hour },
 }
 
 function limits(settings: AppSettings): RateLimits {
@@ -53,6 +61,24 @@ export async function mayMailAddress(
   return (await hitRateLimit(db, `mail:${email}`, limits(settings).mailsPerAddress)).allowed
 }
 
+/** One CSV export by a user (US-0.10.4). */
+export function hitExport(
+  db: Database,
+  settings: AppSettings,
+  userId: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `export:${userId}`, limits(settings).exportsPerUser)
+}
+
+/** One file sent to the import by a user (US-0.10.1). */
+export function hitUpload(
+  db: Database,
+  settings: AppSettings,
+  userId: string,
+): Promise<RateLimitResult> {
+  return hitRateLimit(db, `import:${userId}`, limits(settings).uploadsPerUser)
+}
+
 /** One request that notifies the admins (new collectif, responsibility, re-application). */
 export function hitUserRequest(
   db: Database,
@@ -71,10 +97,13 @@ export function hitContact(
   return hitRateLimit(db, `contact:${userId}`, limits(settings).contactsPerUser)
 }
 
-/** Kinds of request the admins are told about. */
+/** Kinds of request the admins and moderators are told about. */
 export type AdminNotice = 'account' | 'collectif' | 'responsible'
 
-/** E-mails the admins about a new request, unless they were told about this kind recently. */
+/**
+ * E-mails the admins and the active moderators about a new request (US-0.8.2), unless they were
+ * told about this kind recently.
+ */
 export async function notifyAdmins(
   db: Database,
   mailer: Mailer,
@@ -82,8 +111,10 @@ export async function notifyAdmins(
   kind: AdminNotice,
   mail: (admins: string[]) => Mail,
 ): Promise<void> {
-  const admins = [...settings.adminEmails]
+  const admins = [...new Set([...settings.adminEmails, ...(await listActiveModeratorEmails(db))])]
   if (admins.length === 0) return
   const { allowed } = await hitRateLimit(db, `admins:${kind}`, limits(settings).adminNotifications)
-  if (allowed) await sendSafely(mailer, mail(admins))
+  if (!allowed) return
+  // One e-mail per person: admins and moderators never see each other's address.
+  for (const to of admins) await sendSafely(mailer, mail([to]))
 }

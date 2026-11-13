@@ -4,11 +4,20 @@ import type { CurrentUser } from '../middleware/current-user.ts'
 import type { AppContext } from '../middleware/index.ts'
 import { routes } from '../routes.ts'
 import { Layout } from '../ui/layout.tsx'
+import { safeReturnPath, withReturnPath } from './return-path.ts'
 import { viewerOf } from './viewer.ts'
 
-/** Returns the signed-in user, or a redirect to the sign-in page for a visitor. */
+/**
+ * Returns the signed-in user, or a redirect to the sign-in page for a visitor. A page asked for
+ * with GET is remembered, to land there after signing in (US-0.7.8).
+ */
 export function requireUser(context: AppContext): CurrentUser | Response {
-  return context.currentUser ?? redirect(routes.signIn.form.index.href(), 303)
+  if (context.currentUser) return context.currentUser
+  const requested =
+    context.request.method === 'GET'
+      ? safeReturnPath(context.url.pathname + context.url.search)
+      : null
+  return redirect(withReturnPath(routes.signIn.form.index.href(), requested), 303)
 }
 
 /** 403 page for an action the permissions table does not allow. */

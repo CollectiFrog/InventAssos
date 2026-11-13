@@ -1,11 +1,12 @@
 import type { Handle } from 'remix/component'
 
 import type { PendingCollectif } from '../../data/collectifs.ts'
-import type { PendingResponsible } from '../../data/responsibles.ts'
+import type { PendingResponsible } from '../../data/members.ts'
 import type { User } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
+import { AdminTabs } from './admin-tabs.tsx'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'Europe/Paris' })
 
@@ -16,33 +17,18 @@ export interface QueuePageProps {
   pending: User[]
   pendingCollectifs: PendingCollectif[]
   pendingResponsibles: PendingResponsible[]
-  active: User[]
-  disabled: User[]
-  /** The admin viewing the page: they cannot disable themselves. */
-  selfId: string
-  /** Listed platform admins cannot be disabled from here (permissions.md). */
-  adminEmails: ReadonlySet<string>
   notice?: string
 }
 
-/** Every pending request in one place (US-0.3.7), then the active accounts. */
+/** Administration › Demandes: every pending request in one place (US-0.3.7). */
 export function QueuePage(handle: Handle<QueuePageProps>) {
   return () => {
-    const {
-      viewer,
-      csrfToken,
-      pending,
-      pendingCollectifs,
-      pendingResponsibles,
-      active,
-      disabled,
-      selfId,
-      adminEmails,
-      notice,
-    } = handle.props
+    const { viewer, csrfToken, pending, pendingCollectifs, pendingResponsibles, notice } =
+      handle.props
     return (
-      <Layout title="Administration" viewer={viewer}>
+      <Layout title="Administration" viewer={viewer} headerLink="admin">
         <h1>Administration</h1>
+        <AdminTabs current="requests" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">
             {notice}
@@ -109,6 +95,7 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
               <li key={c.id} class="card">
                 <p>
                   <strong>{c.name}</strong>
+                  {c.city ? ` · ${c.city}` : ''}
                   <br />
                   <span class="status">
                     Demandé par {c.requesterName ?? 'compte supprimé'}
@@ -173,28 +160,68 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
             })}
           </ul>
         )}
+      </Layout>
+    )
+  }
+}
+
+/** "0 compte en attente", "2 comptes en attente". */
+function plural(count: number, one: string, many: string): string {
+  return `${count} ${count > 1 ? many : one} en attente`
+}
+
+/** One account on Administration › Comptes, with what the viewer may do to it. */
+export interface AccountRow {
+  user: User
+  /** Shown instead of a button when the viewer may not act on the account. */
+  role?: 'vous' | 'administrateur' | 'modérateur'
+  canDisable: boolean
+  canEnable: boolean
+}
+
+/** Props of Administration › Comptes. */
+export interface AccountsPageProps {
+  viewer: Viewer
+  csrfToken: string
+  active: AccountRow[]
+  disabled: AccountRow[]
+  notice?: string
+}
+
+/** Administration › Comptes: active accounts to disable, disabled ones to re-enable. */
+export function AccountsPage(handle: Handle<AccountsPageProps>) {
+  return () => {
+    const { viewer, csrfToken, active, disabled, notice } = handle.props
+    return (
+      <Layout title="Comptes" viewer={viewer} headerLink="admin">
+        <h1>Administration</h1>
+        <AdminTabs current="accounts" viewer={viewer} />
+        {notice ? (
+          <p class="notice notice-success" role="status">
+            {notice}
+          </p>
+        ) : null}
         <h2 id="comptes-actifs">Comptes actifs</h2>
         <p>
           Désactiver un compte coupe immédiatement ses accès (ses sessions sont fermées) sans rien
           supprimer : son matériel reste visible.
         </p>
         <ul class="cards">
-          {active.map((user) => (
+          {active.map(({ user, role, canDisable }) => (
             <li key={user.id} class="card row">
               <span>
                 <strong>{user.name}</strong> · {user.email}
+                {role && canDisable ? <span class="status"> · {role}</span> : null}
               </span>
-              {user.id === selfId ? (
-                <span class="status">vous</span>
-              ) : adminEmails.has(user.email) ? (
-                <span class="status">administrateur</span>
-              ) : (
+              {canDisable ? (
                 <form method="post" action={routes.admin.disableAccount.href({ userId: user.id })}>
                   <CsrfField token={csrfToken} />
                   <button type="submit" class="danger">
                     Désactiver
                   </button>
                 </form>
+              ) : (
+                <span class="status">{role ?? ''}</span>
               )}
             </li>
           ))}
@@ -209,15 +236,22 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
               lien de connexion.
             </p>
             <ul class="cards">
-              {disabled.map((user) => (
+              {disabled.map(({ user, role, canEnable }) => (
                 <li key={user.id} class="card row">
                   <span>
                     <strong>{user.name}</strong> · {user.email}
                   </span>
-                  <form method="post" action={routes.admin.enableAccount.href({ userId: user.id })}>
-                    <CsrfField token={csrfToken} />
-                    <button type="submit">Réactiver</button>
-                  </form>
+                  {canEnable ? (
+                    <form
+                      method="post"
+                      action={routes.admin.enableAccount.href({ userId: user.id })}
+                    >
+                      <CsrfField token={csrfToken} />
+                      <button type="submit">Réactiver</button>
+                    </form>
+                  ) : (
+                    <span class="status">{role ?? ''}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -226,9 +260,4 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
       </Layout>
     )
   }
-}
-
-/** "0 compte en attente", "2 comptes en attente". */
-function plural(count: number, one: string, many: string): string {
-  return `${count} ${count > 1 ? many : one} en attente`
 }

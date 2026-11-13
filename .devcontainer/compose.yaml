@@ -1,0 +1,13 @@
+# Dev Container additions to ../compose.yaml: keep the Claude Code and GitHub CLI sign-ins across
+# rebuilds. Not used by `docker compose up app`.
+services:
+  app:
+    environment:
+      CLAUDE_CONFIG_DIR: /home/node/.claude
+    volumes:
+      - claude-config:/home/node/.claude
+      - gh-config:/home/node/.config/gh
+
+volumes:
+  claude-config:
+  gh-config:

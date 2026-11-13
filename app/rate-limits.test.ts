@@ -12,8 +12,8 @@ import { createTestLocation } from '../test/locations.ts'
 import { createActiveUser } from '../test/users.ts'
 import { createBackgroundTasks } from './background.ts'
 import { clientAddressHeader, clientAddressOf, withClientAddress } from './client-address.ts'
+import { findResponsible, setResponsible } from './data/members.ts'
 import { deleteExpiredRateLimits, hitRateLimit } from './data/rate-limits.ts'
-import { findResponsible } from './data/responsibles.ts'
 import { createUser, findUserByEmail, setUserStatus } from './data/users.ts'
 import type { Mail, Mailer } from './mail/mailer.ts'
 import { defaultRateLimits } from './rate-limits.ts'
@@ -110,7 +110,10 @@ describe('rate limits (ADR 0018)', () => {
 
   it('caps the contact messages one user sends: 10 a day', async () => {
     const max = await createActiveUser(db, 'Max', 'max@example.org')
-    await createActiveUser(db, 'Lou', 'lou@example.org')
+    const louUser = await createActiveUser(db, 'Lou', 'lou@example.org')
+    // Lou must see the item to write about it (ADR 0021).
+    const collectif = await createActiveCollectif(db, 'Les Grenouilles', max.id)
+    await setResponsible(db, { userId: louUser.id, collectifId: collectif.id, status: 'active' })
     const garage = await createTestLocation(db, { userId: max.id }, 'Garage')
     const item = await createTestItem(db, {
       locationId: garage.id,
@@ -142,6 +145,7 @@ describe('rate limits (ADR 0018)', () => {
     for (let i = 0; i < 5; i++) {
       const response = await val.post(routes.collectifs.request.action.href(), {
         name: `Collectif ${i}`,
+        city: 'Rennes',
       })
       assert.equal(response.status, 303)
     }

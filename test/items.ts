@@ -23,7 +23,7 @@ export function itemFormFields(overrides: Record<string, string> = {}): Record<s
 /** Creates an item directly in the database. */
 export async function createTestItem(
   db: Database,
-  input: { locationId: string; owner: ItemOwner; createdBy: string; name?: string },
+  input: { locationId: string; owner: ItemOwner; createdBy: string; name?: string; ref?: string },
 ): Promise<Item> {
   const fields: ItemFields = {
     name: input.name ?? 'Projecteur',
@@ -32,6 +32,7 @@ export async function createTestItem(
     brand: null,
     model: null,
     serialNumber: null,
+    ref: input.ref ?? null,
     condition: null,
     estimatedValue: null,
     description: null,

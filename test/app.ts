@@ -16,6 +16,8 @@ export interface TestAppOptions {
   adminEmails?: string[]
   /** Defaults to `relaxedRateLimits`; pass `defaultRateLimits` to test the real ones. */
   rateLimits?: RateLimits
+  /** Public URL; a browser test passes its server's, so form origins match (CSRF). */
+  appUrl?: string
 }
 
 const relaxed: RateLimit = { limit: 10_000, windowSeconds: 60 }
@@ -43,7 +45,7 @@ export function createTestApp(db: Database, options: TestAppOptions = {}): TestA
     db,
     mailer,
     settings: {
-      appUrl: testOrigin,
+      appUrl: options.appUrl ?? testOrigin,
       adminEmails: new Set(options.adminEmails?.map((email) => email.toLowerCase()) ?? []),
       rateLimits: options.rateLimits ?? relaxedRateLimits,
     },
@@ -76,9 +78,11 @@ export class TestClient {
     this.#address = address
   }
 
-  /** GET a path; HTML bodies are read so their CSRF token is remembered. */
-  async get(path: string): Promise<TestResponse> {
-    return this.#send(new Request(new URL(path, testOrigin), { headers: this.#headers() }))
+  /** GET a path, with extra headers if given; HTML bodies are read so their CSRF token is remembered. */
+  async get(path: string, extra: Record<string, string> = {}): Promise<TestResponse> {
+    const headers = this.#headers()
+    for (const [name, value] of Object.entries(extra)) headers.set(name, value)
+    return this.#send(new Request(new URL(path, testOrigin), { headers }))
   }
 
   /** POST a form with the remembered CSRF token (fetching one from `csrfFrom` if needed). */
@@ -89,12 +93,33 @@ export class TestClient {
   ): Promise<TestResponse> {
     const body = new FormData()
     for (const [name, value] of Object.entries(fields)) body.set(name, value)
+    return this.postForm(path, body, options)
+  }
+
+  /** POST a ready-made form, files included, with the remembered CSRF token and the Origin. */
+  async postForm(
+    path: string,
+    body: FormData,
+    options: { csrf?: boolean; csrfFrom?: string } = {},
+  ): Promise<TestResponse> {
     if (options.csrf !== false) {
       if (this.#csrfToken === null) await this.get(options.csrfFrom ?? '/connexion')
       body.set('_csrf', this.#csrfToken ?? '')
     }
     const headers = this.#headers()
     headers.set('Origin', testOrigin)
+    return this.#send(new Request(new URL(path, testOrigin), { method: 'POST', body, headers }))
+  }
+
+  /** POST a raw body with the given headers, CSRF token not added: for malformed requests. */
+  async postRaw(
+    path: string,
+    body: BodyInit,
+    extra: Record<string, string>,
+  ): Promise<TestResponse> {
+    const headers = this.#headers()
+    headers.set('Origin', testOrigin)
+    for (const [name, value] of Object.entries(extra)) headers.set(name, value)
     return this.#send(new Request(new URL(path, testOrigin), { method: 'POST', body, headers }))
   }
 
@@ -132,13 +157,16 @@ export class TestClient {
         this.#cookies.set(name, value)
       }
     }
-    const text = await response.text()
+    const bytes = new Uint8Array(await response.arrayBuffer())
+    // Decoded like a browser: a UTF-8 BOM is dropped from `text`, kept in `bytes`.
+    const text = new TextDecoder().decode(bytes)
     const token = /name="_csrf" value="([^"]+)"/.exec(text)?.[1]
     if (token) this.#csrfToken = token
     return {
       status: response.status,
       headers: response.headers,
       text,
+      bytes,
       location: response.headers.get('Location'),
     }
   }
@@ -149,5 +177,7 @@ export interface TestResponse {
   status: number
   headers: Headers
   text: string
+  /** The body as sent, e.g. to check a BOM. */
+  bytes: Uint8Array
   location: string | null
 }

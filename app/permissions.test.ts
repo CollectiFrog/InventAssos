@@ -5,38 +5,68 @@ import type { CurrentUser } from './middleware/current-user.ts'
 import {
   canAssignItemOwner,
   canChangeItem,
+  canDecideItemDeletion,
+  canDeleteItem,
   canDepositForPerson,
   canDisableAccount,
   canEditCollectif,
   canEditItem,
   canEditOwnProfile,
   canEnableAccount,
+  canExportInventoryOf,
+  canImportInto,
+  canLeaveCollectif,
+  canManageCategories,
   canManageCollectifLocations,
+  canManageMembers,
   canManagePersonalLocations,
   canManageResponsibles,
+  canModerateItem,
+  canNameModerators,
+  canNameResponsibles,
+  canRemoveResponsible,
+  canRemoveResponsibleByPlatform,
   canRequestCollectif,
+  canRequestItemDeletion,
+  canRequestMembership,
   canRequestResponsibility,
   canReviewAccounts,
   canReviewCollectifs,
+  canSeeCollectifInventory,
   canSeeFullAddress,
+  canSeeItem,
+  canSeeLocation,
+  canSeePerson,
+  canSetItemRef,
   canStoreItemsIn,
+  deletesAsPlatform,
+  itemScopeOf,
 } from './permissions.ts'
 
+/** A test actor; a responsible belongs to the collectifs they manage unless told otherwise. */
 function user(overrides: Partial<CurrentUser> = {}): CurrentUser {
   return {
+    memberCollectifIds: overrides.managedCollectifIds ?? new Set(),
     id: 'u1',
     name: 'U',
     email: 'u@x.org',
     status: 'active',
     isAdmin: false,
+    isModerator: false,
     managedCollectifIds: new Set(),
+    collectifs: [],
     ...overrides,
   }
 }
 
+const moderator = (overrides: Partial<CurrentUser> = {}) =>
+  user({ isModerator: true, ...overrides })
+
 describe('permissions: accounts', () => {
-  it('"Approve or reject an account": admin yes, validated user no, visitor no', () => {
+  it('"Approve or reject an account": admin and moderator yes, validated user no, visitor no', () => {
     assert.equal(canReviewAccounts(user({ isAdmin: true })), true)
+    assert.equal(canReviewAccounts(moderator()), true)
+    assert.equal(canReviewAccounts(moderator({ status: 'disabled' })), false)
     assert.equal(canReviewAccounts(user()), false)
     assert.equal(canReviewAccounts(null), false)
     assert.equal(canReviewAccounts(user({ isAdmin: true, status: 'pending' })), false)
@@ -48,23 +78,67 @@ describe('permissions: accounts', () => {
     assert.equal(canEditOwnProfile(null), false)
   })
 
-  it('"Disable an account": admin only, never their own account nor a listed admin', () => {
-    const member = { id: 'u2', isListedAdmin: false }
+  const member = { id: 'u2', isListedAdmin: false, isModerator: false }
+  const otherModerator = { ...member, isModerator: true }
+  const listedAdmin = { ...member, isListedAdmin: true }
+
+  it('"Disable an account": admin or moderator, never their own account nor a listed admin', () => {
     assert.equal(canDisableAccount(user({ isAdmin: true }), member), true)
     assert.equal(canDisableAccount(user({ isAdmin: true }), { ...member, id: 'u1' }), false)
-    assert.equal(
-      canDisableAccount(user({ isAdmin: true }), { ...member, isListedAdmin: true }),
-      false,
-    )
+    assert.equal(canDisableAccount(user({ isAdmin: true }), listedAdmin), false)
+    assert.equal(canDisableAccount(user({ isAdmin: true }), otherModerator), true)
+    assert.equal(canDisableAccount(moderator(), member), true)
+    assert.equal(canDisableAccount(moderator(), { ...member, id: 'u1' }), false)
     assert.equal(canDisableAccount(user(), member), false)
     assert.equal(canDisableAccount(null, member), false)
   })
 
-  it('"Re-enable a disabled account": admin only', () => {
-    assert.equal(canEnableAccount(user({ isAdmin: true })), true)
-    assert.equal(canEnableAccount(user({ isAdmin: true, status: 'pending' })), false)
-    assert.equal(canEnableAccount(user({ managedCollectifIds: new Set(['c1']) })), false)
-    assert.equal(canEnableAccount(null), false)
+  it('"Disable an account": a moderator never acts on an admin or another moderator', () => {
+    assert.equal(canDisableAccount(moderator(), listedAdmin), false)
+    assert.equal(canDisableAccount(moderator(), otherModerator), false)
+  })
+
+  it('"Re-enable a disabled account": admin, or moderator for a member', () => {
+    assert.equal(canEnableAccount(user({ isAdmin: true }), member), true)
+    assert.equal(canEnableAccount(user({ isAdmin: true }), otherModerator), true)
+    assert.equal(canEnableAccount(user({ isAdmin: true, status: 'pending' }), member), false)
+    assert.equal(canEnableAccount(moderator(), member), true)
+    assert.equal(canEnableAccount(moderator(), otherModerator), false)
+    assert.equal(canEnableAccount(user({ managedCollectifIds: new Set(['c1']) }), member), false)
+    assert.equal(canEnableAccount(null, member), false)
+  })
+
+  it('"Name or remove a moderator": admin only', () => {
+    assert.equal(canNameModerators(user({ isAdmin: true })), true)
+    assert.equal(canNameModerators(moderator()), false)
+    assert.equal(canNameModerators(user()), false)
+    assert.equal(canNameModerators(null), false)
+  })
+
+  it('"Add, rename, reorder, delete an unused category": admin and moderator', () => {
+    assert.equal(canManageCategories(user({ isAdmin: true })), true)
+    assert.equal(canManageCategories(moderator()), true)
+    assert.equal(canManageCategories(user()), false)
+  })
+
+  it('"Archive an abusive item": admin and moderator, on an item still in the inventory', () => {
+    assert.equal(canModerateItem(user({ isAdmin: true }), { archived_at: null }, null), true)
+    assert.equal(canModerateItem(moderator(), { archived_at: null }, null), true)
+    assert.equal(canModerateItem(moderator(), { archived_at: new Date() }, null), false)
+    assert.equal(canModerateItem(user(), { archived_at: null }, null), false)
+    assert.equal(canModerateItem(null, { archived_at: null }, null), false)
+  })
+
+  it('a moderator gets no manager rights: no location, no item edit', () => {
+    const item = {
+      owner_collectif_id: 'c1',
+      owner_user_id: null,
+      locationCollectifId: 'c1',
+      locationUserId: null,
+    }
+    assert.equal(canEditItem(moderator(), item), false)
+    assert.equal(canManageCollectifLocations(moderator(), 'c1'), false)
+    assert.equal(canSeeFullAddress(moderator(), { collectif_id: 'c1', user_id: null }), false)
   })
 
   it('"Request a new collectif": any validated user, admin included', () => {
@@ -74,8 +148,9 @@ describe('permissions: accounts', () => {
     assert.equal(canRequestCollectif(null), false)
   })
 
-  it('"Approve or reject a collectif": admin only', () => {
+  it('"Approve or reject a collectif": admin and moderator', () => {
     assert.equal(canReviewCollectifs(user({ isAdmin: true })), true)
+    assert.equal(canReviewCollectifs(moderator()), true)
     assert.equal(canReviewCollectifs(user({ managedCollectifIds: new Set(['c1']) })), false)
     assert.equal(canReviewCollectifs(null), false)
   })
@@ -94,8 +169,49 @@ describe('permissions: accounts', () => {
     assert.equal(canRequestResponsibility(null, 'c1'), false)
   })
 
-  it('"Approve, reject or remove a responsible of C": admin only, not a responsible of C', () => {
+  it('"Ask to join C": a validated user who does not belong to C yet', () => {
+    assert.equal(canRequestMembership(user(), 'c1'), true)
+    assert.equal(canRequestMembership(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canRequestMembership(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canRequestMembership(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canRequestMembership(user({ status: 'pending' }), 'c1'), false)
+    assert.equal(canRequestMembership(null, 'c1'), false)
+  })
+
+  it('"Accept, reject or remove a member of C": responsibles of C only, not the platform', () => {
+    assert.equal(canManageMembers(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canManageMembers(user({ managedCollectifIds: new Set(['c2']) }), 'c1'), false)
+    assert.equal(canManageMembers(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canManageMembers(user({ isAdmin: true }), 'c1'), false)
+    assert.equal(canManageMembers(moderator(), 'c1'), false)
+  })
+
+  it('"Request to become responsible of C": not for a member of C, who asks C\'s responsibles', () => {
+    assert.equal(
+      canRequestResponsibility(user({ memberCollectifIds: new Set(['c1']) }), 'c1'),
+      false,
+    )
+  })
+
+  it('"Make a member of C responsible, remove a responsible of C": its responsibles and staff', () => {
+    assert.equal(canNameResponsibles(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canNameResponsibles(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canNameResponsibles(moderator(), 'c1'), true)
+    assert.equal(canNameResponsibles(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+    assert.equal(canNameResponsibles(user({ managedCollectifIds: new Set(['c2']) }), 'c1'), false)
+    assert.equal(canNameResponsibles(null, 'c1'), false)
+  })
+
+  it('"Leave C": any person of C', () => {
+    assert.equal(canLeaveCollectif(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canLeaveCollectif(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canLeaveCollectif(user(), 'c1'), false)
+    assert.equal(canLeaveCollectif(user({ isAdmin: true }), 'c1'), false)
+  })
+
+  it('"Approve, reject or remove a responsible of C": admin and moderator, not a responsible', () => {
     assert.equal(canManageResponsibles(user({ isAdmin: true })), true)
+    assert.equal(canManageResponsibles(moderator()), true)
     assert.equal(canManageResponsibles(user({ managedCollectifIds: new Set(['c1']) })), false)
     assert.equal(canManageResponsibles(null), false)
   })
@@ -224,5 +340,239 @@ describe('permissions: accounts', () => {
     assert.equal(canChangeItem(user(), archived), false)
     assert.equal(canChangeItem(user({ isAdmin: true }), archived), false)
     assert.equal(canChangeItem(user({ id: 'u2' }), item), false)
+  })
+})
+
+describe('permissions: visibility (ADR 0021)', () => {
+  // Owned by person u9, stored at u9's home; u9 belongs to c9.
+  const item = {
+    owner_collectif_id: null,
+    owner_user_id: 'u9',
+    locationCollectifId: null,
+    locationUserId: 'u9',
+    ownerCollectifIds: ['c9'],
+  }
+  const responsibleOf = (...ids: string[]) => user({ managedCollectifIds: new Set(ids) })
+
+  it("shows an item to its owner, the admin, and people of its owner's collectifs", () => {
+    assert.equal(canSeeItem(user({ id: 'u9' }), item), true)
+    assert.equal(canSeeItem(user({ isAdmin: true }), item), true)
+    assert.equal(canSeeItem(responsibleOf('c9'), item), true)
+    assert.equal(canSeeItem(responsibleOf('c1'), item), false)
+    assert.equal(canSeeItem(user(), item), false)
+  })
+
+  it('shows a collectif item to its people, and any item to whoever manages its location', () => {
+    const owned = { ...item, owner_user_id: null, owner_collectif_id: 'c1', ownerCollectifIds: [] }
+    assert.equal(canSeeItem(responsibleOf('c1'), owned), true)
+    assert.equal(canSeeItem(responsibleOf('c2'), owned), false)
+    assert.equal(canSeeItem(user({ id: 'u9' }), owned), true, 'stored at u9')
+    const atC2 = { ...item, locationUserId: null, locationCollectifId: 'c2' }
+    assert.equal(canSeeItem(responsibleOf('c2'), atC2), true)
+  })
+
+  it('shows nothing to a pending account', () => {
+    assert.equal(canSeeItem(user({ id: 'u9', status: 'pending' }), item), false)
+    assert.equal(canSeePerson(user({ status: 'pending' }), { id: 'u1', collectifIds: [] }), false)
+  })
+
+  it('shows a person to themselves, the admin and who shares a collectif with them', () => {
+    const person = { id: 'u9', collectifIds: ['c9'] }
+    assert.equal(canSeePerson(user({ id: 'u9' }), person), true)
+    assert.equal(canSeePerson(user({ isAdmin: true }), person), true)
+    assert.equal(canSeePerson(responsibleOf('c9'), person), true)
+    assert.equal(canSeePerson(responsibleOf('c1'), person), false)
+  })
+
+  it("shows a collectif's inside to its people and the admin only", () => {
+    assert.equal(canSeeCollectifInventory(responsibleOf('c1'), 'c1'), true)
+    assert.equal(canSeeCollectifInventory(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canSeeCollectifInventory(responsibleOf('c2'), 'c1'), false)
+  })
+
+  it('shows a location to its managers, the admin, and who sees an item stored there', () => {
+    const home = { collectif_id: null, user_id: 'u9' }
+    assert.equal(canSeeLocation(user({ id: 'u9' }), home, false), true)
+    assert.equal(canSeeLocation(user({ isAdmin: true }), home, false), true)
+    assert.equal(canSeeLocation(user(), home, true), true)
+    assert.equal(canSeeLocation(user(), home, false), false)
+  })
+
+  it('lets a member of C keep its equipment: add, edit, move, archive, full address (US-0.8.5)', () => {
+    const member = user({ memberCollectifIds: new Set(['c9']) })
+    const local = { collectif_id: 'c9', user_id: null }
+    assert.equal(canStoreItemsIn(member, local), true)
+    assert.equal(canStoreItemsIn(member, { collectif_id: 'c8', user_id: null }), false)
+    assert.equal(canAssignItemOwner(member, { collectifId: 'c9' }), true)
+    assert.equal(canAssignItemOwner(member, { collectifId: 'c8' }), false)
+    assert.equal(canSeeFullAddress(member, local), true)
+    assert.equal(canSeeFullAddress(member, { collectif_id: 'c8', user_id: null }), false)
+    const ofC = {
+      owner_collectif_id: 'c9',
+      owner_user_id: null,
+      locationCollectifId: null,
+      locationUserId: 'u7',
+    }
+    assert.equal(canEditItem(member, ofC), true, 'owned by C, wherever it is')
+    const deposit = {
+      owner_collectif_id: null,
+      owner_user_id: 'u7',
+      locationCollectifId: 'c9',
+      locationUserId: null,
+    }
+    assert.equal(
+      canEditItem(member, deposit),
+      false,
+      "someone's deposit stays with C's responsibles",
+    )
+    assert.equal(canDepositForPerson(member, local), false)
+  })
+
+  it('"Delete an item": personal owner, responsible of the owner, admin, moderator', () => {
+    const ofC = { owner_collectif_id: 'c1', owner_user_id: null }
+    const ofU1 = { owner_collectif_id: null, owner_user_id: 'u1' }
+    assert.equal(canDeleteItem(user({ managedCollectifIds: new Set(['c1']) }), ofC, null), true)
+    assert.equal(canDeleteItem(user({ memberCollectifIds: new Set(['c1']) }), ofC, null), false)
+    assert.equal(canDeleteItem(user(), ofU1, null), true)
+    assert.equal(canDeleteItem(user({ id: 'u2' }), ofU1, null), false)
+    assert.equal(canDeleteItem(user({ id: 'u2', isAdmin: true }), ofU1, null), true)
+    assert.equal(canDeleteItem(moderator({ id: 'u2' }), ofC, null), true)
+    assert.equal(canDeleteItem(user({ status: 'pending' }), ofU1, null), false)
+  })
+
+  it('"Ask to delete an item of C": a member of C only; its responsibles decide', () => {
+    const ofC = { owner_collectif_id: 'c1', owner_user_id: null }
+    assert.equal(canRequestItemDeletion(user({ memberCollectifIds: new Set(['c1']) }), ofC), true)
+    assert.equal(canRequestItemDeletion(user({ managedCollectifIds: new Set(['c1']) }), ofC), false)
+    assert.equal(canRequestItemDeletion(user(), ofC), false)
+    assert.equal(
+      canRequestItemDeletion(user(), { owner_collectif_id: null, owner_user_id: 'u1' }),
+      false,
+    )
+    assert.equal(canDecideItemDeletion(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
+    assert.equal(canDecideItemDeletion(user({ memberCollectifIds: new Set(['c1']) }), 'c1'), false)
+  })
+
+  it('a moderator never acts on an admin or another moderator: roles and items too', () => {
+    const anAdmin = { id: 'u7', isListedAdmin: true, isModerator: false }
+    const aModerator = { id: 'u8', isListedAdmin: false, isModerator: true }
+    const aMember = { id: 'u9', isListedAdmin: false, isModerator: false }
+    const theirItem = { owner_collectif_id: null, owner_user_id: 'u7' }
+    for (const target of [anAdmin, aModerator]) {
+      assert.equal(canRemoveResponsible(moderator(), 'c1', target), false)
+      assert.equal(canRemoveResponsibleByPlatform(moderator(), target), false)
+      assert.equal(canModerateItem(moderator(), { archived_at: null }, target), false)
+      assert.equal(canDeleteItem(moderator(), theirItem, target), false)
+    }
+    assert.equal(canRemoveResponsible(moderator(), 'c1', aMember), true)
+    assert.equal(canRemoveResponsibleByPlatform(moderator(), aMember), true)
+    assert.equal(canModerateItem(moderator(), { archived_at: null }, aMember), true)
+    assert.equal(canDeleteItem(moderator(), theirItem, aMember), true)
+    // An admin may; so may a responsible of the collectif, within it.
+    assert.equal(canRemoveResponsible(user({ isAdmin: true }), 'c1', aModerator), true)
+    assert.equal(canDeleteItem(user({ isAdmin: true }), theirItem, aModerator), true)
+    const responsible = user({ managedCollectifIds: new Set(['c1']) })
+    assert.equal(canRemoveResponsible(responsible, 'c1', anAdmin), true)
+    assert.equal(canRemoveResponsible(user(), 'c1', aMember), false)
+  })
+
+  it('tells a deletion by the platform from one by the owner', () => {
+    const ofC = { owner_collectif_id: 'c1', owner_user_id: null }
+    assert.equal(deletesAsPlatform(moderator(), ofC), true)
+    assert.equal(deletesAsPlatform(user({ isAdmin: true }), ofC), true)
+    const adminResponsible = user({ isAdmin: true, managedCollectifIds: new Set(['c1']) })
+    assert.equal(deletesAsPlatform(adminResponsible, ofC), false)
+    assert.equal(deletesAsPlatform(user({ managedCollectifIds: new Set(['c1']) }), ofC), false)
+    assert.equal(
+      deletesAsPlatform(moderator(), { owner_collectif_id: null, owner_user_id: 'u1' }),
+      false,
+    )
+  })
+
+  it('"Import a file into a location": whoever manages it; not a member, not a moderator', () => {
+    const local = { collectif_id: 'c1', user_id: null }
+    assert.equal(canImportInto(user({ managedCollectifIds: new Set(['c1']) }), local), true)
+    assert.equal(canImportInto(user({ memberCollectifIds: new Set(['c1']) }), local), false)
+    assert.equal(canImportInto(moderator(), local), false)
+    assert.equal(canImportInto(user({ isAdmin: true }), local), true)
+    assert.equal(canImportInto(user(), { collectif_id: null, user_id: 'u1' }), true)
+    assert.equal(canImportInto(user(), { collectif_id: null, user_id: 'u2' }), false)
+    assert.equal(
+      canImportInto(user({ status: 'pending' }), { collectif_id: null, user_id: 'u1' }),
+      false,
+    )
+  })
+
+  it('"Export an owner\'s equipment": own, or a collectif one is responsible of, or admin', () => {
+    assert.equal(canExportInventoryOf(user(), { userId: 'u1' }), true)
+    assert.equal(canExportInventoryOf(user(), { userId: 'u2' }), false)
+    assert.equal(
+      canExportInventoryOf(user({ managedCollectifIds: new Set(['c1']) }), { collectifId: 'c1' }),
+      true,
+    )
+    assert.equal(
+      canExportInventoryOf(user({ memberCollectifIds: new Set(['c1']) }), { collectifId: 'c1' }),
+      false,
+    )
+    assert.equal(canExportInventoryOf(moderator(), { collectifId: 'c1' }), false)
+    assert.equal(canExportInventoryOf(user({ isAdmin: true }), { collectifId: 'c1' }), true)
+    assert.equal(canExportInventoryOf(user({ status: 'pending' }), { userId: 'u1' }), false)
+  })
+
+  it('"Give or change an item\'s reference": its owner only, or an admin', () => {
+    assert.equal(canSetItemRef(user(), { userId: 'u1' }), true)
+    assert.equal(canSetItemRef(user(), { userId: 'u2' }), false)
+    assert.equal(
+      canSetItemRef(user({ memberCollectifIds: new Set(['c1']) }), { collectifId: 'c1' }),
+      true,
+    )
+    assert.equal(
+      canSetItemRef(user({ managedCollectifIds: new Set(['c2']) }), { userId: 'u9' }),
+      false,
+    )
+    assert.equal(canSetItemRef(moderator(), { collectifId: 'c1' }), false)
+    assert.equal(canSetItemRef(user({ isAdmin: true }), { userId: 'u9' }), true)
+    assert.equal(canSetItemRef(null, { userId: 'u1' }), false)
+  })
+
+  it('lets a member of C see like a responsible, without managing anything', () => {
+    const member = user({ memberCollectifIds: new Set(['c9']) })
+    assert.equal(canSeeItem(member, item), true, 'owned by a person of C')
+    const owned = { ...item, owner_user_id: null, owner_collectif_id: 'c9', ownerCollectifIds: [] }
+    assert.equal(canSeeItem(member, owned), true, 'owned by C')
+    const atC = {
+      ...item,
+      owner_user_id: 'u7',
+      ownerCollectifIds: [],
+      locationUserId: null,
+      locationCollectifId: 'c9',
+    }
+    assert.equal(canSeeItem(member, atC), true, "stored in C's location")
+    assert.equal(canSeeCollectifInventory(member, 'c9'), true)
+    assert.equal(canSeePerson(member, { id: 'u9', collectifIds: ['c9'] }), true)
+    assert.equal(canSeeLocation(member, { collectif_id: 'c9', user_id: null }, false), true)
+    assert.equal(canManageCollectifLocations(member, 'c9'), false)
+    assert.equal(canManageMembers(member, 'c9'), false)
+    assert.deepEqual(itemScopeOf(member), { everything: false, userId: 'u1', collectifIds: ['c9'] })
+  })
+
+  it('shows moderators everything, like admins (ADR 0021 open point, settled in V0.8)', () => {
+    const owned = { ...item, owner_user_id: null, owner_collectif_id: 'c1', ownerCollectifIds: [] }
+    assert.equal(canSeeItem(moderator(), item), true)
+    assert.equal(canSeeItem(moderator(), owned), true)
+    assert.equal(canSeePerson(moderator(), { id: 'u9', collectifIds: ['c9'] }), true)
+    assert.equal(canSeeCollectifInventory(moderator(), 'c1'), true)
+    assert.equal(canSeeLocation(moderator(), { collectif_id: null, user_id: 'u9' }, false), true)
+    assert.deepEqual(itemScopeOf(moderator()), { everything: true })
+    assert.equal(canSeeItem(moderator({ status: 'disabled' }), item), false)
+  })
+
+  it('gives listings the same scope: everything for the admin, else me and my collectifs', () => {
+    assert.deepEqual(itemScopeOf(user({ isAdmin: true })), { everything: true })
+    assert.deepEqual(itemScopeOf(responsibleOf('c1')), {
+      everything: false,
+      userId: 'u1',
+      collectifIds: ['c1'],
+    })
   })
 })

@@ -21,4 +21,7 @@ export async function signIn(app: TestApp, client: TestClient, email: string): P
   // Follow the redirects like a browser: the CSRF token changes at sign-in.
   let next = response.location
   for (let hop = 0; next !== null && hop < 3; hop++) next = (await client.get(next)).location
+  // Read the new token from a page with a form: the account page, or the status page it redirects to.
+  next = (await client.get('/compte/profil')).location
+  if (next !== null) await client.get(next)
 }

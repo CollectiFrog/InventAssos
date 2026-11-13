@@ -9,6 +9,7 @@ import { createActiveUser } from '../../../test/users.ts'
 import { findCollectifHoldingSlug, slugify } from '../../data/collectifs.ts'
 import { createUser } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
+import { withReturnPath } from '../return-path.ts'
 
 const requestUrl = routes.collectifs.request.action.href()
 
@@ -37,6 +38,7 @@ describe('request a new collectif (US-0.3.1)', () => {
 
     const response = await client.post(requestUrl, {
       name: 'Les Grenouilles',
+      city: 'Fougères',
       description: 'Sono et lumière',
       contactPhone: '01 23 45 67 89',
     })
@@ -44,6 +46,7 @@ describe('request a new collectif (US-0.3.1)', () => {
     assert.equal(response.location, routes.collectifs.index.href())
     const collectif = await findCollectifHoldingSlug(db, 'les-grenouilles')
     assert.equal(collectif?.status, 'pending')
+    assert.equal(collectif?.city, 'Fougères')
     assert.equal(collectif?.description, 'Sono et lumière')
     assert.equal(collectif?.contact_phone, '01 23 45 67 89')
     assert.deepEqual(app.mailer.outbox.at(-1)?.to, ['boss@example.org'])
@@ -56,9 +59,9 @@ describe('request a new collectif (US-0.3.1)', () => {
     const app = createTestApp(db)
     const client = app.client()
     await signIn(app, client, 'camille@example.org')
-    await client.post(requestUrl, { name: 'Les Grenouilles' })
+    await client.post(requestUrl, { name: 'Les Grenouilles', city: 'Rennes' })
 
-    const response = await client.post(requestUrl, { name: 'les  grenouilles !' })
+    const response = await client.post(requestUrl, { name: 'les  grenouilles !', city: 'Rennes' })
     assert.equal(response.status, 400)
     assert.match(response.text, /Un collectif porte déjà ce nom/)
   })
@@ -71,6 +74,7 @@ describe('request a new collectif (US-0.3.1)', () => {
     const response = await client.post(requestUrl, { name: '', contactPhone: 'abc' })
     assert.equal(response.status, 400)
     assert.match(response.text, /Ce champ est obligatoire/)
+    assert.match(response.text, /<input [^>]*name="city"[^>]*aria-invalid="true"/)
     assert.match(response.text, /Numéro de téléphone invalide/)
   })
 
@@ -81,7 +85,10 @@ describe('request a new collectif (US-0.3.1)', () => {
     const visitor = await app.client().post(requestUrl, { name: 'X' }, { csrf: false })
     assert.equal(visitor.status, 403)
     const visitorPage = await app.client().get(routes.collectifs.request.index.href())
-    assert.equal(visitorPage.location, routes.signIn.form.index.href())
+    assert.equal(
+      visitorPage.location,
+      withReturnPath(routes.signIn.form.index.href(), routes.collectifs.request.index.href()),
+    )
 
     const pending = app.client()
     await signIn(app, pending, 'pat@example.org')

@@ -7,6 +7,7 @@ import { signIn } from '../../../../test/auth.ts'
 import { openTestDatabase, resetDatabase } from '../../../../test/database.ts'
 import { createUser, findUserByEmail, setUserStatus } from '../../../data/users.ts'
 import { routes } from '../../../routes.ts'
+import { withReturnPath } from '../../return-path.ts'
 
 const profileUrl = routes.account.profile.index.href()
 
@@ -33,7 +34,7 @@ describe('profile (US-0.2.6)', () => {
     const page = await client.get(profileUrl)
     assert.equal(page.status, 200)
     assert.match(page.text, /value="Camille"/)
-    assert.match(page.text, /Visible par tous les utilisateurs validés/)
+    assert.match(page.text, /Visible par les personnes de vos collectifs/)
   })
 
   it('saves name and phone, and clears the phone when left blank', async () => {
@@ -84,6 +85,6 @@ describe('profile (US-0.2.6)', () => {
 
   it('sends a visitor to sign-in', async () => {
     const response = await createTestApp(db).client().get(profileUrl)
-    assert.equal(response.location, routes.signIn.form.index.href())
+    assert.equal(response.location, withReturnPath(routes.signIn.form.index.href(), profileUrl))
   })
 })

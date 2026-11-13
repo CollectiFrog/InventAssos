@@ -11,7 +11,8 @@ which may be ahead of the released version described in the user docs.
 | [Setup](contribute/setup/)                           | getting a working dev environment         |
 | [Workflow](contribute/workflow/)                     | branches, commits, PRs, conventions       |
 | [Work in progress](contribute/board/)                | the kanban board (GitHub Projects)        |
-| [Releasing](contribute/releasing/)                   | shipping a version and deploying it       |
+| [Releasing](contribute/releasing/)                   | shipping a version: CI, image, release    |
+| [Deploy on Kubernetes](contribute/deploying/)        | running a version on the cluster          |
 | [Roadmap](product/roadmap/)                          | versions V0.1 to V1.0 and beyond          |
 | [User stories](product/user-stories/)                | what each version delivers (the spec)     |
 | [GDPR checklist](product/gdpr-checklist/)            | what must be true before V1.0             |

@@ -2,7 +2,8 @@
 import { type Database, sql } from 'remix/data-table'
 
 import { isUuid } from './ids.ts'
-import { type Category, categories, type Item, items } from './tables.ts'
+import { likeLiteral } from './search.ts'
+import { type Item, items } from './tables.ts'
 
 /** Owner of an item: a collectif or a person, never both (ADR 0009). */
 export type ItemOwner = { collectifId: string } | { userId: string }
@@ -15,14 +16,11 @@ export interface ItemFields {
   brand: string | null
   model: string | null
   serialNumber: string | null
+  /** The owner's own reference, unique per owner (US-0.10.3). */
+  ref: string | null
   condition: Item['condition']
   estimatedValue: number | null
   description: string | null
-}
-
-/** The fixed list of categories, in display order. */
-export async function listCategories(db: Database): Promise<Category[]> {
-  return db.findMany(categories, { orderBy: ['position', 'asc'] })
 }
 
 function toColumns(fields: ItemFields) {
@@ -33,6 +31,7 @@ function toColumns(fields: ItemFields) {
     brand: fields.brand,
     model: fields.model,
     serial_number: fields.serialNumber,
+    ref: fields.ref,
     condition: fields.condition,
     estimated_value: fields.estimatedValue,
     description: fields.description,
@@ -57,6 +56,168 @@ export async function createItem(
   )
 }
 
+/**
+ * Whether another item of this owner, archived ones included, already has this reference. Compared
+ * as the unique index does (`inv_fold`), so « AMP-01 » and « amp-01 » collide.
+ */
+export async function refTaken(
+  db: Database,
+  owner: ItemOwner,
+  ref: string,
+  exceptItemId: string | null = null,
+): Promise<boolean> {
+  const ownerCondition =
+    'collectifId' in owner
+      ? sql`owner_collectif_id = ${owner.collectifId}`
+      : sql`owner_user_id = ${owner.userId}`
+  const result = await db.exec(sql`
+    select 1 from items
+    where ${ownerCondition} and ref is not null and inv_fold(ref) = inv_fold(${ref})
+      and (${exceptItemId}::uuid is null or id <> ${exceptItemId}::uuid)
+    limit 1
+  `)
+  return (result.rows?.length ?? 0) > 0
+}
+
+/** An owner's item as an import needs it, with where it is stored (for `canChangeItem`). */
+export interface ImportCandidate {
+  item: Item
+  locationName: string
+  locationCollectifId: string | null
+  locationUserId: string | null
+}
+
+const candidateColumns = sql`
+  i.*, l.name as location_name, l.collectif_id as location_collectif_id,
+  l.user_id as location_user_id
+`
+
+function toCandidate(row: Record<string, unknown>): ImportCandidate {
+  const { location_name, location_collectif_id, location_user_id, ...item } = row
+  return {
+    item: item as unknown as Item,
+    locationName: String(location_name),
+    locationCollectifId: location_collectif_id == null ? null : String(location_collectif_id),
+    locationUserId: location_user_id == null ? null : String(location_user_id),
+  }
+}
+
+function ownerCondition(owner: ItemOwner) {
+  return 'collectifId' in owner
+    ? sql`i.owner_collectif_id = ${owner.collectifId}`
+    : sql`i.owner_user_id = ${owner.userId}`
+}
+
+/**
+ * The references of a file, each with the key the database compares it by (`inv_fold`) and the
+ * owner's item that holds it, archived or not (US-0.10.3). Compared in SQL only, as the unique
+ * index does, so the import never disagrees with the database.
+ */
+export async function matchRefs(
+  db: Database,
+  owner: ItemOwner,
+  refs: readonly string[],
+): Promise<Map<string, { key: string; candidate: ImportCandidate | null }>> {
+  const distinct = [...new Set(refs)]
+  const matches = new Map<string, { key: string; candidate: ImportCandidate | null }>()
+  if (distinct.length === 0) return matches
+  const result = await db.exec(sql`
+    select r.ref as file_ref, inv_fold(r.ref) as file_key, ${candidateColumns}
+    from unnest(${distinct}::text[]) as r(ref)
+    left join items i on ${ownerCondition(owner)} and i.ref is not null
+      and inv_fold(i.ref) = inv_fold(r.ref)
+    left join locations l on l.id = i.location_id
+  `)
+  for (const row of result.rows ?? []) {
+    const { file_ref, file_key, ...rest } = row
+    matches.set(String(file_ref), {
+      key: String(file_key),
+      candidate: rest.id == null ? null : toCandidate(rest),
+    })
+  }
+  return matches
+}
+
+/** The owner's items among these IDs, archived or not (the « Identifiant » column, ADR 0027). */
+export async function findOwnerItems(
+  db: Database,
+  owner: ItemOwner,
+  ids: readonly string[],
+): Promise<ImportCandidate[]> {
+  const valid = [...new Set(ids.map((id) => id.toLowerCase()).filter(isUuid))]
+  if (valid.length === 0) return []
+  const result = await db.exec(sql`
+    select ${candidateColumns} from items i join locations l on l.id = i.location_id
+    where ${ownerCondition(owner)} and i.id = any(${valid}::uuid[])
+  `)
+  return (result.rows ?? []).map(toCandidate)
+}
+
+/** Names of the active items in these locations, for the « already there » warning. */
+export async function listActiveItemNames(
+  db: Database,
+  locationIds: readonly string[],
+): Promise<{ locationId: string; name: string }[]> {
+  if (locationIds.length === 0) return []
+  const result = await db.exec(sql`
+    select location_id, name from items
+    where archived_at is null and location_id = any(${[...locationIds]}::uuid[])
+  `)
+  return (result.rows ?? []).map((row) => ({
+    locationId: String(row.location_id),
+    name: String(row.name),
+  }))
+}
+
+/** True when a write failed on the per-owner reference index (a race after `refTaken`). */
+export function isRefConflict(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code
+  const constraint = String((error as { constraint?: unknown } | null)?.constraint ?? '')
+  const cause = (error as { cause?: unknown } | null)?.cause
+  if (code === '23505' && constraint.startsWith('items_ref_')) return true
+  return cause !== undefined && cause !== error && isRefConflict(cause)
+}
+
+/** One item an import creates, with the ID chosen for it so the log can name it. */
+export interface NewItem {
+  id: string
+  fields: ItemFields
+  locationId: string
+  owner: ItemOwner
+  createdBy: string
+}
+
+/** Creates many items at once (an import, US-0.10.1), in chunks, inside the caller's transaction. */
+export async function createItems(db: Database, list: readonly NewItem[]): Promise<void> {
+  for (let start = 0; start < list.length; start += 500) {
+    await db.createMany(
+      items,
+      list.slice(start, start + 500).map((item) => ({
+        id: item.id,
+        ...toColumns(item.fields),
+        location_id: item.locationId,
+        owner_collectif_id: 'collectifId' in item.owner ? item.owner.collectifId : null,
+        owner_user_id: 'userId' in item.owner ? item.owner.userId : null,
+        created_by: item.createdBy,
+      })),
+    )
+  }
+}
+
+/** Writes an import's update of one item: its fields, and its location when it moves. */
+export async function updateImportedItem(
+  db: Database,
+  itemId: string,
+  fields: ItemFields,
+  locationId: string | null,
+): Promise<void> {
+  await db.update(items, itemId, {
+    ...toColumns(fields),
+    ...(locationId ? { location_id: locationId } : {}),
+    updated_at: new Date(),
+  })
+}
+
 /** Finds an item by ID, archived or not. */
 export async function findItemById(db: Database, id: string): Promise<Item | null> {
   return isUuid(id) ? db.find(items, id) : null
@@ -72,6 +233,10 @@ export interface ItemSummary {
   locationName: string
   city: string
   ownerName: string
+  /** Set when a person owns the item. */
+  ownerUserId: string | null
+  /** Set when a collectif owns the item. */
+  ownerCollectifId: string | null
   archivedAt: Date | null
 }
 
@@ -85,12 +250,14 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
     locationName: String(row.location_name),
     city: String(row.city),
     ownerName: String(row.owner_name ?? ''),
+    ownerUserId: row.owner_user_id == null ? null : String(row.owner_user_id),
+    ownerCollectifId: row.owner_collectif_id == null ? null : String(row.owner_collectif_id),
     archivedAt: row.archived_at == null ? null : new Date(String(row.archived_at)),
   }
 }
 
 const summaryColumns = sql`
-  i.id, i.name, i.quantity, i.location_id, i.archived_at,
+  i.id, i.name, i.quantity, i.location_id, i.archived_at, i.owner_user_id, i.owner_collectif_id,
   cat.name as category_name, l.name as location_name, l.city,
   coalesce(oc.name, ou.name) as owner_name
 `
@@ -101,25 +268,68 @@ const summaryJoins = sql`
   left join users ou on ou.id = i.owner_user_id
 `
 
+/** Columns a list of items can be sorted by (`?tri=`, US-0.7.13). */
+export const itemSortColumns = ['nom', 'categorie', 'quantite', 'ville', 'proprietaire'] as const
+
+/** One column, ascending or descending; ties are broken by name. */
+export interface ItemSort {
+  column: (typeof itemSortColumns)[number]
+  descending: boolean
+}
+
+/** The ORDER BY of a sort, from a fixed list of expressions: never text from the URL. */
+function orderBy(sort: ItemSort = { column: 'nom', descending: false }) {
+  const expression = {
+    nom: sql`lower(i.name)`,
+    categorie: sql`cat.position`,
+    quantite: sql`i.quantity`,
+    ville: sql`lower(l.city)`,
+    proprietaire: sql`lower(coalesce(oc.name, ou.name))`,
+  }[sort.column]
+  return sort.descending
+    ? sql`order by ${expression} desc, lower(i.name), i.id`
+    : sql`order by ${expression}, lower(i.name), i.id`
+}
+
+/** Whose point of view a listing takes; built by `itemScopeOf` in app/permissions.ts. */
+export type ItemScope =
+  | { everything: true }
+  | { everything: false; userId: string; collectifIds: readonly string[] }
+
 /**
- * Active items a person deals with: owned by them or by a collectif they manage, or stored in a
- * location they or those collectifs own.
+ * The SQL side of `canSeeItem` (ADR 0021), over `items i` joined to `locations l`. Keep both in
+ * step: app/data/items.visibility.test.ts compares them.
  */
-export async function listItemsManagedBy(
+function visibleIn(scope: ItemScope) {
+  if (scope.everything) return sql`true`
+  const ids = [...scope.collectifIds]
+  return sql`(
+    i.owner_user_id = ${scope.userId}
+    or i.owner_collectif_id = any(${ids}::uuid[])
+    or exists (
+      select 1 from collectif_members vr
+      where vr.user_id = i.owner_user_id and vr.status = 'active'
+        and vr.collectif_id = any(${ids}::uuid[])
+    )
+    or l.user_id = ${scope.userId}
+    or l.collectif_id = any(${ids}::uuid[])
+  )`
+}
+
+/** Splits the comma-joined IDs of a `string_agg`. */
+function idList(value: unknown): string[] {
+  return typeof value === 'string' && value !== '' ? value.split(',') : []
+}
+
+/** Active items stored right now in a person's own locations, by name (US-0.7.3). */
+export async function listItemsStoredAtHomeOf(
   db: Database,
   userId: string,
-  collectifIds: readonly string[],
 ): Promise<ItemSummary[]> {
-  const ids = [...collectifIds]
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins}
-    where i.archived_at is null and (
-      i.owner_user_id = ${userId}
-      or i.owner_collectif_id = any(${ids}::uuid[])
-      or l.user_id = ${userId}
-      or l.collectif_id = any(${ids}::uuid[])
-    )
-    order by i.name
+    where i.archived_at is null and l.user_id = ${userId}
+    order by lower(i.name), i.id
   `)
   return (result.rows ?? []).map(toSummary)
 }
@@ -137,6 +347,8 @@ export interface ItemDetails extends Item {
   ownerUserId: string | null
   /** The collectif's contact phone, or the owner's phone while their account is active. */
   contactPhone: string | null
+  /** Collectifs the owning person belongs to, for `canSeeItem` and `canSeePerson`. */
+  ownerCollectifIds: string[]
 }
 
 /** Loads an item with its category, location and owner names. */
@@ -148,7 +360,11 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
            l.collectif_id as location_collectif_id, l.user_id as location_user_id,
            coalesce(oc.name, ou.name) as owner_name, oc.slug as owner_slug,
            case when i.owner_collectif_id is not null then oc.contact_phone
-                when ou.status = 'active' then ou.phone end as contact_phone
+                when ou.status = 'active' then ou.phone end as contact_phone,
+           (select string_agg(r.collectif_id::text, ',') from collectif_members r
+            join collectifs rc on rc.id = r.collectif_id
+            where r.user_id = i.owner_user_id and r.status = 'active' and rc.status = 'active'
+           ) as owner_collectif_ids
     from items i ${summaryJoins}
     where i.id = ${id}
   `)
@@ -165,6 +381,7 @@ export async function findItemDetails(db: Database, id: string): Promise<ItemDet
     ownerSlug: row.owner_slug == null ? null : String(row.owner_slug),
     contactPhone: row.contact_phone == null ? null : String(row.contact_phone),
     ownerUserId: item.owner_user_id,
+    ownerCollectifIds: idList(row.owner_collectif_ids),
   }
 }
 
@@ -211,6 +428,14 @@ export async function archiveItem(
   })
 }
 
+/**
+ * Deletes an item for good (US-0.8.9), with its pending deletion request. The audit log keeps its
+ * entries, which hold IDs only (ADR 0010).
+ */
+export async function deleteItem(db: Database, itemId: string): Promise<void> {
+  await db.exec(sql`delete from items where id = ${itemId}`)
+}
+
 /** One page of the active inventory, and how many items match in total. */
 export interface InventoryPage {
   items: ItemSummary[]
@@ -225,20 +450,21 @@ export interface InventoryFilters {
   city?: string
 }
 
-/** Escapes LIKE wildcards so a search for "50%" means the text "50%". */
-function likeLiteral(text: string): string {
-  return text.replace(/[\\%_]/g, (char) => `\\${char}`)
-}
-
-/** Active (non-archived) items of everybody, by name, one page at a time (US-0.6.1, US-0.6.2). */
+/** Active items the scope may see, by name, one page at a time (US-0.6.2, US-0.7.11). */
 export async function listInventory(
   db: Database,
-  options: { page: number; pageSize: number; filters?: InventoryFilters },
+  options: {
+    scope: ItemScope
+    page: number
+    pageSize: number
+    filters?: InventoryFilters
+    sort?: ItemSort
+  },
 ): Promise<InventoryPage> {
   const f = options.filters ?? {}
-  const conditions = [sql`i.archived_at is null`]
+  const conditions = [sql`i.archived_at is null`, visibleIn(options.scope)]
   if (f.query) {
-    conditions.push(sql`inv_fold(concat_ws(' ', i.name, i.brand, i.model, i.description))
+    conditions.push(sql`inv_fold(concat_ws(' ', i.name, i.ref, i.brand, i.model, i.description))
       like '%' || inv_fold(${likeLiteral(f.query)}) || '%'`)
   }
   if (f.categoryId) conditions.push(sql`i.category_id = ${f.categoryId}`)
@@ -251,17 +477,17 @@ export async function listInventory(
   const count = await db.exec(sql`select count(*)::int as n from items i ${summaryJoins} ${where}`)
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins} ${where}
-    order by lower(i.name), i.id
+    ${orderBy(options.sort)}
     limit ${options.pageSize} offset ${offset}
   `)
   return { items: (result.rows ?? []).map(toSummary), total: Number(count.rows?.[0]?.n ?? 0) }
 }
 
-/** Cities that hold at least one active item, for the city filter. */
-export async function listInventoryCities(db: Database): Promise<string[]> {
+/** Cities that hold at least one active item the scope may see, for the city filter. */
+export async function listInventoryCities(db: Database, scope: ItemScope): Promise<string[]> {
   const result = await db.exec(sql`
     select distinct l.city from items i join locations l on l.id = i.location_id
-    where i.archived_at is null order by l.city
+    where i.archived_at is null and ${visibleIn(scope)} order by l.city
   `)
   return (result.rows ?? []).map((row) => String(row.city))
 }
@@ -270,8 +496,9 @@ export async function listInventoryCities(db: Database): Promise<string[]> {
 export async function listOwnerContactEmails(db: Database, item: Item): Promise<string[]> {
   const result = item.owner_collectif_id
     ? await db.exec(sql`
-        select u.email from responsibles r join users u on u.id = r.user_id
-        where r.collectif_id = ${item.owner_collectif_id} and r.status = 'active'
+        select u.email from collectif_members r join users u on u.id = r.user_id
+        where r.collectif_id = ${item.owner_collectif_id} and r.role = 'responsible'
+          and r.status = 'active'
           and u.status = 'active'
       `)
     : await db.exec(sql`
@@ -280,16 +507,150 @@ export async function listOwnerContactEmails(db: Database, item: Item): Promise<
   return (result.rows ?? []).map((row) => String(row.email))
 }
 
-/** Active items owned by a collectif or a person, by name (US-0.6.4). */
-export async function listItemsOwnedBy(db: Database, owner: ItemOwner): Promise<ItemSummary[]> {
+/**
+ * What an export holds (US-0.10.4): the active items an owner owns, wherever they are stored, that
+ * the scope may see, by name; with their category name and their location's name, nothing else of
+ * the location.
+ */
+export async function listItemsForExport(
+  db: Database,
+  owner: ItemOwner,
+  scope: ItemScope,
+): Promise<{ item: Item; categoryName: string; locationName: string }[]> {
+  const condition =
+    'collectifId' in owner
+      ? sql`i.owner_collectif_id = ${owner.collectifId}`
+      : sql`i.owner_user_id = ${owner.userId}`
+  const result = await db.exec(sql`
+    select i.*, cat.name as category_name, l.name as location_name
+    from items i
+    join categories cat on cat.id = i.category_id
+    join locations l on l.id = i.location_id
+    where i.archived_at is null and ${condition} and ${visibleIn(scope)}
+    order by lower(i.name), i.id
+  `)
+  return (result.rows ?? []).map((row) => {
+    const { category_name, location_name, ...item } = row
+    return {
+      item: item as unknown as Item,
+      categoryName: String(category_name),
+      locationName: String(location_name),
+    }
+  })
+}
+
+/** Active items owned by a collectif or a person that the scope may see, by name (US-0.6.4). */
+export async function listItemsOwnedBy(
+  db: Database,
+  owner: ItemOwner,
+  scope: ItemScope,
+  sort?: ItemSort,
+): Promise<ItemSummary[]> {
   const condition =
     'collectifId' in owner
       ? sql`i.owner_collectif_id = ${owner.collectifId}`
       : sql`i.owner_user_id = ${owner.userId}`
   const result = await db.exec(sql`
     select ${summaryColumns} from items i ${summaryJoins}
-    where i.archived_at is null and ${condition}
+    where i.archived_at is null and ${condition} and ${visibleIn(scope)}
+    ${orderBy(sort)}
+  `)
+  return (result.rows ?? []).map(toSummary)
+}
+
+/** True when the scope may see an active item stored in the location (its page names it). */
+export async function locationShowsItemTo(
+  db: Database,
+  locationId: string,
+  scope: ItemScope,
+): Promise<boolean> {
+  const result = await db.exec(sql`
+    select 1 from items i join locations l on l.id = i.location_id
+    where i.location_id = ${locationId} and i.archived_at is null and ${visibleIn(scope)}
+    limit 1
+  `)
+  return (result.rows?.length ?? 0) > 0
+}
+
+/** The most recently added active items the scope may see, newest first (US-0.7.2). */
+export async function listRecentItems(
+  db: Database,
+  scope: ItemScope,
+  limit: number,
+): Promise<ItemSummary[]> {
+  const result = await db.exec(sql`
+    select ${summaryColumns} from items i ${summaryJoins}
+    where i.archived_at is null and ${visibleIn(scope)}
+    order by i.created_at desc, i.id
+    limit ${limit}
+  `)
+  return (result.rows ?? []).map(toSummary)
+}
+
+/** How many active items each of these collectifs owns; a collectif with none is absent. */
+export async function countItemsOwnedBy(
+  db: Database,
+  collectifIds: readonly string[],
+): Promise<Map<string, number>> {
+  const ids = [...collectifIds]
+  const result = await db.exec(sql`
+    select owner_collectif_id, count(*)::int as n from items
+    where archived_at is null and owner_collectif_id = any(${ids}::uuid[])
+    group by owner_collectif_id
+  `)
+  return new Map((result.rows ?? []).map((row) => [String(row.owner_collectif_id), Number(row.n)]))
+}
+
+/** Active items stored in a collectif's locations but owned by someone else: its deposits. */
+export async function listItemsDepositedAt(
+  db: Database,
+  collectifId: string,
+  scope: ItemScope,
+): Promise<ItemSummary[]> {
+  const result = await db.exec(sql`
+    select ${summaryColumns} from items i ${summaryJoins}
+    where i.archived_at is null and l.collectif_id = ${collectifId}
+      and i.owner_collectif_id is distinct from ${collectifId}::uuid and ${visibleIn(scope)}
     order by lower(i.name), i.id
   `)
   return (result.rows ?? []).map(toSummary)
+}
+
+/** How many items, archived ones included, use each category; an unused one is absent. */
+export async function countItemsByCategory(db: Database): Promise<Map<string, number>> {
+  const result = await db.exec(sql`
+    select category_id, count(*)::int as n from items group by category_id
+  `)
+  return new Map((result.rows ?? []).map((row) => [String(row.category_id), Number(row.n)]))
+}
+
+/** Moves every item, archived ones included, from one category to another; returns their IDs. */
+export async function recategorizeItems(
+  db: Database,
+  fromId: string,
+  toId: string,
+): Promise<string[]> {
+  const result = await db.exec(sql`
+    update items set category_id = ${toId}, updated_at = now()
+    where category_id = ${fromId}
+    returning id
+  `)
+  return (result.rows ?? []).map((row) => String(row.id))
+}
+
+/** How many visible active items each category and each city holds, for the filters' counts. */
+export async function countVisibleItems(
+  db: Database,
+  scope: ItemScope,
+): Promise<{ byCategory: Map<string, number>; byCity: Map<string, number> }> {
+  const visible = sql`from items i join locations l on l.id = i.location_id
+    where i.archived_at is null and ${visibleIn(scope)}`
+  const categories = await db.exec(sql`select i.category_id as k, count(*)::int as n ${visible}
+    group by i.category_id`)
+  const cities = await db.exec(
+    sql`select l.city as k, count(*)::int as n ${visible} group by l.city`,
+  )
+  const toMap = (rows: Record<string, unknown>[] | undefined) =>
+    new Map((rows ?? []).map((row) => [String(row.k), Number(row.n)]))
+  return { byCategory: toMap(categories.rows), byCity: toMap(cities.rows) }
 }

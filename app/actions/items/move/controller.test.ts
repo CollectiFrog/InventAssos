@@ -74,9 +74,9 @@ describe('move an item (US-0.5.4)', () => {
     assert.equal((await findItemById(db, deposited.id))?.location_id, local.id)
   })
 
-  it('refuses someone who may not edit the item (403)', async () => {
+  it('hides the item from someone outside its collectifs (404, ADR 0021)', async () => {
     const response = await move('lou@example.org', annex)
-    assert.equal(response.status, 403)
+    assert.equal(response.status, 404)
   })
 
   it('offers only the locations the actor manages, without the current one', async () => {

@@ -7,50 +7,152 @@ sidebar:
 
 <!-- Une section par tâche, dans l'ordre où on la rencontre. Chaque version ajoute ses sections. -->
 
+## Se repérer
+
+Quatre entrées mènent partout : **Accueil**, **Rechercher**, **Mon matériel** et **Collectifs**.
+Sur un téléphone, elles sont dans la barre en bas de l'écran ; sur un ordinateur, dans la colonne à
+gauche (réduite à des icônes sur un écran étroit). L'entrée de la section où vous êtes est mise en
+évidence.
+
+Sur un ordinateur, la colonne de gauche liste aussi **Mes collectifs** (les cinq premiers, puis
+**Tous**) et, en bas, **Administration** pour les administrateurs. La barre du haut garde sur
+chaque page un champ de **recherche** et le bouton **Ajouter du matériel**.
+
+Sur la page d'un objet, d'un collectif, d'un lieu ou d'une personne, un **fil d'Ariane** au-dessus
+du titre montre où vous êtes (Collectifs › Collecti'FROG › Console) sur un ordinateur ; sur un
+téléphone, **Retour** ramène à la page précédente.
+
+En haut à droite, le rond avec vos initiales ouvre **votre compte**. Sur un téléphone, les
+administrateurs trouvent le lien **Administration** à côté.
+
+## L'accueil
+
+**Accueil** commence par un champ de recherche dans le matériel de vos collectifs. Dessous, le
+matériel **ajouté récemment** que vous pouvez voir, et **vos collectifs** avec leur ville et leur
+nombre d'objets. Si vous ne faites partie d'aucun collectif, l'accueil vous propose l'annuaire des
+collectifs ou d'en déclarer un. Les administrateurs y voient aussi le nombre de **demandes à
+valider**, qui mène à la file d'attente.
+
+## Qui voit quoi
+
+Chaque collectif garde son inventaire pour lui. Vous voyez un objet quand :
+
+- il appartient à un collectif dont vous êtes responsable ou membre ;
+- il vous appartient, ou appartient à une personne de l'un de vos collectifs ;
+- il est rangé dans l'un de vos lieux, ou dans un lieu de l'un de vos collectifs.
+
+Les autres collectifs n'apparaissent que par leur nom et leur présentation : ni leur matériel, ni
+leurs lieux, ni leurs membres. La page d'une personne, et son téléphone, ne s'affichent qu'aux
+personnes qui partagent un collectif avec elle. Le partage avec d'autres collectifs viendra plus tard.
+
 ## Parcourir l'inventaire
 
-**Inventaire**, en haut de la page, liste tout le matériel actif de la plateforme, 24 objets par
-page : nom, quantité, catégorie, ville et propriétaire. Cliquez sur un objet pour voir sa page.
-Les adresses des lieux n'y apparaissent jamais, seulement la ville.
+**Rechercher** liste le matériel actif que vous pouvez voir, 24 objets par page : nom, catégorie,
+quantité, ville et propriétaire. Cliquez sur un objet pour voir sa page. Les adresses des lieux n'y
+apparaissent jamais, seulement la ville.
 
-En haut de la liste, **Rechercher** cherche dans le nom, la marque, le modèle et la description
-(majuscules et accents ne comptent pas). Les filtres **Catégorie**, **Collectif propriétaire** et
-**Ville** se combinent entre eux et avec la recherche ; **Tout afficher** les efface.
+- **Filtres** (à gauche sur un ordinateur, au-dessus sur un téléphone) : la recherche porte sur le
+  nom, la marque, le modèle et la description (majuscules et accents ne comptent pas) ; **Catégorie**
+  et **Ville** indiquent entre parenthèses combien d'objets elles contiennent ; **Collectif
+  propriétaire** propose vos collectifs. Ils se combinent ; cliquez sur **Appliquer**.
+- **Filtres actifs** : chacun s'affiche au-dessus des résultats ; cliquez dessus pour le retirer, ou
+  sur **Tout effacer**.
+- **Trier** : sur un ordinateur, la liste est un tableau ; cliquez sur un titre de colonne pour trier
+  par cette colonne, une seconde fois pour inverser l'ordre.
+- **Liste** ou **Grille** choisit entre le tableau et des cartes. Sur un téléphone, ce sont toujours
+  des cartes.
+
+Le matériel d'un collectif, sur sa page, se trie et s'affiche de la même façon.
 
 ## Contacter le propriétaire d'un objet
 
-La page d'un objet indique à qui il appartient, la ville où il est rangé et un **téléphone** : celui
-du collectif, ou celui de la personne si elle l'a renseigné dans son profil. Sans téléphone, un
-formulaire permet d'écrire au propriétaire (pour un collectif, à chacun de ses responsables, dans
-un e-mail séparé) : son adresse e-mail reste cachée, la vôtre lui est transmise pour qu'il puisse
-vous répondre. Le prêt, la location ou l'échange s'organisent ensuite directement entre vous.
-L'envoi d'un message n'apparaît pas dans l'historique de l'objet. Le téléphone d'une personne dont
-le compte est désactivé n'est plus affiché.
+En haut de la page d'un objet : à qui il appartient, la ville où il est rangé et, juste dessous,
+les boutons **Appeler**, **SMS** et **Écrire**. Le téléphone est celui du collectif, ou celui de la
+personne si elle l'a renseigné dans son profil et que vous partagez un collectif avec elle ; sans
+téléphone, seul **Écrire** est proposé.
 
-## Modifier mon profil
+**Écrire** mène au formulaire à côté de l'objet (en dessous sur un téléphone) : le message part par
+e-mail au propriétaire (pour un collectif, à chacun de ses responsables, dans un e-mail séparé). Son
+adresse e-mail reste cachée, la vôtre lui est transmise pour qu'il puisse vous répondre. Le prêt,
+la location ou l'échange s'organisent ensuite directement entre vous. L'envoi d'un message
+n'apparaît pas dans l'historique de l'objet. Le téléphone d'une personne dont le compte est
+désactivé n'est plus affiché.
 
-Cliquez sur votre nom en haut de la page. Vous pouvez y changer votre nom et indiquer un numéro de
-téléphone (facultatif).
+## Mon compte
 
-Le téléphone est **visible par tous les utilisateurs validés** de la plateforme : c'est ainsi qu'ils
-vous contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
+Touchez le rond avec vos initiales, en haut à droite. **Mon compte** est rangé en sections, avec un
+sommaire : **Profil** (votre nom et un numéro de téléphone facultatif), **Mes collectifs**,
+**Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
+compte**. La suppression elle-même arrive avec la version 1.0 : la page explique ce qu'elle fera.
+
+Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous
+contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
+
+## La page d'un collectif
+
+Pour ses responsables et ses membres, la page d'un collectif a trois onglets : **Matériel** (ce qu'il
+possède, puis ce que d'autres ont déposé dans ses lieux), **Lieux** et **Membres** (chacun avec son
+rôle, et le téléphone de contact). **Ajouter du matériel**, en haut, ouvre le formulaire avec le collectif comme propriétaire. Les autres utilisateurs ne voient que
+son nom, sa ville, sa présentation et les boutons **Demander à rejoindre** et **Demander à devenir
+responsable**.
+
+## Accueillir les membres d'un collectif
+
+Une personne qui fait partie de votre association choisit **Demander à rejoindre** sur la page du
+collectif. Chaque responsable reçoit un e-mail, et la demande apparaît en tête de l'onglet
+**Membres** (l'onglet indique le nombre de demandes en attente).
+
+- **Accepter** : la personne devient membre ; elle voit le matériel, les lieux (adresse comprise)
+  et les membres du collectif, et elle ajoute, modifie, déplace et archive le matériel du collectif.
+  Les lieux, les membres, la présentation et le matériel que d'autres ont déposé restent gérés par
+  les responsables. Elle est prévenue par e-mail.
+- **Refuser** : la personne est prévenue par e-mail ; elle pourra refaire une demande.
+- **Retirer** un membre, dans la liste : il ne voit plus rien du collectif, aussitôt, et reçoit un
+  e-mail.
+
+Seuls les responsables du collectif décident : ni les administrateurs ni les modérateurs de la
+plateforme. Chaque décision est inscrite au journal.
+
+## Nommer les responsables
+
+Dans l'onglet **Membres**, un responsable peut **Nommer** un membre **responsable** : il gère alors
+aussi les lieux, les membres et la présentation du collectif. **Retirer le rôle de responsable**
+rend un responsable simple membre ; il garde l'accès au matériel. Un collectif garde toujours au
+moins un responsable : le dernier ne peut pas perdre ce rôle tant qu'un autre n'est pas nommé. Les
+administrateurs et les modérateurs peuvent faire de même pour tout collectif, pour qu'aucun ne
+reste sans responsable. La personne concernée est prévenue par e-mail.
+
+## Quitter un collectif
+
+En bas de l'onglet **Membres**, **Quitter** le collectif : vous ne voyez plus son matériel, ses
+lieux ni ses membres ; votre propre matériel reste à vous. Le seul responsable d'un collectif doit
+d'abord nommer un autre responsable.
 
 ## Modifier la présentation d'un collectif
 
 Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y
-changer la description et le téléphone de contact, visibles par les utilisateurs validés. Pour
+changer la ville et la description, visibles par tous les utilisateurs validés, et le téléphone de contact,
+visible par les personnes qui voient le matériel du collectif. Pour
 changer le nom, contactez un administrateur.
+
+## Mon matériel
+
+**Mon matériel** montre ce qui est rangé **chez vous** en ce moment, dans vos lieux personnels, en
+trois parties : **À moi**, **À mes collectifs** (le matériel d'un collectif que vous gardez) et
+**Prêté par d'autres**. Le matériel rangé au local d'un collectif est sur la page du collectif ; le
+vôtre rangé ailleurs se retrouve avec **Rechercher**.
 
 ## Gérer les lieux de stockage
 
 Un **lieu** est un endroit où du matériel est rangé : le local d'un collectif, votre garage…
 Tout utilisateur validé peut déclarer ses propres lieux ; personne d'autre ne peut les modifier. Ouvrez
-**Mes lieux** en haut de la page.
+**Mon matériel**, puis l'onglet **Lieux** : il liste vos lieux personnels. Les lieux d'un collectif
+sont sur la page du collectif.
 
 - **Ajouter un lieu** : choisissez à qui il appartient — vous-même (« Moi (lieu personnel) ») ou
   un collectif dont vous êtes responsable — puis indiquez son nom, sa ville, son adresse et des notes (accès, code…).
-- **Modifier** ou **Supprimer** un lieu depuis la même page. La page d'un collectif liste aussi ses
-  lieux.
+- **Modifier** ou **Supprimer** un lieu depuis l'onglet Lieux, ou depuis la page du collectif pour
+  ses lieux.
 
 Seule la **ville** d'un lieu est montrée aux autres utilisateurs, sur la page du collectif comme
 sur la page du lieu ; l'adresse et les notes restent réservées aux personnes qui gèrent le lieu
@@ -58,18 +160,25 @@ sur la page du lieu ; l'adresse et les notes restent réservées aux personnes q
 
 ## Ajouter du matériel
 
-Ouvrez **Mon matériel**, puis **Ajouter du matériel**. Il faut d'abord avoir au moins un lieu (voir
-ci-dessus).
+**Ajouter du matériel** est en haut de chaque page sur un ordinateur, et dans **Mon matériel**.
+Le formulaire décrit d'abord l'objet, puis rappelle, juste au-dessus du bouton **Ajouter**, où il
+sera rangé et à qui il appartient : vérifiez ces deux choix avant d'enregistrer.
 
 - **Rangé dans** : un lieu que vous gérez (le vôtre, ou celui d'un collectif dont vous êtes
-  responsable).
-- **Appartient à** : vous, ou un collectif dont vous êtes responsable. Le propriétaire et le lieu
+  responsable ou membre), ou **Un nouveau lieu** : décrivez-le dans **Créer un nouveau lieu** (à qui il est,
+  son nom, sa ville) et il est créé en même temps que l'objet. Sans aucun lieu, le formulaire
+  commence par là. L'adresse et les notes se complètent ensuite depuis la page du lieu.
+- **Appartient à** : vous, ou un collectif dont vous êtes responsable ou membre. Le propriétaire et le lieu
   peuvent être différents : votre ampli peut être rangé au local du collectif.
 - **Dépôt d'une personne** : un responsable peut ranger au local de son collectif un objet qui
   appartient à quelqu'un d'autre. Choisissez « Une autre personne » et indiquez son e-mail ; son
-  compte doit être validé. La personne retrouve l'objet dans son matériel et peut le modifier.
+  compte doit être validé. La personne retrouve l'objet avec **Rechercher** et peut le modifier.
 - Le reste décrit l'objet : nom, catégorie, quantité (pour un lot d'objets identiques), marque,
-  modèle, numéro de série, état, valeur estimée et description.
+  modèle, numéro de série, référence, état, valeur estimée et description.
+- **Référence** (facultative) : votre code ou numéro d'inventaire, par exemple celui de
+  l'étiquette. Deux objets du même propriétaire ne peuvent pas porter la même référence (les
+  majuscules et les accents ne comptent pas), même si l'un est archivé. Elle sert à réimporter un
+  fichier sans créer de doublons, et **Rechercher** la trouve.
 
 Un lieu qui contient encore du matériel ne peut pas être supprimé : déplacez d'abord le matériel.
 
@@ -94,6 +203,63 @@ Un objet vendu, perdu ou cassé s'**archive** depuis sa page (même droits que p
 choisissez la raison. Il disparaît de l'inventaire et des listes, mais n'est pas supprimé : sa page
 et son historique restent consultables par ceux qui le gèrent. Un objet archivé ne peut plus être
 modifié ni déplacé.
+
+## Supprimer du matériel
+
+Pour du matériel saisi par erreur (un doublon, une fausse manipulation), **Supprimer…** sur sa page
+ouvre une page de confirmation ; **Supprimer définitivement** efface l'objet et son historique. Ce
+bouton apparaît pour la personne propriétaire, pour les responsables du collectif propriétaire, et
+pour les administrateurs et modérateurs. Pour du matériel vendu, perdu ou cassé, archivez-le
+plutôt : il garde son historique.
+
+Un membre du collectif choisit **Demander la suppression** : la demande apparaît dans l'onglet
+**Membres**, sans e-mail. Un responsable la **supprime** ou la **refuse** ; une seule demande à la
+fois par objet.
+
+## Importer un fichier
+
+Pour reprendre un inventaire tenu dans un tableur, **Importer un fichier** (dans **Mon matériel**,
+ou sur la page d'un collectif pour ses responsables) ajoute ou met à jour beaucoup d'objets à la
+fois. Rien n'est enregistré avant la dernière étape.
+
+1. **Fichier** : choisissez le lieu où ranger le matériel (il appartiendra au propriétaire de ce
+   lieu) et un fichier **CSV** de 2 Mo et 2 000 lignes au plus, dont la première ligne contient les
+   titres des colonnes. Depuis Excel ou LibreOffice : *Enregistrer sous* › *CSV*. Un classeur
+   (.xlsx, .ods) n'est pas lu directement.
+2. **Colonnes** : pour chaque colonne, ce qu'elle contient (nom, catégorie, quantité, référence…)
+   ou **Ne pas importer**. Les titres courants sont reconnus ; vérifiez ceux marqués « à vérifier ».
+3. **Catégories, états et lieux** : chaque valeur différente de ces colonnes reçoit une catégorie,
+   un état ou un lieu. Une valeur inconnue va dans « Autre ».
+4. **Vérification** : le nombre d'objets à créer, à modifier, inchangés et à corriger, puis chaque
+   ligne. Tant qu'une ligne est à corriger, rien n'est importé : corrigez le fichier et envoyez-le
+   à nouveau. **Importer** enregistre tout d'un coup ; chaque objet le note dans son historique.
+
+Vos choix de colonnes et de valeurs sont retenus pour le propriétaire : le fichier suivant les
+reprend. Un import en cours est gardé une heure.
+
+**Réimporter sans doublons.** Une ligne dont la **référence** est déjà celle d'un objet du même
+propriétaire met cet objet à jour au lieu d'en créer un autre ; une ligne avec l'**Identifiant**
+d'un export fait de même, et peut lui donner une référence. Une cellule vide ne vide jamais un
+champ. Une référence présente deux fois dans le fichier bloque l'import. Si la référence est celle
+d'un objet archivé, la ligne est mise de côté : **L'ajouter comme nouvel objet** la crée quand même,
+sans cette référence.
+
+## Exporter le matériel
+
+Le matériel part dans un fichier CSV que LibreOffice et Excel ouvrent directement :
+
+- **Exporter le matériel qui m'appartient (CSV)**, en bas de **Mon matériel** : tout ce qui est à
+  vous, où que ce soit rangé.
+- **Exporter (CSV)**, dans l'onglet **Matériel** d'un collectif, pour ses responsables : tout ce
+  que possède le collectif, où que ce soit rangé. Le matériel que d'autres ont déposé dans ses
+  lieux n'y est pas : il reste à eux.
+
+Le fichier a une ligne par objet : référence, nom, catégorie, quantité, marque, modèle, numéro de
+série, état, valeur estimée, description, nom du lieu et identifiant. Le matériel archivé n'y est
+pas, ni l'adresse des lieux, ni le nom des personnes. C'est le format que l'import relira : gardez
+la colonne **Identifiant** si vous comptez réimporter le fichier après l'avoir corrigé. Un modèle
+vide, avec les mêmes colonnes, se télécharge à l'adresse de l'application suivie de
+`/modele-import.csv`.
 
 ## Historique d'un objet
 

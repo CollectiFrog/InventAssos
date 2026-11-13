@@ -3,13 +3,49 @@ import * as s from 'remix/data-schema'
 
 import type { FieldErrors } from './ui/form.tsx'
 
-/** A required, trimmed text of at most `max` characters. */
+/**
+ * True when the text holds a line break or another control character: C0, DEL and C1 (what a
+ * Windows-1252 file read as Latin-1 produces). Same set as the database checks, written out so
+ * that no server locale changes it.
+ */
+export function hasControlCharacter(value: string): boolean {
+  for (let index = 0; index < value.length; index++) {
+    const code = value.charCodeAt(index)
+    if (code <= 0x1f || (code >= 0x7f && code <= 0x9f)) return true
+  }
+  return false
+}
+
+/**
+ * A required, trimmed, single-line text of at most `max` characters. Names end up in e-mail
+ * subjects and bodies: a line break in one would let its author shape the message.
+ */
 export function requiredText(max: number) {
   return s
     .defaulted(s.string(), '')
     .transform((value) => value.trim())
     .refine((value) => value.length > 0, 'Ce champ est obligatoire.')
+    .refine((value) => !hasControlCharacter(value), 'Une seule ligne, sans retour à la ligne.')
     .refine((value) => value.length <= max, `${max} caractères au maximum.`)
+}
+
+/**
+ * An optional, trimmed, single-line text: blank becomes null (a reference, a code). Normalised to
+ * NFC, so that « é » typed on a Mac (e + accent) and on Windows (one character) are one value:
+ * references are compared with `inv_fold`, which only knows precomposed letters.
+ */
+export function optionalLine(max: number) {
+  // Normalised before it is measured: NFC can lengthen a few characters, and the database checks
+  // the stored length.
+  return (
+    s
+      .defaulted(s.string(), '')
+      // Runs of spaces become one, as the import does: « DBL  01 » and « DBL 01 » are one reference.
+      .transform((value) => value.replace(/\s+/g, ' ').trim().normalize('NFC'))
+      .refine((value) => value.length <= max, `${max} caractères au maximum.`)
+      .refine((value) => !hasControlCharacter(value), 'Une seule ligne, sans retour à la ligne.')
+      .transform((value) => (value === '' ? null : value))
+  )
 }
 
 /** An optional, trimmed text: blank becomes null. */

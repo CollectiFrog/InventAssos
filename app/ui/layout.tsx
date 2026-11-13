@@ -1,21 +1,104 @@
 import type { Handle, RemixNode } from 'remix/component'
-
+import { appInitials, appName } from '../brand.ts'
 import { routes } from '../routes.ts'
 
-/** What the header needs to know about the signed-in person; null for a visitor. */
-export type Viewer = { name: string; isAdmin: boolean; csrfToken: string } | null
+/** What the shell needs to know about the signed-in person; null for a visitor. */
+export type Viewer = {
+  name: string
+  /** Listed in PLATFORM_ADMIN_EMAILS: names moderators (US-0.8.1). */
+  isAdmin: boolean
+  /** Admin or moderator: sees Administration (US-0.8.2). */
+  isStaff: boolean
+  /** Only active accounts get the navigation; pending and rejected ones see their status page. */
+  isActive: boolean
+  csrfToken: string
+  /** Collectifs the person belongs to, by name, for the sidebar's "Mes collectifs". */
+  collectifs: readonly { name: string; slug: string }[]
+} | null
+
+/** The four navigation entries (US-0.7.1); a page names the one it belongs to. */
+export type Section = 'home' | 'search' | 'mine' | 'collectifs'
+
+/** One step of the breadcrumb; the last one is the page itself and has no link. */
+export interface Crumb {
+  label: string
+  href?: string
+}
 
 /** Props of the page shell. */
 export interface LayoutProps {
   title: string
   viewer?: Viewer
+  /** Navigation entry marked as current; detail pages reached from several places leave it out. */
+  section?: Section
+  /** Shell link marked as current, for the pages reached from outside the four entries. */
+  headerLink?: 'admin' | 'account'
+  /** Breadcrumb shown above the title on computers (ADR 0022). */
+  trail?: Crumb[]
+  /** Where « Retour » goes on phones: the previous page of this site, else the parent. */
+  back?: string
   children?: RemixNode
 }
+
+/** How many collectifs the sidebar lists before linking to all of them (ADR 0022). */
+export const sidebarCollectifLimit = 5
+
+/** Up to two initials for the account button: "Camille Martin" → "CM". */
+export function initialsOf(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean)
+  const letters = words.length > 1 ? [words[0], words.at(-1)] : words
+  return letters.map((word = '') => word.charAt(0).toLocaleUpperCase('fr')).join('')
+}
+
+const entries: { section: Section; label: string; href: string; icon: RemixNode }[] = [
+  {
+    section: 'home',
+    label: 'Accueil',
+    href: routes.home.href(),
+    icon: <path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z" />,
+  },
+  {
+    section: 'search',
+    label: 'Rechercher',
+    href: routes.inventory.index.href(),
+    icon: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="M20 20l-3.5-3.5" />
+      </>
+    ),
+  },
+  {
+    section: 'mine',
+    label: 'Mon matériel',
+    href: routes.items.index.href(),
+    icon: (
+      <>
+        <path d="M3 8l9-5 9 5v8l-9 5-9-5z" />
+        <path d="M3 8l9 5 9-5M12 13v8" />
+      </>
+    ),
+  },
+  {
+    section: 'collectifs',
+    label: 'Collectifs',
+    href: routes.collectifs.index.href(),
+    icon: (
+      <>
+        <circle cx="9" cy="8" r="3.5" />
+        <path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5" />
+        <circle cx="17" cy="9" r="2.5" />
+        <path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5" />
+      </>
+    ),
+  },
+]
 
 /** The HTML document every page renders into. Server-rendered only (ADR 0015). */
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
-    const { title, viewer = null, children } = handle.props
+    const { title, viewer = null, section, headerLink, trail = [], back, children } = handle.props
+    const navigates = viewer?.isActive === true
 
     return (
       <html lang="fr">
@@ -25,43 +108,211 @@ export function Layout(handle: Handle<LayoutProps>) {
           <meta name="color-scheme" content="light dark" />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
           <link rel="stylesheet" href="/styles.css" />
-          <title>{`${title} · InventAssos`}</title>
+          <title>{`${title} · ${appName}`}</title>
         </head>
-        <body>
-          <header class="site-header">
-            <a class="brand" href={routes.home.href()}>
-              InventAssos
-            </a>
-            <nav aria-label="Compte" class="account-nav">
-              {viewer ? (
-                <>
-                  <a href={routes.inventory.index.href()}>Inventaire</a>
-                  <a href={routes.items.index.href()}>Mon matériel</a>
-                  <a href={routes.collectifs.index.href()}>Collectifs</a>
-                  <a href={routes.locations.index.href()}>Mes lieux</a>
-                  {viewer.isAdmin ? <a href={routes.admin.index.href()}>Administration</a> : null}
-                  <a class="viewer" href={routes.account.profile.index.href()}>
-                    {viewer.name}
-                    {viewer.isAdmin ? <span class="badge">admin</span> : null}
-                  </a>
-                  <form method="post" action={routes.signOut.href()}>
-                    <input type="hidden" name="_csrf" value={viewer.csrfToken} />
+        <body class={navigates ? 'has-nav' : undefined}>
+          <a class="skip-link" href="#contenu">
+            Aller au contenu
+          </a>
+          <div class="shell">
+            {viewer && navigates ? (
+              <Sidebar viewer={viewer} section={section} headerLink={headerLink} />
+            ) : null}
+            <div class="shell-body">
+              <header class="top-bar">
+                <a class="brand" href={routes.home.href()}>
+                  {appName}
+                </a>
+                {navigates ? (
+                  <form method="get" action={routes.inventory.index.href()} class="top-search">
+                    <label for="recherche-globale" class="visually-hidden">
+                      Chercher dans mes collectifs
+                    </label>
+                    <input
+                      type="search"
+                      id="recherche-globale"
+                      name="q"
+                      placeholder="Chercher dans mes collectifs…"
+                    />
                     <button type="submit" class="secondary">
-                      Se déconnecter
+                      Rechercher
                     </button>
                   </form>
-                </>
-              ) : (
-                <>
-                  <a href={routes.signIn.form.index.href()}>Se connecter</a>
-                  <a href={routes.signUp.form.index.href()}>Créer un compte</a>
-                </>
-              )}
-            </nav>
-          </header>
-          <main>{children}</main>
+                ) : null}
+                <div class="header-links">
+                  {viewer && navigates ? (
+                    <>
+                      <a class="button top-add" href={routes.items.create.index.href()}>
+                        Ajouter du matériel
+                      </a>
+                      {viewer.isStaff ? (
+                        // Phones only: from 720 px Administration sits at the bottom of the sidebar.
+                        <a
+                          class="phone-admin"
+                          href={routes.admin.index.href()}
+                          aria-current={headerLink === 'admin' ? 'page' : undefined}
+                        >
+                          Administration
+                        </a>
+                      ) : null}
+                      <a
+                        class="avatar"
+                        href={routes.account.profile.index.href()}
+                        // The visible initials start the name, for voice control (WCAG 2.5.3).
+                        aria-label={`${initialsOf(viewer.name)}, mon compte : ${viewer.name}`}
+                        aria-current={headerLink === 'account' ? 'page' : undefined}
+                      >
+                        {initialsOf(viewer.name)}
+                      </a>
+                    </>
+                  ) : viewer ? (
+                    <SignOutButton csrfToken={viewer.csrfToken} />
+                  ) : (
+                    <>
+                      <a href={routes.signIn.form.index.href()}>Se connecter</a>
+                      <a href={routes.signUp.form.index.href()}>Créer un compte</a>
+                    </>
+                  )}
+                </div>
+              </header>
+              <main id="contenu">
+                {back || trail.length > 0 ? (
+                  <div class="page-nav">
+                    {back ? (
+                      <a class="back-link" href={back}>
+                        <span aria-hidden="true">← </span>Retour
+                      </a>
+                    ) : null}
+                    {trail.length > 0 ? (
+                      <nav aria-label="Fil d’Ariane" class="breadcrumb">
+                        <ol>
+                          {trail.map((crumb, index) =>
+                            crumb.href && index < trail.length - 1 ? (
+                              <li>
+                                <a href={crumb.href} class="crumb-link">
+                                  {crumb.label}
+                                </a>
+                              </li>
+                            ) : (
+                              <li aria-current="page">{crumb.label}</li>
+                            ),
+                          )}
+                        </ol>
+                      </nav>
+                    ) : null}
+                  </div>
+                ) : null}
+                {children}
+              </main>
+            </div>
+          </div>
         </body>
       </html>
     )
   }
+}
+
+/** Icon of a navigation link, drawn on a 24 px grid. */
+function NavIcon(handle: Handle<{ children?: RemixNode }>) {
+  return () => (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {handle.props.children}
+    </svg>
+  )
+}
+
+/**
+ * The four entries, "Mes collectifs" and Administration. styles.css makes it a bottom tab bar below
+ * 720 px, a rail up to 1099 px, then a sidebar (ADR 0022).
+ */
+function Sidebar(
+  handle: Handle<{
+    viewer: NonNullable<Viewer>
+    section?: Section
+    headerLink?: LayoutProps['headerLink']
+  }>,
+) {
+  return () => {
+    const { viewer, section, headerLink } = handle.props
+    const shown = viewer.collectifs.slice(0, sidebarCollectifLimit)
+
+    return (
+      <aside class="sidebar">
+        <a class="brand side-brand" href={routes.home.href()}>
+          <span class="logo" aria-hidden="true">
+            {appInitials}
+          </span>
+          <span class="brand-name">{appName}</span>
+        </a>
+        <nav aria-label="Navigation principale" class="main-nav">
+          {entries.map((entry) => (
+            <a href={entry.href} aria-current={entry.section === section ? 'page' : undefined}>
+              <NavIcon>{entry.icon}</NavIcon>
+              <span>{entry.label}</span>
+            </a>
+          ))}
+        </nav>
+        {shown.length > 0 ? (
+          <>
+            <p class="side-heading" id="mes-collectifs">
+              Mes collectifs
+            </p>
+            <nav aria-labelledby="mes-collectifs" class="my-collectifs">
+              {shown.map((collectif) => (
+                <a href={routes.collectifs.show.href({ slug: collectif.slug })}>
+                  <span class="initials" aria-hidden="true">
+                    {initialsOf(collectif.name)}
+                  </span>
+                  <span>{collectif.name}</span>
+                </a>
+              ))}
+              {viewer.collectifs.length > shown.length ? (
+                <a href={routes.collectifs.index.href()}>
+                  <span class="initials" aria-hidden="true">
+                    …
+                  </span>
+                  <span>Tous</span>
+                </a>
+              ) : null}
+            </nav>
+          </>
+        ) : null}
+        {viewer.isStaff ? (
+          <div class="side-foot">
+            <a
+              href={routes.admin.index.href()}
+              aria-current={headerLink === 'admin' ? 'page' : undefined}
+            >
+              <NavIcon>
+                <path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z" />
+              </NavIcon>
+              <span>Administration</span>
+            </a>
+          </div>
+        ) : null}
+      </aside>
+    )
+  }
+}
+
+/** Sign-out form: in the top bar for pending accounts, on the account page for active ones. */
+export function SignOutButton(handle: Handle<{ csrfToken: string }>) {
+  return () => (
+    <form method="post" action={routes.signOut.href()} class="sign-out">
+      <input type="hidden" name="_csrf" value={handle.props.csrfToken} />
+      <button type="submit" class="secondary">
+        Se déconnecter
+      </button>
+    </form>
+  )
 }

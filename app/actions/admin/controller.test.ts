@@ -9,6 +9,7 @@ import { listEntityHistory } from '../../data/audit-log.ts'
 import type { User } from '../../data/tables.ts'
 import { createUser, findUserById, setUserStatus } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
+import { withReturnPath } from '../return-path.ts'
 
 describe('approve or reject accounts (US-0.2.4)', () => {
   let db: Database
@@ -100,6 +101,9 @@ describe('approve or reject accounts (US-0.2.4)', () => {
   it('sends a visitor to sign-in', async () => {
     const response = await app.client().get(routes.admin.index.href())
 
-    assert.equal(response.location, routes.signIn.form.index.href())
+    assert.equal(
+      response.location,
+      withReturnPath(routes.signIn.form.index.href(), routes.admin.index.href()),
+    )
   })
 })

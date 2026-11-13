@@ -5,20 +5,26 @@ import { createController } from 'remix/router'
 import { logAction } from '../../../data/audit-log.ts'
 import { findCollectifById } from '../../../data/collectifs.ts'
 import {
-  countActiveResponsiblesForUpdate,
+  countOtherResponsiblesForUpdate,
   findResponsible,
+  setMembershipRole,
   setResponsible,
-} from '../../../data/responsibles.ts'
+} from '../../../data/members.ts'
 import { findUserByEmail, findUserById } from '../../../data/users.ts'
 import { sendSafely } from '../../../mail/mailer.ts'
 import {
   responsibleApprovedMail,
+  responsibleDemotedMail,
   responsibleRejectedMail,
-  responsibleRemovedMail,
 } from '../../../mail/messages.ts'
-import { canManageResponsibles } from '../../../permissions.ts'
+import {
+  canMakeResponsibleByPlatform,
+  canManageResponsibles,
+  canRemoveResponsibleByPlatform,
+} from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import { optionalText, parseForm } from '../../../validation.ts'
+import { accountTargetOf } from '../../account-target.ts'
 import { forbidden, requireUser } from '../../guards.tsx'
 
 const queueUrl = routes.admin.index.href()
@@ -47,6 +53,8 @@ export default createController(routes.admin.responsibles, {
         session.flash('notice', 'Cette demande a déjà été traitée.')
         return redirect(queueUrl, 303)
       }
+      // A moderator never approves their own request (security review of V0.8).
+      if (!canMakeResponsibleByPlatform(actor, user.id)) return forbidden(context)
 
       await db.transaction(async (tx) => {
         await setResponsible(tx, {
@@ -108,7 +116,7 @@ export default createController(routes.admin.responsibles, {
       if (actor instanceof Response) return actor
       if (!canManageResponsibles(actor)) return forbidden(context)
 
-      const { db, mailer, session, params } = context
+      const { db, mailer, session, settings, params } = context
       const collectif = await findCollectifById(db, params.collectifId)
       const user = await findUserById(db, params.userId)
       const link = await findResponsible(db, params.userId, params.collectifId)
@@ -116,9 +124,13 @@ export default createController(routes.admin.responsibles, {
         session.flash('notice', 'Cette personne n’est pas responsable de ce collectif.')
         return redirect(queueUrl, 303)
       }
+      // A moderator never takes the role from an admin or another moderator.
+      if (!canRemoveResponsibleByPlatform(actor, accountTargetOf(user, settings.adminEmails))) {
+        return forbidden(context)
+      }
       const backUrl =
         collectif.status === 'active'
-          ? routes.collectifs.show.href({ slug: collectif.slug })
+          ? routes.collectifs.people.href({ slug: collectif.slug })
           : queueUrl
 
       const parsed = parseForm(removeSchema, context.formData)
@@ -127,6 +139,10 @@ export default createController(routes.admin.responsibles, {
       if (replacementEmail && (replacement?.status !== 'active' || replacement.id === user.id)) {
         session.flash('notice', 'Le remplaçant doit être un autre utilisateur validé.')
         return redirect(backUrl, 303)
+      }
+      // Nor names themselves as the replacement.
+      if (replacement && !canMakeResponsibleByPlatform(actor, replacement.id)) {
+        return forbidden(context)
       }
 
       try {
@@ -139,14 +155,15 @@ export default createController(routes.admin.responsibles, {
               validatedBy: actor.id,
             })
           }
-          const remaining = (await countActiveResponsiblesForUpdate(tx, collectif.id)) - 1
+          const remaining = await countOtherResponsiblesForUpdate(tx, collectif.id, user.id)
           if (collectif.status === 'active' && remaining < 1) throw new RemovalRefused()
 
-          await setResponsible(tx, {
+          // A removed responsible stays a member of the collectif (US-0.8.6).
+          await setMembershipRole(tx, {
             userId: user.id,
             collectifId: collectif.id,
-            status: 'removed',
-            validatedBy: actor.id,
+            role: 'member',
+            decidedBy: actor.id,
           })
           await logAction(tx, {
             actorId: actor.id,
@@ -165,7 +182,7 @@ export default createController(routes.admin.responsibles, {
         return redirect(backUrl, 303)
       }
 
-      await sendSafely(mailer, responsibleRemovedMail(user.email, collectif.name))
+      await sendSafely(mailer, responsibleDemotedMail(user.email, collectif.name))
       session.flash('notice', `${user.name} n’est plus responsable de « ${collectif.name} ».`)
       return redirect(backUrl, 303)
     },

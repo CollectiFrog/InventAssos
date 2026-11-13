@@ -2,7 +2,7 @@
 import type { Database } from 'remix/data-table'
 
 import { createCollectifRequest, decideCollectif } from '../app/data/collectifs.ts'
-import { setResponsible } from '../app/data/responsibles.ts'
+import { setResponsible } from '../app/data/members.ts'
 import type { Collectif } from '../app/data/tables.ts'
 
 /** Creates a pending collectif requested by `requesterId`. */
@@ -13,6 +13,7 @@ export async function createPendingCollectif(
 ): Promise<Collectif> {
   return createCollectifRequest(db, {
     name,
+    city: 'Rennes',
     description: '',
     contactPhone: null,
     requestedBy: requesterId,

@@ -3,7 +3,7 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { logAction } from '../../data/audit-log.ts'
-import { locationHoldsItems } from '../../data/items.ts'
+import { locationHoldsItems, locationShowsItemTo } from '../../data/items.ts'
 import {
   deleteLocation,
   findLocationById,
@@ -11,13 +11,20 @@ import {
   listLocationsOwnedBy,
   redactLocation,
 } from '../../data/locations.ts'
-import { canManageLocation, canSeeFullAddress, isValidatedUser } from '../../permissions.ts'
+import {
+  canManageLocation,
+  canSeeFullAddress,
+  canSeeLocation,
+  isValidatedUser,
+  itemScopeOf,
+} from '../../permissions.ts'
 import { routes } from '../../routes.ts'
+import { backHref } from '../back-link.ts'
 import { forbidden, notFound, requireUser } from '../guards.tsx'
 import { viewerOf } from '../viewer.ts'
 import { LocationPage } from './location-page.tsx'
 import { LocationsPage } from './locations-pages.tsx'
-import { ownerOptionsFor } from './owners.ts'
+import { listPageOf } from './owners.ts'
 
 /** "Mes lieux" and deletion (US-0.4.1, US-0.4.2). */
 export default createController(routes.locations, {
@@ -33,8 +40,8 @@ export default createController(routes.locations, {
         <LocationsPage
           viewer={viewerOf(context)}
           csrfToken={getCsrfToken(context)}
-          locations={await listLocationsOwnedBy(db, actor.id, [...actor.managedCollectifIds])}
-          canCreate={(await ownerOptionsFor(db, actor)).length > 0}
+          // US-0.7.3: my own places only; a collectif's are on its page.
+          locations={await listLocationsOwnedBy(db, actor.id, [])}
           notice={typeof notice === 'string' ? notice : undefined}
         />,
       )
@@ -47,11 +54,21 @@ export default createController(routes.locations, {
 
       const location = await findLocationWithOwner(context.db, context.params.locationId)
       if (location === null) return notFound(context)
+      const seesAnItemThere =
+        !canManageLocation(actor, location) &&
+        (await locationShowsItemTo(context.db, location.id, itemScopeOf(actor)))
+      if (!canSeeLocation(actor, location, seesAnItemThere)) return notFound(context)
       return context.render(
         <LocationPage
           viewer={viewerOf(context)}
           location={redactLocation(location, canSeeFullAddress(actor, location))}
           canManage={canManageLocation(actor, location)}
+          back={backHref(
+            context,
+            location.ownerSlug
+              ? routes.collectifs.places.href({ slug: location.ownerSlug })
+              : routes.locations.index.href(),
+          )}
         />,
       )
     },
@@ -66,7 +83,7 @@ export default createController(routes.locations, {
       // US-0.4.1: the foreign key also refuses it; this check gives a readable message.
       if (await locationHoldsItems(db, location.id)) {
         session.flash('notice', `« ${location.name} » contient du matériel : déplacez-le d’abord.`)
-        return redirect(routes.locations.index.href(), 303)
+        return redirect(await listPageOf(db, location), 303)
       }
 
       await db.transaction(async (tx) => {
@@ -79,7 +96,7 @@ export default createController(routes.locations, {
         })
       })
       session.flash('notice', `Lieu « ${location.name} » supprimé.`)
-      return redirect(routes.locations.index.href(), 303)
+      return redirect(await listPageOf(db, location), 303)
     },
   },
 })

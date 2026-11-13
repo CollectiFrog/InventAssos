@@ -2,20 +2,31 @@ import { createRouter } from 'remix/router'
 
 import accountController from './actions/account/controller.tsx'
 import profileController from './actions/account/profile/controller.tsx'
+import adminCategoriesController from './actions/admin/categories/controller.tsx'
 import adminCollectifsController from './actions/admin/collectifs/controller.tsx'
 import adminController from './actions/admin/controller.tsx'
+import adminModeratorsController from './actions/admin/moderators/controller.tsx'
 import adminResponsiblesController from './actions/admin/responsibles/controller.tsx'
 import collectifsController from './actions/collectifs/controller.tsx'
+import deletionRequestsController from './actions/collectifs/deletions/controller.tsx'
 import editCollectifController from './actions/collectifs/edit/controller.tsx'
+import collectifMembersController from './actions/collectifs/members/controller.tsx'
 import requestCollectifController from './actions/collectifs/request/controller.tsx'
 import controller from './actions/controller.tsx'
+import exportsController from './actions/exports/controller.ts'
 import healthController from './actions/health/controller.ts'
+import importColumnsController from './actions/imports/columns/controller.tsx'
+import importsController from './actions/imports/controller.ts'
+import importPreviewController from './actions/imports/preview/controller.tsx'
+import importStartController from './actions/imports/start/controller.tsx'
+import importValuesController from './actions/imports/values/controller.tsx'
 import inventoryController from './actions/inventory/controller.tsx'
 import archiveItemController from './actions/items/archive/controller.tsx'
 import itemsController from './actions/items/controller.tsx'
 import createItemController from './actions/items/create/controller.tsx'
 import editItemController from './actions/items/edit/controller.tsx'
 import moveItemController from './actions/items/move/controller.tsx'
+import deleteItemController from './actions/items/remove/controller.tsx'
 import locationsController from './actions/locations/controller.tsx'
 import createLocationController from './actions/locations/create/controller.tsx'
 import editLocationController from './actions/locations/edit/controller.tsx'
@@ -35,18 +46,29 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.account, accountController)
   router.map(routes.account.profile, profileController)
   router.map(routes.admin, adminController)
+  router.map(routes.admin.categories, adminCategoriesController)
   router.map(routes.admin.collectifs, adminCollectifsController)
+  router.map(routes.admin.moderators, adminModeratorsController)
   router.map(routes.admin.responsibles, adminResponsiblesController)
   router.map(routes.collectifs, collectifsController)
+  router.map(routes.collectifs.members, collectifMembersController)
+  router.map(routes.collectifs.deletions, deletionRequestsController)
   router.map(routes.collectifs.request, requestCollectifController)
   router.map(routes.collectifs.edit, editCollectifController)
   router.map(routes.health, healthController)
   router.map(routes.inventory, inventoryController)
+  router.map(routes.exports, exportsController)
+  router.map(routes.imports, importsController)
+  router.map(routes.imports.start, importStartController)
+  router.map(routes.imports.columns, importColumnsController)
+  router.map(routes.imports.values, importValuesController)
+  router.map(routes.imports.preview, importPreviewController)
   router.map(routes.items, itemsController)
   router.map(routes.items.create, createItemController)
   router.map(routes.items.edit, editItemController)
   router.map(routes.items.move, moveItemController)
   router.map(routes.items.archive, archiveItemController)
+  router.map(routes.items.remove, deleteItemController)
   router.map(routes.locations, locationsController)
   router.map(routes.people, peopleController)
   router.map(routes.locations.create, createLocationController)

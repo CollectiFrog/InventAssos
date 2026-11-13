@@ -7,6 +7,8 @@
   --border: #d9d9d2;
   --danger: #a12622;
   --surface: #ffffff;
+  --accent-soft: #e8f2ec;
+  --touch: 44px;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
   color: var(--fg);
@@ -22,6 +24,7 @@
     --border: #3a3a35;
     --danger: #ff8a80;
     --surface: #1f1f1c;
+    --accent-soft: #23362a;
   }
 }
 
@@ -31,22 +34,56 @@
 body {
   margin: 0;
 }
-main {
-  max-width: 56rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 4rem;
-}
 a {
   color: var(--accent);
 }
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 30;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: var(--surface);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
 
-.site-header {
+/*
+ * Shell (ADR 0022): one sidebar <aside> holding the main <nav>. Phones: bottom tab bar.
+ * 720-1099 px: rail of 84 px. From 1100 px: sidebar of 240 px. Content is fluid.
+ */
+main {
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: 1.5rem clamp(1rem, 2.2vw, 2.5rem) 4rem;
+  container: main / inline-size;
+}
+main > p,
+.prose {
+  max-width: 68ch;
+}
+.top-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.5rem 1rem;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
@@ -54,6 +91,259 @@ a {
   font-weight: 700;
   text-decoration: none;
   font-size: 1.15rem;
+}
+.top-search,
+.top-add,
+.side-brand,
+.side-heading,
+.my-collectifs,
+.side-foot {
+  display: none;
+}
+.header-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+.header-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+}
+.header-links a[aria-current="page"] {
+  font-weight: 700;
+}
+.header-links .avatar {
+  justify-content: center;
+  width: var(--touch);
+  border-radius: 50%;
+  background: var(--accent-soft);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.header-links .avatar[aria-current="page"] {
+  outline: 2px solid var(--accent);
+}
+
+.sidebar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 10;
+  padding: 0.25rem 0.25rem calc(0.25rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.main-nav {
+  display: flex;
+}
+.main-nav a,
+.side-foot a {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 3.5rem;
+  padding: 0 0.25rem;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+}
+.main-nav a:hover,
+.side-foot a:hover,
+.my-collectifs a:hover {
+  color: var(--fg);
+}
+.main-nav a[aria-current="page"],
+.side-foot a[aria-current="page"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+.main-nav svg,
+.side-foot svg {
+  flex: none;
+}
+body.has-nav main {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 720px) {
+  .has-nav .shell {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+  .sidebar {
+    position: sticky;
+    inset: auto;
+    top: 0;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    height: 100vh;
+    padding: 0.75rem 0.4rem;
+    overflow-y: auto;
+    border-top: 0;
+    border-right: 1px solid var(--border);
+  }
+  .main-nav {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .main-nav a,
+  .side-foot a {
+    flex: none;
+    min-height: 3.6rem;
+  }
+  .main-nav a[aria-current="page"],
+  .side-foot a[aria-current="page"] {
+    background: var(--accent-soft);
+  }
+  .side-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.25rem 0 0.75rem;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+  /* Hidden on the rail but still read, so the brand link keeps its name (WCAG 2.4.4). */
+  .brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .side-foot {
+    display: block;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .has-nav .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    flex-wrap: nowrap;
+    min-height: 4rem;
+    padding: 0.6rem clamp(1rem, 2.2vw, 2.5rem);
+  }
+  .has-nav .top-bar > .brand,
+  .phone-admin {
+    display: none;
+  }
+  .top-search {
+    display: flex;
+    flex: 1;
+    gap: 0.4rem;
+    max-width: 40rem;
+  }
+  .top-search input {
+    min-height: var(--touch);
+  }
+  .top-search button {
+    flex: none;
+  }
+  .header-links {
+    flex-wrap: nowrap;
+  }
+  .header-links .top-add {
+    display: inline-flex;
+    white-space: nowrap;
+  }
+  body.has-nav main {
+    padding-bottom: 4rem;
+  }
+}
+
+@media (min-width: 1100px) {
+  .has-nav .shell {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .sidebar {
+    padding: 0.9rem 0.75rem;
+  }
+  .side-brand {
+    justify-content: flex-start;
+    padding: 0.25rem 0.6rem 0.9rem;
+  }
+  .brand-name {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+  .main-nav a,
+  .side-foot a,
+  .my-collectifs a {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.6rem;
+    min-height: var(--touch);
+    padding: 0 0.6rem;
+    font-size: 1rem;
+    text-align: left;
+  }
+  .main-nav svg,
+  .side-foot svg {
+    width: 20px;
+    height: 20px;
+  }
+  .side-heading {
+    display: block;
+    margin: 1.1rem 0.6rem 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .my-collectifs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .my-collectifs a {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .my-collectifs .initials {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 6px;
+    background: var(--accent-soft);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
 }
 .status {
   color: var(--muted);
@@ -66,6 +356,7 @@ h1 {
 input,
 textarea,
 select {
+  min-height: var(--touch);
   font: inherit;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--border);
@@ -107,6 +398,7 @@ select {
 
 button,
 .button {
+  min-height: var(--touch);
   display: inline-block;
   font: inherit;
   font-weight: 600;
@@ -124,7 +416,8 @@ button.secondary,
   background: transparent;
   color: var(--accent);
 }
-button.danger {
+button.danger,
+.button.danger {
   background: var(--danger);
   border-color: var(--danger);
 }
@@ -143,17 +436,8 @@ button.danger {
   border-color: var(--accent);
 }
 
-.account-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
-.account-nav form {
+.sign-out {
   margin: 0;
-}
-.viewer {
-  font-weight: 600;
 }
 .actions {
   display: flex;
@@ -248,4 +532,557 @@ button.danger {
 }
 .filters .actions {
   align-self: end;
+}
+
+/* Page header: title on the left, the page's main action on the right. */
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.page-head h1 {
+  margin-bottom: 0.25rem;
+}
+.page-head p {
+  margin: 0;
+}
+
+/* Collectifs directory (US-0.7.12): cards fill the width, as many per row as fit. */
+.directory {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+.directory-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.directory-card p {
+  margin: 0;
+}
+.directory-name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+.excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.directory-new {
+  border-style: dashed;
+  justify-content: center;
+}
+.directory-new .button {
+  align-self: flex-start;
+  margin-top: 0.35rem;
+}
+.directory-search {
+  max-width: 32rem;
+  margin-bottom: 1rem;
+}
+
+/* Dashboard (US-0.7.2): search first, then recent equipment beside my collectifs when wide. */
+.home-search {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 40rem;
+  margin-bottom: 1.25rem;
+}
+.home-search label {
+  font-weight: 600;
+}
+.home-search input {
+  min-height: var(--touch);
+}
+.pending-card {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  max-width: 40rem;
+  margin-bottom: 1.25rem;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--fg);
+  text-decoration: none;
+}
+.pending-count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+}
+.dashboard {
+  display: grid;
+  gap: 0 2rem;
+  align-items: start;
+}
+@container main (min-width: 60rem) {
+  .dashboard {
+    grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  }
+}
+.empty-state p {
+  margin-top: 0;
+}
+
+/* Tabs inside a page: links to distinct URLs, the current one underlined. */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+}
+.tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 1rem;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tabs a[aria-current="page"] {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* « Créer un nouveau lieu » inside the add form (US-0.7.4). */
+.new-location {
+  display: grid;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+.new-location[open] {
+  padding-bottom: 1rem;
+}
+.new-location summary {
+  min-height: var(--touch);
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Detail template (ADR 0022): content, then a side panel that sticks beside it when wide. */
+.detail {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+.detail-side {
+  display: grid;
+  gap: 1rem;
+}
+.detail-side h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+@container main (min-width: 52rem) {
+  .detail {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+  }
+  .detail-side {
+    position: sticky;
+    top: 5rem;
+  }
+}
+/* Appeler / SMS / Écrire (US-0.7.6): big enough for a thumb, first thing under the title. */
+.contact-buttons {
+  margin: 0;
+}
+.contact-buttons .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6.5rem;
+  min-height: var(--touch);
+}
+.item-head h1 {
+  margin-bottom: 0.25rem;
+}
+.item-head p.status {
+  margin: 0;
+}
+
+/* Categories (US-0.7.10): one card per category, in order. */
+.category-list {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 48rem;
+  padding: 0;
+  list-style: none;
+}
+.category-row {
+  display: grid;
+  gap: 0.5rem;
+}
+.category-row p {
+  margin: 0;
+}
+.confirm summary {
+  min-height: var(--touch);
+  display: flex;
+  align-items: center;
+  color: var(--danger);
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* « Vérifiez avant d’ajouter » (US-0.7.7): owner and location grouped above the button. */
+.recap {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent-soft);
+}
+.recap legend {
+  padding: 0 0.35rem;
+  font-weight: 700;
+}
+
+/* Index template (ADR 0022): filters on the left, sticky, then the results. */
+.index {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+@container main (min-width: 56rem) {
+  .index {
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+  .index-filters {
+    position: sticky;
+    top: 5rem;
+  }
+}
+.filter-form {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.index-results {
+  min-width: 0;
+  container: results / inline-size;
+}
+.results-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.results-bar > p {
+  margin: 0;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chip[aria-current="page"] {
+  background: var(--accent);
+  color: var(--bg);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.view-switch {
+  display: inline-flex;
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.view-switch a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+.view-switch a[aria-current="page"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+.item-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+}
+
+/* Data table: dense rows, sortable headers; cards when its container is narrow. */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.data-table th,
+.data-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.data-table th {
+  font-size: 0.85rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.data-table th a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  color: inherit;
+  text-decoration: none;
+}
+.data-table th[aria-sort] a {
+  color: var(--accent);
+}
+.data-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.data-table tbody tr:hover {
+  background: var(--accent-soft);
+}
+@container results (max-width: 40rem) {
+  .data-table,
+  .data-table tbody,
+  .data-table tr,
+  .data-table td {
+    display: block;
+  }
+  .data-table {
+    border: 0;
+    background: transparent;
+  }
+  .data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .data-table tr {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+  .data-table td {
+    padding: 0.1rem 0;
+    border: 0;
+  }
+  .data-table td:not(.cell-name)::before {
+    content: attr(data-label) " : ";
+    color: var(--muted);
+  }
+  .data-table .num {
+    text-align: left;
+  }
+}
+.results-bar h2 {
+  margin: 0;
+}
+
+/* Settings template (ADR 0022): contents on the left, sections "explanation | card". */
+.settings {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+.settings-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+.toc-link {
+  display: inline-flex;
+  align-items: center;
+  min-width: var(--touch);
+  min-height: var(--touch);
+  padding: 0 0.35rem;
+}
+.settings-sections {
+  display: grid;
+  gap: 1.5rem;
+  min-width: 0;
+}
+.setting {
+  display: grid;
+  gap: 0.75rem;
+  scroll-margin-top: 5rem;
+}
+.setting h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+}
+.setting p.status {
+  margin: 0;
+}
+.danger-zone {
+  border-color: var(--danger);
+}
+.plain-list {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+}
+@container main (min-width: 56rem) {
+  .settings {
+    grid-template-columns: 12rem minmax(0, 1fr);
+  }
+  .settings-toc {
+    position: sticky;
+    top: 5rem;
+    flex-direction: column;
+  }
+  .setting {
+    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .setting:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+/* Breadcrumb on computers, « Retour » on phones (ADR 0022, ui.md). */
+.page-nav {
+  margin-bottom: 0.5rem;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  font-weight: 600;
+  text-decoration: none;
+}
+.breadcrumb {
+  display: none;
+}
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.breadcrumb li + li::before {
+  content: "›";
+  margin-right: 0.35rem;
+}
+.crumb-link {
+  color: var(--muted);
+}
+@media (min-width: 720px) {
+  .back-link {
+    display: none;
+  }
+  .breadcrumb {
+    display: block;
+  }
+}
+
+/* Wizard template (ADR 0022): wide forms with two fields per row, the long text across. */
+.stack.form-wide {
+  max-width: 56rem;
+}
+.field-grid {
+  display: grid;
+  gap: 1rem 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+.field-grid .field:has(textarea) {
+  grid-column: 1 / -1;
+}
+.recap {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+.recap legend,
+.recap .new-location {
+  grid-column: 1 / -1;
+}
+
+/* Wizard steps (import, ADR 0022): a numbered list, the current step marked, done steps linked. */
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+.step {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch);
+}
+.step-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+}
+.step-current span {
+  font-weight: 700;
+  border-bottom: 3px solid var(--accent);
+}
+.step-todo span {
+  color: var(--muted);
+}
+
+/* Import columns: what the file holds beside what it will become. */
+.mapping-table select {
+  min-width: 12rem;
+}
+.sample {
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }

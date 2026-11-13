@@ -6,6 +6,58 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-13
+
+### Added
+
+- Contributors can run the app, its tests and the checks with only Docker installed, or in a VS Code Dev Container.
+- A guide to deploy a version on Kubernetes: manifests, variables and secrets, probes, migrations, first admin and rollback.
+- Navigation with four entries (Accueil, Rechercher, Mon matériel, Collectifs): a tab bar at the bottom of the screen on a phone, a sidebar with your collectifs on a computer.
+- On a computer, every page has a search field and an « Ajouter du matériel » button at the top.
+- Collectifs page: your collectifs first, then a directory of all collectifs with their city, searchable by name or city.
+- A collectif states its city, asked when it is declared and editable by its responsibles.
+- Dashboard on the home page: search first, equipment recently added to your collectifs, your collectifs, and the pending requests for admins.
+- A location can be created from the « Ajouter du matériel » form, so having no location yet no longer blocks you.
+- A collectif's page has tabs Matériel, Lieux and Responsables, with « Ajouter du matériel » first for its responsibles; deposits in its locations are listed apart.
+- An item's page shows its owner and city at the top with « Appeler », « SMS » and « Écrire » buttons; writing is offered even when a phone is known.
+- After signing in from a link to a page of the app, you land on that page instead of the home page.
+- Admins manage the categories: add, rename, reorder, and delete one after moving its equipment to another.
+- Clearer feedback: a message after signing out and after moving a category, the contact form's error under its field, empty searches that propose what to do, and the add form recalls location and owner right above « Ajouter ».
+- Rechercher and a collectif's equipment show as a sortable table on a computer (cards with « Grille »), with filters on the left, counts per category and city, and removable active filters.
+- Administration is split into tabs at their own addresses: Demandes, Comptes, Collectifs (new overview of validated collectifs) and Catégories.
+- « Mon compte » is a settings page in sections (profile, collectifs, session, about, delete) with contents; « Supprimer mon compte » explains what deletion will do in V1.0.
+- Detail pages show a breadcrumb on a computer and a « Retour » link on a phone; the item forms use the width of a computer screen, two fields per row.
+- Accessibility: every button, field and menu is at least 44 px high, the account button's name starts with its initials, and the logo link keeps its name on the narrow sidebar; an automated audit checks the key pages.
+- Moderators: admins name and remove them in Administration › Modérateurs; moderators handle the requests, disable or re-enable accounts, manage categories and see every collectif's equipment, but never act on an admin or another moderator.
+- Admins and moderators can archive an abusive item with « Retiré par la modération »; its owner receives their message by e-mail.
+- « Demander à rejoindre » on a collectif's page: its responsibles accept or reject the request in the new Membres tab, which lists everyone with their role and the pending requests first; members see the collectif's equipment, locations and people.
+- Members of a collectif add, edit, move and archive its equipment, store it in its locations and see their full address; its locations, members and profile stay with its responsibles.
+- In the Membres tab, responsibles (and admins and moderators) make a member responsible or take the role back; a collectif always keeps one responsible, and a removed responsible stays a member.
+- « Quitter le collectif » in the Membres tab; the last responsible names another one first.
+- « Supprimer… » deletes an item entered by mistake for good, after a confirmation page: for its personal owner, its collectif's responsibles, admins and moderators. A member asks with « Demander la suppression », and a responsible accepts or rejects it in the Membres tab.
+- An item can carry a reference (your code or inventory number), unique per owner and found by the search; it will let a file be imported again without duplicates.
+- Export equipment as a CSV file that spreadsheets open directly: your own from « Mon matériel », a collectif's from its Matériel tab (responsibles); a cell that would run as a formula is made harmless.
+- « Importer un fichier » adds or updates many items from a CSV file in four steps (file, columns, categories and conditions, check): columns and values are guessed, every choice can be changed and is remembered for the next file, nothing is written before the final check, and items are matched again by their reference or by the identifier of an export.
+
+### Security
+
+- A moderator can no longer make themselves responsible of a collectif: not by approving their own request or their own collectif, nor by naming or promoting themselves.
+- A collectif can no longer be left with only a disabled responsible; disabling the only responsible of a collectif now says which collectifs need another one.
+- « Nouvelle demande » e-mails go to each admin and moderator separately, so they no longer see each other's address.
+- A name can no longer hold a line break, which could shape the e-mails that quote it.
+- Form posts are limited in size and no longer accept files where none is expected, so an oversized request can no longer exhaust the server's memory; a malformed form is refused instead of causing a server error.
+- A moderator can no longer take the responsible role from an admin or another moderator, nor archive or delete their personal items.
+- An admin or moderator who deletes someone else's item must give a reason, sent by e-mail to its owner.
+
+### Changed
+
+- The application is now called **AssoMatos**, at `assomatos.collecti-frog.fr`; « Mon compte › À propos » shows the version.
+- The account is reached from a round button with your initials; « Se déconnecter » moved to the account page.
+- Pages use the whole width of a computer screen instead of a narrow centred column.
+- « Mon matériel » lists what is stored at your places right now (yours, your collectifs', borrowed), with a Lieux tab for your own locations; a collectif's locations are on its page.
+- Each collectif's equipment, locations and people are now seen only by its responsibles, the people who own the items and those who store them; other collectifs show only their name and presentation.
+- A collectif's Responsables tab became Membres, at `/collectifs/<nom>/membres`; the former address redirects there.
+
 ## [0.6.1] - 2026-11-10
 
 ### Added
@@ -65,5 +117,6 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...v0.10.0
 [0.6.1]: https://github.com/CollectiFrog/InventAssos/releases/tag/v0.6.1

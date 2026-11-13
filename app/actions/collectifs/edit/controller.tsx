@@ -7,17 +7,24 @@ import { logAction } from '../../../data/audit-log.ts'
 import { findActiveCollectifBySlug, updateCollectifProfile } from '../../../data/collectifs.ts'
 import { canEditCollectif } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
-import { formValue, optionalPhone, optionalText, parseForm } from '../../../validation.ts'
+import {
+  formValue,
+  optionalPhone,
+  optionalText,
+  parseForm,
+  requiredText,
+} from '../../../validation.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 import { EditCollectifPage } from './edit-page.tsx'
 
 const profileSchema = f.object({
+  city: f.field(requiredText(120)),
   description: f.field(optionalText(2000)),
   contactPhone: f.field(optionalPhone()),
 })
 
-/** Edit a collectif's description and contact phone (US-0.3.5). */
+/** Edit a collectif's city, description and contact phone (US-0.3.5, US-0.7.12). */
 export default createController(routes.collectifs.edit, {
   actions: {
     async index(context) {
@@ -33,6 +40,7 @@ export default createController(routes.collectifs.edit, {
           csrfToken={getCsrfToken(context)}
           collectif={collectif}
           values={{
+            city: collectif.city,
             description: collectif.description,
             contactPhone: collectif.contact_phone ?? '',
           }}
@@ -56,6 +64,7 @@ export default createController(routes.collectifs.edit, {
             csrfToken={getCsrfToken(context)}
             collectif={collectif}
             values={{
+              city: formValue(formData, 'city'),
               description: formValue(formData, 'description'),
               contactPhone: formValue(formData, 'contactPhone'),
             }}
@@ -67,6 +76,7 @@ export default createController(routes.collectifs.edit, {
 
       await db.transaction(async (tx) => {
         await updateCollectifProfile(tx, collectif.id, {
+          city: parsed.value.city,
           description: parsed.value.description ?? '',
           contactPhone: parsed.value.contactPhone,
         })

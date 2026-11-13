@@ -9,6 +9,7 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createTestItem } from '../../../test/items.ts'
 import { createActiveUser } from '../../../test/users.ts'
 import { createLocation } from '../../data/locations.ts'
+import { setResponsible } from '../../data/members.ts'
 import type { Collectif } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 
@@ -25,8 +26,12 @@ describe('search and filter the inventory (US-0.6.2)', () => {
     await resetDatabase(db)
     const rita = await createActiveUser(db, 'Rita', 'rita@example.org')
     const max = await createActiveUser(db, 'Max', 'max@example.org')
-    await createActiveUser(db, 'Lou', 'lou@example.org')
+    const louUser = await createActiveUser(db, 'Lou', 'lou@example.org')
     grenouilles = await createActiveCollectif(db, 'Les Grenouilles', rita.id)
+    // Lou and Max belong to the Grenouilles too, so Lou sees all three items (ADR 0021).
+    for (const user of [louUser, max]) {
+      await setResponsible(db, { userId: user.id, collectifId: grenouilles.id, status: 'active' })
+    }
     const local = await createLocation(
       db,
       { collectifId: grenouilles.id },

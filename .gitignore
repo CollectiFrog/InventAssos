@@ -19,3 +19,6 @@ coverage/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Isolated copies used by verification agents (Claude Code).
+.claude/worktrees/

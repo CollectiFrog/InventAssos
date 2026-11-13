@@ -1,9 +1,10 @@
 import type { Database } from 'remix/data-table'
 
-import { listCollectifs } from '../../data/collectifs.ts'
+import { findCollectifById, listCollectifs } from '../../data/collectifs.ts'
 import type { LocationOwner } from '../../data/locations.ts'
 import type { CurrentUser } from '../../middleware/current-user.ts'
 import { canManageCollectifLocations, canManagePersonalLocations } from '../../permissions.ts'
+import { routes } from '../../routes.ts'
 import type { OwnerOption } from './location-form.tsx'
 
 /** Owners the actor may create a location for: themselves, then the collectifs they manage. */
@@ -29,4 +30,17 @@ export function parseOwner(value: string, actor: CurrentUser): LocationOwner | n
     return canManageCollectifLocations(actor, collectifId) ? { collectifId } : null
   }
   return null
+}
+
+/** Where a location is listed: its collectif's page, or the Lieux tab of Mon matériel (US-0.7.3). */
+export async function listPageOf(
+  db: Database,
+  location: { collectif_id: string | null },
+): Promise<string> {
+  const collectif = location.collectif_id
+    ? await findCollectifById(db, location.collectif_id)
+    : null
+  return collectif?.status === 'active'
+    ? routes.collectifs.show.href({ slug: collectif.slug })
+    : routes.locations.index.href()
 }

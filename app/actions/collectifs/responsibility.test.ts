@@ -7,7 +7,7 @@ import { signIn } from '../../../test/auth.ts'
 import { createActiveCollectif } from '../../../test/collectifs.ts'
 import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createActiveUser } from '../../../test/users.ts'
-import { findResponsible, setResponsible } from '../../data/responsibles.ts'
+import { findResponsible, setResponsible } from '../../data/members.ts'
 import type { Collectif, User } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 
@@ -29,15 +29,21 @@ describe('ask to become responsible (US-0.3.3)', () => {
     await db.close()
   })
 
-  it('shows the collectif page with its responsibles and the request button', async () => {
+  it('shows the request button to an outsider, and the responsibles to them only', async () => {
     const app = createTestApp(db)
     const client = app.client()
     await signIn(app, client, 'max@example.org')
 
     const page = await client.get(routes.collectifs.show.href({ slug: collectif.slug }))
     assert.equal(page.status, 200)
-    assert.match(page.text, /Responsables<\/dt><dd>Rita/)
-    assert.match(page.text, /Devenir responsable/)
+    assert.match(page.text, /Demander à devenir responsable/)
+    // People of a collectif stay among themselves until V1.1 (ADR 0021).
+    assert.doesNotMatch(page.text, /Rita/)
+
+    const rita = app.client()
+    await signIn(app, rita, 'rita@example.org')
+    const inside = await rita.get(routes.collectifs.people.href({ slug: collectif.slug }))
+    assert.match(inside.text, /<a href="\/personnes\/[^"]+">Rita<\/a>/)
   })
 
   it('records one pending request and notifies the admins', async () => {

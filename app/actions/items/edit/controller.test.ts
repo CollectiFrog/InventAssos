@@ -11,6 +11,7 @@ import { createTestLocation } from '../../../../test/locations.ts'
 import { createActiveUser } from '../../../../test/users.ts'
 import { listEntityHistory } from '../../../data/audit-log.ts'
 import { findItemById } from '../../../data/items.ts'
+import { setResponsible } from '../../../data/members.ts'
 import type { Item } from '../../../data/tables.ts'
 import { routes } from '../../../routes.ts'
 
@@ -20,6 +21,8 @@ describe('edit an item (US-0.5.3)', () => {
   // Max's item deposited at the Grenouilles' local, and a Grenouilles item kept in Max's garage.
   let deposited: Item
   let lent: Item
+  // Cora's own item at her home: Rita sees it (they share the Grenouilles) but may not edit it.
+  let corasOwn: Item
 
   before(async () => {
     db = await openTestDatabase()
@@ -30,7 +33,15 @@ describe('edit an item (US-0.5.3)', () => {
     const otto = await createActiveUser(db, 'Otto', 'otto@example.org')
     const max = await createActiveUser(db, 'Max', 'max@example.org')
     await createActiveUser(db, 'Lou', 'lou@example.org')
+    const cora = await createActiveUser(db, 'Cora', 'cora@example.org')
     const grenouilles = await createActiveCollectif(db, 'Les Grenouilles', rita.id)
+    await setResponsible(db, { userId: cora.id, collectifId: grenouilles.id, status: 'active' })
+    corasOwn = await createTestItem(db, {
+      locationId: (await createTestLocation(db, { userId: cora.id }, 'Chez Cora')).id,
+      owner: { userId: cora.id },
+      createdBy: cora.id,
+      name: 'Perceuse de Cora',
+    })
     await createActiveCollectif(db, 'Les Crapauds', otto.id)
     const local = await createTestLocation(db, { collectifId: grenouilles.id }, 'Local')
     const garage = await createTestLocation(db, { userId: max.id }, 'Garage')
@@ -83,12 +94,18 @@ describe('edit an item (US-0.5.3)', () => {
     ['a validated user with no link to the lent item', () => lent, 'lou@example.org'],
   ]
   for (const [who, item, email] of refused) {
-    it(`refuses ${who} (403)`, async () => {
+    it(`refuses ${who}, who may not even see it (404, ADR 0021)`, async () => {
       const response = await edit(email, item(), 'Volé')
-      assert.equal(response.status, 403)
+      assert.equal(response.status, 404)
       assert.notEqual((await findItemById(db, item().id))?.name, 'Volé')
     })
   }
+
+  it('refuses someone who sees the item but may not edit it (403)', async () => {
+    const response = await edit('rita@example.org', corasOwn, 'Volé')
+    assert.equal(response.status, 403)
+    assert.equal((await findItemById(db, corasOwn.id))?.name, 'Perceuse de Cora')
+  })
 
   it('logs the names of the changed fields, never their values', async () => {
     await edit('max@example.org', deposited, 'Ampli Fender')
@@ -107,6 +124,10 @@ describe('edit an item (US-0.5.3)', () => {
       return (await client.get(routes.items.show.href({ itemId: deposited.id }))).text
     }
     assert.match(await page('max@example.org'), /\/modifier"/)
-    assert.doesNotMatch(await page('lou@example.org'), /\/modifier"/)
+    const client = app.client()
+    await signIn(app, client, 'rita@example.org')
+    const seenOnly = await client.get(routes.items.show.href({ itemId: corasOwn.id }))
+    assert.equal(seenOnly.status, 200)
+    assert.doesNotMatch(seenOnly.text, /\/modifier"/)
   })
 })

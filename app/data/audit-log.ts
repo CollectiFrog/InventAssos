@@ -29,6 +29,22 @@ export async function logAction(db: Database, entry: AuditEntry): Promise<void> 
   })
 }
 
+/** Appends many entries at once (an import), in chunks; inside the change's transaction. */
+export async function logActions(db: Database, entries: readonly AuditEntry[]): Promise<void> {
+  for (let start = 0; start < entries.length; start += 500) {
+    await db.createMany(
+      auditLog,
+      entries.slice(start, start + 500).map((entry) => ({
+        actor_id: entry.actorId,
+        action: entry.action,
+        entity: entry.entity,
+        entity_id: entry.entityId,
+        payload: JSON.stringify(entry.payload ?? {}),
+      })),
+    )
+  }
+}
+
 /** Entries about one object, oldest first; `actions` keeps only those actions when given. */
 export async function listEntityHistory(
   db: Database,
