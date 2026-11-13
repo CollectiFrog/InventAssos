@@ -6,6 +6,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-13
+
 ### Added
 
 - Contributors can run the app, its tests and the checks with only Docker installed, or in a VS Code Dev Container.
@@ -115,5 +117,6 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...v0.10.0
 [0.6.1]: https://github.com/CollectiFrog/InventAssos/releases/tag/v0.6.1
