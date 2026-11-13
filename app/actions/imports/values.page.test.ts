@@ -1,5 +1,5 @@
 import * as assert from 'remix/assert'
-import type { Database } from 'remix/data-table'
+import { type Database, sql } from 'remix/data-table'
 import { after, before, beforeEach, describe, it } from 'remix/test'
 
 import { createTestApp, type TestApp, type TestClient } from '../../../test/app.ts'
@@ -115,6 +115,36 @@ describe('import, step 3: categories, conditions and locations (US-0.10.1, ADR 0
     assert.deepEqual(pending?.columnMapping, ['name', 'category', 'condition', 'location', null])
     const page = (await client.get(response.location ?? '')).text
     assert.match(page, /name="category:machin"[\s\S]*?<option value="sound" selected>/)
+  })
+
+  it('sends a recognised file with too many values to the columns step, saying why', async () => {
+    const rows = [
+      ['Nom', 'Catégorie'],
+      ...Array.from({ length: 150 }, (_, i) => [`O${i}`, `C${i}`]),
+    ]
+    const response = await uploadFile(client, local.id, csvFile(rows))
+    const importId = importIdOf(response.location)
+    assert.equal(response.location, routes.imports.columns.index.href({ importId }))
+    const page = (await client.get(response.location ?? '')).text
+    assert.match(page, /Plus de 100 valeurs différentes/)
+    const values = await client.get(routes.imports.values.index.href({ importId }))
+    assert.equal(values.location, routes.imports.columns.index.href({ importId }))
+  })
+
+  it('does not keep a choice whose category was deleted meanwhile', async () => {
+    const importId = await startImport()
+    await client.post(routes.imports.values.action.href({ importId }), {
+      'category:projo': 'lighting',
+      'category:machin': 'video',
+      'condition:tbe': 'good',
+      'condition:hs': 'broken',
+      'location:cave': cave.id,
+      'location:grenier': '',
+    })
+    await db.exec(sql`delete from categories where id = 'video'`)
+    const page = (await client.get(routes.imports.values.index.href({ importId }))).text
+    assert.match(page, /Machin<\/label><span class="status"> · à vérifier/)
+    assert.match(page, /name="category:machin"[\s\S]*?<option value="other" selected>/)
   })
 
   it('refuses a value column with more than 100 different values', async () => {

@@ -209,6 +209,16 @@ describe('import, step 4: preview and confirmation (US-0.10.1 to US-0.10.3, ADR 
     assert.equal((await findItemById(db, amp.id))?.quantity, 1)
   })
 
+  it('ignores an unknown view, inherited names included', async () => {
+    const { importId } = await upload([row({ name: 'Lyre' })])
+    for (const voir of ['constructor', '__proto__', 'toString', 'nimporte']) {
+      const page = await client.get(
+        `${routes.imports.preview.index.href({ importId })}?voir=${voir}`,
+      )
+      assert.equal(page.status, 200, voir)
+    }
+  })
+
   it('writes once even when confirmed twice', async () => {
     const { importId } = await upload([row({ name: 'Lyre' })])
     const first = await confirm(importId)

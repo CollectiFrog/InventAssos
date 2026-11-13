@@ -431,7 +431,7 @@ async function render(
   const params = context.url.searchParams
   const asked = params.get('voir')
   const view: View =
-    asked && asked in views
+    asked && Object.hasOwn(views, asked)
       ? (asked as View)
       : plan.counts.invalid > 0
         ? 'erreurs'

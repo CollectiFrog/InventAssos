@@ -16,6 +16,7 @@ import { viewerOf } from '../../viewer.ts'
 import { inventoryHeaders, toColumnMapping } from '../format.ts'
 import { ImportLayout, type ImportLocation, importSteps, loadImport } from '../shared.tsx'
 import {
+  crowdedValueColumns,
   guessValues,
   toValueMapping,
   type ValueChoice,
@@ -178,6 +179,11 @@ function ValuesPage(handle: Handle<ValuesPageProps>) {
 async function load(context: AppContext, importId: string) {
   const loaded = await loadImport(context, importId)
   if (loaded instanceof Response) return loaded
+  // Hundreds of values in one column: back to the columns, which say why.
+  const columns = toColumnMapping(loaded.pending.columnMapping)
+  if (crowdedValueColumns(loaded.pending.rows, columns).length > 0) {
+    return redirect(routes.imports.columns.index.href({ importId }), 303)
+  }
   const world = await loadValueWorld(context.db, loaded.actor, loaded.location)
   const template = await findTemplate(context.db, world.owner)
   const choices = guessValues(

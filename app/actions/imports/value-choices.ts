@@ -41,6 +41,19 @@ export function distinctValues(
   return [...found.values()]
 }
 
+/**
+ * The value columns holding more than `maxDistinctValues` different values: most likely the wrong
+ * column, and too many choices for one page.
+ */
+export function crowdedValueColumns(
+  rows: readonly { cells: readonly string[] }[],
+  columns: ColumnMapping,
+): number[] {
+  return valueKinds
+    .map((kind) => columns.indexOf(kind))
+    .filter((index) => index >= 0 && distinctValues(rows, index).length > maxDistinctValues)
+}
+
 /** The column each value kind is mapped to, if any. */
 export function valueColumns(columns: ColumnMapping): Partial<Record<ValueKind, number>> {
   const found: Partial<Record<ValueKind, number>> = {}
@@ -79,12 +92,21 @@ export function guessValues(
   kept: ValueMapping = { category: {}, condition: {}, location: {} },
 ): ValueChoices {
   const at = valueColumns(columns)
+  const stillOffered = (kind: ValueKind, choice: string) =>
+    kind === 'category'
+      ? world.categories.some((category) => category.id === choice)
+      : kind === 'location'
+        ? choice === '' || world.locations.some((place) => place.id === choice)
+        : true
   const choicesOf = (kind: ValueKind) =>
     at[kind] === undefined
       ? []
       : distinctValues(rows, at[kind]).map((value): ValueChoice => {
           const already = Object.hasOwn(kept[kind], value.key) ? kept[kind][value.key] : undefined
-          if (already !== undefined) return { ...value, choice: already, source: 'saved' }
+          // A choice made earlier stays while it is still offered (a category may be deleted).
+          if (already !== undefined && stillOffered(kind, already)) {
+            return { ...value, choice: already, source: 'saved' }
+          }
           return { ...value, ...guessed(kind, value.label) }
         })
   const guessed = (

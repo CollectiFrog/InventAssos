@@ -18,7 +18,7 @@ import { forbidden, requireUser, tooManyRequests } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
 import { guessColumns } from '../columns.ts'
 import { ImportLayout, importableLocations, importSteps } from '../shared.tsx'
-import { allValuesSure, guessValues } from '../value-choices.ts'
+import { allValuesSure, crowdedValueColumns, guessValues } from '../value-choices.ts'
 import { loadValueWorld } from '../world.ts'
 
 /** Most rows of data in a file (ADR 0026), the title row not counted. */
@@ -159,7 +159,13 @@ async function readFile(file: File) {
   }
   const [header = [], ...data] = table.rows
   if (data.length === 0) throw new FileRefused('Ce fichier ne contient aucune ligne à importer.')
-  const cell = (value: string) => restoreNeutralized(value).slice(0, maxCell)
+  // Control characters other than tab and line breaks mean nothing in a cell (and would bloat it
+  // sixfold once stored as JSON): they are dropped.
+  const cell = (value: string) =>
+    restoreNeutralized(value)
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: removing them is the point
+      .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')
+      .slice(0, maxCell)
   return {
     header: header.map(cell),
     rows: data.map((cells, index) => ({
@@ -242,22 +248,26 @@ export default createController(routes.imports.start, {
       const template = await findTemplate(db, world.owner)
       const guesses = guessColumns(content.header, template.columnMap)
       const columnMapping = guesses.map((guess) => guess.field)
-      const importId = await createImport(db, {
-        createdBy: actor.id,
-        locationId: location.id,
-        fileName: displayName(file.name) || 'fichier.csv',
-        header: content.header,
-        rows: content.rows,
-        columnMapping,
-      })
-      // A file mapped as before goes straight to the preview; else to the first step to check.
-      const columnsSure = guesses.every(
-        (guess, index) =>
-          content.header[index]?.trim() === '' ||
-          guess.source === 'saved' ||
-          guess.source === 'own' ||
-          guess.source === 'exact',
+      // One transaction: the previous import is only replaced if the new one is stored.
+      const importId = await db.transaction((tx) =>
+        createImport(tx, {
+          createdBy: actor.id,
+          locationId: location.id,
+          fileName: displayName(file.name) || 'fichier.csv',
+          header: content.header,
+          rows: content.rows,
+          columnMapping,
+        }),
       )
+      // A file mapped as before goes straight to the preview; else to the first step to check.
+      const columnsSure =
+        guesses.every(
+          (guess, index) =>
+            content.header[index]?.trim() === '' ||
+            guess.source === 'saved' ||
+            guess.source === 'own' ||
+            guess.source === 'exact',
+        ) && crowdedValueColumns(content.rows, columnMapping).length === 0
       const valuesSure = allValuesSure(
         guessValues(content.rows, columnMapping, world, template.valueMap),
       )

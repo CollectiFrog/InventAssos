@@ -11,7 +11,12 @@ import type { Viewer } from '../../../ui/layout.tsx'
 import { formValue } from '../../../validation.ts'
 import { viewerOf } from '../../viewer.ts'
 import { headerKey } from '../columns.ts'
-import { type InventoryField, inventoryFields, inventoryHeaders } from '../format.ts'
+import {
+  type InventoryField,
+  inventoryFields,
+  inventoryHeaders,
+  toColumnMapping,
+} from '../format.ts'
 import {
   frenchTime,
   ImportLayout,
@@ -19,7 +24,7 @@ import {
   importSteps,
   loadImport,
 } from '../shared.tsx'
-import { distinctValues, maxDistinctValues, valueKinds } from '../value-choices.ts'
+import { crowdedValueColumns, maxDistinctValues } from '../value-choices.ts'
 import { loadValueWorld } from '../world.ts'
 
 /** What each field is called in the select. */
@@ -203,11 +208,27 @@ export function checkColumns(
   return { choices, errors }
 }
 
+/** The error under each value column holding too many different values. */
+function crowdedErrors(
+  rows: PendingImport['rows'],
+  choices: readonly (InventoryField | null)[],
+): FieldErrors {
+  const errors: FieldErrors = {}
+  for (const index of crowdedValueColumns(rows, choices)) {
+    const field = choices[index]
+    if (!field) continue
+    errors[`col-${index}`] =
+      `Plus de ${maxDistinctValues} valeurs différentes : est-ce bien la colonne « ${inventoryHeaders[field]} » ?`
+  }
+  return errors
+}
+
 async function render(
   context: AppContext,
   loaded: { pending: PendingImport; location: ImportLocation },
   choices: (string | null)[],
   errors: FieldErrors = {},
+  status = Object.keys(errors).length > 0 ? 400 : 200,
 ) {
   const notice = context.session.get('notice')
   return context.render(
@@ -220,7 +241,7 @@ async function render(
       errors={errors}
       notice={typeof notice === 'string' ? notice : undefined}
     />,
-    { status: Object.keys(errors).length > 0 ? 400 : 200 },
+    { status },
   )
 }
 
@@ -230,7 +251,10 @@ export default createController(routes.imports.columns, {
     async index(context) {
       const loaded = await loadImport(context, context.params.importId)
       if (loaded instanceof Response) return loaded
-      return render(context, loaded, loaded.pending.columnMapping)
+      // A value column with too many values is shown at once, before anything is submitted.
+      const columns = toColumnMapping(loaded.pending.columnMapping)
+      const errors = crowdedErrors(loaded.pending.rows, columns)
+      return render(context, loaded, loaded.pending.columnMapping, errors, 200)
     },
 
     async action(context) {
@@ -239,15 +263,7 @@ export default createController(routes.imports.columns, {
       const { header } = loaded.pending
       const submitted = header.map((_, index) => formValue(context.formData, `col-${index}`))
       const { choices, errors } = checkColumns(header, submitted)
-      // A value column with hundreds of different values is most likely the wrong column.
-      for (const kind of valueKinds) {
-        const index = choices.indexOf(kind)
-        if (index < 0) continue
-        if (distinctValues(loaded.pending.rows, index).length > maxDistinctValues) {
-          errors[`col-${index}`] =
-            `Plus de ${maxDistinctValues} valeurs différentes : est-ce bien la colonne « ${inventoryHeaders[kind]} » ?`
-        }
-      }
+      Object.assign(errors, crowdedErrors(loaded.pending.rows, choices))
       if (Object.keys(errors).length > 0) return render(context, loaded, submitted, errors)
 
       // Values the person already chose for this import stay; the others are guessed afresh.

@@ -105,6 +105,15 @@ describe('import, steps 1 and 2: the file and its columns (US-0.10.1)', () => {
     assert.equal(n.rows?.[0]?.n, 0)
   })
 
+  it('drops control characters from cells, and keeps the previous import if one fails', async () => {
+    const first = importIdOf((await uploadFile(ritaClient, local.id, file)).location)
+    const noisy = new File([`Nom\nA\u0001B\u0007C\n`], 'bruit.csv')
+    const response = await uploadFile(ritaClient, local.id, noisy)
+    const second = importIdOf(response.location)
+    assert.equal((await findImport(db, second, rita.id))?.rows[0]?.cells[0], 'ABC')
+    assert.equal(await findImport(db, first, rita.id), null, 'replaced by the new one')
+  })
+
   it('refuses more than 2,000 rows', async () => {
     const rows = [['Nom'], ...Array.from({ length: 2001 }, (_, i) => [`Objet ${i}`])]
     const response = await uploadFile(ritaClient, local.id, csvFile(rows))
