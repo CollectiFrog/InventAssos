@@ -9,6 +9,7 @@ import { createTestApp, type TestApp, type TestClient } from '../test/app.ts'
 import { signIn } from '../test/auth.ts'
 import { createActiveCollectif, createPendingCollectif } from '../test/collectifs.ts'
 import { openTestDatabase, resetDatabase } from '../test/database.ts'
+import { csvFile, uploadFile } from '../test/imports.ts'
 import { createTestItem, itemFormFields } from '../test/items.ts'
 import { createTestLocation } from '../test/locations.ts'
 import { createActiveUser } from '../test/users.ts'
@@ -536,6 +537,25 @@ const rules: Rule[] = [
     happened: async (db, w) => (await findItemById(db, w.item.id))?.archive_reason === 'moderated',
   },
   {
+    // US-0.10.1: into C's locations, its responsibles (and admins); members later (ADR 0027).
+    row: 'Import a file into a location',
+    allowed: ['admin', 'responsibleOfC'],
+    act: (c, w) => uploadFile(c, w.local.id, csvFile([['Nom'], ['Importé']])),
+    happened: async (db) => {
+      const rows = await db.exec(sql`select 1 from imports`)
+      return (rows.rows?.length ?? 0) > 0
+    },
+  },
+  {
+    row: 'Import a file into a location (own location)',
+    allowed: ['validated'],
+    act: (c, w) => uploadFile(c, w.valHome.id, csvFile([['Nom'], ['Importé']])),
+    happened: async (db) => {
+      const rows = await db.exec(sql`select 1 from imports`)
+      return (rows.rows?.length ?? 0) > 0
+    },
+  },
+  {
     // US-0.10.4: members and moderators export only their own for now (ADR 0026).
     row: "Export an owner's equipment (C's)",
     allowed: ['admin', 'responsibleOfC'],
@@ -800,7 +820,11 @@ describe('permissions matrix (US-0.5.7)', () => {
             response.location?.startsWith(`${routes.signIn.form.index.href()}?suite=`) ||
             response.location === routes.account.status.href()
           assert.ok(
-            response.status === 403 || sentAway || response.status === 404,
+            // 413: a file from someone with no upload allowance is refused before it is read.
+            response.status === 403 ||
+              sentAway ||
+              response.status === 404 ||
+              response.status === 413,
             `denied with status ${response.status} ${response.location ?? ''}`,
           )
         }

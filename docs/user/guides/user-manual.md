@@ -216,6 +216,34 @@ Un membre du collectif choisit **Demander la suppression** : la demande apparaî
 **Membres**, sans e-mail. Un responsable la **supprime** ou la **refuse** ; une seule demande à la
 fois par objet.
 
+## Importer un fichier
+
+Pour reprendre un inventaire tenu dans un tableur, **Importer un fichier** (dans **Mon matériel**,
+ou sur la page d'un collectif pour ses responsables) ajoute ou met à jour beaucoup d'objets à la
+fois. Rien n'est enregistré avant la dernière étape.
+
+1. **Fichier** : choisissez le lieu où ranger le matériel (il appartiendra au propriétaire de ce
+   lieu) et un fichier **CSV** de 2 Mo et 2 000 lignes au plus, dont la première ligne contient les
+   titres des colonnes. Depuis Excel ou LibreOffice : *Enregistrer sous* › *CSV*. Un classeur
+   (.xlsx, .ods) n'est pas lu directement.
+2. **Colonnes** : pour chaque colonne, ce qu'elle contient (nom, catégorie, quantité, référence…)
+   ou **Ne pas importer**. Les titres courants sont reconnus ; vérifiez ceux marqués « à vérifier ».
+3. **Catégories, états et lieux** : chaque valeur différente de ces colonnes reçoit une catégorie,
+   un état ou un lieu. Une valeur inconnue va dans « Autre ».
+4. **Vérification** : le nombre d'objets à créer, à modifier, inchangés et à corriger, puis chaque
+   ligne. Tant qu'une ligne est à corriger, rien n'est importé : corrigez le fichier et envoyez-le
+   à nouveau. **Importer** enregistre tout d'un coup ; chaque objet le note dans son historique.
+
+Vos choix de colonnes et de valeurs sont retenus pour le propriétaire : le fichier suivant les
+reprend. Un import en cours est gardé une heure.
+
+**Réimporter sans doublons.** Une ligne dont la **référence** est déjà celle d'un objet du même
+propriétaire met cet objet à jour au lieu d'en créer un autre ; une ligne avec l'**Identifiant**
+d'un export fait de même, et peut lui donner une référence. Une cellule vide ne vide jamais un
+champ. Une référence présente deux fois dans le fichier bloque l'import. Si la référence est celle
+d'un objet archivé, la ligne est mise de côté : **L'ajouter comme nouvel objet** la crée quand même,
+sans cette référence.
+
 ## Exporter le matériel
 
 Le matériel part dans un fichier CSV que LibreOffice et Excel ouvrent directement :

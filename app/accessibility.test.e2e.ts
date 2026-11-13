@@ -15,6 +15,7 @@ import { openTestDatabase, resetDatabase } from '../test/database.ts'
 import { createTestItem } from '../test/items.ts'
 import { createTestLocation } from '../test/locations.ts'
 import { createActiveUser } from '../test/users.ts'
+import { createImport } from './data/imports.ts'
 
 const widths = [
   { width: 390, height: 844 },
@@ -81,6 +82,7 @@ async function audit(page: Page, paths: string[]): Promise<void> {
 describe('accessibility of the key pages (US-0.7.9)', () => {
   let db: Database
   let itemPath = ''
+  let importPath = ''
 
   before(async () => {
     db = await openTestDatabase()
@@ -100,6 +102,19 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
       })
       itemPath = `/materiel/${item.id}`
     }
+    // An import in progress, with a column left « à vérifier » (US-0.10.1).
+    const importId = await createImport(db, {
+      createdBy: rita.id,
+      locationId: local.id,
+      fileName: 'inventaire.csv',
+      header: ['Désignation', 'Qté', 'Famille', 'Bizarre'],
+      rows: [
+        { n: 2, cells: ['Lyre', '2', 'Projo', 'x'] },
+        { n: 3, cells: ['Console', 'deux', 'Machin', ''] },
+      ],
+      columnMapping: ['name', 'quantity', 'category', null],
+    })
+    importPath = `/import/${importId}/colonnes`
   })
   after(async () => {
     await db.close()
@@ -132,6 +147,10 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
         '/collectifs/collecti-frog/membres',
         '/compte/profil',
         '/compte/supprimer',
+        '/import',
+        importPath,
+        importPath.replace('/colonnes', '/valeurs'),
+        importPath.replace('/colonnes', '/apercu'),
       ])
     })
 

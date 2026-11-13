@@ -14,7 +14,8 @@ A review by someone qualified in law is still advised.
 
 - [ ] Controller and publisher named: Collecti'FROG for the proofs of concept, to confirm for V1.0
 - [ ] GDPR contact named, with a dedicated address
-- [ ] Record of processing kept (CNIL simplified model): accounts, inventory, audit log, e-mails
+- [ ] Record of processing kept (CNIL simplified model): accounts, inventory, audit log, e-mails,
+      files being imported (`imports`: whatever a spreadsheet held, for its author, one hour)
 - [ ] Legal notice: publisher (Collecti'FROG), publication director, host (Tristan, legal host,
       self-hosted; servers maintained by TFGL, informal group without legal entity)
 - [ ] Terms of use: rules of use, responsibilities when lending between collectifs

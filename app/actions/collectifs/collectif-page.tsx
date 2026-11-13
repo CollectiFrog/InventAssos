@@ -109,6 +109,14 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
                   Modifier la présentation
                 </a>
               ) : null}
+              {p.canManageLocations ? (
+                <a
+                  class="button secondary"
+                  href={`${routes.imports.start.index.href()}?pour=collectif:${collectif.id}`}
+                >
+                  Importer un fichier
+                </a>
+              ) : null}
               {p.canAddItems ? (
                 <a
                   class="button"

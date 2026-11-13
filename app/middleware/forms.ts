@@ -10,6 +10,9 @@ import {
 import { redirect } from 'remix/response/redirect'
 import type { Middleware, RequestContext } from 'remix/router'
 
+import { routes } from '../routes.ts'
+import { CurrentUserKey } from './current-user.ts'
+
 /** True when the body passed one of the parser's limits. */
 function isLimitError(error: unknown): boolean {
   return (
@@ -90,5 +93,28 @@ export function boundedFormData(
     }
     context.set(FormData, parsed, { property: 'formData' })
     return next()
+  }
+}
+
+/** The one file an import accepts (ADR 0026): 2 MB, a few fields beside it. */
+export const importUploadLimits = {
+  maxFiles: 1,
+  maxFileSize: 2 * 1024 * 1024,
+  maxTotalSize: 2 * 1024 * 1024 + 64 * 1024,
+  maxParts: 8,
+  maxHeaderSize: 1024,
+} satisfies ParseFormDataOptions
+
+/**
+ * The upload allowance: the import's first step, for an active account only (visitors and pending
+ * accounts never reach a 2 MB body). A refusal lands back on the step with its explanation.
+ */
+export function importUpload(context: RequestContext): UploadAllowance | null {
+  const user = context.get(CurrentUserKey)
+  if (context.method !== 'POST' || user?.status !== 'active') return null
+  if (context.url.pathname !== routes.imports.start.action.href()) return null
+  return {
+    limits: importUploadLimits,
+    tooLargeRedirect: `${routes.imports.start.index.href()}?erreur=taille`,
   }
 }

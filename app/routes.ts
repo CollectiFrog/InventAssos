@@ -46,6 +46,13 @@ export const routes = route({
   inventory: {
     index: get('/inventaire'),
   },
+  imports: {
+    start: form('/import'),
+    columns: form('/import/:importId/colonnes'),
+    values: form('/import/:importId/valeurs'),
+    preview: form('/import/:importId/apercu'),
+    cancel: post('/import/:importId/abandonner'),
+  },
   exports: {
     collectif: post('/collectifs/:slug/exporter'),
     mine: post('/materiel/exporter'),

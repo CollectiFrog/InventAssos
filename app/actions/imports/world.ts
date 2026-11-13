@@ -56,6 +56,29 @@ function toExisting(actor: Actor, candidate: ImportCandidate): ExistingItem {
 }
 
 /**
+ * What the values step chooses from: the categories, and the owner's locations the actor may
+ * store items in.
+ */
+export async function loadValueWorld(db: Database, actor: Actor, location: Location) {
+  const owner = ownerOfLocation(location)
+  const ownerLocations =
+    'collectifId' in owner
+      ? await listCollectifLocations(db, owner.collectifId)
+      : await listLocationsOwnedBy(db, owner.userId, [])
+  return {
+    owner,
+    locations: ownerLocations
+      .filter((place) => canStoreItemsIn(actor, place))
+      .map((place) => ({ id: place.id, name: place.name })),
+    categories: (await listCategories(db)).map(({ id, name, position }) => ({
+      id,
+      name,
+      position,
+    })),
+  }
+}
+
+/**
  * Builds the world of an import into `location`: the owner's locations the actor may store in, the
  * categories, the items the file's references and identifiers name, and the names already there.
  */
@@ -70,14 +93,7 @@ export async function loadImportWorld(
   if (!canImportInto(actor, location)) {
     throw new Error('This person may not import into this location')
   }
-  const owner = ownerOfLocation(location)
-  const ownerLocations =
-    'collectifId' in owner
-      ? await listCollectifLocations(db, owner.collectifId)
-      : await listLocationsOwnedBy(db, owner.userId, [])
-  const locations = ownerLocations
-    .filter((place) => canStoreItemsIn(actor, place))
-    .map((place) => ({ id: place.id, name: place.name }))
+  const { owner, locations, categories } = await loadValueWorld(db, actor, location)
 
   const cellsOf = (field: string) => {
     const index = columns.indexOf(field as ColumnMapping[number])
@@ -107,11 +123,7 @@ export async function loadImportWorld(
   return {
     defaultLocation: { id: location.id, name: location.name },
     locations,
-    categories: (await listCategories(db)).map(({ id, name, position }) => ({
-      id,
-      name,
-      position,
-    })),
+    categories,
     refs: new Map(
       [...refs].map(([ref, { key, candidate }]) => [
         ref,

@@ -25,8 +25,10 @@ responsible of another collectif, member of C, validated user, pending user, vis
 each verb of a row ("create, edit, delete"), and each "if …" branch of the responsible and
 member and validated-user columns, is a separate case. A new row, verb or branch needs a new matrix entry.
 
-"Import a file into a location" arrives with the rest of V0.10 and is not implemented yet. Import
-and export of a collectif are for its responsibles for now; members may come later (ADR 0027).
+Import and export of a collectif are for its responsibles for now; members may come later
+(ADR 0027). An import in progress (`/import/:importId/…`) is seen, changed and ended by its author
+only, and only while they may still import into its location; anyone else gets the same 404 as
+for an expired or unknown import.
 
 Visibility ([ADR 0021](../../adr/0021-inventory-within-collectifs/)), from V0.7: an item is seen
 only by the people who keep it, until sharing arrives in V1.1. "A person of C" is a responsible of

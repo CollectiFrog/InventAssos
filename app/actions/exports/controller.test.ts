@@ -187,6 +187,7 @@ describe('export equipment as CSV (US-0.10.4)', () => {
         contactsPerUser: { limit: 100, windowSeconds: 60 },
         adminNotifications: { limit: 100, windowSeconds: 60 },
         exportsPerUser: { limit: 1, windowSeconds: 60 },
+        uploadsPerUser: { limit: 100, windowSeconds: 60 },
       },
     })
     const client = limited.client()

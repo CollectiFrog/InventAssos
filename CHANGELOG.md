@@ -35,6 +35,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - « Supprimer… » deletes an item entered by mistake for good, after a confirmation page: for its personal owner, its collectif's responsibles, admins and moderators. A member asks with « Demander la suppression », and a responsible accepts or rejects it in the Membres tab.
 - An item can carry a reference (your code or inventory number), unique per owner and found by the search; it will let a file be imported again without duplicates.
 - Export equipment as a CSV file that spreadsheets open directly: your own from « Mon matériel », a collectif's from its Matériel tab (responsibles); a cell that would run as a formula is made harmless.
+- « Importer un fichier » adds or updates many items from a CSV file in four steps (file, columns, categories and conditions, check): columns and values are guessed, every choice can be changed and is remembered for the next file, nothing is written before the final check, and items are matched again by their reference or by the identifier of an export.
 
 ### Security
 

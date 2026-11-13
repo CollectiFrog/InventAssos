@@ -12,7 +12,7 @@ import { provideBackground } from './background.ts'
 import { checkCsrf } from './csrf.ts'
 import { loadCurrentUser } from './current-user.ts'
 import { provideDatabase } from './database.ts'
-import { boundedFormData } from './forms.ts'
+import { boundedFormData, importUpload } from './forms.ts'
 import { contentSecurityPolicy, securityHeaders } from './security-headers.ts'
 import { type AppSettings, provideMailer, provideSettings } from './services.ts'
 
@@ -51,7 +51,7 @@ export function appMiddleware(deps: AppDependencies) {
     loadCurrentUser(deps.db, deps.settings.adminEmails),
     gateInactiveAccounts(),
     // After the account checks, so that only an active user can ever get an upload allowance.
-    boundedFormData(),
+    boundedFormData(importUpload),
     // Same reason as `secure`: compare form posts with the public origin, not the pod's URL.
     checkCsrf(appUrl.origin),
     render(),

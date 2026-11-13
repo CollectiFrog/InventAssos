@@ -15,6 +15,11 @@ import requestCollectifController from './actions/collectifs/request/controller.
 import controller from './actions/controller.tsx'
 import exportsController from './actions/exports/controller.ts'
 import healthController from './actions/health/controller.ts'
+import importColumnsController from './actions/imports/columns/controller.tsx'
+import importsController from './actions/imports/controller.ts'
+import importPreviewController from './actions/imports/preview/controller.tsx'
+import importStartController from './actions/imports/start/controller.tsx'
+import importValuesController from './actions/imports/values/controller.tsx'
 import inventoryController from './actions/inventory/controller.tsx'
 import archiveItemController from './actions/items/archive/controller.tsx'
 import itemsController from './actions/items/controller.tsx'
@@ -53,6 +58,11 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.health, healthController)
   router.map(routes.inventory, inventoryController)
   router.map(routes.exports, exportsController)
+  router.map(routes.imports, importsController)
+  router.map(routes.imports.start, importStartController)
+  router.map(routes.imports.columns, importColumnsController)
+  router.map(routes.imports.values, importValuesController)
+  router.map(routes.imports.preview, importPreviewController)
   router.map(routes.items, itemsController)
   router.map(routes.items.create, createItemController)
   router.map(routes.items.edit, editItemController)
