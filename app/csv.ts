@@ -145,18 +145,25 @@ const formulaStarts = new Set(['=', '+', '-', '@', '\t', '\r'])
  * formula. A plain number keeps its sign, since it cannot run anything.
  */
 export function neutralizeFormula(value: string): string {
-  // A value that already starts with the apostrophe the import strips keeps it: « '=x » stays.
-  if (value.startsWith("'") && formulaStarts.has(value.charAt(1))) return `'${value}`
+  const quotes = leadingApostrophes(value)
+  // Already starting with apostrophes before a formula character: one more, which the import
+  // strips again, so « '=x » or « ''=x » come back as they were.
+  if (quotes > 0) return formulaStarts.has(value.charAt(quotes)) ? `'${value}` : value
   if (!formulaStarts.has(value.charAt(0))) return value
   return /^[+-]?\d+([.,]\d+)?$/.test(value) ? value : `'${value}`
 }
 
 /** Undoes `neutralizeFormula` when a file we exported comes back. */
 export function restoreNeutralized(value: string): string {
-  if (!value.startsWith("'")) return value
-  // « '=x » was a formula made inert; « ''=x » was a value that started with « '= » itself.
-  const next = value.charAt(1) === "'" ? value.charAt(2) : value.charAt(1)
-  return formulaStarts.has(next) ? value.slice(1) : value
+  const quotes = leadingApostrophes(value)
+  return quotes > 0 && formulaStarts.has(value.charAt(quotes)) ? value.slice(1) : value
+}
+
+/** How many apostrophes the value starts with. */
+function leadingApostrophes(value: string): number {
+  let count = 0
+  while (value.charAt(count) === "'") count++
+  return count
 }
 
 /**

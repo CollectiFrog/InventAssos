@@ -65,7 +65,13 @@ describe('CSV (ADR 0026)', () => {
     assert.equal(restoreNeutralized("'=1+1"), '=1+1')
     assert.equal(restoreNeutralized("'Console"), "'Console")
     // A value that really starts with « '= » survives the round trip.
-    assert.equal(restoreNeutralized(neutralizeFormula("'=apos")), "'=apos")
+    const values = ["'=apos", "''=x", "'''-y", "'plain", "''", '=x', '-3', "'-3", '@user', '+33 6']
+    for (const value of values) {
+      assert.equal(restoreNeutralized(neutralizeFormula(value)), value, value)
+    }
+    // Through the file itself: written, read back, restored.
+    const back = parseCsv(decodeCsv(bytes(toCsv([values])))).rows[0]?.map(restoreNeutralized)
+    assert.deepEqual(back, values)
   })
 
   it('stays linear on a file of quotes, a huge cell or many columns', () => {

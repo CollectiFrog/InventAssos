@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/remix/schema/remix.json",
   "test": {
-    "exclude": ["node_modules/**", "docs/**", "dist/**"],
+    "exclude": ["node_modules/**", "docs/**", "dist/**", ".claude/**"],
     // One file at a time: test files share one PostgreSQL database.
     "concurrency": 1,
     "setup": "./test/setup.ts",
