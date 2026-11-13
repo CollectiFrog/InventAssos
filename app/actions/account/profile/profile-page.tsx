@@ -17,6 +17,8 @@ export interface ProfilePageProps {
   collectifs: readonly { name: string; slug: string; city: string }[]
   /** Whether the person has chosen a password (US-0.10.8). */
   hasPassword: boolean
+  /** Requests waiting in Administration; set for admins and moderators only (US-0.10.9). */
+  pendingRequests?: number
   errors?: FieldErrors
   saved?: boolean
 }
@@ -48,6 +50,7 @@ function SettingSection(
 const sections = [
   { id: 'profil', title: 'Profil' },
   { id: 'collectifs', title: 'Mes collectifs' },
+  { id: 'administration', title: 'Administration', staffOnly: true },
   { id: 'mot-de-passe', title: 'Mot de passe' },
   { id: 'session', title: 'Session' },
   { id: 'a-propos', title: 'À propos' },
@@ -64,9 +67,11 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
       values,
       collectifs,
       hasPassword,
+      pendingRequests,
       errors = {},
       saved,
     } = handle.props
+    const isStaff = pendingRequests !== undefined
     return (
       <Layout title="Mon compte" viewer={viewer} headerLink="account">
         <h1>Mon compte</h1>
@@ -78,11 +83,13 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
         <ErrorSummary errors={errors} />
         <div class="settings">
           <nav aria-label="Sur cette page" class="settings-toc">
-            {sections.map((section) => (
-              <a href={`#${section.id}`} class="toc-link">
-                {section.title}
-              </a>
-            ))}
+            {sections
+              .filter((section) => isStaff || !section.staffOnly)
+              .map((section) => (
+                <a href={`#${section.id}`} class="toc-link">
+                  {section.title}
+                </a>
+              ))}
           </nav>
           <div class="settings-sections">
             <SettingSection
@@ -138,6 +145,26 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
                 <a href={routes.collectifs.index.href()}>Rejoindre ou déclarer un collectif</a>
               </p>
             </SettingSection>
+            {isStaff ? (
+              <SettingSection
+                id="administration"
+                title="Administration"
+                text="Demandes, comptes, collectifs et catégories de la plateforme."
+              >
+                <p>
+                  {pendingRequests === 0
+                    ? 'Aucune demande en attente.'
+                    : pendingRequests === 1
+                      ? '1 demande en attente.'
+                      : `${pendingRequests} demandes en attente.`}
+                </p>
+                <p>
+                  <a class="button" href={routes.admin.index.href()}>
+                    Ouvrir l’administration
+                  </a>
+                </p>
+              </SettingSection>
+            ) : null}
             <SettingSection
               id="mot-de-passe"
               title="Mot de passe"

@@ -6,7 +6,7 @@ import type { User } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
-import { AdminTabs } from './admin-tabs.tsx'
+import { AdminTabs, adminBack, adminTrail } from './admin-tabs.tsx'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'Europe/Paris' })
 
@@ -26,7 +26,13 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
     const { viewer, csrfToken, pending, pendingCollectifs, pendingResponsibles, notice } =
       handle.props
     return (
-      <Layout title="Administration" viewer={viewer} headerLink="admin">
+      <Layout
+        title="Administration"
+        viewer={viewer}
+        headerLink="account"
+        trail={adminTrail}
+        back={adminBack}
+      >
         <h1>Administration</h1>
         <AdminTabs current="requests" viewer={viewer} />
         {notice ? (
@@ -193,7 +199,13 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
   return () => {
     const { viewer, csrfToken, active, disabled, notice } = handle.props
     return (
-      <Layout title="Comptes" viewer={viewer} headerLink="admin">
+      <Layout
+        title="Comptes"
+        viewer={viewer}
+        headerLink="account"
+        trail={adminTrail}
+        back={adminBack}
+      >
         <h1>Administration</h1>
         <AdminTabs current="accounts" viewer={viewer} />
         {notice ? (

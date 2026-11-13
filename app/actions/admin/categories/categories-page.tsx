@@ -4,7 +4,7 @@ import type { Category } from '../../../data/tables.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../../ui/form.tsx'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
-import { AdminTabs } from '../admin-tabs.tsx'
+import { AdminTabs, adminBack, adminTrail } from '../admin-tabs.tsx'
 
 /** Props of the categories page. */
 export interface CategoriesPageProps {
@@ -28,7 +28,13 @@ export function CategoriesPage(handle: Handle<CategoriesPageProps>) {
   return () => {
     const { viewer, csrfToken, categories, usage, values, errors, notice } = handle.props
     return (
-      <Layout title="Catégories" viewer={viewer} headerLink="admin">
+      <Layout
+        title="Catégories"
+        viewer={viewer}
+        headerLink="account"
+        trail={adminTrail}
+        back={adminBack}
+      >
         <h1>Administration</h1>
         <AdminTabs current="categories" viewer={viewer} />
         {notice ? (

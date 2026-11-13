@@ -1,11 +1,18 @@
 import type { Handle } from 'remix/component'
 
 import { routes } from '../../routes.ts'
-import type { Viewer } from '../../ui/layout.tsx'
+import type { Crumb, Viewer } from '../../ui/layout.tsx'
 import { Tabs } from '../../ui/tabs.tsx'
 
 /** A section of Administration. */
 export type AdminSection = 'requests' | 'accounts' | 'collectifs' | 'team' | 'categories'
+
+/** Administration is reached from Mon compte (ADR 0030): « Retour » and the breadcrumb lead there. */
+export const adminBack = `${routes.account.profile.index.href()}#administration`
+export const adminTrail: Crumb[] = [
+  { label: 'Mon compte', href: adminBack },
+  { label: 'Administration' },
+]
 
 /** Sections of Administration, each at its own URL (ADR 0022); Équipe is for admins only. */
 export function AdminTabs(handle: Handle<{ current: AdminSection; viewer: Viewer }>) {
