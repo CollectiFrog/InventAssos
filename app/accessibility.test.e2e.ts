@@ -163,7 +163,7 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
         '/admin',
         '/admin/comptes',
         '/admin/collectifs',
-        '/admin/moderateurs',
+        '/admin/equipe',
         '/admin/categories',
       ])
     })

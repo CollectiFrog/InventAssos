@@ -6,6 +6,10 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+### Added
+
+- Admins can name and remove other admins in the app, on Administration › Équipe (formerly Modérateurs); admins from the server configuration stay out of reach.
+
 ### Changed
 
 - The link from the sign-in e-mail signs you in at once, without the « Me connecter » page.

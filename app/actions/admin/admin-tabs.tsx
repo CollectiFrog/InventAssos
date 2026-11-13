@@ -5,9 +5,9 @@ import type { Viewer } from '../../ui/layout.tsx'
 import { Tabs } from '../../ui/tabs.tsx'
 
 /** A section of Administration. */
-export type AdminSection = 'requests' | 'accounts' | 'collectifs' | 'moderators' | 'categories'
+export type AdminSection = 'requests' | 'accounts' | 'collectifs' | 'team' | 'categories'
 
-/** Sections of Administration, each at its own URL (ADR 0022); Modérateurs is for admins only. */
+/** Sections of Administration, each at its own URL (ADR 0022); Équipe is for admins only. */
 export function AdminTabs(handle: Handle<{ current: AdminSection; viewer: Viewer }>) {
   return () => {
     const { current, viewer } = handle.props
@@ -16,7 +16,7 @@ export function AdminTabs(handle: Handle<{ current: AdminSection; viewer: Viewer
       { key: 'accounts', label: 'Comptes', href: routes.admin.accounts.href() },
       { key: 'collectifs', label: 'Collectifs', href: routes.admin.collectifs.index.href() },
       ...(viewer?.isAdmin
-        ? [{ key: 'moderators', label: 'Modérateurs', href: routes.admin.moderators.index.href() }]
+        ? [{ key: 'team', label: 'Équipe', href: routes.admin.team.index.href() }]
         : []),
       { key: 'categories', label: 'Catégories', href: routes.admin.categories.index.href() },
     ]

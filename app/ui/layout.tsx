@@ -5,7 +5,7 @@ import { routes } from '../routes.ts'
 /** What the shell needs to know about the signed-in person; null for a visitor. */
 export type Viewer = {
   name: string
-  /** Listed in PLATFORM_ADMIN_EMAILS: names moderators (US-0.8.1). */
+  /** Listed in PLATFORM_ADMIN_EMAILS or named in the app: manages the team (US-0.10.7). */
   isAdmin: boolean
   /** Admin or moderator: sees Administration (US-0.8.2). */
   isStaff: boolean

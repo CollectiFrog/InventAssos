@@ -6,12 +6,12 @@ import type { CurrentUser } from './middleware/current-user.ts'
 /** Who is acting: the signed-in user, or null for a visitor. */
 export type Actor = CurrentUser | null
 
-/** A platform admin with an active account. */
+/** A platform admin, listed or named in the app (ADR 0028), with an active account. */
 export function isActiveAdmin(actor: Actor): actor is CurrentUser {
   return actor !== null && actor.status === 'active' && actor.isAdmin
 }
 
-/** An active moderator (US-0.8.1); a listed admin is never treated as one. */
+/** An active moderator (US-0.8.1); an admin is never treated as one. */
 export function isActiveModerator(actor: Actor): boolean {
   return isValidatedUser(actor) && actor.isModerator && !actor.isAdmin
 }
@@ -42,14 +42,17 @@ export function canEditOwnProfile(actor: Actor): boolean {
 /** An account as the account rules see it: who it is and which platform role it holds. */
 export interface AccountTarget {
   id: string
+  /** In PLATFORM_ADMIN_EMAILS: nobody acts on them from the app. */
   isListedAdmin: boolean
+  /** Named admin in the app (ADR 0028): only another admin acts on them. */
+  isNamedAdmin: boolean
   isModerator: boolean
 }
 
-/** A moderator never acts on an admin or another moderator (US-0.8.2); an admin may. */
+/** A moderator never acts on an admin or another moderator (US-0.8.2); an admin may, except on a listed one. */
 function staffMayActOn(actor: Actor, target: AccountTarget): boolean {
   if (target.isListedAdmin) return false
-  return isActiveAdmin(actor) || !target.isModerator
+  return isActiveAdmin(actor) || (!target.isModerator && !target.isNamedAdmin)
 }
 
 /**
@@ -66,9 +69,17 @@ export function canEnableAccount(actor: Actor, target: AccountTarget): boolean {
   return isActiveStaff(actor) && staffMayActOn(actor, target)
 }
 
-/** "Name or remove a moderator": admin only, among other validated accounts (US-0.8.1). */
-export function canNameModerators(actor: Actor): boolean {
+/** "Name or remove a moderator or an admin": admin only (US-0.8.1, US-0.10.7). */
+export function canManageTeam(actor: Actor): boolean {
   return isActiveAdmin(actor)
+}
+
+/**
+ * Give or take back someone's platform role: an admin, never on their own account (one could lock
+ * oneself out) nor on a listed admin, whose rights come from PLATFORM_ADMIN_EMAILS (ADR 0028).
+ */
+export function canChangeRoleOf(actor: Actor, target: AccountTarget): boolean {
+  return canManageTeam(actor) && actor?.id !== target.id && !target.isListedAdmin
 }
 
 /** "Request a new collectif": any validated user (admins and responsibles included). */

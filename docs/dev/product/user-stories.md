@@ -44,6 +44,7 @@ per story when its version is planned; the issue links back here.
 | UC29 | Make a member responsible, remove a responsible | Responsible, admin, moderator | V0.8    |
 | UC30 | Leave a collectif                               | Member, responsible           | V0.8    |
 | UC31 | Delete an item, or ask to delete it             | Responsible, owner, member    | V0.8    |
+| UC32 | Name or remove an admin                         | Admin                         | V0.10.x |
 
 ## V0.1 — Foundations
 
@@ -320,6 +321,14 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
   to sign me in without another click, so that signing in is quicker.
     - Opening the link signs in and lands on the home page, or on the page asked for (US-0.7.8).
     - The link stays single-use and valid 15 minutes; a used or expired link offers a new one.
+- **US-0.10.7 Name admins in the app.** As an admin, I want to name and remove other admins in the
+  app, so that sharing the role needs no deployment
+  ([ADR 0028](../../adr/0028-admins-named-in-the-app/)).
+    - Any admin names an admin or a moderator by the e-mail of a validated account, on
+      Administration › Équipe (formerly Modérateurs), and removes them.
+    - Admins of `PLATFORM_ADMIN_EMAILS` are shown but never removed nor disabled from the app;
+      nobody changes their own role.
+    - A named admin has every admin right; a moderator never acts on them. No e-mail is sent.
 
 ## V0.11 — Photos
 

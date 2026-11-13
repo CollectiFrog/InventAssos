@@ -11,7 +11,7 @@ export interface CurrentUser {
   name: string
   email: string
   status: UserStatus
-  /** Checked against PLATFORM_ADMIN_EMAILS (read at startup) on every request, never a stored flag. */
+  /** Listed in PLATFORM_ADMIN_EMAILS (checked on every request), or named in the app (ADR 0028). */
   isAdmin: boolean
   /** Named by an admin (US-0.8.1); stored on the account. */
   isModerator: boolean
@@ -53,7 +53,7 @@ export function loadCurrentUser(
           name: user.name,
           email: user.email,
           status: user.status,
-          isAdmin: adminEmails.has(user.email),
+          isAdmin: adminEmails.has(user.email) || user.role === 'admin',
           isModerator: user.role === 'moderator',
           managedCollectifIds: new Set(
             collectifs.filter((c) => c.role === 'responsible').map((c) => c.id),

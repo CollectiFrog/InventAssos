@@ -3,7 +3,7 @@
 import type { Database } from 'remix/data-table'
 
 import { hitRateLimit, type RateLimit, type RateLimitResult } from './data/rate-limits.ts'
-import { listActiveModeratorEmails } from './data/users.ts'
+import { listActiveStaffEmails } from './data/users.ts'
 import { type Mail, type Mailer, sendSafely } from './mail/mailer.ts'
 import type { AppSettings } from './middleware/services.ts'
 
@@ -111,7 +111,7 @@ export async function notifyAdmins(
   kind: AdminNotice,
   mail: (admins: string[]) => Mail,
 ): Promise<void> {
-  const admins = [...new Set([...settings.adminEmails, ...(await listActiveModeratorEmails(db))])]
+  const admins = [...new Set([...settings.adminEmails, ...(await listActiveStaffEmails(db))])]
   if (admins.length === 0) return
   const { allowed } = await hitRateLimit(db, `admins:${kind}`, limits(settings).adminNotifications)
   if (!allowed) return

@@ -5,6 +5,7 @@ import type { CurrentUser } from './middleware/current-user.ts'
 import {
   canAssignItemOwner,
   canChangeItem,
+  canChangeRoleOf,
   canDecideItemDeletion,
   canDeleteItem,
   canDepositForPerson,
@@ -21,8 +22,8 @@ import {
   canManageMembers,
   canManagePersonalLocations,
   canManageResponsibles,
+  canManageTeam,
   canModerateItem,
-  canNameModerators,
   canNameResponsibles,
   canRemoveResponsible,
   canRemoveResponsibleByPlatform,
@@ -78,9 +79,10 @@ describe('permissions: accounts', () => {
     assert.equal(canEditOwnProfile(null), false)
   })
 
-  const member = { id: 'u2', isListedAdmin: false, isModerator: false }
+  const member = { id: 'u2', isListedAdmin: false, isNamedAdmin: false, isModerator: false }
   const otherModerator = { ...member, isModerator: true }
   const listedAdmin = { ...member, isListedAdmin: true }
+  const namedAdmin = { ...member, isNamedAdmin: true }
 
   it('"Disable an account": admin or moderator, never their own account nor a listed admin', () => {
     assert.equal(canDisableAccount(user({ isAdmin: true }), member), true)
@@ -95,7 +97,15 @@ describe('permissions: accounts', () => {
 
   it('"Disable an account": a moderator never acts on an admin or another moderator', () => {
     assert.equal(canDisableAccount(moderator(), listedAdmin), false)
+    assert.equal(canDisableAccount(moderator(), namedAdmin), false)
     assert.equal(canDisableAccount(moderator(), otherModerator), false)
+    assert.equal(canEnableAccount(moderator(), namedAdmin), false)
+  })
+
+  it('"Disable an account": an admin may disable and re-enable an admin named in the app', () => {
+    assert.equal(canDisableAccount(user({ isAdmin: true }), namedAdmin), true)
+    assert.equal(canEnableAccount(user({ isAdmin: true }), namedAdmin), true)
+    assert.equal(canEnableAccount(user({ isAdmin: true }), listedAdmin), false)
   })
 
   it('"Re-enable a disabled account": admin, or moderator for a member', () => {
@@ -108,11 +118,22 @@ describe('permissions: accounts', () => {
     assert.equal(canEnableAccount(null, member), false)
   })
 
-  it('"Name or remove a moderator": admin only', () => {
-    assert.equal(canNameModerators(user({ isAdmin: true })), true)
-    assert.equal(canNameModerators(moderator()), false)
-    assert.equal(canNameModerators(user()), false)
-    assert.equal(canNameModerators(null), false)
+  it('"Name or remove a moderator or an admin": admin only', () => {
+    assert.equal(canManageTeam(user({ isAdmin: true })), true)
+    assert.equal(canManageTeam(user({ isAdmin: true, status: 'disabled' })), false)
+    assert.equal(canManageTeam(moderator()), false)
+    assert.equal(canManageTeam(user()), false)
+    assert.equal(canManageTeam(null), false)
+  })
+
+  it('"Name or remove a moderator or an admin": never oneself, never a listed admin', () => {
+    const admin = user({ isAdmin: true })
+    assert.equal(canChangeRoleOf(admin, member), true)
+    assert.equal(canChangeRoleOf(admin, otherModerator), true)
+    assert.equal(canChangeRoleOf(admin, namedAdmin), true)
+    assert.equal(canChangeRoleOf(admin, listedAdmin), false)
+    assert.equal(canChangeRoleOf(admin, { ...namedAdmin, id: 'u1' }), false)
+    assert.equal(canChangeRoleOf(moderator(), member), false)
   })
 
   it('"Add, rename, reorder, delete an unused category": admin and moderator', () => {
@@ -454,11 +475,12 @@ describe('permissions: visibility (ADR 0021)', () => {
   })
 
   it('a moderator never acts on an admin or another moderator: roles and items too', () => {
-    const anAdmin = { id: 'u7', isListedAdmin: true, isModerator: false }
-    const aModerator = { id: 'u8', isListedAdmin: false, isModerator: true }
-    const aMember = { id: 'u9', isListedAdmin: false, isModerator: false }
+    const aMember = { id: 'u9', isListedAdmin: false, isNamedAdmin: false, isModerator: false }
+    const anAdmin = { ...aMember, id: 'u7', isListedAdmin: true }
+    const aNamedAdmin = { ...aMember, id: 'u7', isNamedAdmin: true }
+    const aModerator = { ...aMember, id: 'u8', isModerator: true }
     const theirItem = { owner_collectif_id: null, owner_user_id: 'u7' }
-    for (const target of [anAdmin, aModerator]) {
+    for (const target of [anAdmin, aNamedAdmin, aModerator]) {
       assert.equal(canRemoveResponsible(moderator(), 'c1', target), false)
       assert.equal(canRemoveResponsibleByPlatform(moderator(), target), false)
       assert.equal(canModerateItem(moderator(), { archived_at: null }, target), false)

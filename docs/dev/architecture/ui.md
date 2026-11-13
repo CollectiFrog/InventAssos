@@ -141,7 +141,7 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 | Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/lieux`, `/responsables`, `/modifier`, `/devenir-responsable`) |
 | People       | `/personnes/:userId`                                                                                                         |
 | Account      | `/compte/profil` (sections: profil, collectifs, session, à propos, supprimer), `/compte/supprimer`, `/deconnexion`           |
-| Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/moderateurs`, `/categories`, `/instance`                  |
+| Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/equipe`, `/categories`, `/instance`                       |
 
 URLs are a contract: V0.7 changes what the pages show and how they are reached, not their URLs.
 It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
@@ -157,7 +157,8 @@ It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
 - `/admin/demandes` (also `/admin`), `/admin/comptes`, `/admin/collectifs`, `/admin/moderateurs`,
   `/admin/categories`, `/admin/instance`. Demandes, comptes, collectifs and categories are open to
   admins and moderators; `/admin/moderateurs` (V0.8) to admins only; `/admin/instance` waits for a
-  story.
+  story. V0.10.x renames `/admin/moderateurs` to `/admin/equipe` (admins and moderators, US-0.10.7);
+  the old URL redirects.
 
 ## Page templates
 

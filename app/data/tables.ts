@@ -5,8 +5,8 @@ import { column as c, type TableRow, table } from 'remix/data-table'
 export const userStatuses = ['pending', 'active', 'rejected', 'disabled', 'deleted'] as const
 export type UserStatus = (typeof userStatuses)[number]
 
-/** Platform roles stored on the account (ADR 0020); admins come from PLATFORM_ADMIN_EMAILS only. */
-export const userRoles = ['member', 'moderator'] as const
+/** Platform roles stored on the account; admins also come from PLATFORM_ADMIN_EMAILS (ADR 0028). */
+export const userRoles = ['member', 'moderator', 'admin'] as const
 export type UserRole = (typeof userRoles)[number]
 
 export const users = table({
