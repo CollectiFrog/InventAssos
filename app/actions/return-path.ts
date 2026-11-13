@@ -5,7 +5,7 @@
 export const returnParam = 'suite'
 
 /** Pages that make no sense to come back to after signing in. */
-const excluded = ['/connexion', '/inscription', '/deconnexion']
+const excluded = ['/connexion', '/inscription', '/deconnexion', '/mot-de-passe']
 
 /** The value as an internal path ("/materiel?x=1"), or null when it is not a safe one. */
 export function safeReturnPath(value: string | null | undefined): string | null {

@@ -8,6 +8,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ### Added
 
+- Sign in with a password if you want one, chosen or changed through a link sent by e-mail; the e-mailed sign-in link keeps working.
 - Admins can name and remove other admins in the app, on Administration › Équipe (formerly Modérateurs); admins from the server configuration stay out of reach.
 
 ### Changed

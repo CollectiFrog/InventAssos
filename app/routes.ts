@@ -11,6 +11,12 @@ export const routes = route({
     form: form('/connexion'),
     sent: get('/connexion/envoyee'),
     link: get('/connexion/lien/:token'),
+    password: post('/connexion/mot-de-passe'),
+  },
+  password: {
+    request: form('/mot-de-passe'),
+    sent: get('/mot-de-passe/envoye'),
+    choose: form('/mot-de-passe/nouveau/:token'),
   },
   signOut: post('/deconnexion'),
   account: {

@@ -82,7 +82,7 @@ désactivé n'est plus affiché.
 
 Touchez le rond avec vos initiales, en haut à droite. **Mon compte** est rangé en sections, avec un
 sommaire : **Profil** (votre nom et un numéro de téléphone facultatif), **Mes collectifs**,
-**Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
+**Mot de passe** (le choisir ou le changer), **Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
 compte**. La suppression elle-même arrive avec la version 1.0 : la page explique ce qu'elle fera.
 
 Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous

@@ -25,7 +25,7 @@ export async function startBrowserApp(
 export async function signInWithBrowser(page: Page, app: TestApp, email: string): Promise<void> {
   await page.goto('/connexion')
   await page.getByLabel('Adresse e-mail').fill(email)
-  await page.getByRole('button', { name: 'Recevoir le lien' }).click()
+  await page.getByRole('button', { name: 'Recevoir un lien par e-mail' }).click()
   await page.waitForURL('**/connexion/envoyee')
   await app.background.idle()
   const token = lastSignInToken(app, email)

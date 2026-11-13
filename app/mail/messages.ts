@@ -32,8 +32,31 @@ export function signInLinkMail(to: string, linkUrl: string): Mail {
     subject: `Votre lien de connexion ${appName}`,
     text:
       `Bonjour,\n\nPour vous connecter, ouvrez ce lien dans les 15 minutes :\n${linkUrl}\n\n` +
-      'Il ne fonctionne qu’une fois. Si vous n’avez rien demandé, ignorez ce message : ' +
-      `personne ne peut se connecter sans ce lien.${signature}`,
+      `Il ne fonctionne qu’une fois. Si vous n’avez rien demandé, ignorez ce message.${signature}`,
+  }
+}
+
+/** To the person: the link to choose a password, or a new one (ADR 0029). */
+export function passwordResetMail(to: string, linkUrl: string): Mail {
+  return {
+    to,
+    subject: `Choisir votre mot de passe ${appName}`,
+    text:
+      `Bonjour,\n\nPour choisir votre mot de passe, ouvrez ce lien dans les 30 minutes :\n${linkUrl}\n\n` +
+      'Il ne fonctionne qu’une fois. Si vous n’avez rien demandé, ignorez ce message : votre ' +
+      `mot de passe actuel, si vous en avez un, ne change pas.${signature}`,
+  }
+}
+
+/** To the person: their password was just set; the only sign that someone else did it. */
+export function passwordChangedMail(to: string, resetUrl: string): Mail {
+  return {
+    to,
+    subject: `Votre mot de passe ${appName} a été modifié`,
+    text:
+      'Bonjour,\n\nLe mot de passe de votre compte vient d’être choisi ou modifié, et vos autres ' +
+      'sessions ont été fermées.\n\nSi ce n’est pas vous, choisissez-en un nouveau tout de suite :\n' +
+      `${resetUrl}\n\npuis prévenez un administrateur.${signature}`,
   }
 }
 
