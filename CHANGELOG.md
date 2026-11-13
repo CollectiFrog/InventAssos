@@ -15,6 +15,10 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 - The link from the sign-in e-mail signs you in at once, without the « Me connecter » page.
 
+### Security
+
+- After signing in, a crafted return address can no longer send you to another site.
+
 ## [0.10.0] - 2026-11-13
 
 ### Added

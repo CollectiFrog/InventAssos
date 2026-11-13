@@ -22,7 +22,8 @@ export function gateInactiveAccounts(): Middleware {
     if (user == null || user.status === 'active') return next()
 
     const path = context.url.pathname
-    if (openPaths.has(path) || openPrefixes.some((prefix) => path.startsWith(prefix))) {
+    const underOpenPrefix = openPrefixes.some((p) => path === p || path.startsWith(`${p}/`))
+    if (openPaths.has(path) || underOpenPrefix) {
       return next()
     }
     return redirect(routes.account.status.href(), 303)

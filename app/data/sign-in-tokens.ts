@@ -50,7 +50,7 @@ export async function isTokenUsable(
   return (result.rows?.length ?? 0) > 0
 }
 
-/** Uses up every open token of a user for one purpose, e.g. older password links once one served. */
+/** Uses up every open token of a user for one purpose, e.g. when the password changes. */
 export async function closeUserTokens(
   db: Database,
   userId: string,

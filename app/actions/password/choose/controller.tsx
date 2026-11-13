@@ -1,7 +1,7 @@
 import { getCsrfToken } from 'remix/middleware/csrf'
 import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
-
+import { clientAddressOf } from '../../../client-address.ts'
 import { logAction } from '../../../data/audit-log.ts'
 import { deleteUserSessions } from '../../../data/sessions.ts'
 import { closeUserTokens, consumeSignInToken, isTokenUsable } from '../../../data/sign-in-tokens.ts'
@@ -10,9 +10,11 @@ import { sendSafely } from '../../../mail/mailer.ts'
 import { passwordChangedMail } from '../../../mail/messages.ts'
 import { signedInStatuses } from '../../../middleware/current-user.ts'
 import { hashPassword, passwordProblem } from '../../../passwords.ts'
+import { hitFormFromClient } from '../../../rate-limits.ts'
 import { routes } from '../../../routes.ts'
 import type { FieldErrors } from '../../../ui/form.tsx'
 import { formValue } from '../../../validation.ts'
+import { tooManyRequests } from '../../guards.tsx'
 import { startSession } from '../../sign-in/session.ts'
 import { PasswordChoosePage, PasswordLinkInvalidPage } from '../password-pages.tsx'
 
@@ -47,7 +49,13 @@ export default createController(routes.password.choose, {
         )
       }
 
-      // Hash first: it is the slow part, and the link must stay usable if it fails.
+      // The hash is the costly part: only for a live link, and within the per-client limit.
+      const client = await hitFormFromClient(db, settings, clientAddressOf(context.request))
+      if (!client.allowed) return tooManyRequests(context, client.retryAfterSeconds)
+      if (!(await isTokenUsable(db, token, 'password_reset'))) {
+        return context.render(<PasswordLinkInvalidPage />, { status: 400 })
+      }
+      // Hash before using the link up, so that it stays usable if hashing fails.
       const hash = await hashPassword(password)
       const userId = await consumeSignInToken(db, token, 'password_reset')
       let user = userId === null ? null : await findUserById(db, userId)
@@ -59,7 +67,9 @@ export default createController(routes.password.choose, {
       const { id, email } = user
       await db.transaction(async (tx) => {
         await setPasswordHash(tx, id, hash)
+        // Every e-mailed link still open, to sign in or to choose a password, dies with the sessions.
         await closeUserTokens(tx, id, 'password_reset')
+        await closeUserTokens(tx, id, 'sign_in')
         await deleteUserSessions(tx, id)
         await logAction(tx, {
           actorId: id,

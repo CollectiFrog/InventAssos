@@ -32,9 +32,9 @@ A person may add a **password**; the e-mailed link keeps working for everyone.
   password or an account without one, and the hash work is done in every case.
 - **Limits**: 10 tries per address per hour, right or wrong, besides the 20 forms per client per
   15 minutes ([ADR 0018](../0018-rate-limits-in-postgresql/)).
-- **On change**: every other session is closed, the person is signed in, and an e-mail tells them
-  the password changed, with a link to choose another. The audit log records `user.password_set`
-  with IDs only.
+- **On change**: every other session and every open e-mailed link (sign-in or password) is closed,
+  the person is signed in, and an e-mail tells them the password changed, with a link to choose
+  another. The audit log records `user.password_set` with IDs only.
 - No second factor, admins and moderators included.
 
 ## Alternatives
@@ -50,6 +50,9 @@ A person may add a **password**; the e-mailed link keeps working for everyone.
 
 - `users.password_hash` and `sign_in_tokens.purpose` (migration 0019); a sign-in token never works
   as a password token, nor the reverse.
-- Someone who knows the address can block password sign-in for an hour with wrong tries; the
-  e-mailed link still works.
+- Someone who knows the address can block password sign-in for an hour with wrong tries. The
+  e-mailed link then still works, unless they also use up the address's 5 e-mails an hour (password
+  links count with sign-in links), the gap [ADR 0018](../0018-rate-limits-in-postgresql/) accepts.
+- Choosing a password costs a hash, so the form is checked against the per-client limit and the
+  link's validity first.
 - A password is personal data: it goes with the account when V1.0 deletes it (ADR 0010).

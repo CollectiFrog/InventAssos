@@ -21,6 +21,8 @@ export function safeReturnPath(value: string | null | undefined): string | null 
     return null
   }
   if (url.origin !== base) return null
+  // Dot segments are resolved above: "/.//evil.example" only becomes "//evil.example" now.
+  if (url.pathname.startsWith('//')) return null
   if (excluded.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`))) {
     return null
   }

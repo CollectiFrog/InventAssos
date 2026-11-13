@@ -189,12 +189,15 @@ describe('password sign-in (US-0.10.8)', () => {
     assert.equal((await findUserById(db, camille.id))?.password_hash, null)
   })
 
-  it('closes every other session when the password changes', async () => {
+  it('closes every other session and open sign-in link when the password changes', async () => {
     const elsewhere = app.client()
     await signIn(app, elsewhere, email)
     assert.match((await elsewhere.get(routes.home.href())).text, /Bonjour Camille/)
+    await app.client().post(routes.signIn.form.action.href(), { email })
+    const pending = lastSignInToken(app, email) ?? ''
     await choose()
     assert.doesNotMatch((await elsewhere.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.equal((await app.client().get(routes.signIn.link.href({ token: pending }))).status, 400)
   })
 
   it('answers the same for an unknown address and sends nothing', async () => {
