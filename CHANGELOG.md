@@ -6,6 +6,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-14
+
 ### Added
 
 - Sign in with a password if you want one, chosen or changed through a link sent by e-mail; the e-mailed sign-in link keeps working.
@@ -132,6 +134,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...v0.10.0
 [0.6.1]: https://github.com/CollectiFrog/InventAssos/releases/tag/v0.6.1
