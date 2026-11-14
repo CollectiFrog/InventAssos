@@ -9,6 +9,7 @@ export function accountTargetOf(user: User, adminEmails: ReadonlySet<string>): A
   return {
     id: user.id,
     isListedAdmin: adminEmails.has(user.email),
+    isNamedAdmin: user.role === 'admin',
     isModerator: user.role === 'moderator',
   }
 }

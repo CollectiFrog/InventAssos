@@ -4,6 +4,7 @@ import type { LocationWithOwner } from '../../data/locations.ts'
 import { routes } from '../../routes.ts'
 import type { FieldErrors } from '../../ui/form.tsx'
 import { CsrfField } from '../../ui/form.tsx'
+import { IconButton, IconLink } from '../../ui/icons.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 import { MyStuffTabs } from '../items/items-pages.tsx'
 import { LocationForm, type LocationFormValues, type OwnerOption } from './location-form.tsx'
@@ -27,9 +28,12 @@ export function LocationsPage(handle: Handle<LocationsPageProps>) {
             <h1>Mon matériel</h1>
             <p class="status">Vos lieux de stockage : garage, cave, local personnel…</p>
           </div>
-          <a class="button" href={`${routes.locations.create.index.href()}?pour=me`}>
-            Ajouter un lieu
-          </a>
+          <IconLink
+            icon="add"
+            label="Ajouter un lieu"
+            text="Lieu"
+            href={`${routes.locations.create.index.href()}?pour=me`}
+          />
         </div>
         <MyStuffTabs current="locations" />
         {notice ? (
@@ -55,21 +59,18 @@ export function LocationsPage(handle: Handle<LocationsPageProps>) {
                 </p>
                 {location.address ? <p>{location.address}</p> : null}
                 {location.notes ? <p class="prose">{location.notes}</p> : null}
-                <div class="actions">
-                  <a
-                    class="button secondary"
+                <div class="icon-toolbar">
+                  <IconLink
+                    icon="edit"
+                    label={`Modifier ${location.name}`}
                     href={routes.locations.edit.index.href({ locationId: location.id })}
-                  >
-                    Modifier
-                  </a>
+                  />
                   <form
                     method="post"
                     action={routes.locations.remove.href({ locationId: location.id })}
                   >
                     <CsrfField token={csrfToken} />
-                    <button type="submit" class="danger">
-                      Supprimer
-                    </button>
+                    <IconButton icon="remove" label={`Supprimer ${location.name}`} danger />
                   </form>
                 </div>
               </li>

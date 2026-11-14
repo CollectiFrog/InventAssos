@@ -8,8 +8,8 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createUser, findUserByEmail, setUserStatus } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
 
-// Only platform admins get the Administration link in the header (US-0.7.1).
-const adminBadge = /<a href="\/admin"[^>]*>Administration<\/a>/
+// Only platform admins get the Administration section of Mon compte (US-0.10.9).
+const adminBadge = /<a href="\/admin" class="button secondary">Ouvrir l’administration<\/a>/
 
 describe('platform admins from PLATFORM_ADMIN_EMAILS (US-0.2.5)', () => {
   let db: Database
@@ -34,9 +34,9 @@ describe('platform admins from PLATFORM_ADMIN_EMAILS (US-0.2.5)', () => {
     assert.equal(user?.status, 'active')
     assert.equal(user?.is_platform_admin, true)
     assert.equal(user?.name, 'boss')
-    const home = await client.get(routes.home.href())
-    assert.equal(home.status, 200)
-    assert.match(home.text, adminBadge)
+    const account = await client.get(routes.account.profile.index.href())
+    assert.equal(account.status, 200)
+    assert.match(account.text, adminBadge)
   })
 
   it('activates a listed e-mail that had signed up and was still pending', async () => {
@@ -59,7 +59,8 @@ describe('platform admins from PLATFORM_ADMIN_EMAILS (US-0.2.5)', () => {
     await signIn(app, client, 'pat@example.org')
 
     assert.equal((await findUserByEmail(db, 'pat@example.org'))?.is_platform_admin, false)
-    assert.doesNotMatch((await client.get(routes.home.href())).text, adminBadge)
+    const account = await client.get(routes.account.profile.index.href())
+    assert.doesNotMatch(account.text, adminBadge)
   })
 
   it('drops admin rights as soon as the e-mail leaves the list', async () => {
@@ -69,12 +70,12 @@ describe('platform admins from PLATFORM_ADMIN_EMAILS (US-0.2.5)', () => {
 
     // Same browser, new configuration: rights are read from the variable on every request.
     const unlisted = createTestApp(db, { adminEmails: [] })
-    const home = await unlisted.router.fetch(
-      new Request(new URL(routes.home.href(), 'http://inventassos.test'), {
+    const account = await unlisted.router.fetch(
+      new Request(new URL(routes.account.profile.index.href(), 'http://inventassos.test'), {
         headers: { Cookie: client.cookieHeader() },
       }),
     )
-    assert.doesNotMatch(await home.text(), adminBadge)
+    assert.doesNotMatch(await account.text(), adminBadge)
 
     await signIn(unlisted, unlisted.client(), 'boss@example.org')
     assert.equal((await findUserByEmail(db, 'boss@example.org'))?.is_platform_admin, false)

@@ -40,7 +40,10 @@ describe('create a location while adding (US-0.7.4)', () => {
     const html = (await louClient.get(routes.items.create.index.href())).text
     assert.match(html, /<option value="nouveau" selected>Un nouveau lieu \(à décrire\)<\/option>/)
     assert.match(html, /<details open class="new-location"/)
-    assert.match(html, /<label for="field-newLocationName">Nom du lieu<\/label>/)
+    assert.match(
+      html,
+      /<label for="field-newLocationName">Nom du lieu<span title="Garage, cave, local de répétition…" class="hint-mark"/,
+    )
   })
 
   it('creates the location and the item together, and logs both', async () => {

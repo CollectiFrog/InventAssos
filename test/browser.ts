@@ -21,16 +21,15 @@ export async function startBrowserApp(
   return { app, server }
 }
 
-/** Signs in through the pages, like a person: e-mail form, link from the e-mail, confirm. */
+/** Signs in through the pages, like a person: e-mail form, then the link from the e-mail. */
 export async function signInWithBrowser(page: Page, app: TestApp, email: string): Promise<void> {
   await page.goto('/connexion')
   await page.getByLabel('Adresse e-mail').fill(email)
-  await page.getByRole('button', { name: 'Recevoir le lien' }).click()
+  await page.getByRole('button', { name: 'Recevoir un lien par e-mail' }).click()
   await page.waitForURL('**/connexion/envoyee')
   await app.background.idle()
   const token = lastSignInToken(app, email)
   if (token === null) throw new Error(`no sign-in e-mail for ${email}`)
   await page.goto(`/connexion/lien/${token}`)
-  await page.getByRole('button', { name: 'Me connecter' }).click()
   await page.waitForURL((url) => !url.pathname.startsWith('/connexion'))
 }

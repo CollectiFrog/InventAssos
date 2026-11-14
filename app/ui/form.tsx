@@ -1,11 +1,43 @@
 import type { Handle, RemixNode } from 'remix/component'
 
+import { Icon } from './icons.tsx'
+
 /** Field errors keyed by field name, as returned by `parseForm`. */
 export type FieldErrors = Partial<Record<string, string>>
 
 /** Hidden CSRF token; every POST form must include it (csrf middleware). */
 export function CsrfField(handle: Handle<{ token: string }>) {
   return () => <input type="hidden" name="_csrf" value={handle.props.token} />
+}
+
+/** A text hint is shown on hover (ADR 0031); a hint holding a link stays on the page. */
+function hoverText(hint: RemixNode | undefined): string | undefined {
+  return typeof hint === 'string' ? hint : undefined
+}
+
+/** The « i » after a label whose hint shows on hover. */
+function HintMark(handle: Handle<{ hint?: RemixNode }>) {
+  return () => {
+    const text = hoverText(handle.props.hint)
+    return text ? (
+      <span class="hint-mark" title={text}>
+        <Icon name="info" size={16} />
+      </span>
+    ) : null
+  }
+}
+
+/** The hint itself: read by screen readers through aria-describedby, hidden when it is a tooltip. */
+function FieldHint(handle: Handle<{ id: string; hint?: RemixNode }>) {
+  return () => {
+    const { id, hint } = handle.props
+    if (!hint) return null
+    return (
+      <p class={hoverText(hint) ? 'visually-hidden' : 'hint'} id={id}>
+        {hint}
+      </p>
+    )
+  }
 }
 
 /** Props of a labelled text input. */
@@ -15,7 +47,7 @@ export interface TextFieldProps {
   value?: string | null
   error?: string
   hint?: RemixNode
-  type?: 'text' | 'email' | 'tel' | 'number' | 'search'
+  type?: 'text' | 'email' | 'tel' | 'number' | 'search' | 'password'
   required?: boolean
   /** Required only when its section is used: no "(facultatif)", and the server checks it. */
   requiredIfUsed?: boolean
@@ -37,12 +69,9 @@ export function TextField(handle: Handle<TextFieldProps>) {
         <label for={id}>
           {p.label}
           {p.required || p.requiredIfUsed ? null : <span class="optional"> (facultatif)</span>}
+          <HintMark hint={p.hint} />
         </label>
-        {p.hint ? (
-          <p class="hint" id={`${id}-hint`}>
-            {p.hint}
-          </p>
-        ) : null}
+        <FieldHint id={`${id}-hint`} hint={p.hint} />
         <input
           id={id}
           name={p.name}
@@ -52,6 +81,7 @@ export function TextField(handle: Handle<TextFieldProps>) {
           required={p.required}
           autoComplete={p.autoComplete}
           maxLength={p.maxLength}
+          title={hoverText(p.hint)}
           aria-invalid={p.error ? 'true' : undefined}
           aria-describedby={describedBy || undefined}
         />
@@ -90,18 +120,16 @@ export function TextArea(handle: Handle<TextAreaProps>) {
         <label for={id}>
           {p.label}
           {p.required ? null : <span class="optional"> (facultatif)</span>}
+          <HintMark hint={p.hint} />
         </label>
-        {p.hint ? (
-          <p class="hint" id={`${id}-hint`}>
-            {p.hint}
-          </p>
-        ) : null}
+        <FieldHint id={`${id}-hint`} hint={p.hint} />
         <textarea
           id={id}
           name={p.name}
           rows={4}
           required={p.required}
           maxLength={p.maxLength}
+          title={hoverText(p.hint)}
           aria-invalid={p.error ? 'true' : undefined}
           aria-describedby={describedBy || undefined}
           value={p.value ?? ''}
@@ -155,18 +183,20 @@ export function SelectField(handle: Handle<SelectFieldProps>) {
         <label for={id}>
           {p.label}
           {p.required ? null : <span class="optional"> (facultatif)</span>}
+          <HintMark hint={p.hint} />
         </label>
-        {p.hint ? (
-          <p class="hint" id={`${id}-hint`}>
-            {p.hint}
-          </p>
-        ) : null}
+        <FieldHint id={`${id}-hint`} hint={p.hint} />
         <select
           id={id}
           name={p.name}
           required={p.required}
+          title={hoverText(p.hint)}
           aria-invalid={p.error ? 'true' : undefined}
-          aria-describedby={p.error ? `${id}-error` : undefined}
+          aria-describedby={
+            [p.hint ? `${id}-hint` : null, p.error ? `${id}-error` : null]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
         >
           {p.emptyLabel !== undefined ? <option value="">{p.emptyLabel}</option> : null}
           {p.options.map((option) => (

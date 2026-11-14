@@ -12,8 +12,8 @@ const openPaths = new Set([
   routes.health.live.href(),
   routes.health.ready.href(),
 ])
-// Signing in again with another link must keep working.
-const openPrefix = routes.signIn.form.index.href()
+// Signing in again, and choosing a password, must keep working (ADR 0029).
+const openPrefixes = [routes.signIn.form.index.href(), routes.password.request.index.href()]
 
 /** Sends pending and rejected users to their status page from anywhere else (US-0.2.3). */
 export function gateInactiveAccounts(): Middleware {
@@ -22,7 +22,10 @@ export function gateInactiveAccounts(): Middleware {
     if (user == null || user.status === 'active') return next()
 
     const path = context.url.pathname
-    if (openPaths.has(path) || path.startsWith(openPrefix)) return next()
+    const underOpenPrefix = openPrefixes.some((p) => path === p || path.startsWith(`${p}/`))
+    if (openPaths.has(path) || underOpenPrefix) {
+      return next()
+    }
     return redirect(routes.account.status.href(), 303)
   }
 }

@@ -3,6 +3,7 @@ import type { Handle, RemixNode } from 'remix/component'
 import type { ItemDetails } from '../../data/items.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
+import { IconButton, IconLink } from '../../ui/icons.tsx'
 import { archiveReasonLabels, conditionLabels, formatEuros } from '../../ui/labels.ts'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 
@@ -75,6 +76,11 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
         ]
       : [{ label: 'Rechercher', href: routes.inventory.index.href() }, { label: item.name }]
     const reachable = contact !== undefined && !item.archived_at
+    const tools =
+      (canEdit && !item.archived_at) ||
+      (canModerate && !item.archived_at) ||
+      canDelete ||
+      (deletion !== undefined && !deletion.requested)
     const phone = reachable ? item.contactPhone : null
     return (
       <Layout title={item.name} viewer={viewer} trail={trail} back={back ?? trail.at(-2)?.href}>
@@ -88,6 +94,53 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
               À <OwnerLink item={item} /> · rangé à {item.city}
             </p>
           </div>
+          {tools ? (
+            <div class="icon-toolbar">
+              {canEdit && !item.archived_at ? (
+                <>
+                  <IconLink
+                    icon="edit"
+                    label="Modifier"
+                    href={routes.items.edit.index.href({ itemId: item.id })}
+                  />
+                  <IconLink
+                    icon="move"
+                    label="Déplacer"
+                    href={routes.items.move.index.href({ itemId: item.id })}
+                  />
+                  <IconLink
+                    icon="archive"
+                    label="Archiver"
+                    href={routes.items.archive.index.href({ itemId: item.id })}
+                  />
+                </>
+              ) : null}
+              {canModerate && !canEdit && !item.archived_at ? (
+                <IconLink
+                  icon="moderate"
+                  label="Retirer (modération)"
+                  href={routes.items.archive.index.href({ itemId: item.id })}
+                />
+              ) : null}
+              {canDelete ? (
+                <IconLink
+                  icon="remove"
+                  label="Supprimer…"
+                  danger
+                  href={routes.items.remove.index.href({ itemId: item.id })}
+                />
+              ) : deletion && !deletion.requested ? (
+                <form method="post" action={routes.items.requestDeletion.href({ itemId: item.id })}>
+                  <CsrfField token={deletion.csrfToken} />
+                  <IconButton
+                    icon="askRemoval"
+                    label="Demander la suppression aux responsables du collectif"
+                    danger
+                  />
+                </form>
+              ) : null}
+            </div>
+          ) : null}
           {reachable ? (
             <p class="actions contact-buttons">
               {phone ? (
@@ -112,6 +165,9 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
             {archiveReasonLabels[item.archive_reason].toLowerCase()}. Il n’apparaît plus dans
             l’inventaire.
           </p>
+        ) : null}
+        {deletion?.requested ? (
+          <p class="status">Suppression demandée aux responsables du collectif.</p>
         ) : null}
         {notice ? (
           <p class="notice notice-success" role="status">
@@ -164,7 +220,7 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
             {history}
           </div>
           <aside class="detail-side" aria-label="Où le trouver">
-            <div class="card">
+            <div class="panel">
               <dl class="facts">
                 <dt>Appartient à</dt>
                 <dd>
@@ -188,7 +244,7 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
               </dl>
             </div>
             {reachable && contact ? (
-              <section id="ecrire" class="card contact" aria-labelledby="ecrire-titre">
+              <section id="ecrire" class="panel contact" aria-labelledby="ecrire-titre">
                 <h2 id="ecrire-titre">Écrire à {item.ownerName}</h2>
                 {phone ? null : <p>Pas de téléphone renseigné : écrivez-lui via la plateforme.</p>}
                 {contact.sent ? (
@@ -226,72 +282,6 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                   <button type="submit">Envoyer</button>
                 </form>
               </section>
-            ) : null}
-            {canEdit && !item.archived_at ? (
-              <div class="card">
-                <p class="actions">
-                  <a
-                    class="button secondary"
-                    href={routes.items.edit.index.href({ itemId: item.id })}
-                  >
-                    Modifier
-                  </a>
-                  <a
-                    class="button secondary"
-                    href={routes.items.move.index.href({ itemId: item.id })}
-                  >
-                    Déplacer
-                  </a>
-                  <a
-                    class="button secondary"
-                    href={routes.items.archive.index.href({ itemId: item.id })}
-                  >
-                    Archiver
-                  </a>
-                </p>
-              </div>
-            ) : null}
-            {canModerate && !canEdit && !item.archived_at ? (
-              <div class="card">
-                <p class="actions">
-                  <a
-                    class="button secondary"
-                    href={routes.items.archive.index.href({ itemId: item.id })}
-                  >
-                    Retirer (modération)
-                  </a>
-                </p>
-              </div>
-            ) : null}
-            {canDelete || deletion ? (
-              <div class="card">
-                {canDelete ? (
-                  <p class="actions">
-                    <a
-                      class="button danger"
-                      href={routes.items.remove.index.href({ itemId: item.id })}
-                    >
-                      Supprimer…
-                    </a>
-                  </p>
-                ) : deletion?.requested ? (
-                  <p class="status">Suppression demandée aux responsables du collectif.</p>
-                ) : deletion ? (
-                  <form
-                    method="post"
-                    action={routes.items.requestDeletion.href({ itemId: item.id })}
-                    class="stack"
-                  >
-                    <CsrfField token={deletion.csrfToken} />
-                    <p class="status">
-                      Saisi par erreur ? Les responsables du collectif peuvent le supprimer.
-                    </p>
-                    <button type="submit" class="secondary">
-                      Demander la suppression
-                    </button>
-                  </form>
-                ) : null}
-              </div>
             ) : null}
           </aside>
         </div>

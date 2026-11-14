@@ -10,7 +10,13 @@ export const routes = route({
   signIn: {
     form: form('/connexion'),
     sent: get('/connexion/envoyee'),
-    link: form('/connexion/lien/:token'),
+    link: get('/connexion/lien/:token'),
+    password: post('/connexion/mot-de-passe'),
+  },
+  password: {
+    request: form('/mot-de-passe'),
+    sent: get('/mot-de-passe/envoye'),
+    choose: form('/mot-de-passe/nouveau/:token'),
   },
   signOut: post('/deconnexion'),
   account: {
@@ -91,11 +97,13 @@ export const routes = route({
       approve: post('/admin/collectifs/:collectifId/accepter'),
       reject: post('/admin/collectifs/:collectifId/refuser'),
     },
-    moderators: {
-      index: get('/admin/moderateurs'),
-      name: post('/admin/moderateurs'),
-      remove: post('/admin/moderateurs/:userId/retirer'),
+    team: {
+      index: get('/admin/equipe'),
+      name: post('/admin/equipe'),
+      remove: post('/admin/equipe/:userId/retirer'),
     },
+    /** The Modérateurs tab until V0.10, kept for bookmarks: redirects to `team`. */
+    oldModerators: get('/admin/moderateurs'),
     categories: {
       index: get('/admin/categories'),
       create: post('/admin/categories'),

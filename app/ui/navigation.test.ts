@@ -120,21 +120,36 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     assert.match(profile, /Se déconnecter/)
   })
 
-  it('puts Administration at the bottom of the sidebar for a platform admin only', async () => {
+  it('puts Administration in Mon compte for staff only, never in the navigation (ADR 0030)', async () => {
     const app = createTestApp(db, { adminEmails: ['boss@example.org'] })
     const client = app.client()
     await signIn(app, client, 'boss@example.org')
 
     const home = (await client.get(routes.home.href())).text
-    assert.match(home, /<div class="side-foot"><a href="\/admin">.*?<span>Administration<\/span>/s)
-    // Phones have no sidebar foot: the same link sits in the top bar, hidden by CSS from 720 px.
-    assert.match(home, /<a href="\/admin" class="phone-admin">Administration<\/a>/)
+    assert.doesNotMatch(home, /<aside class="sidebar">.*?Administration.*?<\/aside>/s)
+    assert.doesNotMatch(home, /<header class="top-bar">.*?Administration.*?<\/header>/s)
+    const profile = (await client.get(routes.account.profile.index.href())).text
+    assert.match(profile, /<a href="#administration" class="toc-link">Administration<\/a>/)
+    assert.match(profile, /<section id="administration"[\s\S]*?Aucune demande en attente\./)
+    assert.match(profile, /<a href="\/admin" class="button secondary">Ouvrir l’administration<\/a>/)
+    // The admin pages lead back to Mon compte and mark it as the current shell link.
     const queue = (await client.get(routes.admin.index.href())).text
-    assert.match(queue, /<div class="side-foot"><a href="\/admin" aria-current="page">/)
-    assert.match(queue, /<a href="\/admin" aria-current="page" class="phone-admin">/)
+    assert.match(queue, /<a href="\/compte\/profil" aria-label="[^"]*" aria-current="page"/)
+    assert.match(queue, /<a href="\/compte\/profil#administration" class="back-link">/)
+    assert.match(queue, /<a href="\/compte\/profil#administration" class="crumb-link">Mon compte/)
   })
 
-  it('gives every page a top bar with search, "Ajouter du matériel" and the account', async () => {
+  it('counts the pending requests in Mon compte › Administration', async () => {
+    const app = createTestApp(db, { adminEmails: ['boss@example.org'] })
+    const client = app.client()
+    await signIn(app, client, 'boss@example.org')
+    await createUser(db, { name: 'Pat', email: 'pat@example.org' })
+    await createUser(db, { name: 'Pia', email: 'pia@example.org' })
+    const profile = (await client.get(routes.account.profile.index.href())).text
+    assert.match(profile, /2 demandes en attente\./)
+  })
+
+  it('gives every page a top bar with search, "+" to add equipment and the account', async () => {
     const app = createTestApp(db)
     const client = app.client()
     await signIn(app, client, 'camille@example.org')
@@ -145,7 +160,15 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
       assert.match(top, /<form method="get" action="\/inventaire"/, url)
       assert.match(top, /<label for="recherche-globale"[^>]*>Chercher dans mes collectifs<\/label>/)
       assert.match(top, /<input type="search" id="recherche-globale" name="q"/)
-      assert.match(top, /<a href="\/materiel\/nouveau"[^>]*>Ajouter du matériel<\/a>/)
+      // Icons only (ADR 0030): the names stay for screen readers and voice control.
+      assert.match(
+        top,
+        /<button[^>]*class="secondary icon-button"[^>]*>.*?<span class="visually-hidden">Rechercher<\/span><\/button>/s,
+      )
+      assert.match(
+        top,
+        /<a href="\/materiel\/nouveau" title="Ajouter du matériel"[^>]*>.*?<span class="visually-hidden">Ajouter du matériel<\/span><\/a>/s,
+      )
       assert.match(top, /aria-label="CM, mon compte : Camille Martin"/)
     }
     // The top bar's search lands on Rechercher with the words typed.

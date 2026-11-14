@@ -64,13 +64,24 @@ flowchart TB
 | Rechercher   | `/inventaire`              | text search in my collectifs' equipment, filters (category, my collectifs, city)   |
 | Mon matériel | `/materiel`, tab `/lieux`  | what is stored in my locations: mine, my collectifs', borrowed; tab Lieux          |
 | Collectifs   | `/collectifs`              | my collectifs, then the directory of all (name, city); request a new one           |
-| *Top bar*    | `/compte/profil`, `/admin` | search, Ajouter du matériel, account (initials); Administration in the sidebar     |
+| *Top bar*    | `/compte/profil`, `/admin` | search (magnifier), « + » to add, account (initials); Administration in Mon compte |
 
 - **Phone (< 720 px):** a tab bar fixed at the bottom with the four entries, icon and label.
 - **Computer (≥ 720 px):** the same `<nav>` becomes a left rail of 84 px (icon and label) up to
-  1099 px, then a sidebar of 240 px with "Mes collectifs" shortcuts (5 at most, then "Tous") and
-  Administration at the bottom. A top bar holds the search field (submits to `/inventaire`),
-  "Ajouter du matériel" and the account link.
+  1099 px, then a sidebar of 240 px with "Mes collectifs" shortcuts (5 at most, then "Tous"). A
+  top bar holds the search field (submits to `/inventaire`) with a magnifier button, a « + » to add
+  equipment and the account link; icon buttons keep a visually hidden name
+  ([ADR 0030](../../adr/0030-lighter-shell/)).
+- **Administration** is a section of Mon compte for admins and moderators, not a navigation entry;
+  the admin pages lead back to Mon compte (ADR 0030).
+- **Actions on an object** are square icon buttons (`IconLink`, `IconButton` in `app/ui/icons.tsx`),
+  one icon per kind of action, grouped in an `icon-toolbar` beside the title; their names stay
+  hidden for assistive technology and in `title`. Form submissions, empty-state invitations, contact
+  and settings actions stay text buttons. The top bar's « + » always adds equipment (preset to the
+  collectif on its page, through `add`); a page adds anything else with a labelled `IconLink`
+  (`text`), such as « + Lieu ». Text field hints show on hover behind an « i ».
+  Cards keep a frame only in grids; lists, panels and settings sections are flat
+  ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
 - **Content is fluid**: no page-wide `max-width`, only running text (`68ch`) and form fields are
   limited; above 2000 px the content stops at 1760 px. Window breakpoints (720, 1100, 1440) drive
   the shell; components adapt to their container (`@container`, `auto-fill`).
@@ -131,6 +142,7 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 | Zone         | Pages                                                                                                                        |
 |--------------|------------------------------------------------------------------------------------------------------------------------------|
 | Visitor      | `/connexion`, `/connexion/envoyee`, `/connexion/lien/:token`, `/inscription`, `/inscription/envoyee`                         |
+| Password     | POST `/connexion/mot-de-passe`; `/mot-de-passe`, `/mot-de-passe/envoye`, `/mot-de-passe/nouveau/:token`                      |
 | Pending      | `/compte/statut`, `/compte/statut/redemander`                                                                                |
 | Accueil      | `/`                                                                                                                          |
 | Rechercher   | `/inventaire`                                                                                                                |
@@ -141,7 +153,7 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 | Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/lieux`, `/responsables`, `/modifier`, `/devenir-responsable`) |
 | People       | `/personnes/:userId`                                                                                                         |
 | Account      | `/compte/profil` (sections: profil, collectifs, session, à propos, supprimer), `/compte/supprimer`, `/deconnexion`           |
-| Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/moderateurs`, `/categories`, `/instance`                  |
+| Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/equipe`, `/categories`, `/instance`                       |
 
 URLs are a contract: V0.7 changes what the pages show and how they are reached, not their URLs.
 It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
@@ -157,7 +169,8 @@ It adds a few ([ADR 0022](../../adr/0022-sidebar-navigation-on-computers/)):
 - `/admin/demandes` (also `/admin`), `/admin/comptes`, `/admin/collectifs`, `/admin/moderateurs`,
   `/admin/categories`, `/admin/instance`. Demandes, comptes, collectifs and categories are open to
   admins and moderators; `/admin/moderateurs` (V0.8) to admins only; `/admin/instance` waits for a
-  story.
+  story. V0.10.x renames `/admin/moderateurs` to `/admin/equipe` (admins and moderators, US-0.10.7);
+  the old URL redirects.
 
 ## Page templates
 

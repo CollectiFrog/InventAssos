@@ -5,7 +5,7 @@
 export const returnParam = 'suite'
 
 /** Pages that make no sense to come back to after signing in. */
-const excluded = ['/connexion', '/inscription', '/deconnexion']
+const excluded = ['/connexion', '/inscription', '/deconnexion', '/mot-de-passe']
 
 /** The value as an internal path ("/materiel?x=1"), or null when it is not a safe one. */
 export function safeReturnPath(value: string | null | undefined): string | null {
@@ -21,6 +21,8 @@ export function safeReturnPath(value: string | null | undefined): string | null 
     return null
   }
   if (url.origin !== base) return null
+  // Dot segments are resolved above: "/.//evil.example" only becomes "//evil.example" now.
+  if (url.pathname.startsWith('//')) return null
   if (excluded.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`))) {
     return null
   }

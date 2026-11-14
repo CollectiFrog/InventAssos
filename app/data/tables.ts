@@ -5,9 +5,13 @@ import { column as c, type TableRow, table } from 'remix/data-table'
 export const userStatuses = ['pending', 'active', 'rejected', 'disabled', 'deleted'] as const
 export type UserStatus = (typeof userStatuses)[number]
 
-/** Platform roles stored on the account (ADR 0020); admins come from PLATFORM_ADMIN_EMAILS only. */
-export const userRoles = ['member', 'moderator'] as const
+/** Platform roles stored on the account; admins also come from PLATFORM_ADMIN_EMAILS (ADR 0028). */
+export const userRoles = ['member', 'moderator', 'admin'] as const
 export type UserRole = (typeof userRoles)[number]
+
+/** What an e-mailed token is for: signing in, or choosing a password (ADR 0029). */
+export const tokenPurposes = ['sign_in', 'password_reset'] as const
+export type TokenPurpose = (typeof tokenPurposes)[number]
 
 export const users = table({
   name: 'users',
@@ -19,6 +23,8 @@ export const users = table({
     status: c.enum(userStatuses),
     is_platform_admin: c.boolean(),
     role: c.enum(userRoles),
+    /** scrypt hash of the password (ADR 0029); null until the person chooses one. */
+    password_hash: c.text().nullable(),
     rejection_reason: c.text().nullable(),
     created_at: c.timestamp({ withTimezone: true }),
     updated_at: c.timestamp({ withTimezone: true }),
@@ -55,6 +61,7 @@ export const signInTokens = table({
   columns: {
     token_hash: c.text(),
     user_id: c.uuid(),
+    purpose: c.enum(tokenPurposes),
     expires_at: c.timestamp({ withTimezone: true }),
     used_at: c.timestamp({ withTimezone: true }).nullable(),
     created_at: c.timestamp({ withTimezone: true }),

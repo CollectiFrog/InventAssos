@@ -2,6 +2,7 @@ import type { Handle } from 'remix/component'
 
 import type { Location } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
+import { IconLink } from '../../ui/icons.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 
 /** Props of a location's page. Address and notes are already redacted for this viewer. */
@@ -69,12 +70,11 @@ export function LocationPage(handle: Handle<LocationPageProps>) {
         </dl>
         {canManage ? (
           <p>
-            <a
-              class="button secondary"
+            <IconLink
+              icon="edit"
+              label="Modifier"
               href={routes.locations.edit.index.href({ locationId: location.id })}
-            >
-              Modifier
-            </a>
+            />
           </p>
         ) : null}
       </Layout>

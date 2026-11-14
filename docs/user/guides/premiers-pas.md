@@ -25,17 +25,40 @@ connecter pour utiliser ce bouton, afin que seul le titulaire de l'adresse puiss
 
 ## Se connecter
 
-AssoMatos n'utilise pas de mot de passe.
+Deux façons de se connecter, avec la même adresse e-mail : un **lien reçu par e-mail**, toujours
+possible, ou un **mot de passe** si vous en avez choisi un.
 
-1. Choisissez **Se connecter** et indiquez votre adresse e-mail.
-2. Ouvrez l'e-mail « Votre lien de connexion AssoMatos » et cliquez sur le lien.
-3. Sur la page qui s'ouvre, cliquez sur **Me connecter**.
+Par lien :
+
+1. Choisissez **Se connecter**, indiquez votre adresse e-mail et touchez **Recevoir un lien par
+   e-mail**.
+2. Ouvrez l'e-mail « Votre lien de connexion AssoMatos » et cliquez sur le lien : vous êtes
+   connecté et arrivez sur l'accueil.
+
+Avec un mot de passe : indiquez votre adresse e-mail et votre mot de passe, puis **Se connecter**.
 
 Si vous avez ouvert un lien vers une page de l'application (un objet, un collectif…) sans être
 connecté, vous arrivez sur cette page une fois connecté, et non sur l'accueil.
 
 Le lien est valable **15 minutes** et ne sert **qu'une fois**. Vous restez connecté 30 jours sur cet
-appareil. Si le lien a expiré, demandez-en simplement un nouveau.
+appareil. Si le lien a expiré, demandez-en simplement un nouveau. Certaines messageries
+d'entreprise ouvrent les liens avant vous, ce qui les use : si « Ce lien ne fonctionne plus »
+revient à chaque fois, choisissez un mot de passe.
+
+### Choisir un mot de passe
+
+Le mot de passe se crée, ou se change, toujours par un lien reçu par e-mail :
+
+1. Sur la page **Se connecter**, touchez **Mot de passe oublié ou pas encore créé ?** (ou, une fois
+   connecté, **Mon compte › Mot de passe**) et indiquez votre adresse e-mail.
+2. Ouvrez l'e-mail « Choisir votre mot de passe AssoMatos » et cliquez sur le lien, valable
+   **30 minutes**.
+3. Tapez votre mot de passe deux fois : au moins **12 caractères**, sans autre règle. Une phrase
+   facile à retenir convient très bien.
+
+Vous êtes alors connecté sur cet appareil et **déconnecté de tous les autres**, et un e-mail vous
+confirme le changement. Si vous ne l'avez pas demandé, choisissez aussitôt un nouveau mot de passe
+et prévenez un administrateur.
 
 Pour éviter les abus, une même adresse reçoit au plus 5 e-mails de connexion ou d'inscription par
 heure : si vous n'en recevez plus, attendez un peu (et vérifiez vos indésirables). Après un trop grand

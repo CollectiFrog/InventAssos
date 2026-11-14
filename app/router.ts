@@ -5,8 +5,8 @@ import profileController from './actions/account/profile/controller.tsx'
 import adminCategoriesController from './actions/admin/categories/controller.tsx'
 import adminCollectifsController from './actions/admin/collectifs/controller.tsx'
 import adminController from './actions/admin/controller.tsx'
-import adminModeratorsController from './actions/admin/moderators/controller.tsx'
 import adminResponsiblesController from './actions/admin/responsibles/controller.tsx'
+import adminTeamController from './actions/admin/team/controller.tsx'
 import collectifsController from './actions/collectifs/controller.tsx'
 import deletionRequestsController from './actions/collectifs/deletions/controller.tsx'
 import editCollectifController from './actions/collectifs/edit/controller.tsx'
@@ -30,10 +30,12 @@ import deleteItemController from './actions/items/remove/controller.tsx'
 import locationsController from './actions/locations/controller.tsx'
 import createLocationController from './actions/locations/create/controller.tsx'
 import editLocationController from './actions/locations/edit/controller.tsx'
+import passwordChooseController from './actions/password/choose/controller.tsx'
+import passwordController from './actions/password/controller.tsx'
+import passwordRequestController from './actions/password/request/controller.tsx'
 import peopleController from './actions/people/controller.tsx'
 import signInController from './actions/sign-in/controller.tsx'
 import signInFormController from './actions/sign-in/form/controller.tsx'
-import signInLinkController from './actions/sign-in/link/controller.tsx'
 import signUpController from './actions/sign-up/controller.tsx'
 import signUpFormController from './actions/sign-up/form/controller.tsx'
 import { type AppDependencies, appMiddleware } from './middleware/index.ts'
@@ -48,8 +50,8 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.admin, adminController)
   router.map(routes.admin.categories, adminCategoriesController)
   router.map(routes.admin.collectifs, adminCollectifsController)
-  router.map(routes.admin.moderators, adminModeratorsController)
   router.map(routes.admin.responsibles, adminResponsiblesController)
+  router.map(routes.admin.team, adminTeamController)
   router.map(routes.collectifs, collectifsController)
   router.map(routes.collectifs.members, collectifMembersController)
   router.map(routes.collectifs.deletions, deletionRequestsController)
@@ -70,12 +72,14 @@ export function createAppRouter(deps: AppDependencies) {
   router.map(routes.items.archive, archiveItemController)
   router.map(routes.items.remove, deleteItemController)
   router.map(routes.locations, locationsController)
+  router.map(routes.password, passwordController)
+  router.map(routes.password.request, passwordRequestController)
+  router.map(routes.password.choose, passwordChooseController)
   router.map(routes.people, peopleController)
   router.map(routes.locations.create, createLocationController)
   router.map(routes.locations.edit, editLocationController)
   router.map(routes.signIn, signInController)
   router.map(routes.signIn.form, signInFormController)
-  router.map(routes.signIn.link, signInLinkController)
   router.map(routes.signUp, signUpController)
   router.map(routes.signUp.form, signUpFormController)
   return router

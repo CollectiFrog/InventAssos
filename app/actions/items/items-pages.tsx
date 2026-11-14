@@ -10,6 +10,7 @@ import {
   type SelectOption,
   TextField,
 } from '../../ui/form.tsx'
+import { IconButton, IconLink } from '../../ui/icons.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 import { Tabs } from '../../ui/tabs.tsx'
 import { ItemFields } from './item-fields.tsx'
@@ -62,13 +63,19 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
             <h1>Mon matériel</h1>
             <p class="status">Ce qui est rangé chez vous en ce moment, et à qui il appartient.</p>
           </div>
-          <div class="actions">
-            <a class="button secondary" href={routes.imports.start.index.href()}>
-              Importer un fichier
-            </a>
-            <a class="button" href={routes.items.create.index.href()}>
-              Ajouter du matériel
-            </a>
+          <div class="icon-toolbar">
+            <IconLink
+              icon="upload"
+              label="Importer un fichier"
+              href={routes.imports.start.index.href()}
+            />
+            <form method="post" action={routes.exports.mine.href()}>
+              <CsrfField token={csrfToken} />
+              <IconButton
+                icon="download"
+                label="Exporter le matériel qui m’appartient (CSV), où qu’il soit rangé"
+              />
+            </form>
           </div>
         </div>
         <MyStuffTabs current="items" />
@@ -100,16 +107,6 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
         <p class="status">
           Le matériel rangé au local d’un collectif est sur la page du collectif.
         </p>
-        <form method="post" action={routes.exports.mine.href()} class="stack">
-          <CsrfField token={csrfToken} />
-          <p class="status">
-            Le fichier liste tout ce qui vous appartient, où qu’il soit rangé, dans le format que
-            l’import relit.
-          </p>
-          <button type="submit" class="secondary">
-            Exporter le matériel qui m’appartient (CSV)
-          </button>
-        </form>
       </Layout>
     )
   }

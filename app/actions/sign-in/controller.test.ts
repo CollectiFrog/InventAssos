@@ -55,41 +55,37 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     assert.equal(app.mailer.outbox.length, 0)
   })
 
-  it('opening the link only shows a confirmation button', async () => {
+  it('signs in once by opening the link and regenerates the session', async () => {
     const app = createTestApp(db)
     const client = app.client()
+    await signIn(app, client, 'camille@example.org')
+    const before = client.cookieHeader()
     await client.post(requestUrl, { email: 'camille@example.org' })
     const token = lastSignInToken(app, 'camille@example.org') ?? ''
 
-    // An e-mail scanner opening the link twice must not use it up.
-    await client.get(routes.signIn.link.index.href({ token }))
-    const page = await client.get(routes.signIn.link.index.href({ token }))
-    assert.match(page.text, /Me connecter/)
-
-    const response = await client.post(routes.signIn.link.action.href({ token }))
-    assert.equal(response.status, 303)
-  })
-
-  it('signs in once with a valid link and regenerates the session', async () => {
-    const app = createTestApp(db)
-    const client = app.client()
-    await client.post(requestUrl, { email: 'camille@example.org' })
-    const token = lastSignInToken(app, 'camille@example.org') ?? ''
-    const before = (await client.get(routes.signIn.link.index.href({ token }))).headers
-      .get('Set-Cookie')
-      ?.split(';')[0]
-
-    const response = await client.post(routes.signIn.link.action.href({ token }))
-    const after = response.headers.get('Set-Cookie')?.split(';')[0]
+    const response = await client.get(routes.signIn.link.href({ token }))
 
     assert.equal(response.status, 303)
     assert.equal(response.location, routes.home.href())
-    assert.notEqual(after, before)
+    assert.notEqual(client.cookieHeader(), before)
     assert.match((await client.get(routes.home.href())).text, /Bonjour Camille/)
 
-    const again = await app.client().post(routes.signIn.link.action.href({ token }))
+    const again = await app.client().get(routes.signIn.link.href({ token }))
     assert.equal(again.status, 400)
     assert.match(again.text, /Ce lien ne fonctionne plus/)
+  })
+
+  it('does not use the link up on a HEAD request', async () => {
+    const app = createTestApp(db)
+    const client = app.client()
+    await client.post(requestUrl, { email: 'camille@example.org' })
+    const token = lastSignInToken(app, 'camille@example.org') ?? ''
+
+    const head = await app.router.fetch(
+      new Request(new URL(routes.signIn.link.href({ token }), testOrigin), { method: 'HEAD' }),
+    )
+    assert.notEqual(head.status, 303)
+    assert.equal((await client.get(routes.signIn.link.href({ token }))).status, 303)
   })
 
   it('gives a new CSRF token at sign-in: the token from before no longer works', async () => {
@@ -99,7 +95,7 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     const before = /name="_csrf" value="([^"]+)"/.exec(form.text)?.[1] ?? ''
     await client.post(requestUrl, { email: 'camille@example.org' })
     const token = lastSignInToken(app, 'camille@example.org') ?? ''
-    await client.post(routes.signIn.link.action.href({ token }))
+    await client.get(routes.signIn.link.href({ token }))
 
     const profile = await client.get(routes.account.profile.index.href())
     const now = /name="_csrf" value="([^"]+)"/.exec(profile.text)?.[1] ?? ''
@@ -133,14 +129,14 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     const token = lastSignInToken(app, 'camille@example.org') ?? ''
     await db.exec(sql`update sign_in_tokens set expires_at = now() - interval '1 second'`)
 
-    const response = await client.post(routes.signIn.link.action.href({ token }))
+    const response = await client.get(routes.signIn.link.href({ token }))
     assert.equal(response.status, 400)
   })
 
   it('refuses an unknown link', async () => {
     const response = await createTestApp(db)
       .client()
-      .post(routes.signIn.link.action.href({ token: 'not-a-real-token' }))
+      .get(routes.signIn.link.href({ token: 'not-a-real-token' }))
 
     assert.equal(response.status, 400)
   })
@@ -152,7 +148,7 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     const token = lastSignInToken(app, 'camille@example.org') ?? ''
     await db.exec(sql`update users set status = 'disabled'`)
 
-    const response = await client.post(routes.signIn.link.action.href({ token }))
+    const response = await client.get(routes.signIn.link.href({ token }))
     assert.equal(response.status, 400)
   })
 

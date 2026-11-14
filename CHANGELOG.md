@@ -6,6 +6,23 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-14
+
+### Added
+
+- Sign in with a password if you want one, chosen or changed through a link sent by e-mail; the e-mailed sign-in link keeps working.
+- Admins can name and remove other admins in the app, on Administration › Équipe (formerly Modérateurs); admins from the server configuration stay out of reach.
+
+### Changed
+
+- The link from the sign-in e-mail signs you in at once, without the « Me connecter » page.
+- A lighter top bar: a magnifier to search and a « + » to add equipment; Administration moves to a section of Mon compte.
+- Lighter pages: actions on equipment, places and collectifs are icons named on hover, the « + » adds equipment (to the collectif on its page) and « + Lieu » adds a place, fewer frames, field help on hover, and one search field on the home page.
+
+### Security
+
+- After signing in, a crafted return address can no longer send you to another site.
+
 ## [0.10.0] - 2026-11-13
 
 ### Added
@@ -117,6 +134,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...v0.10.0
 [0.6.1]: https://github.com/CollectiFrog/InventAssos/releases/tag/v0.6.1

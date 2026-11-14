@@ -70,7 +70,7 @@ a {
 main {
   max-width: 1760px;
   margin: 0 auto;
-  padding: 1.5rem clamp(1rem, 2.2vw, 2.5rem) 4rem;
+  padding: 1rem clamp(1rem, 2.2vw, 2.5rem) 4rem;
   container: main / inline-size;
 }
 main > p,
@@ -96,8 +96,7 @@ main > p,
 .top-add,
 .side-brand,
 .side-heading,
-.my-collectifs,
-.side-foot {
+.my-collectifs {
   display: none;
 }
 .header-links {
@@ -113,6 +112,23 @@ main > p,
 }
 .header-links a[aria-current="page"] {
   font-weight: 700;
+}
+/* A square button showing an icon; its name is in a visually hidden span (ADR 0030). */
+button.icon-button,
+.button.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch);
+  min-width: var(--touch);
+  min-height: var(--touch);
+  padding: 0;
+}
+/* « + Lieu »: a short word beside the icon where the « + » alone would be ambiguous (ADR 0031). */
+.button.icon-button.with-text {
+  width: auto;
+  gap: 0.3rem;
+  padding: 0 0.85rem 0 0.6rem;
 }
 .header-links .avatar {
   justify-content: center;
@@ -138,8 +154,7 @@ main > p,
 .main-nav {
   display: flex;
 }
-.main-nav a,
-.side-foot a {
+.main-nav a {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -156,17 +171,14 @@ main > p,
   text-decoration: none;
 }
 .main-nav a:hover,
-.side-foot a:hover,
 .my-collectifs a:hover {
   color: var(--fg);
 }
-.main-nav a[aria-current="page"],
-.side-foot a[aria-current="page"] {
+.main-nav a[aria-current="page"] {
   color: var(--accent);
   font-weight: 600;
 }
-.main-nav svg,
-.side-foot svg {
+.main-nav svg {
   flex: none;
 }
 body.has-nav main {
@@ -197,13 +209,11 @@ body.has-nav main {
     flex-direction: column;
     gap: 0.15rem;
   }
-  .main-nav a,
-  .side-foot a {
+  .main-nav a {
     flex: none;
     min-height: 3.6rem;
   }
-  .main-nav a[aria-current="page"],
-  .side-foot a[aria-current="page"] {
+  .main-nav a[aria-current="page"] {
     background: var(--accent-soft);
   }
   .side-brand {
@@ -234,12 +244,6 @@ body.has-nav main {
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .side-foot {
-    display: block;
-    margin-top: auto;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-  }
   .has-nav .top-bar {
     position: sticky;
     top: 0;
@@ -248,8 +252,7 @@ body.has-nav main {
     min-height: 4rem;
     padding: 0.6rem clamp(1rem, 2.2vw, 2.5rem);
   }
-  .has-nav .top-bar > .brand,
-  .phone-admin {
+  .has-nav .top-bar > .brand {
     display: none;
   }
   .top-search {
@@ -269,7 +272,6 @@ body.has-nav main {
   }
   .header-links .top-add {
     display: inline-flex;
-    white-space: nowrap;
   }
   body.has-nav main {
     padding-bottom: 4rem;
@@ -295,7 +297,6 @@ body.has-nav main {
     clip-path: none;
   }
   .main-nav a,
-  .side-foot a,
   .my-collectifs a {
     flex-direction: row;
     justify-content: flex-start;
@@ -305,8 +306,7 @@ body.has-nav main {
     font-size: 1rem;
     text-align: left;
   }
-  .main-nav svg,
-  .side-foot svg {
+  .main-nav svg {
     width: 20px;
     height: 20px;
   }
@@ -349,8 +349,16 @@ body.has-nav main {
   color: var(--muted);
 }
 
+/* Quieter titles and spacing (ADR 0031): more content per screen, phones first. */
 h1 {
+  margin: 0.25rem 0 0.75rem;
+  font-size: clamp(1.45rem, 1.2rem + 0.8vw, 1.85rem);
   line-height: 1.2;
+}
+h2 {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 1.15rem;
+  line-height: 1.3;
 }
 
 input,
@@ -421,6 +429,31 @@ button.danger,
   background: var(--danger);
   border-color: var(--danger);
 }
+/* Destructive icon actions keep the shape of the others, outlined in the danger colour. */
+button.danger-icon,
+.button.danger-icon {
+  background: transparent;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+/* A row of icon actions on one object; one-button forms sit inline. */
+.icon-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.icon-toolbar form {
+  margin: 0;
+}
+/* The « i » after a label: its hint shows on hover (ADR 0031). */
+.hint-mark {
+  display: inline-flex;
+  margin-left: 0.35rem;
+  color: var(--muted);
+  vertical-align: -0.15em;
+  cursor: help;
+}
 
 .notice {
   padding: 0.75rem 1rem;
@@ -461,11 +494,39 @@ button.danger,
   display: grid;
   gap: 1rem;
 }
+/*
+ * Fewer frames (ADR 0031): a card is a soft surface without border, and only in grids (directory,
+ * item grid). A plain list of cards becomes rows divided by a line; panels and empty states are flat.
+ */
 .card {
   padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--border) 45%, transparent);
+}
+.cards:not(.directory):not(.item-grid) {
+  gap: 0;
+}
+.cards:not(.directory):not(.item-grid) > .card {
+  padding: 0.75rem 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  box-shadow: none;
+}
+.card.empty-state,
+.setting .card {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.panel {
+  padding: 0;
+}
+.panel + .panel {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
 }
 .card p {
   margin-top: 0;
@@ -596,6 +657,12 @@ button.danger,
   max-width: 40rem;
   margin-bottom: 1.25rem;
 }
+@media (min-width: 720px) {
+  /* The top bar already has the search field (ADR 0031). */
+  .has-nav .home-search {
+    display: none;
+  }
+}
 .home-search label {
   font-weight: 600;
 }
@@ -608,7 +675,7 @@ button.danger,
   align-items: center;
   max-width: 40rem;
   margin-bottom: 1.25rem;
-  border-color: var(--accent);
+  border: 1px solid var(--accent);
   background: var(--accent-soft);
   color: var(--fg);
   text-decoration: none;
@@ -855,9 +922,6 @@ button:disabled {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
 }
 .data-table th,
 .data-table td {
@@ -963,9 +1027,13 @@ button:disabled {
 .setting p.status {
   margin: 0;
 }
-.danger-zone {
-  border-color: var(--danger);
+/* Phones: the section title is enough; its explanation shows from 720 px (ADR 0031). */
+@media (max-width: 719px) {
+  .setting p.status {
+    display: none;
+  }
 }
+
 .plain-list {
   margin: 0 0 0.75rem;
   padding-left: 1.1rem;

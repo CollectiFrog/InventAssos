@@ -1,13 +1,14 @@
 import type { Handle, RemixNode } from 'remix/component'
 import { appInitials, appName } from '../brand.ts'
 import { routes } from '../routes.ts'
+import { Icon, icons } from './icons.tsx'
 
 /** What the shell needs to know about the signed-in person; null for a visitor. */
 export type Viewer = {
   name: string
-  /** Listed in PLATFORM_ADMIN_EMAILS: names moderators (US-0.8.1). */
+  /** Listed in PLATFORM_ADMIN_EMAILS or named in the app: manages the team (US-0.10.7). */
   isAdmin: boolean
-  /** Admin or moderator: sees Administration (US-0.8.2). */
+  /** Admin or moderator: Mon compte shows the Administration section (US-0.8.2, US-0.10.9). */
   isStaff: boolean
   /** Only active accounts get the navigation; pending and rejected ones see their status page. */
   isActive: boolean
@@ -32,11 +33,13 @@ export interface LayoutProps {
   /** Navigation entry marked as current; detail pages reached from several places leave it out. */
   section?: Section
   /** Shell link marked as current, for the pages reached from outside the four entries. */
-  headerLink?: 'admin' | 'account'
+  headerLink?: 'account'
   /** Breadcrumb shown above the title on computers (ADR 0022). */
   trail?: Crumb[]
   /** Where « Retour » goes on phones: the previous page of this site, else the parent. */
   back?: string
+  /** What the top bar's « + » adds here; equipment in general by default (ADR 0031). */
+  add?: { href: string; label: string }
   children?: RemixNode
 }
 
@@ -61,12 +64,7 @@ const entries: { section: Section; label: string; href: string; icon: RemixNode 
     section: 'search',
     label: 'Rechercher',
     href: routes.inventory.index.href(),
-    icon: (
-      <>
-        <circle cx="11" cy="11" r="7" />
-        <path d="M20 20l-3.5-3.5" />
-      </>
-    ),
+    icon: icons.search,
   },
   {
     section: 'mine',
@@ -98,6 +96,10 @@ const entries: { section: Section; label: string; href: string; icon: RemixNode 
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
     const { title, viewer = null, section, headerLink, trail = [], back, children } = handle.props
+    const add = handle.props.add ?? {
+      href: routes.items.create.index.href(),
+      label: 'Ajouter du matériel',
+    }
     const navigates = viewer?.isActive === true
 
     return (
@@ -115,9 +117,7 @@ export function Layout(handle: Handle<LayoutProps>) {
             Aller au contenu
           </a>
           <div class="shell">
-            {viewer && navigates ? (
-              <Sidebar viewer={viewer} section={section} headerLink={headerLink} />
-            ) : null}
+            {viewer && navigates ? <Sidebar viewer={viewer} section={section} /> : null}
             <div class="shell-body">
               <header class="top-bar">
                 <a class="brand" href={routes.home.href()}>
@@ -134,27 +134,19 @@ export function Layout(handle: Handle<LayoutProps>) {
                       name="q"
                       placeholder="Chercher dans mes collectifs…"
                     />
-                    <button type="submit" class="secondary">
-                      Rechercher
+                    <button type="submit" class="secondary icon-button" title="Rechercher">
+                      <Icon name="search" />
+                      <span class="visually-hidden">Rechercher</span>
                     </button>
                   </form>
                 ) : null}
                 <div class="header-links">
                   {viewer && navigates ? (
                     <>
-                      <a class="button top-add" href={routes.items.create.index.href()}>
-                        Ajouter du matériel
+                      <a class="button top-add icon-button" href={add.href} title={add.label}>
+                        <Icon name="add" />
+                        <span class="visually-hidden">{add.label}</span>
                       </a>
-                      {viewer.isStaff ? (
-                        // Phones only: from 720 px Administration sits at the bottom of the sidebar.
-                        <a
-                          class="phone-admin"
-                          href={routes.admin.index.href()}
-                          aria-current={headerLink === 'admin' ? 'page' : undefined}
-                        >
-                          Administration
-                        </a>
-                      ) : null}
                       <a
                         class="avatar"
                         href={routes.account.profile.index.href()}
@@ -212,38 +204,13 @@ export function Layout(handle: Handle<LayoutProps>) {
   }
 }
 
-/** Icon of a navigation link, drawn on a 24 px grid. */
-function NavIcon(handle: Handle<{ children?: RemixNode }>) {
-  return () => (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      {handle.props.children}
-    </svg>
-  )
-}
-
 /**
- * The four entries, "Mes collectifs" and Administration. styles.css makes it a bottom tab bar below
- * 720 px, a rail up to 1099 px, then a sidebar (ADR 0022).
+ * The four entries and "Mes collectifs". styles.css makes it a bottom tab bar below 720 px, a rail
+ * up to 1099 px, then a sidebar (ADR 0022); Administration lives in Mon compte (ADR 0030).
  */
-function Sidebar(
-  handle: Handle<{
-    viewer: NonNullable<Viewer>
-    section?: Section
-    headerLink?: LayoutProps['headerLink']
-  }>,
-) {
+function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section }>) {
   return () => {
-    const { viewer, section, headerLink } = handle.props
+    const { viewer, section } = handle.props
     const shown = viewer.collectifs.slice(0, sidebarCollectifLimit)
 
     return (
@@ -257,7 +224,7 @@ function Sidebar(
         <nav aria-label="Navigation principale" class="main-nav">
           {entries.map((entry) => (
             <a href={entry.href} aria-current={entry.section === section ? 'page' : undefined}>
-              <NavIcon>{entry.icon}</NavIcon>
+              <Icon>{entry.icon}</Icon>
               <span>{entry.label}</span>
             </a>
           ))}
@@ -286,19 +253,6 @@ function Sidebar(
               ) : null}
             </nav>
           </>
-        ) : null}
-        {viewer.isStaff ? (
-          <div class="side-foot">
-            <a
-              href={routes.admin.index.href()}
-              aria-current={headerLink === 'admin' ? 'page' : undefined}
-            >
-              <NavIcon>
-                <path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z" />
-              </NavIcon>
-              <span>Administration</span>
-            </a>
-          </div>
         ) : null}
       </aside>
     )

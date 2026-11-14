@@ -38,8 +38,7 @@ async function sendSignInLink(
   if (user !== null) user = await syncPlatformAdmin(db, user, settings.adminEmails)
   if (user !== null && signedInStatuses.has(user.status)) {
     const token = await createSignInToken(db, user.id)
-    const url =
-      settings.appUrl + withReturnPath(routes.signIn.link.index.href({ token }), returnPath)
+    const url = settings.appUrl + withReturnPath(routes.signIn.link.href({ token }), returnPath)
     await sendSafely(mailer, signInLinkMail(user.email, url))
   }
 }

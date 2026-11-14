@@ -51,6 +51,7 @@ export default createController(routes.admin, {
   actions: {
     index: (context) => renderRequests(context),
     requests: (context) => renderRequests(context),
+    oldModerators: () => redirect(routes.admin.team.index.href(), 301),
 
     async accounts(context) {
       const actor = requireUser(context)
@@ -67,7 +68,7 @@ export default createController(routes.admin, {
           role:
             user.id === actor.id
               ? 'vous'
-              : target.isListedAdmin
+              : target.isListedAdmin || target.isNamedAdmin
                 ? 'administrateur'
                 : target.isModerator
                   ? 'modérateur'

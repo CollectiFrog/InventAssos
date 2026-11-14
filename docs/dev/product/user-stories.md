@@ -44,6 +44,8 @@ per story when its version is planned; the issue links back here.
 | UC29 | Make a member responsible, remove a responsible | Responsible, admin, moderator | V0.8    |
 | UC30 | Leave a collectif                               | Member, responsible           | V0.8    |
 | UC31 | Delete an item, or ask to delete it             | Responsible, owner, member    | V0.8    |
+| UC32 | Name or remove an admin                         | Admin                         | V0.10.x |
+| UC33 | Sign in with a password                         | User                          | V0.10.x |
 
 ## V0.1 — Foundations
 
@@ -311,6 +313,43 @@ Platform roles: admin, moderator, member. Collectif roles: responsible, member
     - An export never holds an item its author may not see (ADR 0021).
 - **US-0.10.5 Import for myself.** As a validated user, I want to import into my personal
   locations, so that I list my own equipment at once.
+
+## V0.10.x — Field feedback
+
+Remarks gathered from the first weeks of use, shipped together as one patch.
+
+- **US-0.10.6 Sign in from the link at once.** As a user, I want the link from the sign-in e-mail
+  to sign me in without another click, so that signing in is quicker.
+    - Opening the link signs in and lands on the home page, or on the page asked for (US-0.7.8).
+    - The link stays single-use and valid 15 minutes; a used or expired link offers a new one.
+- **US-0.10.7 Name admins in the app.** As an admin, I want to name and remove other admins in the
+  app, so that sharing the role needs no deployment
+  ([ADR 0028](../../adr/0028-admins-named-in-the-app/)).
+    - Any admin names an admin or a moderator by the e-mail of a validated account, on
+      Administration › Équipe (formerly Modérateurs), and removes them.
+    - Admins of `PLATFORM_ADMIN_EMAILS` are shown but never removed nor disabled from the app;
+      nobody changes their own role.
+    - A named admin has every admin right; a moderator never acts on them. No e-mail is sent.
+- **US-0.10.8 Sign in with a password.** As a user, I want to sign in with a password, so that I
+  do not wait for an e-mail ([ADR 0029](../../adr/0029-password-sign-in/)).
+    - The e-mailed link keeps working; the sign-in page offers both with one e-mail field.
+    - A password is created or changed only through an e-mailed link (« Mot de passe oublié ou pas
+      encore créé ? », or Mon compte › Mot de passe), valid 30 minutes, single use.
+    - At least 12 characters, no other rule; no second factor, staff included.
+    - The same answer for an unknown address, a wrong password or no password; 10 tries per address
+      per hour.
+    - Choosing a password closes the other sessions and e-mails the person.
+- **US-0.10.9 A lighter shell.** As a user, I want a quieter top bar, so that the page content
+  stands out ([ADR 0030](../../adr/0030-lighter-shell/)).
+    - The search button is a magnifier and « Ajouter du matériel » a « + », both with hidden names.
+    - Administration is a section of Mon compte for admins and moderators, with the pending count;
+      it leaves the sidebar and the phone's top bar.
+- **US-0.10.10 Lighter pages.** As a user, I want pages with fewer frames, words and repeats, so
+  that I find what matters at a glance ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
+    - Actions on an object are icons, one per kind of action, named on hover and for screen readers.
+    - The top bar's « + » adds what the page is about; the page does not repeat it.
+    - Lists, panels, empty states and settings are not framed; field hints show on hover.
+    - The home page has one search field on computers; visitors no longer see the database status.
 
 ## V0.11 — Photos
 
