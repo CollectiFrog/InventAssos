@@ -23,14 +23,16 @@ same**.
 
 - **Actions on an object are square icon buttons**, one icon per kind, everywhere: edit (pencil),
   move, archive, delete and ask to delete (bin, in the danger colour), moderate (flag), import
-  (upload), export (download), add (« + »). They sit together in one `icon-toolbar` beside the
+  (upload), export (download), add (« + », with a word beside it when it adds something other than
+  equipment: « + Lieu »). They sit together in one `icon-toolbar` beside the
   title. Their names stay in a visually hidden span and in `title` (tooltip on hover), so screen
   readers and voice control keep them (`app/ui/icons.tsx`).
 - **Text buttons stay** for form submissions (Enregistrer, Envoyer, Accepter, Refuser), invitations
   in empty states, contact (Appeler, SMS, Écrire) and settings actions; within each kind they share
   one style.
-- **The top bar's « + » follows the page**: equipment for this collectif on its page, a place on a
-  Lieux tab or on Mes lieux; the page drops its own add button.
+- **The top bar's « + » always adds equipment**, already set to the collectif on its page, which
+  drops its own « Ajouter du matériel ». Adding a place stays a button in the page, written
+  « + Lieu » so it is not taken for the top bar's « + ».
 - **Fewer frames**: a card keeps a soft surface only in grids (collectifs directory, item grid);
   lists of cards become rows divided by a line; side panels, empty states and settings sections are
   flat; tables lose their outer border.

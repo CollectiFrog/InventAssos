@@ -108,13 +108,21 @@ function classOf(props: IconActionProps): string {
   return ['button', tone, 'icon-button'].filter(Boolean).join(' ')
 }
 
-/** A square link showing an icon (ADR 0031). */
-export function IconLink(handle: Handle<IconActionProps & { href: string }>) {
+/**
+ * A square link showing an icon (ADR 0031). `text` adds a short visible word beside the icon, where
+ * the icon alone could be mistaken for another action (« + Lieu » next to the top bar's « + »).
+ */
+export function IconLink(handle: Handle<IconActionProps & { href: string; text?: string }>) {
   return () => {
-    const { href, icon, label } = handle.props
+    const { href, icon, label, text } = handle.props
     return (
-      <a class={classOf(handle.props)} href={href} title={label}>
+      <a
+        class={text ? `${classOf(handle.props)} with-text` : classOf(handle.props)}
+        href={href}
+        title={label}
+      >
         <Icon name={icon} />
+        {text ? <span aria-hidden="true">{text}</span> : null}
         <span class="visually-hidden">{label}</span>
       </a>
     )

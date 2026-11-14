@@ -124,6 +124,12 @@ button.icon-button,
   min-height: var(--touch);
   padding: 0;
 }
+/* « + Lieu »: a short word beside the icon where the « + » alone would be ambiguous (ADR 0031). */
+.button.icon-button.with-text {
+  width: auto;
+  gap: 0.3rem;
+  padding: 0 0.85rem 0 0.6rem;
+}
 .header-links .avatar {
   justify-content: center;
   width: var(--touch);

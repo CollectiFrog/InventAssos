@@ -22,17 +22,18 @@ export function LocationsPage(handle: Handle<LocationsPageProps>) {
   return () => {
     const { viewer, csrfToken, locations, notice } = handle.props
     return (
-      <Layout
-        title="Mes lieux"
-        viewer={viewer}
-        section="mine"
-        add={{ href: `${routes.locations.create.index.href()}?pour=me`, label: 'Ajouter un lieu' }}
-      >
+      <Layout title="Mes lieux" viewer={viewer} section="mine">
         <div class="page-head">
           <div>
             <h1>Mon matériel</h1>
             <p class="status">Vos lieux de stockage : garage, cave, local personnel…</p>
           </div>
+          <IconLink
+            icon="add"
+            label="Ajouter un lieu"
+            text="Lieu"
+            href={`${routes.locations.create.index.href()}?pour=me`}
+          />
         </div>
         <MyStuffTabs current="locations" />
         {notice ? (

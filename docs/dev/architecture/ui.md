@@ -77,8 +77,9 @@ flowchart TB
 - **Actions on an object** are square icon buttons (`IconLink`, `IconButton` in `app/ui/icons.tsx`),
   one icon per kind of action, grouped in an `icon-toolbar` beside the title; their names stay
   hidden for assistive technology and in `title`. Form submissions, empty-state invitations, contact
-  and settings actions stay text buttons. The top bar's « + » takes the page's `add` (collectif,
-  Lieux); pages do not repeat it. Text field hints show on hover behind an « i ».
+  and settings actions stay text buttons. The top bar's « + » always adds equipment (preset to the
+  collectif on its page, through `add`); a page adds anything else with a labelled `IconLink`
+  (`text`), such as « + Lieu ». Text field hints show on hover behind an « i ».
   Cards keep a frame only in grids; lists, panels and settings sections are flat
   ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
 - **Content is fluid**: no page-wide `max-width`, only running text (`68ch`) and form fields are

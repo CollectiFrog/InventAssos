@@ -25,8 +25,9 @@ téléphone, **Retour** ramène à la page précédente.
 En haut à droite, le rond avec vos initiales ouvre **votre compte**. Les administrateurs et les
 modérateurs y trouvent la section **Administration**.
 
-Le **+** de la barre du haut s'adapte à la page : sur la page d'un collectif, il ajoute du matériel
-à ce collectif ; dans un onglet **Lieux**, il ajoute un lieu.
+Le **+** de la barre du haut ajoute toujours du matériel ; sur la page d'un collectif, le collectif
+est déjà choisi comme propriétaire. Pour créer un lieu, utilisez **+ Lieu** dans **Mes lieux** ou
+dans l'onglet **Lieux** d'un collectif.
 
 ### Les boutons en icônes
 
@@ -42,7 +43,7 @@ la souris, leur nom s'affiche :
 | poubelle (rouge)       | **Supprimer…**, ou **Demander la suppression**            |
 | flèche vers le haut    | **Importer un fichier**                                   |
 | flèche vers le bas     | **Exporter** en CSV                                       |
-| +                      | **Ajouter**                                               |
+| + (ou + Lieu)          | **Ajouter** du matériel (ou un lieu)                      |
 
 Dans les formulaires, un **i** après le nom d'un champ signale une aide : passez la souris dessus
 pour la lire.

@@ -65,7 +65,7 @@ describe('lighter pages (ADR 0031)', () => {
     assert.doesNotMatch(html, /<div class="card">\s*<p class="actions">/)
   })
 
-  it('makes the top bar’s « + » add to the collectif, or a place on its Lieux tab', async () => {
+  it('makes the top bar’s « + » add equipment, to the collectif on its pages', async () => {
     const show = (await rita.get(routes.collectifs.show.href({ slug: frog.slug }))).text
     assert.deepEqual(topAdd(show), {
       href: `${routes.items.create.index.href()}?pour=collectif:${frog.id}`,
@@ -76,14 +76,26 @@ describe('lighter pages (ADR 0031)', () => {
     const places = (await rita.get(routes.collectifs.places.href({ slug: frog.slug }))).text
     assert.equal(
       topAdd(places)?.href,
-      `${routes.locations.create.index.href()}?pour=collectif:${frog.id}`,
+      `${routes.items.create.index.href()}?pour=collectif:${frog.id}`,
     )
+    for (const url of [routes.home.href(), routes.locations.index.href()]) {
+      assert.equal(topAdd((await rita.get(url)).text)?.label, 'Ajouter du matériel', url)
+    }
+  })
+
+  it('adds a place with « + Lieu » in the page, never with the top bar’s « + »', async () => {
+    const plusLieu = (href: string) =>
+      new RegExp(
+        `<a href="${href.replace('?', '\\?')}" title="[^"]+" class="button secondary icon-button with-text">.*?<span aria-hidden="true">Lieu</span>`,
+        's',
+      )
     const mine = (await rita.get(routes.locations.index.href())).text
-    assert.deepEqual(topAdd(mine), {
-      href: `${routes.locations.create.index.href()}?pour=me`,
-      label: 'Ajouter un lieu',
-    })
-    assert.equal(topAdd((await rita.get(routes.home.href())).text)?.label, 'Ajouter du matériel')
+    assert.match(mine, plusLieu(`${routes.locations.create.index.href()}?pour=me`))
+    const places = (await rita.get(routes.collectifs.places.href({ slug: frog.slug }))).text
+    assert.match(
+      places,
+      plusLieu(`${routes.locations.create.index.href()}?pour=collectif:${frog.id}`),
+    )
   })
 
   it('shows a text hint on hover, still read by screen readers', async () => {

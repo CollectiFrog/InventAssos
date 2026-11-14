@@ -88,19 +88,14 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           { label: 'Collectifs', href: routes.collectifs.index.href() },
           { label: collectif.name },
         ]}
-        // The top bar's « + » adds to this collectif, a place on the Lieux tab (ADR 0031).
+        // The top bar's « + » adds equipment to this collectif (ADR 0031).
         add={
-          inside && p.tab === 'places' && p.canManageLocations
+          inside && p.canAddItems
             ? {
-                href: `${routes.locations.create.index.href()}?pour=collectif:${collectif.id}`,
-                label: `Ajouter un lieu à ${collectif.name}`,
+                href: `${routes.items.create.index.href()}?pour=collectif:${collectif.id}`,
+                label: `Ajouter du matériel à ${collectif.name}`,
               }
-            : inside && p.canAddItems
-              ? {
-                  href: `${routes.items.create.index.href()}?pour=collectif:${collectif.id}`,
-                  label: `Ajouter du matériel à ${collectif.name}`,
-                }
-              : undefined
+            : undefined
         }
       >
         <div class="page-head">
@@ -263,7 +258,17 @@ function PlacesTab(handle: Handle<CollectifPageProps>) {
     const { locations, canManageLocations, collectif } = handle.props
     return (
       <section aria-labelledby="lieux-collectif">
-        <h2 id="lieux-collectif">Lieux de stockage · {locations.length}</h2>
+        <div class="results-bar">
+          <h2 id="lieux-collectif">Lieux de stockage · {locations.length}</h2>
+          {canManageLocations ? (
+            <IconLink
+              icon="add"
+              label={`Ajouter un lieu à ${collectif.name}`}
+              text="Lieu"
+              href={`${routes.locations.create.index.href()}?pour=collectif:${collectif.id}`}
+            />
+          ) : null}
+        </div>
         {locations.length === 0 ? (
           <p>Aucun lieu déclaré.</p>
         ) : (
