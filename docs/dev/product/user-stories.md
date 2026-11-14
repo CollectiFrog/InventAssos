@@ -344,6 +344,12 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
     - The search button is a magnifier and « Ajouter du matériel » a « + », both with hidden names.
     - Administration is a section of Mon compte for admins and moderators, with the pending count;
       it leaves the sidebar and the phone's top bar.
+- **US-0.10.10 Lighter pages.** As a user, I want pages with fewer frames, words and repeats, so
+  that I find what matters at a glance ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
+    - Actions on an object are icons, one per kind of action, named on hover and for screen readers.
+    - The top bar's « + » adds what the page is about; the page does not repeat it.
+    - Lists, panels, empty states and settings are not framed; field hints show on hover.
+    - The home page has one search field on computers; visitors no longer see the database status.
 
 ## V0.11 — Photos
 

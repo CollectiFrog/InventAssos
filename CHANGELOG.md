@@ -15,6 +15,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 - The link from the sign-in e-mail signs you in at once, without the « Me connecter » page.
 - A lighter top bar: a magnifier to search and a « + » to add equipment; Administration moves to a section of Mon compte.
+- Lighter pages: actions on equipment, places and collectifs are icons named on hover, the « + » adds what the page is about, fewer frames, field help on hover, and one search field on the home page.
 
 ### Security
 

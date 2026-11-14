@@ -107,7 +107,7 @@ describe('moderators (US-0.8.1, US-0.8.2)', () => {
   it('gives a moderator Administration without the Équipe tab', async () => {
     const monaClient = await signedInMona()
     const account = (await monaClient.get(routes.account.profile.index.href())).text
-    assert.match(account, /<a href="\/admin" class="button">Ouvrir l’administration<\/a>/)
+    assert.match(account, /<a href="\/admin" class="button secondary">Ouvrir l’administration<\/a>/)
     const queue = (await monaClient.get(routes.admin.index.href())).text
     assert.doesNotMatch(queue, /Équipe/)
     assert.equal((await monaClient.get(routes.admin.team.index.href())).status, 403)

@@ -17,7 +17,7 @@ describe('home page', () => {
     await db.close()
   })
 
-  it('answers in French and reports a connected database', async () => {
+  it('answers in French, with no technical status when the database answers', async () => {
     const router = createTestApp(db).router
     const response = await router.fetch(get(routes.home.href()))
 
@@ -25,7 +25,7 @@ describe('home page', () => {
     assert.match(response.headers.get('Content-Type') ?? '', /text\/html/)
     const html = await response.text()
     assert.match(html, /<html lang="fr"/)
-    assert.match(html, /Base de données : connectée/)
+    assert.doesNotMatch(html, /Base de données|indisponible/)
   })
 
   it('serves the stylesheet', async () => {

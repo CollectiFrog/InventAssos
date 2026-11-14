@@ -5,6 +5,7 @@ import type { CollectifPerson, MembershipRequest } from '../../data/members.ts'
 import type { Collectif, Location } from '../../data/tables.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
+import { IconButton, IconLink } from '../../ui/icons.tsx'
 import { ItemTable, type ItemView, ViewSwitch } from '../../ui/item-table.tsx'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 import { Tabs } from '../../ui/tabs.tsx'
@@ -87,6 +88,20 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           { label: 'Collectifs', href: routes.collectifs.index.href() },
           { label: collectif.name },
         ]}
+        // The top bar's « + » adds to this collectif, a place on the Lieux tab (ADR 0031).
+        add={
+          inside && p.tab === 'places' && p.canManageLocations
+            ? {
+                href: `${routes.locations.create.index.href()}?pour=collectif:${collectif.id}`,
+                label: `Ajouter un lieu à ${collectif.name}`,
+              }
+            : inside && p.canAddItems
+              ? {
+                  href: `${routes.items.create.index.href()}?pour=collectif:${collectif.id}`,
+                  label: `Ajouter du matériel à ${collectif.name}`,
+                }
+              : undefined
+        }
       >
         <div class="page-head">
           <div>
@@ -102,28 +117,21 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
               </p>
             ) : null}
           </div>
-          {inside ? (
-            <div class="actions">
+          {inside && (p.canEdit || p.canManageLocations) ? (
+            <div class="icon-toolbar">
               {p.canEdit ? (
-                <a class="button secondary" href={routes.collectifs.edit.index.href({ slug })}>
-                  Modifier la présentation
-                </a>
+                <IconLink
+                  icon="edit"
+                  label="Modifier la présentation"
+                  href={routes.collectifs.edit.index.href({ slug })}
+                />
               ) : null}
               {p.canManageLocations ? (
-                <a
-                  class="button secondary"
+                <IconLink
+                  icon="upload"
+                  label="Importer un fichier"
                   href={`${routes.imports.start.index.href()}?pour=collectif:${collectif.id}`}
-                >
-                  Importer un fichier
-                </a>
-              ) : null}
-              {p.canAddItems ? (
-                <a
-                  class="button"
-                  href={`${routes.items.create.index.href()}?pour=collectif:${collectif.id}`}
-                >
-                  Ajouter du matériel
-                </a>
+                />
               ) : null}
             </div>
           ) : null}
@@ -210,9 +218,7 @@ function ItemsTab(handle: Handle<CollectifPageProps>) {
             {canExport ? (
               <form method="post" action={routes.exports.collectif.href({ slug: collectif.slug })}>
                 <CsrfField token={csrfToken} />
-                <button type="submit" class="secondary">
-                  Exporter (CSV)
-                </button>
+                <IconButton icon="download" label="Exporter (CSV)" />
               </form>
             ) : null}
           </div>
@@ -263,34 +269,25 @@ function PlacesTab(handle: Handle<CollectifPageProps>) {
         ) : (
           <ul class="cards">
             {locations.map((location) => (
-              <li key={location.id} class="card">
-                <a href={routes.locations.show.href({ locationId: location.id })}>
-                  {location.name}
-                </a>{' '}
-                · {location.city}
-                {location.address ? ` · ${location.address}` : null}
+              <li key={location.id} class="card row">
+                <span>
+                  <a href={routes.locations.show.href({ locationId: location.id })}>
+                    {location.name}
+                  </a>{' '}
+                  · {location.city}
+                  {location.address ? ` · ${location.address}` : null}
+                </span>
                 {canManageLocations ? (
-                  <>
-                    {' '}
-                    <a href={routes.locations.edit.index.href({ locationId: location.id })}>
-                      modifier
-                    </a>
-                  </>
+                  <IconLink
+                    icon="edit"
+                    label={`Modifier ${location.name}`}
+                    href={routes.locations.edit.index.href({ locationId: location.id })}
+                  />
                 ) : null}
               </li>
             ))}
           </ul>
         )}
-        {canManageLocations ? (
-          <p>
-            <a
-              class="button secondary"
-              href={`${routes.locations.create.index.href()}?pour=collectif:${collectif.id}`}
-            >
-              Ajouter un lieu
-            </a>
-          </p>
-        ) : null}
       </section>
     )
   }

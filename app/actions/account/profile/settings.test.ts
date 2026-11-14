@@ -41,7 +41,10 @@ describe('Mon compte as a settings page (US-0.7.13)', () => {
       assert.match(html, new RegExp(`<section id="${id}"[^>]*class="setting"`))
     }
     assert.match(html, /<a href="\/collectifs\/collecti-frog">Collecti'FROG<\/a>/)
-    assert.match(html, /<div class="card danger-zone"><p><a href="\/compte\/supprimer">/)
+    assert.match(
+      html,
+      /<div class="card danger-zone"><p><a href="\/compte\/supprimer" class="button danger">/,
+    )
   })
 
   it('explains deletion at /compte/supprimer, and deletes nothing before V1.0', async () => {

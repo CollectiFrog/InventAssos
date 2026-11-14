@@ -142,7 +142,9 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
                 </ul>
               )}
               <p>
-                <a href={routes.collectifs.index.href()}>Rejoindre ou déclarer un collectif</a>
+                <a class="button secondary" href={routes.collectifs.index.href()}>
+                  Rejoindre ou déclarer un collectif
+                </a>
               </p>
             </SettingSection>
             {isStaff ? (
@@ -159,7 +161,7 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
                       : `${pendingRequests} demandes en attente.`}
                 </p>
                 <p>
-                  <a class="button" href={routes.admin.index.href()}>
+                  <a class="button secondary" href={routes.admin.index.href()}>
                     Ouvrir l’administration
                   </a>
                 </p>
@@ -176,7 +178,7 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
                   : 'Vous n’avez pas encore de mot de passe.'}
               </p>
               <p>
-                <a href={routes.password.request.index.href()}>
+                <a class="button secondary" href={routes.password.request.index.href()}>
                   {hasPassword ? 'Changer mon mot de passe' : 'Choisir un mot de passe'}
                 </a>
               </p>
@@ -204,7 +206,9 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
               danger
             >
               <p>
-                <a href={routes.account.deletion.href()}>Supprimer mon compte…</a>
+                <a class="button danger" href={routes.account.deletion.href()}>
+                  Supprimer mon compte…
+                </a>
               </p>
             </SettingSection>
           </div>
