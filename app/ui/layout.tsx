@@ -1,6 +1,7 @@
 import type { Handle, RemixNode } from 'remix/component'
 import { appInitials, appName } from '../brand.ts'
 import { routes } from '../routes.ts'
+import { Icon, icons } from './icons.tsx'
 
 /** What the shell needs to know about the signed-in person; null for a visitor. */
 export type Viewer = {
@@ -37,6 +38,8 @@ export interface LayoutProps {
   trail?: Crumb[]
   /** Where « Retour » goes on phones: the previous page of this site, else the parent. */
   back?: string
+  /** What the top bar's « + » adds here; equipment in general by default (ADR 0031). */
+  add?: { href: string; label: string }
   children?: RemixNode
 }
 
@@ -50,14 +53,6 @@ export function initialsOf(name: string): string {
   return letters.map((word = '') => word.charAt(0).toLocaleUpperCase('fr')).join('')
 }
 
-/** The magnifier, for the Rechercher entry and the top bar's search button. */
-const searchIcon = (
-  <>
-    <circle cx="11" cy="11" r="7" />
-    <path d="M20 20l-3.5-3.5" />
-  </>
-)
-
 const entries: { section: Section; label: string; href: string; icon: RemixNode }[] = [
   {
     section: 'home',
@@ -69,7 +64,7 @@ const entries: { section: Section; label: string; href: string; icon: RemixNode 
     section: 'search',
     label: 'Rechercher',
     href: routes.inventory.index.href(),
-    icon: searchIcon,
+    icon: icons.search,
   },
   {
     section: 'mine',
@@ -101,6 +96,10 @@ const entries: { section: Section; label: string; href: string; icon: RemixNode 
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
     const { title, viewer = null, section, headerLink, trail = [], back, children } = handle.props
+    const add = handle.props.add ?? {
+      href: routes.items.create.index.href(),
+      label: 'Ajouter du matériel',
+    }
     const navigates = viewer?.isActive === true
 
     return (
@@ -136,7 +135,7 @@ export function Layout(handle: Handle<LayoutProps>) {
                       placeholder="Chercher dans mes collectifs…"
                     />
                     <button type="submit" class="secondary icon-button" title="Rechercher">
-                      <NavIcon>{searchIcon}</NavIcon>
+                      <Icon name="search" />
                       <span class="visually-hidden">Rechercher</span>
                     </button>
                   </form>
@@ -144,15 +143,9 @@ export function Layout(handle: Handle<LayoutProps>) {
                 <div class="header-links">
                   {viewer && navigates ? (
                     <>
-                      <a
-                        class="button top-add icon-button"
-                        href={routes.items.create.index.href()}
-                        title="Ajouter du matériel"
-                      >
-                        <NavIcon>
-                          <path d="M12 5v14M5 12h14" />
-                        </NavIcon>
-                        <span class="visually-hidden">Ajouter du matériel</span>
+                      <a class="button top-add icon-button" href={add.href} title={add.label}>
+                        <Icon name="add" />
+                        <span class="visually-hidden">{add.label}</span>
                       </a>
                       <a
                         class="avatar"
@@ -211,25 +204,6 @@ export function Layout(handle: Handle<LayoutProps>) {
   }
 }
 
-/** Icon of a navigation link, drawn on a 24 px grid. */
-function NavIcon(handle: Handle<{ children?: RemixNode }>) {
-  return () => (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      {handle.props.children}
-    </svg>
-  )
-}
-
 /**
  * The four entries and "Mes collectifs". styles.css makes it a bottom tab bar below 720 px, a rail
  * up to 1099 px, then a sidebar (ADR 0022); Administration lives in Mon compte (ADR 0030).
@@ -250,7 +224,7 @@ function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section
         <nav aria-label="Navigation principale" class="main-nav">
           {entries.map((entry) => (
             <a href={entry.href} aria-current={entry.section === section ? 'page' : undefined}>
-              <NavIcon>{entry.icon}</NavIcon>
+              <Icon>{entry.icon}</Icon>
               <span>{entry.label}</span>
             </a>
           ))}

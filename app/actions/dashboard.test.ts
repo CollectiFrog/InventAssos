@@ -107,10 +107,10 @@ describe('dashboard (US-0.7.2)', () => {
     assert.doesNotMatch(await home('rita@example.org'), /pending-card/)
   })
 
-  it('shows a visitor the presentation and the database status', async () => {
+  it('shows a visitor the presentation, without the database status (ADR 0031)', async () => {
     const html = (await app.client().get(routes.home.href())).text
     assert.match(html, /Se connecter/)
-    assert.match(html, /Base de données : connectée/)
+    assert.doesNotMatch(html, /Base de données/)
     assert.doesNotMatch(html, /home-search/)
   })
 })

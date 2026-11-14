@@ -131,7 +131,7 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     const profile = (await client.get(routes.account.profile.index.href())).text
     assert.match(profile, /<a href="#administration" class="toc-link">Administration<\/a>/)
     assert.match(profile, /<section id="administration"[\s\S]*?Aucune demande en attente\./)
-    assert.match(profile, /<a href="\/admin" class="button">Ouvrir l’administration<\/a>/)
+    assert.match(profile, /<a href="\/admin" class="button secondary">Ouvrir l’administration<\/a>/)
     // The admin pages lead back to Mon compte and mark it as the current shell link.
     const queue = (await client.get(routes.admin.index.href())).text
     assert.match(queue, /<a href="\/compte\/profil" aria-label="[^"]*" aria-current="page"/)

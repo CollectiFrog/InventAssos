@@ -74,6 +74,14 @@ flowchart TB
   ([ADR 0030](../../adr/0030-lighter-shell/)).
 - **Administration** is a section of Mon compte for admins and moderators, not a navigation entry;
   the admin pages lead back to Mon compte (ADR 0030).
+- **Actions on an object** are square icon buttons (`IconLink`, `IconButton` in `app/ui/icons.tsx`),
+  one icon per kind of action, grouped in an `icon-toolbar` beside the title; their names stay
+  hidden for assistive technology and in `title`. Form submissions, empty-state invitations, contact
+  and settings actions stay text buttons. The top bar's « + » always adds equipment (preset to the
+  collectif on its page, through `add`); a page adds anything else with a labelled `IconLink`
+  (`text`), such as « + Lieu ». Text field hints show on hover behind an « i ».
+  Cards keep a frame only in grids; lists, panels and settings sections are flat
+  ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
 - **Content is fluid**: no page-wide `max-width`, only running text (`68ch`) and form fields are
   limited; above 2000 px the content stops at 1760 px. Window breakpoints (720, 1100, 1440) drive
   the shell; components adapt to their container (`@container`, `auto-fill`).

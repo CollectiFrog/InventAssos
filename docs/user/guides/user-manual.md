@@ -25,6 +25,29 @@ téléphone, **Retour** ramène à la page précédente.
 En haut à droite, le rond avec vos initiales ouvre **votre compte**. Les administrateurs et les
 modérateurs y trouvent la section **Administration**.
 
+Le **+** de la barre du haut ajoute toujours du matériel ; sur la page d'un collectif, le collectif
+est déjà choisi comme propriétaire. Pour créer un lieu, utilisez **+ Lieu** dans **Mes lieux** ou
+dans l'onglet **Lieux** d'un collectif.
+
+### Les boutons en icônes
+
+Les actions sur un objet, un lieu ou un collectif sont des icônes, toujours les mêmes. Au passage de
+la souris, leur nom s'affiche :
+
+| Icône                  | Action                                                    |
+|------------------------|-----------------------------------------------------------|
+| crayon                 | **Modifier** (l'objet, le lieu, la présentation)          |
+| flèche sortant         | **Déplacer** un objet                                     |
+| boîte                  | **Archiver** un objet                                     |
+| drapeau                | **Retirer (modération)**                                  |
+| poubelle (rouge)       | **Supprimer…**, ou **Demander la suppression**            |
+| flèche vers le haut    | **Importer un fichier**                                   |
+| flèche vers le bas     | **Exporter** en CSV                                       |
+| + (ou + Lieu)          | **Ajouter** du matériel (ou un lieu)                      |
+
+Dans les formulaires, un **i** après le nom d'un champ signale une aide : passez la souris dessus
+pour la lire.
+
 ## L'accueil
 
 **Accueil** commence par un champ de recherche dans le matériel de vos collectifs. Dessous, le
@@ -93,7 +116,8 @@ contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
 
 Pour ses responsables et ses membres, la page d'un collectif a trois onglets : **Matériel** (ce qu'il
 possède, puis ce que d'autres ont déposé dans ses lieux), **Lieux** et **Membres** (chacun avec son
-rôle, et le téléphone de contact). **Ajouter du matériel**, en haut, ouvre le formulaire avec le collectif comme propriétaire. Les autres utilisateurs ne voient que
+rôle, et le téléphone de contact). Le **+** de la barre du haut y ouvre le formulaire avec le
+collectif comme propriétaire. Les autres utilisateurs ne voient que
 son nom, sa ville, sa présentation et les boutons **Demander à rejoindre** et **Demander à devenir
 responsable**.
 
@@ -161,7 +185,7 @@ sur la page du lieu ; l'adresse et les notes restent réservées aux personnes q
 
 ## Ajouter du matériel
 
-**Ajouter du matériel** est en haut de chaque page sur un ordinateur, et dans **Mon matériel**.
+Le **+** en haut de chaque page ouvre le formulaire **Ajouter du matériel**.
 Le formulaire décrit d'abord l'objet, puis rappelle, juste au-dessus du bouton **Ajouter**, où il
 sera rangé et à qui il appartient : vérifiez ces deux choix avant d'enregistrer.
 
@@ -249,7 +273,8 @@ sans cette référence.
 
 Le matériel part dans un fichier CSV que LibreOffice et Excel ouvrent directement :
 
-- **Exporter le matériel qui m'appartient (CSV)**, en bas de **Mon matériel** : tout ce qui est à
+- **Exporter le matériel qui m'appartient (CSV)** (flèche vers le bas, en haut de **Mon
+  matériel**) : tout ce qui est à
   vous, où que ce soit rangé.
 - **Exporter (CSV)**, dans l'onglet **Matériel** d'un collectif, pour ses responsables : tout ce
   que possède le collectif, où que ce soit rangé. Le matériel que d'autres ont déposé dans ses

@@ -60,7 +60,9 @@ export function HomePage(
             </a>
           </p>
         )}
-        <p class="status">Base de données : {databaseOk ? 'connectée' : 'injoignable'}</p>
+        {databaseOk ? null : (
+          <p class="notice notice-error">Le service est momentanément indisponible.</p>
+        )}
       </Layout>
     )
   }
