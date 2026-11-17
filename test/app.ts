@@ -18,6 +18,8 @@ export interface TestAppOptions {
   rateLimits?: RateLimits
   /** Public URL; a browser test passes its server's, so form origins match (CSRF). */
   appUrl?: string
+  /** Runs as in production (hides the design preview). */
+  production?: boolean
 }
 
 const relaxed: RateLimit = { limit: 10_000, windowSeconds: 60 }
@@ -48,6 +50,7 @@ export function createTestApp(db: Database, options: TestAppOptions = {}): TestA
       appUrl: options.appUrl ?? testOrigin,
       adminEmails: new Set(options.adminEmails?.map((email) => email.toLowerCase()) ?? []),
       rateLimits: options.rateLimits ?? relaxedRateLimits,
+      production: options.production ?? false,
     },
     sessionSecret: 'test-secret-test-secret-test-secret',
     background,

@@ -99,7 +99,10 @@ describe('Rechercher and a collectif’s equipment as dense tables (US-0.7.13)',
     const html = await search('?vue=grille')
     assert.match(html, /<ul class="cards item-grid">/)
     assert.match(html, /<input type="hidden" name="vue" value="grille"/)
-    assert.match(html, /<a href="\/inventaire\?vue=grille" aria-current="page">Grille<\/a>/)
+    assert.match(
+      html,
+      /<a href="\/inventaire\?vue=grille" aria-current="page"><svg[^>]*>.*?<\/svg>Grille<\/a>/,
+    )
   })
 
   it("sorts a collectif's equipment the same way", async () => {

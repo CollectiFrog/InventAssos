@@ -6,13 +6,14 @@ import type { Middleware } from 'remix/router'
 /** One year, the usual HSTS lifetime. */
 const hstsMaxAgeSeconds = 365 * 24 * 60 * 60
 
-/** Content-Security-Policy for HTML pages: own stylesheet and favicon, forms posting to us only. */
+/** Content-Security-Policy for HTML pages: own styles, fonts and favicon; forms post to us only. */
 export function contentSecurityPolicy() {
   return csp({
     policy: {
       defaultSrc: ["'none'"],
       styleSrc: ["'self'"],
       imgSrc: ["'self'"],
+      fontSrc: ["'self'"],
       formAction: ["'self'"],
       frameAncestors: ["'none'"],
       baseUri: ["'none'"],

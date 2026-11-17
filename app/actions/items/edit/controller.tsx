@@ -54,7 +54,7 @@ function EditItemPage(
         >
           <CsrfField token={csrfToken} />
           <ItemFields values={values} errors={errors} categories={categories} />
-          <div class="actions">
+          <div class="actions form-footer">
             <button type="submit">Enregistrer</button>
             <a class="button secondary" href={routes.items.show.href({ itemId: item.id })}>
               Annuler

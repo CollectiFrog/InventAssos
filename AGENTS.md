@@ -74,7 +74,7 @@ Without Node or `make` on the host, run any target in the app container:
 | `server.ts`          | entry point: config, migrations, HTTP server                |
 | `app/`               | the Remix 3 application (routes, actions, data, ui)         |
 | `db/migrations/`     | SQL migrations, applied at startup                          |
-| `public/`            | static files served as is                                   |
+| `public/`            | static files: `tokens.css`, `styles.css`, fonts, favicon    |
 | `test/`              | shared test helpers (test database, requests)               |
 | `Dockerfile`         | production image, published on GHCR by `release.yml`        |
 | `compose.yaml`       | dev services: `db`, `mail`, `app` (Docker-only development) |
@@ -102,5 +102,8 @@ Project-specific rules go below this line, kept short.
   the two (`docs/adr/0009-ownership-and-locations.md`).
 - **One responsive interface.** Pages follow `docs/dev/architecture/ui.md` and reuse the shared pieces
   in `app/ui/`; no separate mobile UI (`docs/adr/0019-interface-conventions.md`).
+- **Design tokens only.** Colours, sizes, radii and durations come from `public/tokens.css`, never
+  hard-coded; check new components on `/dev/ui` in both themes (`docs/dev/design/ui-guidelines.md`,
+  `docs/adr/0032-linear-style-design-system.md`).
 - **Specs live in `docs/dev/product/`.** Work on a user story only once it is listed there; if a
   story is ambiguous, ask instead of guessing.

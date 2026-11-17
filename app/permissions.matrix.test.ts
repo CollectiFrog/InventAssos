@@ -324,6 +324,17 @@ const rules: Rule[] = [
     },
   },
   {
+    row: 'Choose the interface theme (a cookie on this device)',
+    allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated', 'memberOfC'],
+    // The effect is the next page's theme; the redirect of the POST tells who was refused.
+    act: async (c) => {
+      const posted = await c.post(routes.appearance.href(), { theme: 'dark' })
+      const page = await c.get(routes.home.href())
+      return { ...posted, text: page.text }
+    },
+    happened: async (_db, _w, response) => response.text.includes('data-theme="dark"'),
+  },
+  {
     row: 'Request a new collectif',
     allowed: ['admin', 'moderator', 'responsibleOfC', 'responsibleOfD', 'validated', 'memberOfC'],
     act: (c) =>

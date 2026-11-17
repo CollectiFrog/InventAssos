@@ -71,8 +71,9 @@ personnes qui partagent un collectif avec elle. Le partage avec d'autres collect
 ## Parcourir l'inventaire
 
 **Rechercher** liste le matériel actif que vous pouvez voir, 24 objets par page : nom, catégorie,
-quantité, ville et propriétaire. Cliquez sur un objet pour voir sa page. Les adresses des lieux n'y
-apparaissent jamais, seulement la ville.
+propriétaire, ville et quantité. Cliquez sur un objet pour voir sa page ; un objet **À réparer**,
+**Hors service** ou **Archivé** y porte une étiquette de couleur à côté de son nom. Les adresses des
+lieux n'apparaissent jamais, seulement la ville.
 
 - **Filtres** (à gauche sur un ordinateur, au-dessus sur un téléphone) : la recherche porte sur le
   nom, la marque, le modèle et la description (majuscules et accents ne comptent pas) ; **Catégorie**
@@ -82,8 +83,8 @@ apparaissent jamais, seulement la ville.
   sur **Tout effacer**.
 - **Trier** : sur un ordinateur, la liste est un tableau ; cliquez sur un titre de colonne pour trier
   par cette colonne, une seconde fois pour inverser l'ordre.
-- **Liste** ou **Grille** choisit entre le tableau et des cartes. Sur un téléphone, ce sont toujours
-  des cartes.
+- **Liste** ou **Grille** choisit entre le tableau et des cartes. Sur un téléphone, la liste montre
+  une ligne par objet : son nom, puis catégorie, propriétaire, ville et quantité.
 
 Le matériel d'un collectif, sur sa page, se trie et s'affiche de la même façon.
 
@@ -104,13 +105,18 @@ désactivé n'est plus affiché.
 ## Mon compte
 
 Touchez le rond avec vos initiales, en haut à droite. **Mon compte** est rangé en sections, avec un
-sommaire : **Profil** (votre nom et un numéro de téléphone facultatif), **Mes collectifs**,
+sommaire : **Profil** (votre nom et un numéro de téléphone facultatif), **Apparence** (thème
+**Automatique**, **Clair** ou **Sombre**), **Mes collectifs**,
 **Administration** (administrateurs et modérateurs), **Mot de passe** (le choisir ou le changer),
 **Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
 compte**. La suppression elle-même arrive avec la version 1.0 : la page explique ce qu'elle fera.
 
 Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous
 contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
+
+Le thème **Automatique** suit le réglage clair ou sombre de votre appareil. Votre choix est retenu
+sur cet appareil seulement ; sur ordinateur, les trois petits boutons en bas du menu de gauche le
+changent aussi.
 
 ## La page d'un collectif
 

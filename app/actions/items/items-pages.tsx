@@ -239,7 +239,12 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
               hint="Seulement si « Une autre personne » : son compte doit être validé. Le matériel doit être rangé dans un lieu de votre collectif ; la personne pourra ensuite le modifier."
             />
           </fieldset>
-          <button type="submit">Ajouter</button>
+          <div class="actions form-footer">
+            <button type="submit">Ajouter</button>
+            <a class="button secondary" href={routes.items.index.href()}>
+              Annuler
+            </a>
+          </div>
         </form>
       </Layout>
     )

@@ -152,7 +152,8 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 | Import      | `/import` (file), `/import/:importId/colonnes`, `/valeurs`, `/apercu` (preview, force an archived row, confirm), POST `/abandonner`; wizard steps, one import per person (US-0.10.1) |
 | Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/lieux`, `/responsables`, `/modifier`, `/devenir-responsable`) |
 | People       | `/personnes/:userId`                                                                                                         |
-| Account      | `/compte/profil` (sections: profil, collectifs, session, à propos, supprimer), `/compte/supprimer`, `/deconnexion`           |
+| Account      | `/compte/profil` (sections: profil, apparence, collectifs, session, à propos, supprimer), `/compte/supprimer`, `/deconnexion`, POST `/apparence` |
+| Design       | `/dev/ui`: tokens and components, outside production only (ADR 0032)                                                         |
 | Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/equipe`, `/categories`, `/instance`                       |
 
 URLs are a contract: V0.7 changes what the pages show and how they are reached, not their URLs.
@@ -182,7 +183,7 @@ the same DOM order.
 | Index    | Rechercher, Mon matériel, collectif page | filters on the left (sticky, with counts), active filters, sort, list or grid          |
 | Detail   | item page, collectif page, person page   | content on the left, sticky side panel on the right: owner, location, contact, actions |
 | Settings | Mon compte, Administration               | in-page contents or section links, sections "explanation, card", danger zone last      |
-| Wizard   | import, add and edit forms               | steps or section cards, two fields per row, sticky summary with the save button        |
+| Wizard   | import, add and edit forms               | import: steps, wide tables; item form: one 560 px column, sticky save footer (ADR 0032) |
 
 - Lists are **dense tables by default on computers** (`?vue=liste`), cards with `?vue=grille`;
   photos (V0.11) may change the default later. Below 720 px they are cards.
@@ -190,11 +191,14 @@ the same DOM order.
 
 ## Components
 
-Every page is built from a few shared pieces in `app/ui/`, styled by `public/styles.css`:
+Every page is built from a few shared pieces in `app/ui/`, styled by `public/styles.css` from the
+tokens of `public/tokens.css`; how they look, in both themes, is in the
+[UI guidelines](../../design/ui-guidelines/) ([ADR 0032](../../adr/0032-linear-style-design-system/)),
+and `/dev/ui` shows them all outside production:
 
 | Piece       | Rule                                                                                                                          |
 |-------------|-------------------------------------------------------------------------------------------------------------------------------|
-| Button      | one primary per screen; 44 px high at least; a verb ("Enregistrer")                                                           |
+| Button      | one primary per screen; a verb ("Enregistrer"); 32 px with a mouse, 44 px on phones and touch screens (ADR 0032)              |
 | Field       | visible label, hint under it, error in French under it, `aria-describedby`                                                    |
 | Item card   | name, quantity, category, owner · city; the whole card is the link                                                            |
 | Tabs        | links to distinct URLs, current one marked                                                                                    |
@@ -202,6 +206,8 @@ Every page is built from a few shared pieces in `app/ui/`, styled by `public/sty
 | Side panel  | sticky on computers, after the content in the DOM, so it comes after it on phones                                             |
 | Empty state | says why it is empty and offers the next action                                                                               |
 | Notice      | confirmation after every action (flash message), `role="status"`                                                              |
+| State badge | an item's state as icon, word and tint (`StatusBadge`): « Archivé », « À réparer », « Hors service »                          |
+| Theme       | Automatique, Clair, Sombre: Mon compte › Apparence and the sidebar's foot; a cookie, rendered by the server (ADR 0032)        |
 | Info bubble | secondary explanations behind an ⓘ next to a heading; `<details>`/`<summary>`, so it opens on tap or click without JavaScript |
 
 ## Lessons from the Matosthèque audit
