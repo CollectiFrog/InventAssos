@@ -112,41 +112,58 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
       home,
       /<a href="\/compte\/profil" aria-label="CM, mon compte : Camille Martin"[^>]*>CM<\/a>/,
     )
-    assert.doesNotMatch(home, /Administration/)
+    assert.doesNotMatch(home, /href="\/admin"/)
+
+    // Computers reach it from the foot of the sidebar; CSS shows one or the other (ADR 0034).
+    assert.match(
+      home,
+      /<a href="\/compte\/profil" title="Camille Martin" class="side-account"><span aria-hidden="true" class="initials">CM<\/span><span>Mon compte<\/span><\/a>/,
+    )
 
     const profile = (await client.get(routes.account.profile.index.href())).text
     assert.match(profile, /<a href="\/compte\/profil" aria-label="[^"]*" aria-current="page"/)
+    assert.match(profile, /<a href="\/compte\/profil"[^>]*aria-current="page" class="side-account"/)
     assert.deepEqual(currentEntries(profile), [])
     assert.match(profile, /Se déconnecter/)
   })
 
-  it('puts Administration in Mon compte for staff only, never in the navigation (ADR 0030)', async () => {
+  it('adds Administration to the navigation for staff only, and leaves Mon compte (ADR 0033)', async () => {
     const app = createTestApp(db, { adminEmails: ['boss@example.org'] })
-    const client = app.client()
-    await signIn(app, client, 'boss@example.org')
+    const boss = app.client()
+    await signIn(app, boss, 'boss@example.org')
 
-    const home = (await client.get(routes.home.href())).text
-    assert.doesNotMatch(home, /<aside class="sidebar">.*?Administration.*?<\/aside>/s)
-    assert.doesNotMatch(home, /<header class="top-bar">.*?Administration.*?<\/header>/s)
-    const profile = (await client.get(routes.account.profile.index.href())).text
-    assert.match(profile, /<a href="#administration" class="toc-link">Administration<\/a>/)
-    assert.match(profile, /<section id="administration"[\s\S]*?Aucune demande en attente\./)
-    assert.match(profile, /<a href="\/admin" class="button secondary">Ouvrir l’administration<\/a>/)
-    // The admin pages lead back to Mon compte and mark it as the current shell link.
-    const queue = (await client.get(routes.admin.index.href())).text
-    assert.match(queue, /<a href="\/compte\/profil" aria-label="[^"]*" aria-current="page"/)
-    assert.match(queue, /<a href="\/compte\/profil#administration" class="back-link">/)
-    assert.match(queue, /<a href="\/compte\/profil#administration" class="crumb-link">Mon compte/)
-  })
+    const nav = mainNav((await boss.get(routes.home.href())).text) ?? ''
+    const labels = [...nav.matchAll(/<span>(.*?)<\/span>/g)].map((match) => match[1])
+    assert.deepEqual(labels, [
+      'Accueil',
+      'Rechercher',
+      'Mon matériel',
+      'Collectifs',
+      // A soft hyphen breaks it where the column is too narrow.
+      'Adminis\u00adtration',
+    ])
+    assert.match(nav, /<a href="\/admin">/)
+    const profile = (await boss.get(routes.account.profile.index.href())).text
+    assert.doesNotMatch(profile, /id="administration"|Ouvrir l’administration/)
+    // Every admin page marks the entry as current, with no breadcrumb back to Mon compte.
+    for (const url of [
+      routes.admin.index.href(),
+      routes.admin.accounts.href(),
+      routes.admin.collectifs.index.href(),
+      routes.admin.team.index.href(),
+      routes.admin.categories.index.href(),
+    ]) {
+      const page = (await boss.get(url)).text
+      assert.deepEqual(currentEntries(page), ['Adminis\u00adtration'], url)
+      assert.doesNotMatch(page, /class="back-link"|Fil d’Ariane/, url)
+    }
 
-  it('counts the pending requests in Mon compte › Administration', async () => {
-    const app = createTestApp(db, { adminEmails: ['boss@example.org'] })
-    const client = app.client()
-    await signIn(app, client, 'boss@example.org')
-    await createUser(db, { name: 'Pat', email: 'pat@example.org' })
-    await createUser(db, { name: 'Pia', email: 'pia@example.org' })
-    const profile = (await client.get(routes.account.profile.index.href())).text
-    assert.match(profile, /2 demandes en attente\./)
+    const member = app.client()
+    await signIn(app, member, 'camille@example.org')
+    assert.doesNotMatch(
+      mainNav((await member.get(routes.home.href())).text) ?? '',
+      /href="\/admin"/,
+    )
   })
 
   it('gives every page a top bar with search, "+" to add equipment and the account', async () => {

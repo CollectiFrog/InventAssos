@@ -64,20 +64,23 @@ flowchart TB
 | Rechercher   | `/inventaire`              | text search in my collectifs' equipment, filters (category, my collectifs, city)   |
 | Mon matériel | `/materiel`, tab `/lieux`  | what is stored in my locations: mine, my collectifs', borrowed; tab Lieux          |
 | Collectifs   | `/collectifs`              | my collectifs, then the directory of all (name, city); request a new one           |
-| *Top bar*    | `/compte/profil`, `/admin` | search (magnifier), « + » to add, account (initials); Administration in Mon compte |
+| Administration | `/admin`                 | admins and moderators only: requests, accounts, collectifs, team, categories       |
+| *Top bar*    | `/compte/profil`           | search (magnifier), « + » to add; account (initials) on phones only                |
 
 - **Phone (< 720 px):** a tab bar fixed at the bottom with the four entries, icon and label.
 - **Computer (≥ 720 px):** the same `<nav>` becomes a left rail of 84 px (icon and label) up to
   1099 px, then a sidebar of 240 px with "Mes collectifs" shortcuts (5 at most, then "Tous"). A
   top bar holds the search field (submits to `/inventaire`) with a magnifier button, a « + » to add
-  equipment and the account link; icon buttons keep a visually hidden name
-  ([ADR 0030](../../adr/0030-lighter-shell/)).
-- **Administration** is a section of Mon compte for admins and moderators, not a navigation entry;
-  the admin pages lead back to Mon compte (ADR 0030).
+  equipment; icon buttons keep a visually hidden name
+  ([ADR 0030](../../adr/0030-lighter-shell/)). Mon compte is at the foot of the rail and the
+  sidebar, under the theme switch ([ADR 0034](../../adr/0034-mon-compte-in-one-column/)).
+- **Administration** is a fifth navigation entry for admins and moderators only, in the sidebar,
+  the rail and the phone's tab bar ([ADR 0033](../../adr/0033-administration-in-the-navigation/)).
 - **Actions on an object** are square icon buttons (`IconLink`, `IconButton` in `app/ui/icons.tsx`),
   one icon per kind of action, grouped in an `icon-toolbar` beside the title; their names stay
   hidden for assistive technology and in `title`. Form submissions, empty-state invitations, contact
-  and settings actions stay text buttons. The top bar's « + » always adds equipment (preset to the
+  and settings actions stay text buttons, except a field edited in its own settings row: pencil,
+  then ✓ and ✕ (ADR 0034). The top bar's « + » always adds equipment (preset to the
   collectif on its page, through `add`); a page adds anything else with a labelled `IconLink`
   (`text`), such as « + Lieu ». Text field hints show on hover behind an « i ».
   Cards keep a frame only in grids; lists, panels and settings sections are flat
@@ -90,7 +93,8 @@ flowchart TB
 - The current entry carries `aria-current="page"`; the bar is a `<nav aria-label>`. It is one
   `<nav>`, which CSS turns into the bottom tab bar, the rail or the sidebar; each page passes its
   `section` to `Layout` (detail pages reached from several sections pass none).
-- The account link shows the initials; « Se déconnecter » is on the account page. Pending and
+- The account link shows the initials: in the top bar on phones, at the foot of the sidebar with
+  « Mon compte » on computers; « Se déconnecter » is on the account page. Pending and
   rejected accounts have no navigation, only « Se déconnecter » in the top bar.
 - Detail pages have one link labelled « Retour » that goes back one page. The server builds it from
   the `Referer` header (sent for same-origin navigation, `Referrer-Policy: same-origin`) when it is
@@ -152,7 +156,7 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 | Import      | `/import` (file), `/import/:importId/colonnes`, `/valeurs`, `/apercu` (preview, force an archived row, confirm), POST `/abandonner`; wizard steps, one import per person (US-0.10.1) |
 | Collectifs   | `/collectifs`, `/collectifs/nouveau`, `/collectifs/:slug` (+ `/lieux`, `/responsables`, `/modifier`, `/devenir-responsable`) |
 | People       | `/personnes/:userId`                                                                                                         |
-| Account      | `/compte/profil` (sections: profil, apparence, collectifs, session, à propos, supprimer), `/compte/supprimer`, `/deconnexion`, POST `/apparence` |
+| Account      | `/compte/profil` (rows: e-mail, nom, téléphone, apparence, collectifs, mot de passe, session, supprimer), `/compte/supprimer`, `/deconnexion`, POST `/apparence` |
 | Design       | `/dev/ui`: tokens and components, outside production only (ADR 0032)                                                         |
 | Admin        | `/admin` (= `/admin/demandes`), `/admin/comptes`, `/collectifs`, `/equipe`, `/categories`, `/instance`                       |
 
@@ -182,7 +186,7 @@ the same DOM order.
 |----------|------------------------------------------|----------------------------------------------------------------------------------------|
 | Index    | Rechercher, Mon matériel, collectif page | filters on the left (sticky, with counts), active filters, sort, list or grid          |
 | Detail   | item page, collectif page, person page   | content on the left, sticky side panel on the right: owner, location, contact, actions |
-| Settings | Mon compte, Administration               | in-page contents or section links, sections "explanation, card", danger zone last      |
+| Settings | Mon compte                               | one column (~40rem) of rows « label · state \| action » (`app/ui/settings.tsx`), a field edited in its own row (pencil, then ✓ ✕), deletion last (ADR 0034) |
 | Wizard   | import, add and edit forms               | import: steps, wide tables; item form: one 560 px column, sticky save footer (ADR 0032) |
 
 - Lists are **dense tables by default on computers** (`?vue=liste`), cards with `?vue=grille`;
@@ -201,6 +205,7 @@ and `/dev/ui` shows them all outside production:
 | Button      | a pill; one primary per screen; a verb ("Enregistrer"); 30 px with a mouse, 44 px on phones and touch screens (ADR 0032)      |
 | Field       | underlined; visible label above, hint under it, error in French under it, `aria-describedby`                                  |
 | Item card   | name, quantity, category, owner · city; the whole card is the link                                                            |
+| Collectif card | name, city, description; the whole card is the link (the name's `card-link` stretches over the card)                     |
 | Tabs        | links to distinct URLs, current one marked                                                                                    |
 | Data table  | dense rows, sortable headers as links (`?tri=`), columns hidden by container query as space shrinks; cards below 720 px       |
 | Side panel  | sticky on computers, after the content in the DOM, so it comes after it on phones                                             |
@@ -208,7 +213,7 @@ and `/dev/ui` shows them all outside production:
 | Notice      | confirmation after every action (flash message), `role="status"`                                                              |
 | State badge | an item's state as icon, word and tint (`StatusBadge`): « Archivé », « À réparer », « Hors service »                          |
 | Theme       | Automatique, Clair, Sombre: Mon compte › Apparence and the sidebar's foot; a cookie, rendered by the server (ADR 0032)        |
-| Info bubble | secondary explanations behind an ⓘ next to a heading; `<details>`/`<summary>`, so it opens on tap or click without JavaScript |
+| Field hint  | a text hint shows on hover behind an ⓘ after the label (`title`), and stays read through `aria-describedby` (ADR 0031)      |
 
 ## Lessons from the Matosthèque audit
 

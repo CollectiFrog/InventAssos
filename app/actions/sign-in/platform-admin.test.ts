@@ -8,8 +8,8 @@ import { openTestDatabase, resetDatabase } from '../../../test/database.ts'
 import { createUser, findUserByEmail, setUserStatus } from '../../data/users.ts'
 import { routes } from '../../routes.ts'
 
-// Only platform admins get the Administration section of Mon compte (US-0.10.9).
-const adminBadge = /<a href="\/admin" class="button secondary">Ouvrir l’administration<\/a>/
+// Only platform admins get Administration in the navigation (ADR 0033).
+const adminBadge = /<a href="\/admin"[^>]*>.*?<span>Adminis\u00adtration<\/span><\/a>/s
 
 describe('platform admins from PLATFORM_ADMIN_EMAILS (US-0.2.5)', () => {
   let db: Database

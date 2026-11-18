@@ -33,8 +33,9 @@ describe('profile (US-0.2.6)', () => {
 
     const page = await client.get(profileUrl)
     assert.equal(page.status, 200)
-    assert.match(page.text, /value="Camille"/)
+    assert.match(page.text, /<span class="setting-value">Camille<\/span>/)
     assert.match(page.text, /Visible par les personnes de vos collectifs/)
+    assert.match((await client.get(`${profileUrl}?modifier=nom`)).text, /value="Camille"/)
   })
 
   it('saves name and phone, and clears the phone when left blank', async () => {
@@ -70,6 +71,29 @@ describe('profile (US-0.2.6)', () => {
     assert.match(response.text, /Numéro de téléphone invalide/)
     assert.match(response.text, /value="call me"/)
     assert.equal((await findUserByEmail(db, 'camille@example.org'))?.name, 'Camille')
+  })
+
+  it('edits one field at a time: a field left out of the form keeps its value (ADR 0034)', async () => {
+    const app = createTestApp(db)
+    const client = app.client()
+    await signIn(app, client, 'camille@example.org')
+    const action = routes.account.profile.action.href()
+
+    await client.post(action, { phone: '06 12 34 56 78' })
+    let user = await findUserByEmail(db, 'camille@example.org')
+    assert.equal(user?.name, 'Camille')
+    assert.equal(user?.phone, '06 12 34 56 78')
+
+    await client.post(action, { name: 'Camille Martin' })
+    user = await findUserByEmail(db, 'camille@example.org')
+    assert.equal(user?.name, 'Camille Martin')
+    assert.equal(user?.phone, '06 12 34 56 78')
+
+    // An error opens the row of the field in error, and only that one.
+    const wrong = await client.post(action, { phone: 'call me' })
+    assert.equal(wrong.status, 400)
+    assert.match(wrong.text, /<form id="telephone"[^>]*class="setting-row setting-invalid"/)
+    assert.match(wrong.text, /<div id="nom" class="setting-row">/)
   })
 
   it('ignores a user ID slipped into the form: only the own account changes', async () => {

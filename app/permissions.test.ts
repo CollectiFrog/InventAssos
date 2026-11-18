@@ -237,8 +237,10 @@ describe('permissions: accounts', () => {
     assert.equal(canManageResponsibles(null), false)
   })
 
-  it('"Edit C\'s profile": admin yes, responsible of C yes, others no', () => {
+  it('"Edit C\'s profile, its name included": admin, moderator, responsible of C', () => {
     assert.equal(canEditCollectif(user({ isAdmin: true }), 'c1'), true)
+    assert.equal(canEditCollectif(moderator(), 'c1'), true)
+    assert.equal(canEditCollectif(moderator({ status: 'disabled' }), 'c1'), false)
     assert.equal(canEditCollectif(user({ managedCollectifIds: new Set(['c1']) }), 'c1'), true)
     assert.equal(canEditCollectif(user({ managedCollectifIds: new Set(['c2']) }), 'c1'), false)
     assert.equal(canEditCollectif(user(), 'c1'), false)

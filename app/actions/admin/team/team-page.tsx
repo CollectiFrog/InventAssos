@@ -10,7 +10,7 @@ import {
   TextField,
 } from '../../../ui/form.tsx'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
-import { AdminTabs, adminBack, adminTrail } from '../admin-tabs.tsx'
+import { AdminTabs } from '../admin-tabs.tsx'
 
 /** A platform role an admin gives in the app. */
 export type StaffRole = 'moderator' | 'admin'
@@ -81,13 +81,7 @@ export function TeamPage(handle: Handle<TeamPageProps>) {
     const { viewer, csrfToken, listedAdmins, namedAdmins, moderators, values, errors, notice } =
       handle.props
     return (
-      <Layout
-        title="Équipe"
-        viewer={viewer}
-        headerLink="account"
-        trail={adminTrail}
-        back={adminBack}
-      >
+      <Layout title="Équipe" viewer={viewer} section="admin">
         <h1>Administration</h1>
         <AdminTabs current="team" viewer={viewer} />
         {notice ? (

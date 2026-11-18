@@ -10,8 +10,8 @@ la configuration (`PLATFORM_ADMIN_EMAILS`). À la première connexion, leur comp
 automatiquement. La liste est lue au démarrage de l'application : un ajout ou un retrait prend effet
 après son redémarrage. Tout administrateur peut ensuite nommer d'autres **administrateurs** et des
 **modérateurs** dans l'application (voir [L'équipe](#léquipe)). L'administration s'ouvre depuis
-**Mon compte** (le rond avec vos initiales), section **Administration**, qui indique aussi le nombre
-de demandes en attente ; l'accueil affiche ces demandes avec un lien direct.
+l'entrée **Administration** de la navigation (le bouclier, après Collectifs), visible des seuls
+administrateurs et modérateurs ; l'accueil affiche les demandes en attente avec un lien direct.
 
 ## La file d'attente
 
@@ -81,11 +81,14 @@ La réactivation est enregistrée dans l'historique de la plateforme.
 
 **Administration**, onglet **Catégories**, liste les catégories dans l'ordre où elles apparaissent
 dans le formulaire d'ajout et dans les filtres de recherche. Chaque changement s'y voit aussitôt.
+**Liste** les montre en tableau (ordre, nom, clé, nombre d'objets) ; **Grille**, en petites cartes
+côte à côte. L'affichage choisi reste après chaque changement.
 
-- **Ajouter** une catégorie : son nom en français. Elle s'ajoute en fin de liste. Deux catégories ne
+- **Ajouter** une catégorie : tapez son nom en français dans le champ « Nouvelle catégorie », sous
+  la liste, puis **+**. Elle s'ajoute en fin de liste. Deux catégories ne
   peuvent pas porter le même nom (majuscules et accents ne comptent pas).
 - **Renommer** : le matériel garde sa catégorie, seul le nom affiché change.
-- **Monter** ou **Descendre** change sa place dans la liste.
+- Les flèches **Monter** (↑) et **Descendre** (↓) changent sa place dans la liste.
 - **Supprimer…** : une catégorie que personne n'utilise disparaît aussitôt. Si du matériel l'utilise
   encore (y compris du matériel archivé), choisissez d'abord la catégorie qui le reçoit ; son
   historique indique le changement.
@@ -99,7 +102,7 @@ modérateurs.
 
 - **Nommer** : indiquez l'adresse e-mail d'un compte validé et choisissez le rôle, **Modérateur** ou
   **Administrateur**. La personne garde son matériel et ses collectifs ; la section
-  **Administration** apparaît dans son compte à sa prochaine page. Nommer administrateur un modérateur change simplement son rôle.
+  l'entrée **Administration** apparaît dans sa navigation à sa prochaine page. Nommer administrateur un modérateur change simplement son rôle.
 - **Retirer** : la personne redevient un utilisateur ordinaire, aussitôt.
 
 Un administrateur nommé dans l'application a exactement les mêmes droits que ceux de la

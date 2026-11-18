@@ -222,15 +222,19 @@ describe('password sign-in (US-0.10.8)', () => {
     assert.equal(home.location, routes.account.status.href())
   })
 
-  it('offers « Choisir un mot de passe » in Mon compte, then « Changer » once chosen', async () => {
+  it('offers « Choisir » in Mon compte, then « Changer » once chosen (ADR 0034)', async () => {
     const client = app.client()
     await signIn(app, client, email)
-    const before = (await client.get(routes.account.profile.index.href())).text
-    assert.match(before, /Vous n’avez pas encore de mot de passe/)
-    assert.match(before, />Choisir un mot de passe</)
+    const row = async () =>
+      /<div id="mot-de-passe"[^>]*>(.*?)<\/div><\/div>/s.exec(
+        (await client.get(routes.account.profile.index.href())).text,
+      )?.[1] ?? ''
+    const before = await row()
+    assert.match(before, /<span class="setting-value">Aucun<\/span>/)
+    assert.match(before, /<a href="\/mot-de-passe"[^>]*>Choisir<\/a>/)
     await choose(client)
-    const after = (await client.get(routes.account.profile.index.href())).text
-    assert.match(after, /Vous avez un mot de passe\./)
-    assert.match(after, />Changer mon mot de passe</)
+    const after = await row()
+    assert.match(after, /<span class="setting-value">Défini<\/span>/)
+    assert.match(after, /<a href="\/mot-de-passe"[^>]*>Changer<\/a>/)
   })
 })

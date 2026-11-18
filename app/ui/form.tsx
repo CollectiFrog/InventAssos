@@ -11,12 +11,12 @@ export function CsrfField(handle: Handle<{ token: string }>) {
 }
 
 /** A text hint is shown on hover (ADR 0031); a hint holding a link stays on the page. */
-function hoverText(hint: RemixNode | undefined): string | undefined {
+export function hoverText(hint: RemixNode | undefined): string | undefined {
   return typeof hint === 'string' ? hint : undefined
 }
 
 /** The « i » after a label whose hint shows on hover. */
-function HintMark(handle: Handle<{ hint?: RemixNode }>) {
+export function HintMark(handle: Handle<{ hint?: RemixNode }>) {
   return () => {
     const text = hoverText(handle.props.hint)
     return text ? (
@@ -28,7 +28,7 @@ function HintMark(handle: Handle<{ hint?: RemixNode }>) {
 }
 
 /** The hint itself: read by screen readers through aria-describedby, hidden when it is a tooltip. */
-function FieldHint(handle: Handle<{ id: string; hint?: RemixNode }>) {
+export function FieldHint(handle: Handle<{ id: string; hint?: RemixNode }>) {
   return () => {
     const { id, hint } = handle.props
     if (!hint) return null

@@ -9,7 +9,7 @@ export type Viewer = {
   name: string
   /** Listed in PLATFORM_ADMIN_EMAILS or named in the app: manages the team (US-0.10.7). */
   isAdmin: boolean
-  /** Admin or moderator: Mon compte shows the Administration section (US-0.8.2, US-0.10.9). */
+  /** Admin or moderator: the navigation shows Administration (US-0.8.2, ADR 0033). */
   isStaff: boolean
   /** Only active accounts get the navigation; pending and rejected ones see their status page. */
   isActive: boolean
@@ -20,8 +20,8 @@ export type Viewer = {
   theme: Theme
 } | null
 
-/** The four navigation entries (US-0.7.1); a page names the one it belongs to. */
-export type Section = 'home' | 'search' | 'mine' | 'collectifs'
+/** The navigation entries (US-0.7.1), plus Administration for staff; a page names its own. */
+export type Section = 'home' | 'search' | 'mine' | 'collectifs' | 'admin'
 
 /** One step of the breadcrumb; the last one is the page itself and has no link. */
 export interface Crumb {
@@ -70,6 +70,17 @@ const entries: { section: Section; label: string; href: string; icon: IconName }
   },
 ]
 
+/**
+ * The fifth entry, for admins and moderators only (ADR 0033). A soft hyphen lets the label break
+ * in the 72 px rail and the phone's tab bar, where « Administration » is wider than its column.
+ */
+const adminEntry = {
+  section: 'admin',
+  label: 'Adminis\u00adtration',
+  href: routes.admin.index.href(),
+  icon: 'admin',
+} as const
+
 /** The HTML document every page renders into. Server-rendered only (ADR 0015). */
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
@@ -104,7 +115,9 @@ export function Layout(handle: Handle<LayoutProps>) {
             Aller au contenu
           </a>
           <div class="shell">
-            {viewer && navigates ? <Sidebar viewer={viewer} section={section} /> : null}
+            {viewer && navigates ? (
+              <Sidebar viewer={viewer} section={section} onAccount={headerLink === 'account'} />
+            ) : null}
             <div class="shell-body">
               <header class="top-bar">
                 <a class="brand" href={routes.home.href()}>
@@ -192,13 +205,17 @@ export function Layout(handle: Handle<LayoutProps>) {
 }
 
 /**
- * The four entries and "Mes collectifs". styles.css makes it a bottom tab bar below 720 px, a rail
- * up to 1099 px, then a sidebar (ADR 0022); Administration lives in Mon compte (ADR 0030).
+ * The four entries, Administration for staff, "Mes collectifs", then the theme and Mon compte at
+ * the foot. styles.css makes it a bottom tab bar below 720 px (the foot hidden: the account stays
+ * in the top bar), a rail up to 1099 px, then a sidebar (ADR 0022, ADR 0033, ADR 0034).
  */
-function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section }>) {
+function Sidebar(
+  handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section; onAccount?: boolean }>,
+) {
   return () => {
-    const { viewer, section } = handle.props
+    const { viewer, section, onAccount } = handle.props
     const shown = viewer.collectifs.slice(0, sidebarCollectifLimit)
+    const links = viewer.isStaff ? [...entries, adminEntry] : entries
 
     return (
       <aside class="sidebar">
@@ -209,7 +226,7 @@ function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section
           <span class="brand-name">{appName}</span>
         </a>
         <nav aria-label="Navigation principale" class="main-nav">
-          {entries.map((entry) => (
+          {links.map((entry) => (
             <a href={entry.href} aria-current={entry.section === section ? 'page' : undefined}>
               <Icon name={entry.icon} />
               <span>{entry.label}</span>
@@ -241,8 +258,21 @@ function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section
             </nav>
           </>
         ) : null}
-        <div class="theme-switch">
-          <ThemeSwitch csrfToken={viewer.csrfToken} theme={viewer.theme} compact />
+        <div class="side-foot">
+          <div class="theme-switch">
+            <ThemeSwitch csrfToken={viewer.csrfToken} theme={viewer.theme} compact />
+          </div>
+          <a
+            class="side-account"
+            href={routes.account.profile.index.href()}
+            title={viewer.name}
+            aria-current={onAccount ? 'page' : undefined}
+          >
+            <span class="initials" aria-hidden="true">
+              {initialsOf(viewer.name)}
+            </span>
+            <span>Mon compte</span>
+          </a>
         </div>
       </aside>
     )
@@ -250,11 +280,11 @@ function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section
 }
 
 /** Sign-out form: in the top bar for pending accounts, on the account page for active ones. */
-export function SignOutButton(handle: Handle<{ csrfToken: string }>) {
+export function SignOutButton(handle: Handle<{ csrfToken: string; small?: boolean }>) {
   return () => (
     <form method="post" action={routes.signOut.href()} class="sign-out">
       <input type="hidden" name="_csrf" value={handle.props.csrfToken} />
-      <button type="submit" class="secondary">
+      <button type="submit" class={handle.props.small ? 'secondary small' : 'secondary'}>
         Se déconnecter
       </button>
     </form>
