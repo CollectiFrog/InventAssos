@@ -6,6 +6,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-11-18
+
 ### Added
 
 - Responsibles, moderators and admins can rename a collectif in « Modifier la présentation »; its address follows the new name.
@@ -169,7 +171,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.2...HEAD
+[0.10.2]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...v0.10.0
 [0.6.1]: https://github.com/CollectiFrog/InventAssos/releases/tag/v0.6.1
