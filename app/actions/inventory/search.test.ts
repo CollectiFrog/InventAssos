@@ -106,7 +106,8 @@ describe('search and filter the inventory (US-0.6.2)', () => {
   it('keeps the search and filters in the form', async () => {
     const html = (await lou.get(`${routes.inventory.index.href()}?q=console&categorie=sound`)).text
     assert.match(html, /name="q"[^>]*value="console"/)
-    assert.match(html, /<option value="sound" selected/)
+    // A new search keeps the category chosen.
+    assert.match(html, /<input type="hidden" name="categorie" value="sound"/)
   })
 
   it('ignores a malformed collectif filter instead of failing', async () => {

@@ -54,7 +54,7 @@ function EditItemPage(
         >
           <CsrfField token={csrfToken} />
           <ItemFields values={values} errors={errors} categories={categories} />
-          <div class="actions">
+          <div class="actions form-footer">
             <button type="submit">Enregistrer</button>
             <a class="button secondary" href={routes.items.show.href({ itemId: item.id })}>
               Annuler
@@ -76,8 +76,8 @@ function valuesOf(item: ItemDetails): ItemFormValues {
     serialNumber: item.serial_number ?? '',
     ref: item.ref ?? '',
     condition: item.condition ?? '',
-    estimatedValue:
-      item.estimated_value === null ? '' : String(item.estimated_value).replace('.', ','),
+    replacementValue:
+      item.replacement_value === null ? '' : String(item.replacement_value).replace('.', ','),
     description: item.description ?? '',
   }
 }

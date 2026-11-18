@@ -7,6 +7,9 @@ description: The top bar shows a magnifier and a "+"; Administration leaves the 
 |----------|------------|------------|
 | Accepted | 2026-11-13 | @tritriper |
 
+Where Administration is reached is superseded by [0033](../0033-administration-in-the-navigation/);
+the top bar on computers by [0037](../0037-no-top-bar-on-computers/).
+
 Amends [0022](../0022-sidebar-navigation-on-computers/) on two points: the top bar's buttons and
 where Administration is reached. Everything else in 0022 stands.
 

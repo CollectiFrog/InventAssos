@@ -29,5 +29,6 @@ links, buttons and labels). The app itself follows [UI](../../docs/dev/architect
 mock-up is a reference, not code to ship: once a page is built, the app is the reference and the
 mock-up is not kept in sync with it.
 
-A professional design system will replace the mock-up's look later, through the CSS custom
-properties of [ADR 0019](../../docs/adr/0019-interface-conventions.md).
+The app's look now follows the Linear-style design system of
+[ADR 0032](../../docs/adr/0032-linear-style-design-system.md) and the
+[UI guidelines](../../docs/dev/design/ui-guidelines.md), through the tokens of `public/tokens.css`.

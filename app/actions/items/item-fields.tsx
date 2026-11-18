@@ -24,11 +24,14 @@ export function ItemFields(
       <div class="field-grid">
         <TextField
           name="name"
-          label="Nom"
+          label="Nom du matériel"
           value={values.name}
           error={errors.name}
           required
           maxLength={120}
+          // Without it, browsers fill in the person's own name (field feedback, US-0.10.18).
+          autoComplete="off"
+          placeholder="Par exemple : Lyre LED 300 W"
         />
         <SelectField
           name="categoryId"
@@ -85,10 +88,11 @@ export function ItemFields(
           emptyLabel="Non précisé"
         />
         <TextField
-          name="estimatedValue"
-          label="Valeur estimée (€)"
-          value={values.estimatedValue}
-          error={errors.estimatedValue}
+          name="replacementValue"
+          label="Valeur à neuf (€)"
+          hint="Son prix neuf, même s’il a servi."
+          value={values.replacementValue}
+          error={errors.replacementValue}
           maxLength={12}
         />
         <TextArea

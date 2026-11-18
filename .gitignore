@@ -22,3 +22,6 @@ coverage/
 
 # Isolated copies used by verification agents (Claude Code).
 .claude/worktrees/
+
+# Screenshots of third-party products: local references only (public MIT repository).
+.ia/sources/ui/*.png

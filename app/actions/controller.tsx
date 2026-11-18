@@ -8,6 +8,11 @@ import { listPendingResponsibles } from '../data/members.ts'
 import { listPendingUsers } from '../data/users.ts'
 import { canReviewAccounts, isValidatedUser, itemScopeOf } from '../permissions.ts'
 import { routes } from '../routes.ts'
+import { parseTheme, themeCookie } from '../theme.ts'
+import { formValue } from '../validation.ts'
+import { backHref } from './back-link.ts'
+import { DesignPreviewPage } from './design-preview-page.tsx'
+import { notFound, requireUser } from './guards.tsx'
 import { type Dashboard, HomePage } from './home-page.tsx'
 import { viewerOf } from './viewer.ts'
 
@@ -50,6 +55,23 @@ export default createController(routes, {
       context.session.destroy()
       // The session is gone, so no flash message: the home page reads this flag (US-0.7.7).
       return redirect(`${routes.home.href()}?deconnexion=ok`, 303)
+    },
+    // ADR 0032: a cookie on this device, then back to the page the switch was on.
+    appearance(context) {
+      const actor = requireUser(context)
+      if (actor instanceof Response) return actor
+      const theme = parseTheme(formValue(context.formData, 'theme'))
+      const secure = new URL(context.settings.appUrl).protocol === 'https:'
+      const response = redirect(backHref(context, routes.home.href()), 303)
+      response.headers.append('Set-Cookie', themeCookie(theme, { secure }))
+      return response
+    },
+    // Tokens and components in both themes, for design reviews; not served in production.
+    designPreview(context) {
+      if (context.settings.production) return notFound(context)
+      const asked = context.url.searchParams.get('theme')
+      const theme = asked === 'light' || asked === 'dark' ? asked : undefined
+      return context.render(<DesignPreviewPage viewer={viewerOf(context)} theme={theme} />)
     },
   },
 })

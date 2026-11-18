@@ -7,6 +7,8 @@ description: One icon shape per kind of action on an object; the top bar's « + 
 |----------|------------|------------|
 | Accepted | 2026-11-14 | @tritriper |
 
+The top bar's « + » is superseded by [0037](../0037-no-top-bar-on-computers/): pages add.
+
 Continues [0030](../0030-lighter-shell/) inside the pages. Amends the page templates of
 [0022](../0022-sidebar-navigation-on-computers/) on frames only.
 

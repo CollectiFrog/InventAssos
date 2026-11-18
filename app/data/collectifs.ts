@@ -143,13 +143,18 @@ export async function listPendingCollectifs(db: Database): Promise<PendingCollec
   }))
 }
 
-/** Updates the fields a responsible may edit (US-0.3.5); the name stays under admin control. */
+/**
+ * Updates a collectif's presentation, its name included (US-0.3.5, US-0.10.14). The slug follows
+ * the name, so its address reads like it; the caller checks that no other collectif holds it.
+ */
 export async function updateCollectifProfile(
   db: Database,
   id: string,
-  profile: { city: string; description: string; contactPhone: string | null },
+  profile: { name: string; city: string; description: string; contactPhone: string | null },
 ): Promise<Collectif> {
   return db.update(collectifs, id, {
+    name: profile.name,
+    slug: slugify(profile.name),
     city: profile.city,
     description: profile.description,
     contact_phone: profile.contactPhone,

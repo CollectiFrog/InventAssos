@@ -18,6 +18,9 @@ export function SignUpPage(handle: Handle<SignUpPageProps>) {
     return (
       <Layout title="Créer un compte">
         <h1>Créer un compte</h1>
+        <p class="status">
+          Déjà un compte ? <a href={routes.signIn.form.index.href()}>Se connecter</a>
+        </p>
         <p>
           Votre demande sera examinée par un administrateur de la plateforme. Vous recevrez un
           e-mail quand votre compte sera validé.

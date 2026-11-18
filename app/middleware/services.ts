@@ -4,8 +4,14 @@ import type { Config } from '../config.ts'
 import type { Mailer } from '../mail/mailer.ts'
 import type { RateLimits } from '../rate-limits.ts'
 
-/** The part of the configuration actions may read; `rateLimits` defaults to production values. */
-export type AppSettings = Pick<Config, 'appUrl' | 'adminEmails'> & { rateLimits?: RateLimits }
+/**
+ * The part of the configuration actions may read; `rateLimits` defaults to production values and
+ * `production` to false (it hides the design preview, ADR 0032).
+ */
+export type AppSettings = Pick<Config, 'appUrl' | 'adminEmails'> & {
+  rateLimits?: RateLimits
+  production?: boolean
+}
 
 /** Context key for the mailer; actions read it as `context.mailer`. */
 export const MailerKey = createContextKey<Mailer>()

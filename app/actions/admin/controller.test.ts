@@ -54,6 +54,33 @@ describe('approve or reject accounts (US-0.2.4)', () => {
     assert.match((await admin.get(routes.admin.index.href())).text, /Aucune demande en attente/)
   })
 
+  it('e-mails a 7-day link that opens « choose your password » and signs in (US-0.10.16)', async () => {
+    await admin.post(routes.admin.approveAccount.href({ userId: pending.id }))
+
+    const text = app.mailer.outbox[0]?.text ?? ''
+    const path = /\/mot-de-passe\/nouveau\/\S+/.exec(text)?.[0]
+    assert.ok(path, 'the e-mail carries a password link')
+    assert.match(text, new RegExp(routes.signIn.form.index.href()))
+    const token = decodeURIComponent(path.split('/').at(-1) ?? '')
+    const result = await db.exec(sql`
+      select expires_at from sign_in_tokens where purpose = 'password_reset' and user_id = ${pending.id}
+    `)
+    const days =
+      (new Date(String(result.rows?.[0]?.expires_at)).getTime() - Date.now()) / 86_400_000
+    assert.ok(days > 6.9 && days <= 7, `valid 7 days, got ${days}`)
+
+    const person = app.client()
+    const form = await person.get(routes.password.choose.index.href({ token }))
+    assert.equal(form.status, 200)
+    const password = 'une phrase assez longue'
+    const done = await person.post(routes.password.choose.action.href({ token }), {
+      password,
+      confirmation: password,
+    })
+    assert.equal(done.location, routes.home.href())
+    assert.equal((await person.get(routes.account.profile.index.href())).status, 200)
+  })
+
   it('rejects with a reason, e-mails it, and keeps it out of the log', async () => {
     await admin.post(routes.admin.rejectAccount.href({ userId: pending.id }), {
       reason: 'Personne ne connaît Pat Pending',

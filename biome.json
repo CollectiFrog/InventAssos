@@ -36,6 +36,14 @@
   },
   "overrides": [
     {
+      "includes": ["public/*.css"],
+      "linter": {
+        "rules": {
+          "style": { "noDescendingSpecificity": "off" }
+        }
+      }
+    },
+    {
       "includes": ["remix.json", ".devcontainer/devcontainer.json"],
       "json": {
         "parser": {

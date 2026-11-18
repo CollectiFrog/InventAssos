@@ -1,11 +1,16 @@
-import type { Handle, RemixNode } from 'remix/component'
+import type { Handle } from 'remix/component'
 import { appName, appVersion } from '../../../brand.ts'
 import { routes } from '../../../routes.ts'
-import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../../ui/form.tsx'
-import { Layout, SignOutButton, type Viewer } from '../../../ui/layout.tsx'
+import { ErrorSummary, type FieldErrors } from '../../../ui/form.tsx'
+import { Layout, SignOutButton, ThemeSwitch, type Viewer } from '../../../ui/layout.tsx'
+import { EditableSettingRow, SettingRow } from '../../../ui/settings.tsx'
 
 /** The public user guide. */
 const guideUrl = 'https://collectifrog.github.io/InventAssos/'
+
+/** The rows of Mon compte edited in place, as `?modifier=` names them (ADR 0034). */
+export const editableRows = ['nom', 'telephone'] as const
+export type EditableRow = (typeof editableRows)[number]
 
 /** Props of Mon compte. */
 export interface ProfilePageProps {
@@ -13,51 +18,17 @@ export interface ProfilePageProps {
   csrfToken: string
   email: string
   values: { name: string; phone: string }
-  /** Collectifs the person is responsible of. */
+  /** The person's collectifs, linked from their row. */
   collectifs: readonly { name: string; slug: string; city: string }[]
   /** Whether the person has chosen a password (US-0.10.8). */
   hasPassword: boolean
-  /** Requests waiting in Administration; set for admins and moderators only (US-0.10.9). */
-  pendingRequests?: number
+  /** The row showing its field instead of its value, if any. */
+  editing?: EditableRow
   errors?: FieldErrors
   saved?: boolean
 }
 
-/** One section of a settings page: what it is for on the left, the card on the right. */
-function SettingSection(
-  handle: Handle<{
-    id: string
-    title: string
-    text: string
-    danger?: boolean
-    children?: RemixNode
-  }>,
-) {
-  return () => {
-    const { id, title, text, danger, children } = handle.props
-    return (
-      <section id={id} class="setting" aria-labelledby={`${id}-titre`}>
-        <div>
-          <h2 id={`${id}-titre`}>{title}</h2>
-          <p class="status">{text}</p>
-        </div>
-        <div class={danger ? 'card danger-zone' : 'card'}>{children}</div>
-      </section>
-    )
-  }
-}
-
-const sections = [
-  { id: 'profil', title: 'Profil' },
-  { id: 'collectifs', title: 'Mes collectifs' },
-  { id: 'administration', title: 'Administration', staffOnly: true },
-  { id: 'mot-de-passe', title: 'Mot de passe' },
-  { id: 'session', title: 'Session' },
-  { id: 'a-propos', title: 'À propos' },
-  { id: 'supprimer', title: 'Supprimer mon compte' },
-]
-
-/** Mon compte (US-0.2.6, US-0.7.13), settings template: contents, then one section per topic. */
+/** Mon compte (US-0.2.6, US-0.10.13): one column of rows, the profile first, deletion last. */
 export function ProfilePage(handle: Handle<ProfilePageProps>) {
   return () => {
     const {
@@ -67,11 +38,16 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
       values,
       collectifs,
       hasPassword,
-      pendingRequests,
+      editing,
       errors = {},
       saved,
     } = handle.props
-    const isStaff = pendingRequests !== undefined
+    const page = routes.account.profile.index.href()
+    const row = {
+      action: routes.account.profile.action.href(),
+      csrfToken,
+      cancelHref: page,
+    }
     return (
       <Layout title="Mon compte" viewer={viewer} headerLink="account">
         <h1>Mon compte</h1>
@@ -81,138 +57,85 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
           </p>
         ) : null}
         <ErrorSummary errors={errors} />
-        <div class="settings">
-          <nav aria-label="Sur cette page" class="settings-toc">
-            {sections
-              .filter((section) => isStaff || !section.staffOnly)
-              .map((section) => (
-                <a href={`#${section.id}`} class="toc-link">
-                  {section.title}
-                </a>
-              ))}
-          </nav>
-          <div class="settings-sections">
-            <SettingSection
-              id="profil"
-              title="Profil"
-              text="Ce que voient les personnes de vos collectifs."
-            >
-              <form method="post" action={routes.account.profile.action.href()} class="stack">
-                <CsrfField token={csrfToken} />
-                <p>
-                  Adresse e-mail : <strong>{email}</strong>
-                </p>
-                <TextField
-                  name="name"
-                  label="Nom et prénom"
-                  value={values.name}
-                  error={errors.name}
-                  required
-                  autoComplete="name"
-                  maxLength={120}
-                />
-                <TextField
-                  name="phone"
-                  label="Téléphone"
-                  type="tel"
-                  value={values.phone}
-                  error={errors.phone}
-                  autoComplete="tel"
-                  maxLength={25}
-                  hint="Visible par les personnes de vos collectifs, pour qu’elles puissent vous joindre au sujet du matériel. Laissez vide pour ne pas le partager."
-                />
-                <button type="submit">Enregistrer</button>
-              </form>
-            </SettingSection>
-            <SettingSection
-              id="collectifs"
-              title="Mes collectifs"
-              text="Les collectifs dont vous êtes responsable."
-            >
-              {collectifs.length === 0 ? (
-                <p>Vous ne faites encore partie d’aucun collectif.</p>
-              ) : (
-                <ul class="plain-list">
-                  {collectifs.map((c) => (
-                    <li>
-                      <a href={routes.collectifs.show.href({ slug: c.slug })}>{c.name}</a>
-                      {c.city ? <span class="status"> · {c.city}</span> : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p>
-                <a class="button secondary" href={routes.collectifs.index.href()}>
-                  Rejoindre ou déclarer un collectif
-                </a>
-              </p>
-            </SettingSection>
-            {isStaff ? (
-              <SettingSection
-                id="administration"
-                title="Administration"
-                text="Demandes, comptes, collectifs et catégories de la plateforme."
-              >
-                <p>
-                  {pendingRequests === 0
-                    ? 'Aucune demande en attente.'
-                    : pendingRequests === 1
-                      ? '1 demande en attente.'
-                      : `${pendingRequests} demandes en attente.`}
-                </p>
-                <p>
-                  <a class="button secondary" href={routes.admin.index.href()}>
-                    Ouvrir l’administration
-                  </a>
-                </p>
-              </SettingSection>
-            ) : null}
-            <SettingSection
-              id="mot-de-passe"
-              title="Mot de passe"
-              text="Pour vous connecter sans attendre d’e-mail. Le lien de connexion reste possible."
-            >
-              <p>
-                {hasPassword
-                  ? 'Vous avez un mot de passe.'
-                  : 'Vous n’avez pas encore de mot de passe.'}
-              </p>
-              <p>
-                <a class="button secondary" href={routes.password.request.index.href()}>
-                  {hasPassword ? 'Changer mon mot de passe' : 'Choisir un mot de passe'}
-                </a>
-              </p>
-            </SettingSection>
-            <SettingSection
-              id="session"
-              title="Session"
-              text="Sur un appareil partagé, déconnectez-vous en partant."
-            >
-              <SignOutButton csrfToken={csrfToken} />
-            </SettingSection>
-            <SettingSection
-              id="a-propos"
-              title="À propos"
-              text={`${appName}, version ${appVersion}.`}
-            >
-              <p>
-                <a href={guideUrl}>Guide d’utilisation</a>
-              </p>
-            </SettingSection>
-            <SettingSection
-              id="supprimer"
-              title="Supprimer mon compte"
-              text="Votre accès s’arrête ; vos données sont effacées ensuite."
-              danger
-            >
-              <p>
-                <a class="button danger" href={routes.account.deletion.href()}>
-                  Supprimer mon compte…
-                </a>
-              </p>
-            </SettingSection>
-          </div>
+        <div class="setting-rows" id="profil">
+          <SettingRow id="e-mail" label="Adresse e-mail" value={email} />
+          <EditableSettingRow
+            {...row}
+            id="nom"
+            label="Nom et prénom"
+            value={values.name}
+            empty="Non renseigné"
+            editing={editing === 'nom' || Boolean(errors.name)}
+            editHref={`${page}?modifier=nom#nom`}
+            name="name"
+            required
+            autoComplete="name"
+            maxLength={120}
+            error={errors.name}
+          />
+          <EditableSettingRow
+            {...row}
+            id="telephone"
+            label="Téléphone"
+            value={values.phone}
+            empty="Non partagé"
+            editing={editing === 'telephone' || Boolean(errors.phone)}
+            editHref={`${page}?modifier=telephone#telephone`}
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            maxLength={25}
+            hint="Visible par les personnes de vos collectifs, pour qu’elles puissent vous joindre au sujet du matériel. Laissez vide pour ne pas le partager."
+            error={errors.phone}
+          />
         </div>
+        <div class="setting-rows">
+          <SettingRow id="apparence" label="Apparence">
+            <ThemeSwitch csrfToken={csrfToken} theme={viewer?.theme ?? 'system'} />
+          </SettingRow>
+          <SettingRow
+            id="collectifs"
+            label="Mes collectifs"
+            value={
+              collectifs.length === 0
+                ? 'Aucun pour l’instant'
+                : collectifs.map((c, index) => (
+                    <>
+                      {index > 0 ? ', ' : null}
+                      <a href={routes.collectifs.show.href({ slug: c.slug })}>{c.name}</a>
+                    </>
+                  ))
+            }
+          >
+            <a class="button secondary small" href={routes.collectifs.index.href()}>
+              Rejoindre ou déclarer
+            </a>
+          </SettingRow>
+          <SettingRow
+            id="mot-de-passe"
+            label="Mot de passe"
+            value={hasPassword ? 'Défini' : 'Aucun'}
+          >
+            <a class="button secondary small" href={routes.password.request.index.href()}>
+              {hasPassword ? 'Changer' : 'Choisir'}
+            </a>
+          </SettingRow>
+          <SettingRow id="session" label="Session">
+            <SignOutButton csrfToken={csrfToken} small />
+          </SettingRow>
+          <SettingRow
+            id="supprimer"
+            label="Supprimer mon compte"
+            value="Votre accès s’arrête ; vos données sont effacées ensuite."
+          >
+            <a class="button danger small" href={routes.account.deletion.href()}>
+              Supprimer…
+            </a>
+          </SettingRow>
+        </div>
+        <p class="setting-foot" id="a-propos">
+          {appName}, version {appVersion} · <a href={guideUrl}>Guide d’utilisation</a>
+        </p>
       </Layout>
     )
   }

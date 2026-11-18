@@ -17,14 +17,17 @@ export interface CollectifsPageProps {
   notice?: string
 }
 
-/** One collectif of the directory: name, city and description, never what it holds (ADR 0021). */
+/**
+ * One collectif of the directory: name, city and description, never what it holds (ADR 0021).
+ * The whole card opens the collectif: its name link stretches over the card (`card-link`).
+ */
 function DirectoryCard(handle: Handle<{ collectif: Collectif; mine?: boolean }>) {
   return () => {
     const { collectif, mine } = handle.props
     return (
       <li class="card directory-card">
         <p class="directory-name">
-          <a href={routes.collectifs.show.href({ slug: collectif.slug })}>
+          <a class="card-link" href={routes.collectifs.show.href({ slug: collectif.slug })}>
             <strong>{collectif.name}</strong>
           </a>
           {mine ? <span class="badge">Responsable</span> : null}
@@ -45,7 +48,7 @@ export function CollectifsPage(handle: Handle<CollectifsPageProps>) {
       <Layout title="Collectifs" viewer={viewer} section="collectifs">
         <div class="page-head">
           <div>
-            <h1>Collectifs</h1>
+            <h1 class="visually-hidden">Collectifs</h1>
             <p class="status">Vos collectifs, puis l’annuaire de tous les collectifs.</p>
           </div>
           <a class="button secondary" href={requestHref}>
@@ -155,6 +158,7 @@ export function RequestCollectifPage(handle: Handle<RequestCollectifPageProps>) 
             value={values?.name}
             error={errors.name}
             required
+            autoComplete="off"
             maxLength={120}
           />
           <TextField

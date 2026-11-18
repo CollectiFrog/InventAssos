@@ -17,12 +17,17 @@ import type { AppContext } from '../../../middleware/index.ts'
 import { canManageCategories } from '../../../permissions.ts'
 import { routes } from '../../../routes.ts'
 import type { FieldErrors } from '../../../ui/form.tsx'
+import { parseItemView } from '../../../ui/item-table.tsx'
 import { formValue } from '../../../validation.ts'
 import { forbidden, notFound, requireUser } from '../../guards.tsx'
 import { viewerOf } from '../../viewer.ts'
-import { CategoriesPage } from './categories-page.tsx'
+import { CategoriesPage, viewQuery } from './categories-page.tsx'
 
-const listUrl = routes.admin.categories.index.href()
+/** The list in the view it was shown in (`?vue=`, kept on every form's URL). */
+function listUrl(context: AppContext): string {
+  const view = parseItemView(context.url.searchParams.get('vue'))
+  return `${routes.admin.categories.index.href()}${viewQuery(view)}`
+}
 
 /** The page, with what was typed and its errors after a refused change. */
 async function renderPage(
@@ -36,6 +41,7 @@ async function renderPage(
       csrfToken={getCsrfToken(context)}
       categories={await listCategories(context.db)}
       usage={await countItemsByCategory(context.db)}
+      view={parseItemView(context.url.searchParams.get('vue'))}
       values={form?.values ?? {}}
       errors={form?.errors ?? {}}
       notice={typeof notice === 'string' ? notice : undefined}
@@ -87,7 +93,7 @@ export default createController(routes.admin.categories, {
         })
       })
       context.session.flash('notice', `Catégorie « ${name} » ajoutée.`)
-      return redirect(listUrl, 303)
+      return redirect(listUrl(context), 303)
     },
 
     async rename(context) {
@@ -113,7 +119,7 @@ export default createController(routes.admin.categories, {
         })
       })
       context.session.flash('notice', `« ${category.name} » renommée en « ${name} ».`)
-      return redirect(listUrl, 303)
+      return redirect(listUrl(context), 303)
     },
 
     up: (context) => move(context, context.params.categoryId, -1),
@@ -166,7 +172,7 @@ export default createController(routes.admin.categories, {
           ? `« ${category.name} » supprimée ; son matériel est maintenant dans « ${target.name} ».`
           : `« ${category.name} » supprimée.`,
       )
-      return redirect(listUrl, 303)
+      return redirect(listUrl(context), 303)
     },
   },
 })
@@ -196,5 +202,5 @@ async function move(context: AppContext, categoryId: string, direction: -1 | 1) 
     const where = direction < 0 ? 'monte' : 'descend'
     context.session.flash('notice', `« ${category.name} » ${where} d’une place.`)
   }
-  return redirect(`${listUrl}#categorie-${category.id}`, 303)
+  return redirect(`${listUrl(context)}#categorie-${category.id}`, 303)
 }

@@ -15,19 +15,19 @@ gauche (réduite à des icônes sur un écran étroit). L'entrée de la section 
 évidence.
 
 Sur un ordinateur, la colonne de gauche liste aussi **Mes collectifs** (les cinq premiers, puis
-**Tous**). La barre du haut garde sur chaque page un champ de **recherche** (la loupe lance la
-recherche) et le bouton **+** pour ajouter du matériel.
+**Tous**). Les pages de ces entrées n'ont pas de titre : l'entrée mise en évidence suffit.
 
 Sur la page d'un objet, d'un collectif, d'un lieu ou d'une personne, un **fil d'Ariane** au-dessus
 du titre montre où vous êtes (Collectifs › Collecti'FROG › Console) sur un ordinateur ; sur un
 téléphone, **Retour** ramène à la page précédente.
 
-En haut à droite, le rond avec vos initiales ouvre **votre compte**. Les administrateurs et les
-modérateurs y trouvent la section **Administration**.
+Le rond avec vos initiales ouvre **votre compte** : en haut à droite sur un téléphone, en bas du
+menu de gauche sur un ordinateur. Les administrateurs et les modérateurs ont une cinquième entrée,
+**Administration**.
 
-Le **+** de la barre du haut ajoute toujours du matériel ; sur la page d'un collectif, le collectif
-est déjà choisi comme propriétaire. Pour créer un lieu, utilisez **+ Lieu** dans **Mes lieux** ou
-dans l'onglet **Lieux** d'un collectif.
+On ajoute là où l'on regarde : **+ Matériel** dans **Mon matériel** et dans l'onglet **Matériel**
+d'un collectif (le collectif est alors déjà choisi comme propriétaire), **+ Lieu** dans **Mes
+lieux** et dans l'onglet **Lieux** d'un collectif.
 
 ### Les boutons en icônes
 
@@ -43,14 +43,15 @@ la souris, leur nom s'affiche :
 | poubelle (rouge)       | **Supprimer…**, ou **Demander la suppression**            |
 | flèche vers le haut    | **Importer un fichier**                                   |
 | flèche vers le bas     | **Exporter** en CSV                                       |
-| + (ou + Lieu)          | **Ajouter** du matériel (ou un lieu)                      |
+| + Matériel, + Lieu     | **Ajouter** du matériel, un lieu                          |
 
 Dans les formulaires, un **i** après le nom d'un champ signale une aide : passez la souris dessus
 pour la lire.
 
 ## L'accueil
 
-**Accueil** commence par un champ de recherche dans le matériel de vos collectifs. Dessous, le
+**Accueil** commence par un champ de recherche dans le matériel de vos collectifs, qui mène à
+**Rechercher**. Dessous, le
 matériel **ajouté récemment** que vous pouvez voir, et **vos collectifs** avec leur ville et leur
 nombre d'objets. Si vous ne faites partie d'aucun collectif, l'accueil vous propose l'annuaire des
 collectifs ou d'en déclarer un. Les administrateurs y voient aussi le nombre de **demandes à
@@ -71,19 +72,22 @@ personnes qui partagent un collectif avec elle. Le partage avec d'autres collect
 ## Parcourir l'inventaire
 
 **Rechercher** liste le matériel actif que vous pouvez voir, 24 objets par page : nom, catégorie,
-quantité, ville et propriétaire. Cliquez sur un objet pour voir sa page. Les adresses des lieux n'y
-apparaissent jamais, seulement la ville.
+propriétaire, ville et quantité. Cliquez sur un objet pour voir sa page ; un objet **À réparer**,
+**Hors service** ou **Archivé** y porte une étiquette de couleur à côté de son nom. Les adresses des
+lieux n'apparaissent jamais, seulement la ville.
 
-- **Filtres** (à gauche sur un ordinateur, au-dessus sur un téléphone) : la recherche porte sur le
-  nom, la marque, le modèle et la description (majuscules et accents ne comptent pas) ; **Catégorie**
-  et **Ville** indiquent entre parenthèses combien d'objets elles contiennent ; **Collectif
-  propriétaire** propose vos collectifs. Ils se combinent ; cliquez sur **Appliquer**.
+- **Champ de recherche**, en haut : il porte sur le nom, la marque, le modèle et la description
+  (majuscules et accents ne comptent pas). Une nouvelle recherche garde les filtres choisis.
+- **Filtres**, sous le champ : **Catégorie**, **Collectif** (vos collectifs) et **Ville** ouvrent
+  chacun une liste ; un clic sur un choix l'applique aussitôt. Catégories et villes indiquent entre
+  parenthèses combien d'objets elles contiennent. Un filtre appliqué affiche son choix sur son
+  bouton ; ils se combinent.
 - **Filtres actifs** : chacun s'affiche au-dessus des résultats ; cliquez dessus pour le retirer, ou
   sur **Tout effacer**.
 - **Trier** : sur un ordinateur, la liste est un tableau ; cliquez sur un titre de colonne pour trier
   par cette colonne, une seconde fois pour inverser l'ordre.
-- **Liste** ou **Grille** choisit entre le tableau et des cartes. Sur un téléphone, ce sont toujours
-  des cartes.
+- **Liste** ou **Grille** choisit entre le tableau et des cartes. Sur un téléphone, la liste montre
+  une ligne par objet : son nom, puis catégorie, propriétaire, ville et quantité.
 
 Le matériel d'un collectif, sur sa page, se trie et s'affiche de la même façon.
 
@@ -103,21 +107,30 @@ désactivé n'est plus affiché.
 
 ## Mon compte
 
-Touchez le rond avec vos initiales, en haut à droite. **Mon compte** est rangé en sections, avec un
-sommaire : **Profil** (votre nom et un numéro de téléphone facultatif), **Mes collectifs**,
-**Administration** (administrateurs et modérateurs), **Mot de passe** (le choisir ou le changer),
-**Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
-compte**. La suppression elle-même arrive avec la version 1.0 : la page explique ce qu'elle fera.
+Sur téléphone, touchez le rond avec vos initiales, en haut à droite ; sur ordinateur, cliquez sur
+**Mon compte** en bas du menu de gauche. **Mon compte** est une liste, un réglage par ligne avec son
+état et un bouton : votre **adresse e-mail**, votre **nom et prénom** et votre **téléphone**
+(facultatif), puis **Apparence** (thème **Automatique**, **Clair** ou **Sombre**), **Mes
+collectifs**, **Mot de passe** (le choisir ou le changer), **Session** (se déconnecter) et, en
+dernier, **Supprimer mon compte**. La suppression elle-même arrive avec la version 1.0 : la page
+explique ce qu'elle fera. Le numéro de version et le guide d'utilisation sont en bas de la page.
+
+Pour changer votre nom ou votre téléphone, touchez le **crayon** au bout de sa ligne : la valeur
+devient modifiable, sur la même ligne. Le **✓** enregistre, la **✕** annule sans rien changer.
 
 Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous
 contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
+
+Le thème **Automatique** suit le réglage clair ou sombre de votre appareil. Votre choix est retenu
+sur cet appareil seulement ; sur ordinateur, les trois petits boutons en bas du menu de gauche le
+changent aussi.
 
 ## La page d'un collectif
 
 Pour ses responsables et ses membres, la page d'un collectif a trois onglets : **Matériel** (ce qu'il
 possède, puis ce que d'autres ont déposé dans ses lieux), **Lieux** et **Membres** (chacun avec son
-rôle, et le téléphone de contact). Le **+** de la barre du haut y ouvre le formulaire avec le
-collectif comme propriétaire. Les autres utilisateurs ne voient que
+rôle, et le téléphone de contact). **+ Matériel**, dans l'onglet Matériel, ouvre le formulaire avec
+le collectif comme propriétaire. Les autres utilisateurs ne voient que
 son nom, sa ville, sa présentation et les boutons **Demander à rejoindre** et **Demander à devenir
 responsable**.
 
@@ -155,10 +168,12 @@ d'abord nommer un autre responsable.
 
 ## Modifier la présentation d'un collectif
 
-Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y
-changer la ville et la description, visibles par tous les utilisateurs validés, et le téléphone de contact,
-visible par les personnes qui voient le matériel du collectif. Pour
-changer le nom, contactez un administrateur.
+Si vous êtes responsable d'un collectif (ou modérateur, ou administrateur), sa page affiche
+**Modifier la présentation** : vous pouvez y changer son nom, la ville et la description, visibles
+par tous les utilisateurs validés, et le téléphone de contact, visible par les personnes qui voient
+le matériel du collectif. Deux collectifs ne peuvent pas porter le même nom (majuscules et accents
+ne comptent pas). L'adresse de la page suit le nom : après un changement, les anciens liens vers le
+collectif ne mènent plus à lui.
 
 ## Mon matériel
 
@@ -199,11 +214,14 @@ sera rangé et à qui il appartient : vérifiez ces deux choix avant d'enregistr
   appartient à quelqu'un d'autre. Choisissez « Une autre personne » et indiquez son e-mail ; son
   compte doit être validé. La personne retrouve l'objet avec **Rechercher** et peut le modifier.
 - Le reste décrit l'objet : nom, catégorie, quantité (pour un lot d'objets identiques), marque,
-  modèle, numéro de série, référence, état, valeur estimée et description.
+  modèle, numéro de série, référence, état, valeur à neuf et description.
 - **Référence** (facultative) : votre code ou numéro d'inventaire, par exemple celui de
   l'étiquette. Deux objets du même propriétaire ne peuvent pas porter la même référence (les
   majuscules et les accents ne comptent pas), même si l'un est archivé. Elle sert à réimporter un
   fichier sans créer de doublons, et **Rechercher** la trouve.
+- **Valeur à neuf** (facultative) : le prix de l'objet neuf, même s'il a servi.
+- Une adresse web collée dans la description (la page du fabricant, par exemple) s'affiche sur la
+  page de l'objet comme un lien court vers le site, « fr.exemple.com ↗ ».
 
 Un lieu qui contient encore du matériel ne peut pas être supprimé : déplacez d'abord le matériel.
 
@@ -281,7 +299,7 @@ Le matériel part dans un fichier CSV que LibreOffice et Excel ouvrent directeme
   lieux n'y est pas : il reste à eux.
 
 Le fichier a une ligne par objet : référence, nom, catégorie, quantité, marque, modèle, numéro de
-série, état, valeur estimée, description, nom du lieu et identifiant. Le matériel archivé n'y est
+série, état, valeur à neuf, description, nom du lieu et identifiant. Le matériel archivé n'y est
 pas, ni l'adresse des lieux, ni le nom des personnes. C'est le format que l'import relira : gardez
 la colonne **Identifiant** si vous comptez réimporter le fichier après l'avoir corrigé. Un modèle
 vide, avec les mêmes colonnes, se télécharge à l'adresse de l'application suivie de
@@ -289,7 +307,7 @@ vide, avec les mêmes colonnes, se télécharge à l'adresse de l'application su
 
 ## Historique d'un objet
 
-En bas de la page d'un objet, l'**historique** liste ce qui lui est arrivé : ajout, modifications
+En bas de la page d'un objet, **Avancé** déplie l'**historique**, qui liste ce qui lui est arrivé : ajout, modifications
 (quels champs), déplacements (d'où vers où) et archivage, avec la date et la personne. Tous les
 utilisateurs validés le voient. La plateforme ne garde dans son journal que des identifiants : les
 noms sont retrouvés au moment de l'affichage, et une personne qui a supprimé son compte apparaît

@@ -10,6 +10,8 @@ import { signInTokens, type TokenPurpose } from './tables.ts'
 export const signInTokenTtlMs = 15 * 60 * 1000
 /** A password link is valid 30 minutes: choosing a password takes longer than a click (ADR 0029). */
 export const passwordTokenTtlMs = 30 * 60 * 1000
+/** The link in the « compte validé » e-mail is valid 7 days: that e-mail is often read late (ADR 0036). */
+export const welcomeTokenTtlMs = 7 * 24 * 60 * 60 * 1000
 
 const ttlOf: Record<TokenPurpose, number> = {
   sign_in: signInTokenTtlMs,
@@ -25,13 +27,14 @@ export async function createSignInToken(
   db: Database,
   userId: string,
   purpose: TokenPurpose = 'sign_in',
+  ttlMs: number = ttlOf[purpose],
 ): Promise<string> {
   const token = randomBytes(32).toString('base64url')
   await db.create(signInTokens, {
     token_hash: hashToken(token),
     user_id: userId,
     purpose,
-    expires_at: new Date(Date.now() + ttlOf[purpose]),
+    expires_at: new Date(Date.now() + ttlMs),
   })
   return token
 }

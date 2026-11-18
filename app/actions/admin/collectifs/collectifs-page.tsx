@@ -2,7 +2,7 @@ import type { Handle } from 'remix/component'
 
 import { routes } from '../../../routes.ts'
 import { Layout, type Viewer } from '../../../ui/layout.tsx'
-import { AdminTabs, adminBack, adminTrail } from '../admin-tabs.tsx'
+import { AdminTabs } from '../admin-tabs.tsx'
 
 /** One active collectif as the admins oversee it. */
 export interface AdminCollectifRow {
@@ -20,14 +20,8 @@ export function AdminCollectifsPage(
   return () => {
     const { viewer, collectifs } = handle.props
     return (
-      <Layout
-        title="Collectifs"
-        viewer={viewer}
-        headerLink="account"
-        trail={adminTrail}
-        back={adminBack}
-      >
-        <h1>Administration</h1>
+      <Layout title="Collectifs" viewer={viewer} section="admin">
+        <h1 class="visually-hidden">Administration</h1>
         <AdminTabs current="collectifs" viewer={viewer} />
         <p class="status">
           Les collectifs validés. Un collectif sans responsable n’est plus géré : nommez-en un

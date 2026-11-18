@@ -13,6 +13,10 @@ AssoMatos est un service en ligne : rien à installer, un navigateur suffit.
 2. Indiquez votre nom et votre adresse e-mail, puis **Demander un compte**.
 3. Vous recevez un e-mail de confirmation. Un administrateur de la plateforme examine votre demande
    et vous écrit quand votre compte est validé.
+4. L'e-mail « Votre compte AssoMatos est validé » contient un lien pour **choisir votre mot de
+   passe** : cliquez dessus, tapez votre mot de passe deux fois, et vous êtes connecté. Ce lien est
+   valable **7 jours** et ne sert qu'une fois ; s'il a expiré, la page propose d'en demander un
+   nouveau. Vous pouvez aussi ne pas choisir de mot de passe et vous connecter par lien.
 
 Si l'adresse a déjà un compte, aucun nouveau compte n'est créé : vous recevez un e-mail qui vous le
 signale.
@@ -25,17 +29,17 @@ connecter pour utiliser ce bouton, afin que seul le titulaire de l'adresse puiss
 
 ## Se connecter
 
-Deux façons de se connecter, avec la même adresse e-mail : un **lien reçu par e-mail**, toujours
-possible, ou un **mot de passe** si vous en avez choisi un.
+Deux façons de se connecter, avec la même adresse e-mail : un **mot de passe**, ou un **lien reçu
+par e-mail**, toujours possible.
 
-Par lien :
+Avec un mot de passe : sur la page **Se connecter**, indiquez votre adresse e-mail et votre mot de
+passe, puis **Se connecter**.
 
-1. Choisissez **Se connecter**, indiquez votre adresse e-mail et touchez **Recevoir un lien par
-   e-mail**.
+Par lien, sous **ou** :
+
+1. Indiquez votre adresse e-mail et touchez **Recevoir un lien de connexion par e-mail**.
 2. Ouvrez l'e-mail « Votre lien de connexion AssoMatos » et cliquez sur le lien : vous êtes
    connecté et arrivez sur l'accueil.
-
-Avec un mot de passe : indiquez votre adresse e-mail et votre mot de passe, puis **Se connecter**.
 
 Si vous avez ouvert un lien vers une page de l'application (un objet, un collectif…) sans être
 connecté, vous arrivez sur cette page une fois connecté, et non sur l'accueil.
@@ -47,10 +51,11 @@ revient à chaque fois, choisissez un mot de passe.
 
 ### Choisir un mot de passe
 
-Le mot de passe se crée, ou se change, toujours par un lien reçu par e-mail :
+Le mot de passe se crée, ou se change, toujours par un lien reçu par e-mail. Le premier arrive avec
+l'e-mail de validation du compte ; ensuite :
 
-1. Sur la page **Se connecter**, touchez **Mot de passe oublié ou pas encore créé ?** (ou, une fois
-   connecté, **Mon compte › Mot de passe**) et indiquez votre adresse e-mail.
+1. Sur la page **Se connecter**, touchez **Mot de passe oublié ?**, à droite de « Mot de passe »
+   (ou, une fois connecté, **Mon compte › Mot de passe**) et indiquez votre adresse e-mail.
 2. Ouvrez l'e-mail « Choisir votre mot de passe AssoMatos » et cliquez sur le lien, valable
    **30 minutes**.
 3. Tapez votre mot de passe deux fois : au moins **12 caractères**, sans autre règle. Une phrase
@@ -65,8 +70,9 @@ heure : si vous n'en recevez plus, attendez un peu (et vérifiez vos indésirabl
 nombre de demandes depuis le même réseau, la page affiche « Trop de demandes » : réessayez un peu
 plus tard.
 
-Sur un appareil partagé, pensez à vous déconnecter : touchez le rond avec vos initiales, en haut à
-droite, puis **Se déconnecter**. La session est fermée et ne peut plus être réutilisée.
+Sur un appareil partagé, pensez à vous déconnecter : ouvrez **Mon compte** (le rond avec vos
+initiales, en haut à droite sur un téléphone, en bas du menu de gauche sur un ordinateur), puis
+**Se déconnecter**. La session est fermée et ne peut plus être réutilisée.
 
 ## Rejoindre ou créer un collectif
 

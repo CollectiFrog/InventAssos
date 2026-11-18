@@ -35,7 +35,7 @@ export const itemFieldsSchema = f.object({
   serialNumber: f.field(optionalText(120)),
   ref: f.field(optionalLine(60)),
   condition: f.field(condition),
-  estimatedValue: f.field(euros),
+  replacementValue: f.field(euros),
   description: f.field(optionalText(2000)),
 })
 
@@ -56,7 +56,7 @@ export const itemFieldNames = [
   'serialNumber',
   'ref',
   'condition',
-  'estimatedValue',
+  'replacementValue',
   'description',
 ] as const
 

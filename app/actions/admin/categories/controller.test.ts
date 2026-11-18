@@ -68,6 +68,19 @@ describe('manage categories (US-0.7.10)', () => {
     assert.doesNotMatch(JSON.stringify(entry), /Instruments/)
   })
 
+  it('adds with one field and a « + », its name in the placeholder and for screen readers', async () => {
+    const html = (await admin.get(urls.index.href())).text
+    const form =
+      /<form [^>]*class="inline-form category-add"[^>]*>.*?<\/form>/s.exec(html)?.[0] ?? ''
+    assert.match(
+      form,
+      /<label for="field-name" class="visually-hidden">Nouvelle catégorie<\/label>/,
+    )
+    assert.match(form, /placeholder="Nouvelle catégorie"/)
+    assert.match(form, /<button[^>]*title="Ajouter la catégorie"[^>]*>/)
+    assert.doesNotMatch(html, /Ajouter une catégorie|En français, tel qu’il apparaîtra/)
+  })
+
   it('refuses an empty name or one already used, ignoring case and accents', async () => {
     for (const name of ['', 'son', 'ELECTRICITE', ' Lumière ']) {
       const response = await admin.post(urls.create.href(), { name })
@@ -115,6 +128,41 @@ describe('manage categories (US-0.7.10)', () => {
     assert.equal((await findItemById(db, oldDrill.id))?.category_id, 'cabling')
     const page = (await rita.get(routes.items.show.href({ itemId: drill.id }))).text
     assert.match(page, /Modifié \(catégorie\)/)
+  })
+
+  it('lists the categories as a table by default, one column per property', async () => {
+    const html = (await admin.get(urls.index.href())).text
+    const table = /<table class="data-table category-table">.*?<\/table>/s.exec(html)?.[0] ?? ''
+    const headers = [...table.matchAll(/<th scope="col"[^>]*>(.*?)<\/th>/gs)].map((m) => m[1])
+    assert.deepEqual(headers.slice(0, 4), ['Ordre', 'Nom', 'Clé', 'Objets'])
+    const power = /<tr id="categorie-power">.*?<\/tr>/s.exec(table)?.[0] ?? ''
+    assert.match(power, /<code>power<\/code>/)
+    assert.match(power, /<td data-label="Objets" class="num">2<\/td>/)
+    // Moves are icons that keep their names; the first category cannot go up.
+    assert.match(power, /title="Monter « [^»]+ »"/)
+    const first = /<tr id="categorie-sound">.*?<\/tr>/s.exec(table)?.[0] ?? ''
+    assert.match(first, /<button[^>]*title="Monter « Son »"[^>]*disabled/)
+    assert.match(html, /<a href="\/admin\/categories\?vue=grille"[^>]*>.*?Grille<\/a>/s)
+  })
+
+  it('shows compact cards several to a row with ?vue=grille, and stays there after a change', async () => {
+    const html = (await admin.get(`${urls.index.href()}?vue=grille`)).text
+    assert.doesNotMatch(html, /category-table/)
+    assert.match(html, /<ol class="cards category-grid">/)
+    assert.match(html, /<li id="categorie-power" class="card category-card">/)
+    // Every form posts back to the grid, so the page comes back the same.
+    assert.match(html, /action="\/admin\/categories\/power\/[a-z-]+\?vue=grille"/)
+
+    const renamed = await admin.post(`${urls.rename.href({ categoryId: 'power' })}?vue=grille`, {
+      name: 'Énergie',
+    })
+    assert.equal(renamed.location, `${urls.index.href()}?vue=grille`)
+    const moved = await admin.post(`${urls.up.href({ categoryId: 'lighting' })}?vue=grille`)
+    assert.equal(moved.location, `${urls.index.href()}?vue=grille#categorie-lighting`)
+    const refused = await admin.post(`${urls.rename.href({ categoryId: 'power' })}?vue=grille`, {
+      name: 'Son',
+    })
+    assert.match(refused.text, /category-grid/)
   })
 
   it('is for platform admins only', async () => {

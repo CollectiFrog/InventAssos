@@ -88,15 +88,6 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           { label: 'Collectifs', href: routes.collectifs.index.href() },
           { label: collectif.name },
         ]}
-        // The top bar's « + » adds equipment to this collectif (ADR 0031).
-        add={
-          inside && p.canAddItems
-            ? {
-                href: `${routes.items.create.index.href()}?pour=collectif:${collectif.id}`,
-                label: `Ajouter du matériel à ${collectif.name}`,
-              }
-            : undefined
-        }
       >
         <div class="page-head">
           <div>
@@ -168,21 +159,17 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
         ) : membership === 'pendingResponsible' ? (
           <p class="status">Votre demande pour devenir responsable est en cours d’examen.</p>
         ) : membership === 'none' ? (
-          <div class="stack">
+          // Set apart from the tabs: staff see the inventory without being members, and its own
+          // « Ajouter du matériel » stays the page's one primary button.
+          <div class="actions join-panel">
             <form method="post" action={routes.collectifs.join.href({ slug })}>
               <CsrfField token={p.csrfToken} />
-              <button type="submit">Demander à rejoindre</button>
+              <button type="submit" class={inside ? 'secondary' : undefined}>
+                Demander à rejoindre
+              </button>
             </form>
-            <form
-              method="post"
-              action={routes.collectifs.requestResponsibility.href({ slug })}
-              class="stack"
-            >
+            <form method="post" action={routes.collectifs.requestResponsibility.href({ slug })}>
               <CsrfField token={p.csrfToken} />
-              <p class="status">
-                Vous gérez ce collectif et il n’a plus de responsable joignable ? La plateforme peut
-                vous en nommer responsable.
-              </p>
               <button type="submit" class="secondary">
                 Demander à devenir responsable
               </button>
@@ -194,6 +181,13 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
   }
 }
 
+/**
+ * « 3 objets »: the count under a tab, whose label already names the list (US-0.10.23).
+ */
+function countOf(count: number, one: string, many: string): string {
+  return `${count} ${count > 1 ? many : one}`
+}
+
 /** Matériel: what the collectif owns, then what others deposited in its locations. */
 function ItemsTab(handle: Handle<CollectifPageProps>) {
   return () => {
@@ -203,11 +197,22 @@ function ItemsTab(handle: Handle<CollectifPageProps>) {
       <>
         <section aria-labelledby="materiel-collectif" class="index-results">
           <div class="results-bar">
-            <h2 id="materiel-collectif">Matériel du collectif · {items.length}</h2>
+            <h2 id="materiel-collectif" class="visually-hidden">
+              Matériel du collectif
+            </h2>
+            <p class="status">{countOf(items.length, 'objet', 'objets')}</p>
             {items.length > 0 ? (
               <ViewSwitch
                 view={view}
                 hrefFor={(next) => hrefWith({ vue: next === 'grille' ? 'grille' : '' })}
+              />
+            ) : null}
+            {canAddItems ? (
+              <IconLink
+                icon="add"
+                label={`Ajouter du matériel à ${collectif.name}`}
+                text="Matériel"
+                href={`${routes.items.create.index.href()}?pour=collectif:${collectif.id}`}
               />
             ) : null}
             {canExport ? (
@@ -259,7 +264,10 @@ function PlacesTab(handle: Handle<CollectifPageProps>) {
     return (
       <section aria-labelledby="lieux-collectif">
         <div class="results-bar">
-          <h2 id="lieux-collectif">Lieux de stockage · {locations.length}</h2>
+          <h2 id="lieux-collectif" class="visually-hidden">
+            Lieux de stockage
+          </h2>
+          <p class="status">{countOf(locations.length, 'lieu', 'lieux')}</p>
           {canManageLocations ? (
             <IconLink
               icon="add"
@@ -417,7 +425,10 @@ function PeopleTab(handle: Handle<CollectifPageProps>) {
           </section>
         ) : null}
         <section aria-labelledby="membres">
-          <h2 id="membres">Membres · {people.length}</h2>
+          <h2 id="membres" class="visually-hidden">
+            Membres
+          </h2>
+          <p class="status">{countOf(people.length, 'membre', 'membres')}</p>
           <table class="data-table">
             <caption class="visually-hidden">Membres de {collectif.name}</caption>
             <thead>
@@ -522,10 +533,6 @@ function PeopleTab(handle: Handle<CollectifPageProps>) {
         {canManageResponsibles && responsibles.length > 0 ? (
           <section aria-labelledby="gerer-responsables">
             <h2 id="gerer-responsables">Remplacer un responsable</h2>
-            <p class="status">
-              Pour la plateforme, quand le collectif n’a pas de membre à nommer : indiquez l’e-mail
-              d’un utilisateur validé qui devient responsable. La personne retirée reste membre.
-            </p>
             <ul class="cards">
               {responsibles.map((r) => (
                 <li key={r.id} class="card">

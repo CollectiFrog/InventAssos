@@ -36,6 +36,7 @@ const sites = {
       { label: 'Contribute', items: [{ autogenerate: { directory: 'contribute' } }] },
       { label: 'Product', items: [{ autogenerate: { directory: 'product' } }] },
       { label: 'Architecture', items: [{ autogenerate: { directory: 'architecture' } }] },
+      { label: 'Design', items: [{ autogenerate: { directory: 'design' } }] },
       { label: 'Decisions (ADR)', items: [{ autogenerate: { directory: 'adr' } }] },
     ],
     otherSite: { label: 'User docs', href: `${userUrl}/` },

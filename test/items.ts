@@ -14,7 +14,7 @@ export function itemFormFields(overrides: Record<string, string> = {}): Record<s
     model: 'MG10',
     serialNumber: '',
     condition: 'good',
-    estimatedValue: '150,50',
+    replacementValue: '150,50',
     description: '',
     ...overrides,
   }
@@ -34,7 +34,7 @@ export async function createTestItem(
     serialNumber: null,
     ref: input.ref ?? null,
     condition: null,
-    estimatedValue: null,
+    replacementValue: null,
     description: null,
   }
   return createItem(db, {

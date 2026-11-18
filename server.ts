@@ -32,7 +32,11 @@ const background = createBackgroundTasks()
 const router = createAppRouter({
   db,
   mailer,
-  settings: { appUrl: config.appUrl, adminEmails: config.adminEmails },
+  settings: {
+    appUrl: config.appUrl,
+    adminEmails: config.adminEmails,
+    production: config.production,
+  },
   sessionSecret: config.sessionSecret,
   background,
 })

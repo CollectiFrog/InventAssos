@@ -26,7 +26,7 @@ const existing = (overrides: Partial<ExistingItem>): ExistingItem => ({
   model: null,
   serialNumber: null,
   condition: 'good',
-  estimatedValue: '150.00',
+  replacementValue: '150.00',
   description: 'Gris',
   locationId: 'local',
   locationName: 'Local',
@@ -78,7 +78,7 @@ const columns: ColumnMapping = [
   'model',
   'serialNumber',
   'condition',
-  'estimatedValue',
+  'replacementValue',
   'description',
   'location',
   'id',
@@ -131,7 +131,7 @@ describe('planning an import, row by row (US-0.10.2, ADR 0027)', () => {
   })
 
   it('leaves an item unchanged when nothing differs', () => {
-    const [same] = plan([row(2, { ref: 'AMP-01', name: 'Ampli', estimatedValue: '150,00' })]).rows
+    const [same] = plan([row(2, { ref: 'AMP-01', name: 'Ampli', replacementValue: '150,00' })]).rows
     assert.equal(same?.state, 'unchanged')
   })
 
@@ -181,7 +181,7 @@ describe('planning an import, row by row (US-0.10.2, ADR 0027)', () => {
 
   it('reports each unreadable cell in French, prefixed by its field', () => {
     const [bad] = plan([
-      row(2, { name: '', quantity: 'deux', estimatedValue: 'beaucoup', brand: 'x'.repeat(121) }),
+      row(2, { name: '', quantity: 'deux', replacementValue: 'beaucoup', brand: 'x'.repeat(121) }),
     ]).rows
     assert.equal(bad?.state, 'invalid')
     const text = bad?.errors.join(' | ') ?? ''
@@ -308,11 +308,11 @@ describe('planning an import, row by row (US-0.10.2, ADR 0027)', () => {
 
   it('keeps an update’s category, value and description when their cells are blank', () => {
     const [same] = plan([
-      row(2, { ref: 'AMP-01', category: '', estimatedValue: '', description: '' }),
+      row(2, { ref: 'AMP-01', category: '', replacementValue: '', description: '' }),
     ]).rows
     assert.equal(same?.state, 'unchanged')
     assert.equal(same?.fields?.categoryId, 'sound')
-    assert.equal(same?.fields?.estimatedValue, 150)
+    assert.equal(same?.fields?.replacementValue, 150)
     assert.equal(same?.fields?.description, 'Gris')
   })
 

@@ -11,12 +11,12 @@ export function CsrfField(handle: Handle<{ token: string }>) {
 }
 
 /** A text hint is shown on hover (ADR 0031); a hint holding a link stays on the page. */
-function hoverText(hint: RemixNode | undefined): string | undefined {
+export function hoverText(hint: RemixNode | undefined): string | undefined {
   return typeof hint === 'string' ? hint : undefined
 }
 
 /** The « i » after a label whose hint shows on hover. */
-function HintMark(handle: Handle<{ hint?: RemixNode }>) {
+export function HintMark(handle: Handle<{ hint?: RemixNode }>) {
   return () => {
     const text = hoverText(handle.props.hint)
     return text ? (
@@ -28,7 +28,7 @@ function HintMark(handle: Handle<{ hint?: RemixNode }>) {
 }
 
 /** The hint itself: read by screen readers through aria-describedby, hidden when it is a tooltip. */
-function FieldHint(handle: Handle<{ id: string; hint?: RemixNode }>) {
+export function FieldHint(handle: Handle<{ id: string; hint?: RemixNode }>) {
   return () => {
     const { id, hint } = handle.props
     if (!hint) return null
@@ -53,6 +53,9 @@ export interface TextFieldProps {
   requiredIfUsed?: boolean
   autoComplete?: string
   maxLength?: number
+  placeholder?: string
+  /** A link at the end of the label's line, outside the label (« Mot de passe oublié ? »). */
+  aside?: RemixNode
 }
 
 /** A labelled input with its hint and error message, linked for screen readers. */
@@ -63,14 +66,24 @@ export function TextField(handle: Handle<TextFieldProps>) {
     const describedBy = [p.hint ? `${id}-hint` : null, p.error ? `${id}-error` : null]
       .filter(Boolean)
       .join(' ')
+    const label = (
+      <label for={id}>
+        {p.label}
+        {p.required || p.requiredIfUsed ? null : <span class="optional"> (facultatif)</span>}
+        <HintMark hint={p.hint} />
+      </label>
+    )
 
     return (
       <div class={p.error ? 'field field-invalid' : 'field'}>
-        <label for={id}>
-          {p.label}
-          {p.required || p.requiredIfUsed ? null : <span class="optional"> (facultatif)</span>}
-          <HintMark hint={p.hint} />
-        </label>
+        {p.aside ? (
+          <div class="label-row">
+            {label}
+            {p.aside}
+          </div>
+        ) : (
+          label
+        )}
         <FieldHint id={`${id}-hint`} hint={p.hint} />
         <input
           id={id}
@@ -81,6 +94,7 @@ export function TextField(handle: Handle<TextFieldProps>) {
           required={p.required}
           autoComplete={p.autoComplete}
           maxLength={p.maxLength}
+          placeholder={p.placeholder}
           title={hoverText(p.hint)}
           aria-invalid={p.error ? 'true' : undefined}
           aria-describedby={describedBy || undefined}

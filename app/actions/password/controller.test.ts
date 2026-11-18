@@ -61,14 +61,14 @@ describe('password sign-in (US-0.10.8)', () => {
     // Opening the link only shows the form: a mail scanner cannot use it up.
     const form = await client.get(routes.password.choose.index.href({ token }))
     assert.equal(form.status, 200)
-    assert.match(form.text, /Nouveau mot de passe/)
+    assert.match(form.text, /Choisir votre mot de passe/)
 
     const response = await client.post(routes.password.choose.action.href({ token }), {
       password,
       confirmation: password,
     })
     assert.equal(response.location, routes.home.href())
-    assert.match((await client.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await client.get(routes.home.href())).text, /mon compte : Camille/)
     assert.match((await findUserById(db, camille.id))?.password_hash ?? '', /^scrypt\$/)
     const [entry] = await listEntityHistory(db, 'user', camille.id)
     assert.equal(entry?.action, 'user.password_set')
@@ -84,7 +84,7 @@ describe('password sign-in (US-0.10.8)', () => {
     const response = await signInWithPassword(client, password, { suite: wanted })
     assert.equal(response.status, 303)
     assert.equal(response.location, wanted)
-    assert.match((await client.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await client.get(routes.home.href())).text, /mon compte : Camille/)
   })
 
   it('answers the same for a wrong password, an unknown address or no password yet', async () => {
@@ -192,11 +192,11 @@ describe('password sign-in (US-0.10.8)', () => {
   it('closes every other session and open sign-in link when the password changes', async () => {
     const elsewhere = app.client()
     await signIn(app, elsewhere, email)
-    assert.match((await elsewhere.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await elsewhere.get(routes.home.href())).text, /mon compte : Camille/)
     await app.client().post(routes.signIn.form.action.href(), { email })
     const pending = lastSignInToken(app, email) ?? ''
     await choose()
-    assert.doesNotMatch((await elsewhere.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.doesNotMatch((await elsewhere.get(routes.home.href())).text, /mon compte : Camille/)
     assert.equal((await app.client().get(routes.signIn.link.href({ token: pending }))).status, 400)
   })
 
@@ -222,15 +222,19 @@ describe('password sign-in (US-0.10.8)', () => {
     assert.equal(home.location, routes.account.status.href())
   })
 
-  it('offers « Choisir un mot de passe » in Mon compte, then « Changer » once chosen', async () => {
+  it('offers « Choisir » in Mon compte, then « Changer » once chosen (ADR 0034)', async () => {
     const client = app.client()
     await signIn(app, client, email)
-    const before = (await client.get(routes.account.profile.index.href())).text
-    assert.match(before, /Vous n’avez pas encore de mot de passe/)
-    assert.match(before, />Choisir un mot de passe</)
+    const row = async () =>
+      /<div id="mot-de-passe"[^>]*>(.*?)<\/div><\/div>/s.exec(
+        (await client.get(routes.account.profile.index.href())).text,
+      )?.[1] ?? ''
+    const before = await row()
+    assert.match(before, /<span class="setting-value">Aucun<\/span>/)
+    assert.match(before, /<a href="\/mot-de-passe"[^>]*>Choisir<\/a>/)
     await choose(client)
-    const after = (await client.get(routes.account.profile.index.href())).text
-    assert.match(after, /Vous avez un mot de passe\./)
-    assert.match(after, />Changer mon mot de passe</)
+    const after = await row()
+    assert.match(after, /<span class="setting-value">Défini<\/span>/)
+    assert.match(after, /<a href="\/mot-de-passe"[^>]*>Changer<\/a>/)
   })
 })

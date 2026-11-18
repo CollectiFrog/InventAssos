@@ -6,6 +6,43 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-11-18
+
+### Added
+
+- Responsibles, moderators and admins can rename a collectif in « Modifier la présentation »; its address follows the new name.
+- A dark theme: choose Automatique, Clair or Sombre in Mon compte › Apparence or at the foot of the sidebar; the choice is kept on this device.
+- Items to repair, out of order or archived show their state as a badge beside their name.
+- The e-mail that validates an account opens « Choisir votre mot de passe » directly, valid 7 days, and signs in once the password is saved.
+- « + Matériel » in Mon matériel and in a collectif's Matériel tab adds equipment where you are looking.
+- A web address in an item's description shows as a short link to its site.
+
+### Changed
+
+- A new, calmer look in both themes: the Inter typeface, finer icons, denser lists, underlined fields and rounded buttons, smaller with a mouse and still large on phones and touch screens.
+- The add and edit forms for equipment are one column, with « Ajouter » or « Enregistrer » and « Annuler » always in reach at the bottom.
+- Equipment lists show the owner before the city, and on a phone each item takes one compact row.
+- In Collectifs, a click anywhere on a collectif's card opens it, not only on its name.
+- Admins and moderators find Administration in the main navigation again, after Collectifs; it leaves Mon compte.
+- Mon compte is one short list, a setting per row with its state and one button; the name and the phone change in their own row, with the pencil, then ✓ or ✕. On a computer, Mon compte is at the bottom of the menu on the left.
+- Administration › Catégories shows a compact table, or small cards side by side with « Grille »; moving a category up or down uses arrows.
+- Adding a category takes one field, « Nouvelle catégorie », and a « + ».
+- Equipment cards open the item from anywhere on the card, like collectifs' cards.
+- In Mon matériel › Lieux, a place's « Modifier » and « Supprimer » buttons sit on the right of its card on a computer.
+- Adding or editing a place no longer ends with a « Retour à mes lieux » link.
+- The sign-in page puts the password first, « Mot de passe oublié ? » beside its label and « Créer un compte » under the title, then « ou » and the e-mailed link; the sign-up page links back to it with « Déjà un compte ? », and the top bar no longer repeats both links.
+- Rechercher starts with its search field; each filter is a menu applied in one click, without « Appliquer ».
+- On a computer, the top bar is gone: search through Rechercher, add from the pages; pages reached from the menu no longer repeat its name as a title, and the home page starts with its search field.
+- « Valeur estimée » becomes « Valeur à neuf », in the form, on the item page and in imports and exports.
+- An item's page no longer repeats its owner and place above the side panel on a computer, and its history is folded under « Avancé ».
+- A collectif's tabs show a count instead of repeating their title; « Demander à rejoindre » and « Demander à devenir responsable » sit side by side, and the page drops two explanations kept in the guide.
+
+### Fixed
+
+- On a collectif's page, « Demander à rejoindre » no longer sticks to « Ajouter du matériel » for admins and moderators who are not members.
+- Browsers no longer fill an item's, a place's, a collectif's or a category's name with your own name.
+- Tabs inside a page no longer show a small vertical scrollbar on Windows.
+
 ## [0.10.1] - 2026-11-14
 
 ### Added
@@ -134,7 +171,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.1...HEAD
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.2...HEAD
+[0.10.2]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...v0.10.0
 [0.6.1]: https://github.com/CollectiFrog/InventAssos/releases/tag/v0.6.1

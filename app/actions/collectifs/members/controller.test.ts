@@ -11,6 +11,7 @@ import { createTestLocation } from '../../../../test/locations.ts'
 import { createActiveUser } from '../../../../test/users.ts'
 import { findMembership, setResponsible } from '../../../data/members.ts'
 import type { Collectif, User } from '../../../data/tables.ts'
+import { setUserRole } from '../../../data/users.ts'
 import { routes } from '../../../routes.ts'
 
 describe('collectif members (US-0.8.3, US-0.8.4, US-0.8.7)', () => {
@@ -56,8 +57,24 @@ describe('collectif members (US-0.8.3, US-0.8.4, US-0.8.7)', () => {
 
   it('offers an outsider « Demander à rejoindre », and nothing of the inventory', async () => {
     const html = (await ninaClient.get(routes.collectifs.show.href({ slug: slug() }))).text
-    assert.match(html, /Demander à rejoindre/)
+    assert.match(
+      html,
+      /<div class="actions join-panel">.*?<button type="submit">Demander à rejoindre/s,
+    )
     assert.doesNotMatch(html, /Console du FROG/)
+  })
+
+  it('sets « Demander à rejoindre » apart, as a secondary button, for staff who see the inventory', async () => {
+    const mona = await createActiveUser(db, 'Mona', 'mona@example.org')
+    await setUserRole(db, mona.id, 'moderator')
+    const monaClient = app.client()
+    await signIn(app, monaClient, 'mona@example.org')
+    const html = (await monaClient.get(routes.collectifs.show.href({ slug: slug() }))).text
+    assert.match(html, /Console du FROG/)
+    assert.match(
+      html,
+      /<div class="actions join-panel">.*?<button[^>]*class="secondary"[^>]*>Demander à rejoindre/s,
+    )
   })
 
   it('records the request, logs it and e-mails each responsible apart', async () => {

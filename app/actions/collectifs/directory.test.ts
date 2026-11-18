@@ -18,9 +18,9 @@ import { routes } from '../../routes.ts'
 /** Names of the collectifs listed in one section of the directory, in order. */
 function namesIn(html: string, heading: RegExp): string[] {
   const section = html.split(/<section /).find((part) => heading.test(part)) ?? ''
-  return [...section.matchAll(/<a href="\/collectifs\/[^"]+"><strong>(.*?)<\/strong>/g)].map(
-    (match) => match[1] ?? '',
-  )
+  return [
+    ...section.matchAll(/<a href="\/collectifs\/[^"]+" class="card-link"><strong>(.*?)<\/strong>/g),
+  ].map((match) => match[1] ?? '')
 }
 
 describe('collectifs directory (US-0.7.12)', () => {
@@ -90,6 +90,17 @@ describe('collectifs directory (US-0.7.12)', () => {
     assert.deepEqual(namesIn(none, /Autres collectifs/), [])
     assert.match(none, /Aucun collectif ne correspond à « 50% »/)
     assert.match(none, /<a href="\/collectifs">Tout afficher<\/a>/)
+  })
+
+  it('makes the whole card the link to the collectif, named by the collectif only', async () => {
+    const html = await directory()
+    const cards = html.match(/<li class="card directory-card">[\s\S]*?<\/li>/g) ?? []
+    assert.equal(cards.length, 3)
+    for (const card of cards) {
+      // One link per card, the stretched one: nothing else in the card to click by mistake.
+      assert.equal(card.match(/<a /g)?.length, 1)
+      assert.match(card, /<a href="\/collectifs\/[^"]+" class="card-link"><strong>/)
+    }
   })
 
   it('always offers to declare a collectif', async () => {

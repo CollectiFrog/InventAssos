@@ -64,6 +64,11 @@ alone. A mail scanner that opens links before the person does uses the token up:
 for one click less, and the person can request a new link. The token is consumed by a single
 `UPDATE … WHERE used_at IS NULL AND expires_at > now()`, so two clicks cannot both succeed.
 
+A password link (from « Mot de passe oublié ? » or from the e-mail that validates an account) is
+the other way round: GET shows the form, only the POST that saves the password uses the token, so a
+scanner that opens it leaves it usable. The validation e-mail's link lasts 7 days, others 30 minutes
+(ADR 0029, ADR 0036).
+
 ## Data
 
 See [Data model](../data-model/) for entities and constraints, and

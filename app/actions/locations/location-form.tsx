@@ -60,6 +60,7 @@ export function LocationForm(handle: Handle<LocationFormProps>) {
             value={values.name}
             error={errors.name}
             required
+            autoComplete="off"
             maxLength={120}
             hint="Par exemple : « Local de la rue Dupont », « Garage de Camille »."
           />

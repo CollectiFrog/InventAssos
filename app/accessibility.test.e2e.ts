@@ -165,6 +165,7 @@ describe('accessibility of the key pages (US-0.7.9)', () => {
         '/admin/collectifs',
         '/admin/equipe',
         '/admin/categories',
+        '/admin/categories?vue=grille',
       ])
     })
   }

@@ -33,7 +33,7 @@ export function HomePage(
     if (viewer && dashboard) {
       return (
         <Layout title="Accueil" viewer={viewer} section="home">
-          <h1>Bonjour {viewer.name}</h1>
+          <h1 class="visually-hidden">Accueil</h1>
           <DashboardView dashboard={dashboard} />
         </Layout>
       )
@@ -76,7 +76,9 @@ function DashboardView(handle: Handle<{ dashboard: Dashboard }>) {
     return (
       <>
         <form method="get" action={routes.inventory.index.href()} class="home-search">
-          <label for="recherche-accueil">Chercher dans mes collectifs</label>
+          <label for="recherche-accueil" class="visually-hidden">
+            Chercher dans mes collectifs
+          </label>
           <div class="inline-form">
             <input
               type="search"

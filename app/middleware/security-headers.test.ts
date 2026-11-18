@@ -27,6 +27,7 @@ describe('security headers (review F8)', () => {
     assert.match(policy, /frame-ancestors 'none'/)
     assert.match(policy, /form-action 'self'/)
     assert.match(policy, /style-src 'self'/)
+    assert.match(policy, /font-src 'self'/)
     assert.doesNotMatch(policy, /script-src|unsafe/)
     assert.doesNotMatch(await response.text(), /<script|style="/)
   })

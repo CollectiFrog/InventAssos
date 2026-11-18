@@ -60,10 +60,16 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
       <Layout title="Mon matériel" viewer={viewer} section="mine">
         <div class="page-head">
           <div>
-            <h1>Mon matériel</h1>
+            <h1 class="visually-hidden">Mon matériel</h1>
             <p class="status">Ce qui est rangé chez vous en ce moment, et à qui il appartient.</p>
           </div>
           <div class="icon-toolbar">
+            <IconLink
+              icon="add"
+              label="Ajouter du matériel"
+              text="Matériel"
+              href={routes.items.create.index.href()}
+            />
             <IconLink
               icon="upload"
               label="Importer un fichier"
@@ -112,13 +118,13 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
   }
 }
 
-/** A list of item summaries linking to their pages. */
+/** A list of item summaries; the whole card opens the item, like a collectif's (`card-link`). */
 export function ItemList(handle: Handle<{ items: ItemSummary[]; grid?: boolean }>) {
   return () => (
     <ul class={handle.props.grid ? 'cards item-grid' : 'cards'}>
       {handle.props.items.map((item) => (
         <li key={item.id} class="card">
-          <a href={routes.items.show.href({ itemId: item.id })}>
+          <a class="card-link" href={routes.items.show.href({ itemId: item.id })}>
             <strong>{item.name}</strong>
           </a>
           {item.quantity > 1 ? ` × ${item.quantity}` : null}
@@ -207,6 +213,7 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
                 value={values.newLocationName}
                 error={errors.newLocationName}
                 requiredIfUsed
+                autoComplete="off"
                 maxLength={120}
                 hint="Garage, cave, local de répétition…"
               />
@@ -239,7 +246,12 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
               hint="Seulement si « Une autre personne » : son compte doit être validé. Le matériel doit être rangé dans un lieu de votre collectif ; la personne pourra ensuite le modifier."
             />
           </fieldset>
-          <button type="submit">Ajouter</button>
+          <div class="actions form-footer">
+            <button type="submit">Ajouter</button>
+            <a class="button secondary" href={routes.items.index.href()}>
+              Annuler
+            </a>
+          </div>
         </form>
       </Layout>
     )
