@@ -13,7 +13,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ### Changed
 
-- A new, calmer look in both themes: the Inter typeface, finer icons, denser lists and smaller controls with a mouse; buttons stay large on phones and touch screens.
+- A new, calmer look in both themes: the Inter typeface, finer icons, denser lists, underlined fields and rounded buttons, smaller with a mouse and still large on phones and touch screens.
 - The add and edit forms for equipment are one column, with « Ajouter » or « Enregistrer » and « Annuler » always in reach at the bottom.
 - Equipment lists show the owner before the city, and on a phone each item takes one compact row.
 

@@ -66,6 +66,9 @@
   --accent-hover: light-dark(#4a4270, #7a71b4);
   --accent-text: light-dark(#595082, #aaa2dc);
   --accent-subtle: color-mix(in srgb, var(--accent) 12%, var(--bg-canvas));
+  /* Tonal fills of secondary and danger pills; stronger in dark so the pill keeps its shape. */
+  --accent-tonal: light-dark(#ebeaf0, #1c1a2b);
+  --accent-tonal-hover: light-dark(#dfdde8, #262339);
   --on-accent: #ffffff;
   --focus-ring: light-dark(#595082, #8b82c8);
 
@@ -73,6 +76,8 @@
   --danger-hover: light-dark(#9b1c13, #d4463d);
   --danger-text: light-dark(#b42318, #f47067);
   --on-danger: #ffffff;
+  --danger-tonal: light-dark(#f6e5e4, #2e1210);
+  --danger-tonal-hover: light-dark(#f0d6d4, #3d1714);
 
   /* Equipment states: always icon + word + colour, on a 12 % tint. */
   --status-available: light-dark(#116329, #4ac26b);
@@ -130,6 +135,8 @@
   --row-height: 36px;
   --touch: 44px;
   --control: var(--control-md);
+  /* Pills are a little lower than fields: without a frame, a field looks lower than it is. */
+  --button: 30px;
   --icon-sm: 16px;
   --icon-md: 18px;
   --icon-stroke: 1.5;
@@ -153,6 +160,7 @@
 @media (pointer: coarse), (max-width: 719px) {
   :root {
     --control: var(--touch);
+    --button: var(--touch);
     --row-height: var(--touch);
   }
 }

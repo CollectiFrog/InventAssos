@@ -198,8 +198,8 @@ and `/dev/ui` shows them all outside production:
 
 | Piece       | Rule                                                                                                                          |
 |-------------|-------------------------------------------------------------------------------------------------------------------------------|
-| Button      | one primary per screen; a verb ("Enregistrer"); 32 px with a mouse, 44 px on phones and touch screens (ADR 0032)              |
-| Field       | visible label, hint under it, error in French under it, `aria-describedby`                                                    |
+| Button      | a pill; one primary per screen; a verb ("Enregistrer"); 30 px with a mouse, 44 px on phones and touch screens (ADR 0032)      |
+| Field       | underlined; visible label above, hint under it, error in French under it, `aria-describedby`                                  |
 | Item card   | name, quantity, category, owner · city; the whole card is the link                                                            |
 | Tabs        | links to distinct URLs, current one marked                                                                                    |
 | Data table  | dense rows, sortable headers as links (`?tri=`), columns hidden by container query as space shrinks; cards below 720 px       |

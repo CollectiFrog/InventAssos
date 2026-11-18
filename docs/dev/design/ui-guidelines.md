@@ -61,6 +61,8 @@ duration. Each colour is `light-dark(light, dark)`.
 | `--text-primary` / `-secondary` / `-tertiary` | `#1a1b1e` / `#4b4f57` / `#65696f` | `#f7f8f8` / `#b4b6bc` / `#8a8f98` | text levels, all ≥ 4.5:1 |
 | `--accent` (fill)                        | `#595082`              | `#6b62a6`                | primary button, selection        |
 | `--accent-text`                          | `#595082`              | `#aaa2dc`                | links, accent text               |
+| `--accent-tonal` (+ `-hover`)            | `#ebeaf0`              | `#1c1a2b`                | secondary pills                  |
+| `--danger-tonal` (+ `-hover`)            | `#f6e5e4`              | `#2e1210`                | danger pills                     |
 | `--focus-ring`                           | `#595082`              | `#8b82c8`                | 2 px ring, 2 px offset           |
 | `--danger` / `--danger-text`             | `#b42318`              | `#c5372e` / `#f47067`    | destructive actions, errors      |
 
@@ -87,8 +89,19 @@ Always **icon + word + colour**, on a 12 % tint (`StatusBadge`, `app/ui/status-b
   title, `--text-3xl` 32/40 sign-in only. Weights 400 / 500 / 600; headings −0.015 em.
 - Spacing on a 4 px base (`--space-1` … `--space-16`). Radii: 4 (badges), 6 (buttons, inputs),
   8 (cards, menus), 12 (sign-in card, dialogs).
-- Controls 28 / **32** / 36 px with a mouse; `--control` becomes **44 px** below 720 px or with a
-  coarse pointer. Rows 36 px (44 px on touch).
+- Controls 28 / **32** / 36 px with a mouse, buttons **30 px**; `--control` and `--button` become
+  **44 px** below 720 px or with a coarse pointer. Rows 36 px (44 px on touch).
+
+### Fields and buttons
+
+- **Fields are underlined**: no box, no fill, one 1 px baseline in `--border-control` (3:1, WCAG
+  1.4.11), darker on hover, accent and 2 px thick on focus, red when invalid, dashed when disabled.
+  The label sits above in 12 px `--text-tertiary`, weight 500. A group of filters keeps a
+  `--bg-panel` surface behind its fields, so a lone line never floats.
+- **Buttons are pills**: primary filled with `--accent`; secondary tonal (`--accent-tonal`, text
+  `--accent-text`); danger tonal red (`--danger-tonal`, `--danger-text`); ghost for quiet actions;
+  icon buttons are circles. No frame on any button. Segmented controls, chips and the theme switch
+  are pills too.
 - Icons: **Lucide** shapes, 16 px, stroke 1.5, `currentColor` (`app/ui/icons.tsx`).
 - Elevation: none in dark (surfaces and borders do it); a soft shadow in light for raised layers.
 - Motion: 120 ms hover and press, 180 ms overlays, opacity and transform only; off with
@@ -105,8 +118,8 @@ Always **icon + word + colour**, on a 12 % tint (`StatusBadge`, `app/ui/status-b
   propriétaire · ville · × quantité ».
 - **Item page**: title 24 px, state badge, owner and city; facts as a label/value list; a side panel
   on `--bg-panel` with where it is and how to reach the owner.
-- **Forms**: one column of 560 px, labels above fields, errors under them, sticky footer with the
-  submit button and « Annuler ».
+- **Forms**: one column of 560 px of underlined fields, labels above, errors under them, sticky
+  footer with the submit pill and « Annuler ».
 - **Sign-in, sign-up**: a centred card on the canvas; the only place with a (faint) gradient.
 - Every list keeps its empty state (a sentence and the next action) and « Tout effacer » for filters.
 

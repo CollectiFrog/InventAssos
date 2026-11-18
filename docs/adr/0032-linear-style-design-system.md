@@ -34,7 +34,12 @@ hand-drawn icons, one theme following the device, and every control 44 px high o
 - **Inter** (variable, optical sizes for Inter Display) and **Lucide** shapes are shipped with the
   app: fonts in `public/fonts/` (SIL OFL), icon paths in `app/ui/icons.tsx` (ISC), credited in
   `THIRD-PARTY-NOTICES.md`. No new npm dependency; the CSP gains `font-src 'self'`.
-- **Density**: 13 px UI text, 36 px rows and 32 px controls with a mouse; **44 px** for every control
+- **Fields are underlined, buttons are pills** (chosen on 2026-11-17 among five proposals): a field
+  has no box, only a baseline at 3:1 that turns accent on focus, and a 12 px label above; the
+  primary button is an accent pill, secondary and danger buttons are tonal pills (a pale tint of
+  the accent or of red), icon buttons are circles. Of the proposals, only the underline keeps form
+  controls at 3:1 (WCAG 1.4.11) without a heavy frame.
+- **Density**: 13 px UI text, 36 px rows, 32 px fields and 30 px buttons with a mouse; **44 px** for every control
   below 720 px or with a coarse pointer (`@media (pointer: coarse)`), so touch targets stay as
   0019 asked where fingers are used.
 - **Item form**: one column of 560 px with a sticky « Ajouter / Enregistrer · Annuler » footer,
@@ -56,6 +61,8 @@ hand-drawn icons, one theme following the device, and every control 44 px high o
 | Inter from Google Fonts, icons from an npm pkg | nothing to vendor                 | third-party request (privacy, CSP), a dependency  | self-hosting is two files and some paths    |
 | Command palette, peek panel, ↑/↓ in lists      | the full Linear experience        | needs client JavaScript and modal-like panels     | waits for an ADR superseding 0015           |
 | 44 px controls everywhere                      | one size                          | lists and forms twice as tall with a mouse        | `pointer: coarse` keeps 44 px for fingers   |
+| Boxed fields with a faint border (Linear)      | the most familiar look            | the border falls to 1.5:1, under WCAG 1.4.11      | the underline is as light and stays at 3:1  |
+| Filled, soft-relief or pill fields             | calm, no border                   | 1.1:1 to 1.5:1 boundaries                         | same reason                                 |
 
 ## Consequences
 
