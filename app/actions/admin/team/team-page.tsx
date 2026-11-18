@@ -82,7 +82,7 @@ export function TeamPage(handle: Handle<TeamPageProps>) {
       handle.props
     return (
       <Layout title="Équipe" viewer={viewer} section="admin">
-        <h1>Administration</h1>
+        <h1 class="visually-hidden">Administration</h1>
         <AdminTabs current="team" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">

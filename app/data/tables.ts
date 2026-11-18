@@ -183,7 +183,7 @@ export const items = table({
     ref: c.text().nullable(),
     quantity: c.integer(),
     condition: c.enum(itemConditions).nullable(),
-    estimated_value: c.decimal(10, 2).nullable(),
+    replacement_value: c.decimal(10, 2).nullable(),
     location_id: c.uuid(),
     owner_collectif_id: c.uuid().nullable(),
     owner_user_id: c.uuid().nullable(),

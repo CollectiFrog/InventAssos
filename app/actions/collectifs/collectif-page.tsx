@@ -88,15 +88,6 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
           { label: 'Collectifs', href: routes.collectifs.index.href() },
           { label: collectif.name },
         ]}
-        // The top bar's « + » adds equipment to this collectif (ADR 0031).
-        add={
-          inside && p.canAddItems
-            ? {
-                href: `${routes.items.create.index.href()}?pour=collectif:${collectif.id}`,
-                label: `Ajouter du matériel à ${collectif.name}`,
-              }
-            : undefined
-        }
       >
         <div class="page-head">
           <div>
@@ -212,6 +203,14 @@ function ItemsTab(handle: Handle<CollectifPageProps>) {
               <ViewSwitch
                 view={view}
                 hrefFor={(next) => hrefWith({ vue: next === 'grille' ? 'grille' : '' })}
+              />
+            ) : null}
+            {canAddItems ? (
+              <IconLink
+                icon="add"
+                label={`Ajouter du matériel à ${collectif.name}`}
+                text="Matériel"
+                href={`${routes.items.create.index.href()}?pour=collectif:${collectif.id}`}
               />
             ) : null}
             {canExport ? (

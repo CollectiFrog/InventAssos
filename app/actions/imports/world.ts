@@ -42,7 +42,7 @@ function toExisting(actor: Actor, candidate: ImportCandidate): ExistingItem {
     model: item.model,
     serialNumber: item.serial_number,
     condition: item.condition,
-    estimatedValue: item.estimated_value,
+    replacementValue: item.replacement_value,
     description: item.description,
     locationId: item.location_id,
     locationName: candidate.locationName,

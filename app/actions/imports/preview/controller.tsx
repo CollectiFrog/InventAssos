@@ -99,7 +99,7 @@ const changedLabels: Record<string, string> = {
   serial_number: 'numéro de série',
   ref: 'référence',
   condition: 'état',
-  estimated_value: 'valeur',
+  replacement_value: 'valeur à neuf',
   description: 'description',
 }
 

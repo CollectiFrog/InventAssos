@@ -28,7 +28,7 @@ describe('guessing columns from their titles (ADR 0026)', () => {
       'model',
       'serialNumber',
       'condition',
-      'estimatedValue',
+      'replacementValue',
       'description',
       'location',
       'id',
@@ -38,7 +38,7 @@ describe('guessing columns from their titles (ADR 0026)', () => {
   it('recognises common spreadsheet titles, French and English', () => {
     assert.deepEqual(
       fields(['Désignation', 'Qté', 'Famille', 'Fabricant', 'S/N', 'Prix d’achat', 'Emplacement']),
-      ['name', 'quantity', 'category', 'brand', 'serialNumber', 'estimatedValue', 'location'],
+      ['name', 'quantity', 'category', 'brand', 'serialNumber', 'replacementValue', 'location'],
     )
     assert.deepEqual(fields(['Item name', 'Qty', 'Category', 'Notes']), [
       'name',
@@ -72,7 +72,7 @@ describe('guessing columns from their titles (ADR 0026)', () => {
     assert.deepEqual(fields(['Nom de famille', 'Prix total', 'Prix unitaire HT']), [
       null,
       null,
-      'estimatedValue',
+      'replacementValue',
     ])
   })
 

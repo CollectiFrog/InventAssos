@@ -7,6 +7,7 @@ import { logAction } from '../../data/audit-log.ts'
 import { listPendingCollectifs } from '../../data/collectifs.ts'
 import { listCollectifsRelyingOn, listPendingResponsibles } from '../../data/members.ts'
 import { deleteUserSessions } from '../../data/sessions.ts'
+import { createSignInToken, welcomeTokenTtlMs } from '../../data/sign-in-tokens.ts'
 import type { User } from '../../data/tables.ts'
 import {
   findUserById,
@@ -100,7 +101,8 @@ export default createController(routes.admin, {
         return redirect(routes.admin.index.href(), 303)
       }
 
-      await db.transaction(async (tx) => {
+      // The e-mail opens « choose your password » at once: no second request (ADR 0036).
+      const token = await db.transaction(async (tx) => {
         await setUserStatus(tx, user.id, 'active')
         await logAction(tx, {
           actorId: actor.id,
@@ -108,10 +110,15 @@ export default createController(routes.admin, {
           entity: 'user',
           entityId: user.id,
         })
+        return createSignInToken(tx, user.id, 'password_reset', welcomeTokenTtlMs)
       })
       await sendSafely(
         mailer,
-        accountApprovedMail(user.email, settings.appUrl + routes.signIn.form.index.href()),
+        accountApprovedMail(
+          user.email,
+          settings.appUrl + routes.password.choose.index.href({ token }),
+          settings.appUrl + routes.signIn.form.index.href(),
+        ),
       )
       session.flash('notice', `Compte de ${user.name} accepté.`)
       return redirect(routes.admin.index.href(), 303)

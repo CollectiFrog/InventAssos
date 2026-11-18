@@ -63,11 +63,16 @@ describe('collectif page in tabs (US-0.7.5)', () => {
     assert.match(people, />Rita<\/a>/)
   })
 
-  it('puts « Ajouter du matériel » first for its responsibles, with the collectif as owner', async () => {
+  it('gives its responsibles « + Matériel » in the Matériel tab, with the collectif as owner', async () => {
     const html = await page('rita@example.org', routes.collectifs.show.href({ slug: frog.slug }))
     const add = `${routes.items.create.index.href()}?pour=collectif:${frog.id}`
-    assert.ok(html.indexOf(`href="${add}"`) > 0)
-    assert.ok(html.indexOf(`href="${add}"`) < html.indexOf('class="tabs"'))
+    assert.ok(html.indexOf(`href="${add}"`) > html.indexOf('class="tabs"'))
+    assert.match(
+      html,
+      new RegExp(
+        `href="${add.replace('?', '\\?')}" title="Ajouter du matériel à [^"]+"[^>]*with-text`,
+      ),
+    )
 
     const form = await page('rita@example.org', add)
     assert.match(form, new RegExp(`<option value="collectif:${frog.id}" selected>`))

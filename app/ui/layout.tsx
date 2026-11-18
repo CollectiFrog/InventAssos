@@ -43,8 +43,6 @@ export interface LayoutProps {
   back?: string
   /** Forces a theme over the viewer's choice: the design preview's `?theme=` (ADR 0032). */
   theme?: Theme
-  /** What the top bar's « + » adds here; equipment in general by default (ADR 0031). */
-  add?: { href: string; label: string }
   children?: RemixNode
 }
 
@@ -85,10 +83,6 @@ const adminEntry = {
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
     const { title, viewer = null, section, headerLink, trail = [], back, children } = handle.props
-    const add = handle.props.add ?? {
-      href: routes.items.create.index.href(),
-      label: 'Ajouter du matériel',
-    }
     const navigates = viewer?.isActive === true
     const theme = handle.props.theme ?? viewer?.theme ?? 'system'
 
@@ -123,48 +117,22 @@ export function Layout(handle: Handle<LayoutProps>) {
                 <a class="brand" href={routes.home.href()}>
                   {appName}
                 </a>
-                {navigates ? (
-                  <form method="get" action={routes.inventory.index.href()} class="top-search">
-                    <label for="recherche-globale" class="visually-hidden">
-                      Chercher dans mes collectifs
-                    </label>
-                    <input
-                      type="search"
-                      id="recherche-globale"
-                      name="q"
-                      placeholder="Chercher dans mes collectifs…"
-                    />
-                    <button type="submit" class="secondary icon-button" title="Rechercher">
-                      <Icon name="search" />
-                      <span class="visually-hidden">Rechercher</span>
-                    </button>
-                  </form>
-                ) : null}
                 <div class="header-links">
                   {viewer && navigates ? (
-                    <>
-                      <a class="button top-add icon-button" href={add.href} title={add.label}>
-                        <Icon name="add" />
-                        <span class="visually-hidden">{add.label}</span>
-                      </a>
-                      <a
-                        class="avatar"
-                        href={routes.account.profile.index.href()}
-                        // The visible initials start the name, for voice control (WCAG 2.5.3).
-                        aria-label={`${initialsOf(viewer.name)}, mon compte : ${viewer.name}`}
-                        aria-current={headerLink === 'account' ? 'page' : undefined}
-                      >
-                        {initialsOf(viewer.name)}
-                      </a>
-                    </>
+                    // Phones only: computers have no top bar, Mon compte is in the sidebar (ADR 0037).
+                    <a
+                      class="avatar"
+                      href={routes.account.profile.index.href()}
+                      // The visible initials start the name, for voice control (WCAG 2.5.3).
+                      aria-label={`${initialsOf(viewer.name)}, mon compte : ${viewer.name}`}
+                      aria-current={headerLink === 'account' ? 'page' : undefined}
+                    >
+                      {initialsOf(viewer.name)}
+                    </a>
                   ) : viewer ? (
                     <SignOutButton csrfToken={viewer.csrfToken} />
-                  ) : (
-                    <>
-                      <a href={routes.signIn.form.index.href()}>Se connecter</a>
-                      <a href={routes.signUp.form.index.href()}>Créer un compte</a>
-                    </>
-                  )}
+                  ) : // Visitors: every page they reach links sign-in and sign-up itself (US-0.10.17).
+                  null}
                 </div>
               </header>
               <main id="contenu">

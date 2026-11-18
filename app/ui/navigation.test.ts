@@ -166,7 +166,7 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     )
   })
 
-  it('gives every page a top bar with search, "+" to add equipment and the account', async () => {
+  it('keeps only the brand and the account in the top bar, shown on phones (US-0.10.20)', async () => {
     const app = createTestApp(db)
     const client = app.client()
     await signIn(app, client, 'camille@example.org')
@@ -174,23 +174,10 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     for (const url of [routes.home.href(), routes.collectifs.index.href()]) {
       const page = (await client.get(url)).text
       const top = /<header class="top-bar">(.*?)<\/header>/s.exec(page)?.[1] ?? ''
-      assert.match(top, /<form method="get" action="\/inventaire"/, url)
-      assert.match(top, /<label for="recherche-globale"[^>]*>Chercher dans mes collectifs<\/label>/)
-      assert.match(top, /<input type="search" id="recherche-globale" name="q"/)
-      // Icons only (ADR 0030): the names stay for screen readers and voice control.
-      assert.match(
-        top,
-        /<button[^>]*class="secondary icon-button"[^>]*>.*?<span class="visually-hidden">Rechercher<\/span><\/button>/s,
-      )
-      assert.match(
-        top,
-        /<a href="\/materiel\/nouveau" title="Ajouter du matériel"[^>]*>.*?<span class="visually-hidden">Ajouter du matériel<\/span><\/a>/s,
-      )
-      assert.match(top, /aria-label="CM, mon compte : Camille Martin"/)
+      assert.match(top, /aria-label="CM, mon compte : Camille Martin"/, url)
+      // Search is in the navigation, adding is in the pages (ADR 0037).
+      assert.doesNotMatch(top, /type="search"|\/materiel\/nouveau/, url)
     }
-    // The top bar's search lands on Rechercher with the words typed.
-    const found = await client.get(`${routes.inventory.index.href()}?q=perceuse`)
-    assert.equal(found.status, 200)
   })
 
   it('lists my collectifs in the sidebar, five at most, then "Tous"', async () => {
@@ -229,18 +216,26 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
 
     const status = (await client.get(routes.account.status.href())).text
     assert.equal(mainNav(status), null)
-    assert.doesNotMatch(status, /class="sidebar"|recherche-globale/)
+    assert.doesNotMatch(status, /class="sidebar"|class="avatar"/)
     assert.match(status, /<form method="post" action="\/deconnexion"/)
   })
 
-  it('gives no navigation to a visitor, only sign-in and sign-up', async () => {
+  it('gives a visitor no navigation and no header links: the pages link each other', async () => {
     const app = createTestApp(db)
-    const page = (await app.client().get(routes.signIn.form.index.href())).text
+    const client = app.client()
+    const signInPage = (await client.get(routes.signIn.form.index.href())).text
+    const signUpPage = (await client.get(routes.signUp.form.index.href())).text
+    const home = (await client.get(routes.home.href())).text
 
-    assert.equal(mainNav(page), null)
-    assert.doesNotMatch(page, /class="sidebar"|recherche-globale/)
-    assert.match(page, /<a href="\/connexion">Se connecter<\/a>/)
-    assert.match(page, /<a href="\/inscription">Créer un compte<\/a>/)
+    for (const page of [signInPage, signUpPage, home]) {
+      assert.equal(mainNav(page), null)
+      assert.doesNotMatch(page, /class="sidebar"|class="avatar"/)
+      assert.match(page, /<div class="header-links"><\/div>/)
+    }
+    assert.match(signInPage, /Pas encore de compte \? <a href="\/inscription">Créer un compte<\/a>/)
+    assert.match(signUpPage, /Déjà un compte \? <a href="\/connexion">Se connecter<\/a>/)
+    assert.match(home, /<a href="\/connexion" class="button">Se connecter/)
+    assert.match(home, /<a href="\/inscription" class="button secondary">Créer un compte/)
   })
 })
 

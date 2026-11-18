@@ -7,7 +7,7 @@ import { returnParam } from '../return-path.ts'
 
 /**
  * Sign in with a password, or ask for a link with the same e-mail field (US-0.2.2, US-0.10.8): the
- * second button posts the form to the link request instead.
+ * button under « ou » posts the form to the link request instead (US-0.10.17).
  */
 export function SignInPage(
   handle: Handle<{
@@ -22,46 +22,50 @@ export function SignInPage(
     const { csrfToken, email, errors = {}, returnPath } = handle.props
     return (
       <Layout title="Se connecter">
-        <h1>Se connecter</h1>
-        <p>Avec votre mot de passe, ou sans : recevez un lien de connexion par e-mail.</p>
-        <ErrorSummary errors={errors} />
-        {returnPath ? <p class="status">Connectez-vous pour ouvrir la page demandée.</p> : null}
-        <form method="post" action={routes.signIn.password.href()} class="stack">
-          <CsrfField token={csrfToken} />
-          {returnPath ? <input type="hidden" name={returnParam} value={returnPath} /> : null}
-          <TextField
-            name="email"
-            label="Adresse e-mail"
-            type="email"
-            value={email}
-            error={errors.email}
-            required
-            autoComplete="username"
-            maxLength={254}
-          />
-          <TextField
-            name="password"
-            label="Mot de passe"
-            type="password"
-            error={errors.password}
-            autoComplete="current-password"
-            maxLength={passwordMaxLength}
-            hint={
-              <a href={routes.password.request.index.href()}>
-                Mot de passe oublié ou pas encore créé ?
-              </a>
-            }
-          />
-          <div class="actions">
-            <button type="submit">Se connecter</button>
-            <button type="submit" class="secondary" formAction={routes.signIn.form.action.href()}>
-              Recevoir un lien par e-mail
+        <div class="sign-in">
+          <h1>Se connecter</h1>
+          <p class="status">
+            Pas encore de compte ? <a href={routes.signUp.form.index.href()}>Créer un compte</a>
+          </p>
+          <ErrorSummary errors={errors} />
+          {returnPath ? <p class="status">Connectez-vous pour ouvrir la page demandée.</p> : null}
+          <form method="post" action={routes.signIn.password.href()} class="stack">
+            <CsrfField token={csrfToken} />
+            {returnPath ? <input type="hidden" name={returnParam} value={returnPath} /> : null}
+            <TextField
+              name="email"
+              label="Adresse e-mail"
+              type="email"
+              value={email}
+              error={errors.email}
+              required
+              autoComplete="username"
+              maxLength={254}
+            />
+            {/* Not `required`: the link button below posts the same form without it (ADR 0029). */}
+            <TextField
+              name="password"
+              label="Mot de passe"
+              type="password"
+              error={errors.password}
+              requiredIfUsed
+              autoComplete="current-password"
+              maxLength={passwordMaxLength}
+              aside={<a href={routes.password.request.index.href()}>Mot de passe oublié ?</a>}
+            />
+            <button type="submit" class="wide">
+              Se connecter
             </button>
-          </div>
-        </form>
-        <p>
-          Pas encore de compte ? <a href={routes.signUp.form.index.href()}>Créer un compte</a>
-        </p>
+            <p class="or-divider">ou</p>
+            <button
+              type="submit"
+              class="secondary wide"
+              formAction={routes.signIn.form.action.href()}
+            >
+              Recevoir un lien de connexion par e-mail
+            </button>
+          </form>
+        </div>
       </Layout>
     )
   }

@@ -21,7 +21,7 @@ export function AdminCollectifsPage(
     const { viewer, collectifs } = handle.props
     return (
       <Layout title="Collectifs" viewer={viewer} section="admin">
-        <h1>Administration</h1>
+        <h1 class="visually-hidden">Administration</h1>
         <AdminTabs current="collectifs" viewer={viewer} />
         <p class="status">
           Les collectifs validés. Un collectif sans responsable n’est plus géré : nommez-en un

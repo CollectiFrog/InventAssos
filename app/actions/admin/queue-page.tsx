@@ -27,7 +27,7 @@ export function QueuePage(handle: Handle<QueuePageProps>) {
       handle.props
     return (
       <Layout title="Administration" viewer={viewer} section="admin">
-        <h1>Administration</h1>
+        <h1 class="visually-hidden">Administration</h1>
         <AdminTabs current="requests" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">
@@ -194,7 +194,7 @@ export function AccountsPage(handle: Handle<AccountsPageProps>) {
     const { viewer, csrfToken, active, disabled, notice } = handle.props
     return (
       <Layout title="Comptes" viewer={viewer} section="admin">
-        <h1>Administration</h1>
+        <h1 class="visually-hidden">Administration</h1>
         <AdminTabs current="accounts" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">

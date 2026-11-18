@@ -136,7 +136,7 @@ decision:
 
 - **⌘K command palette**, `/` to search, ↑/↓ and Enter in lists, the **peek panel** and toasts:
   need client JavaScript, so an ADR superseding [0015](../../adr/0015-server-rendered-html/).
-  Today search is the top bar's field and an item opens its own page.
+  Today search is the Rechercher page (and the home page's field) and an item opens its own page.
 - **Copy the phone** button: needs the clipboard API (JavaScript); the number stays a `tel:` link.
 - **Thumbnails** in lists: photos come with V0.11.
 - Sidebar entries stay Accueil, Rechercher, Mon matériel, Collectifs (UI, ADR 0019); item pages

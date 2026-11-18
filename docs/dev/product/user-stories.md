@@ -333,21 +333,24 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
 - **US-0.10.8 Sign in with a password.** As a user, I want to sign in with a password, so that I
   do not wait for an e-mail ([ADR 0029](../../adr/0029-password-sign-in/)).
     - The e-mailed link keeps working; the sign-in page offers both with one e-mail field.
-    - A password is created or changed only through an e-mailed link (« Mot de passe oublié ou pas
-      encore créé ? », or Mon compte › Mot de passe), valid 30 minutes, single use.
+    - A password is created or changed only through an e-mailed link (« Mot de passe oublié ? »,
+      or Mon compte › Mot de passe), valid 30 minutes, single use; the validation e-mail carries
+      the first one (US-0.10.16).
     - At least 12 characters, no other rule; no second factor, staff included.
     - The same answer for an unknown address, a wrong password or no password; 10 tries per address
       per hour.
     - Choosing a password closes the other sessions and e-mails the person.
 - **US-0.10.9 A lighter shell.** As a user, I want a quieter top bar, so that the page content
   stands out ([ADR 0030](../../adr/0030-lighter-shell/)).
-    - The search button is a magnifier and « Ajouter du matériel » a « + », both with hidden names.
+    - The search button is a magnifier and « Ajouter du matériel » a « + », both with hidden names
+      (superseded by US-0.10.20: computers have no top bar).
     - Administration is a section of Mon compte for admins and moderators, with the pending count;
       it leaves the sidebar and the phone's top bar (superseded by US-0.10.11).
 - **US-0.10.10 Lighter pages.** As a user, I want pages with fewer frames, words and repeats, so
   that I find what matters at a glance ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
     - Actions on an object are icons, one per kind of action, named on hover and for screen readers.
-    - The top bar's « + » adds what the page is about; the page does not repeat it.
+    - The top bar's « + » adds what the page is about; the page does not repeat it (superseded by
+      US-0.10.20: the pages add).
     - Lists, panels, empty states and settings are not framed; field hints show on hover.
     - The home page has one search field on computers; visitors no longer see the database status.
 - **US-0.10.11 Administration in the navigation.** As an admin or a moderator, I want Administration
@@ -381,6 +384,46 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
   open with one click anywhere, and as an admin a short form to add a category.
     - Equipment cards (grid and lists) open the item from anywhere on the card, like collectifs'.
     - « Ajouter une catégorie » is one field, « Nouvelle catégorie » as its placeholder, and a « + ».
+- **US-0.10.16 Choose a password from the validation e-mail.** As a newly validated user, I want the
+  e-mail that validates my account to open « Choisir votre mot de passe », so that I do not ask for
+  another e-mail first ([ADR 0036](../../adr/0036-password-link-in-the-validation-email/)).
+    - The link is single use, valid 7 days; GET shows the form, saving the password uses it up and
+      signs in. An expired link offers a new one.
+    - The e-mail also gives the sign-in page, for those who prefer the e-mailed link.
+- **US-0.10.17 A clearer sign-in page.** As a user, I want the password first and the e-mailed link
+  as the alternative, so that I see at once how to sign in.
+    - Title, then « Pas encore de compte ? Créer un compte »; e-mail, password with « Mot de passe
+      oublié ? » at the end of its label's line, « Se connecter »; then « ou » and « Recevoir un lien
+      de connexion par e-mail ». The password is no longer marked « (facultatif) ».
+    - The sign-up page answers with « Déjà un compte ? Se connecter »; the top bar no longer
+      repeats « Se connecter » and « Créer un compte » for visitors.
+- **US-0.10.18 Names not filled by the browser.** As a user, I want the name of the equipment I add
+  left empty, so that my own name does not end up as the item's.
+    - Item, place, collectif and category names turn browser autofill off; the item field is « Nom du
+      matériel », with an example.
+- **US-0.10.19 Value new.** As a user, I want to give the price of the item new, so that I enter a
+  figure I know ([ADR 0038](../../adr/0038-replacement-value/)).
+    - « Valeur estimée » becomes « Valeur à neuf » in the form, the item page, imports and exports;
+      the values entered so far are kept. An estimated value may come back later.
+- **US-0.10.20 No top bar on computers, adding in the pages.** As a user, I want each page to add
+  what it lists and no title repeating the menu, so that the screen holds content
+  ([ADR 0037](../../adr/0037-no-top-bar-on-computers/)).
+    - Computers have no top bar; phones keep the brand and the account. Search is the Rechercher
+      entry; the home page starts with its search field, without a title.
+    - « + Matériel » in Mon matériel and in a collectif's Matériel tab (preset to the collectif),
+      « + Lieu » in the Lieux tabs.
+    - Pages reached from a navigation entry keep their title for screen readers only.
+- **US-0.10.21 Search first.** As a user, I want the search field at the top of Rechercher and
+  filters applied in one click, so that I see results sooner, on a phone too.
+    - The field, then one menu per filter (category, collectif, city), each choice a link; the
+      button names the filter's choice; chips remove them; results take the full width.
+    - A new search keeps the filters, the view and the sort.
+- **US-0.10.22 A lighter item page.** As a user, I want an item's page to show what matters first,
+  so that I read it at a glance.
+    - On computers, the owner and place appear once, in the side panel; phones keep them under the
+      name.
+    - « Avancé » folds the fuller sections: the history for now.
+    - A web address in the description shows as a short link to its site.
 
 ## V0.11 — Photos
 

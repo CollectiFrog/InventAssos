@@ -44,7 +44,7 @@ describe('sign-out (US-0.2.8)', () => {
     assert.equal(response.location, `${routes.home.href()}?deconnexion=ok`)
 
     const replay = await app.router.fetch(get(routes.home.href(), { Cookie: oldCookie }))
-    assert.doesNotMatch(await replay.text(), /Bonjour Camille/)
+    assert.doesNotMatch(await replay.text(), /mon compte : Camille/)
   })
 
   it('refuses a sign-out without CSRF token', async () => {
@@ -54,6 +54,6 @@ describe('sign-out (US-0.2.8)', () => {
 
     const response = await client.post(routes.signOut.href(), {}, { csrf: false })
     assert.equal(response.status, 403)
-    assert.match((await client.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await client.get(routes.home.href())).text, /mon compte : Camille/)
   })
 })

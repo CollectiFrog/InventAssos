@@ -11,6 +11,9 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Responsibles, moderators and admins can rename a collectif in « Modifier la présentation »; its address follows the new name.
 - A dark theme: choose Automatique, Clair or Sombre in Mon compte › Apparence or at the foot of the sidebar; the choice is kept on this device.
 - Items to repair, out of order or archived show their state as a badge beside their name.
+- The e-mail that validates an account opens « Choisir votre mot de passe » directly, valid 7 days, and signs in once the password is saved.
+- « + Matériel » in Mon matériel and in a collectif's Matériel tab adds equipment where you are looking.
+- A web address in an item's description shows as a short link to its site.
 
 ### Changed
 
@@ -25,10 +28,16 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - Equipment cards open the item from anywhere on the card, like collectifs' cards.
 - In Mon matériel › Lieux, a place's « Modifier » and « Supprimer » buttons sit on the right of its card on a computer.
 - Adding or editing a place no longer ends with a « Retour à mes lieux » link.
+- The sign-in page puts the password first, « Mot de passe oublié ? » beside its label and « Créer un compte » under the title, then « ou » and the e-mailed link; the sign-up page links back to it with « Déjà un compte ? », and the top bar no longer repeats both links.
+- Rechercher starts with its search field; each filter is a menu applied in one click, without « Appliquer ».
+- On a computer, the top bar is gone: search through Rechercher, add from the pages; pages reached from the menu no longer repeat its name as a title, and the home page starts with its search field.
+- « Valeur estimée » becomes « Valeur à neuf », in the form, on the item page and in imports and exports.
+- An item's page no longer repeats its owner and place above the side panel on a computer, and its history is folded under « Avancé ».
 
 ### Fixed
 
 - On a collectif's page, « Demander à rejoindre » no longer sticks to « Ajouter du matériel » for admins and moderators who are not members.
+- Browsers no longer fill an item's, a place's, a collectif's or a category's name with your own name.
 
 ## [0.10.1] - 2026-11-14
 

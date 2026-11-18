@@ -48,7 +48,7 @@ export function CollectifsPage(handle: Handle<CollectifsPageProps>) {
       <Layout title="Collectifs" viewer={viewer} section="collectifs">
         <div class="page-head">
           <div>
-            <h1>Collectifs</h1>
+            <h1 class="visually-hidden">Collectifs</h1>
             <p class="status">Vos collectifs, puis l’annuaire de tous les collectifs.</p>
           </div>
           <a class="button secondary" href={requestHref}>
@@ -158,6 +158,7 @@ export function RequestCollectifPage(handle: Handle<RequestCollectifPageProps>) 
             value={values?.name}
             error={errors.name}
             required
+            autoComplete="off"
             maxLength={120}
           />
           <TextField

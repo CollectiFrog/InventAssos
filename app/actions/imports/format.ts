@@ -13,7 +13,7 @@ export const inventoryFields = [
   'model',
   'serialNumber',
   'condition',
-  'estimatedValue',
+  'replacementValue',
   'description',
   'location',
   'id',
@@ -39,7 +39,7 @@ export const inventoryHeaders: Record<InventoryField, string> = {
   model: 'Modèle',
   serialNumber: 'Numéro de série',
   condition: 'État',
-  estimatedValue: 'Valeur estimée (€)',
+  replacementValue: 'Valeur à neuf (€)',
   description: 'Description',
   location: 'Lieu',
   id: 'Identifiant',
@@ -51,7 +51,7 @@ export function inventoryHeaderRow(): string[] {
 }
 
 /** "150,50": comma, two decimals, no thousands separator, as a French spreadsheet reads it. */
-export function formatValueCell(value: Item['estimated_value']): string {
+export function formatValueCell(value: Item['replacement_value']): string {
   if (value === null || value === undefined) return ''
   return Number(value).toFixed(2).replace('.', ',')
 }
@@ -75,7 +75,7 @@ export function inventoryRow({ item, categoryName, locationName }: ExportedItem)
     model: item.model ?? '',
     serialNumber: item.serial_number ?? '',
     condition: item.condition ? conditionLabels[item.condition] : '',
-    estimatedValue: formatValueCell(item.estimated_value),
+    replacementValue: formatValueCell(item.replacement_value),
     description: item.description ?? '',
     location: locationName,
     id: item.id,

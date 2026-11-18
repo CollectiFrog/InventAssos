@@ -19,7 +19,7 @@ export interface ItemFields {
   /** The owner's own reference, unique per owner (US-0.10.3). */
   ref: string | null
   condition: Item['condition']
-  estimatedValue: number | null
+  replacementValue: number | null
   description: string | null
 }
 
@@ -33,7 +33,7 @@ function toColumns(fields: ItemFields) {
     serial_number: fields.serialNumber,
     ref: fields.ref,
     condition: fields.condition,
-    estimated_value: fields.estimatedValue,
+    replacement_value: fields.replacementValue,
     description: fields.description,
   }
 }
@@ -401,7 +401,7 @@ export async function updateItemFields(
   const changed = (Object.keys(next) as (keyof typeof next)[]).filter((key) => {
     const before = item[key]
     const after = next[key]
-    if (key === 'estimated_value') {
+    if (key === 'replacement_value') {
       return (before === null ? null : Number(before)) !== after
     }
     return before !== after
