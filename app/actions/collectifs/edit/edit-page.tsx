@@ -16,11 +16,11 @@ export interface EditCollectifPageProps {
   viewer: Viewer
   csrfToken: string
   collectif: Collectif
-  values: { city: string; description: string; contactPhone: string }
+  values: { name: string; city: string; description: string; contactPhone: string }
   errors?: FieldErrors
 }
 
-/** City, description and contact phone of a collectif (US-0.3.5, US-0.7.12). */
+/** Name, city, description and contact phone of a collectif (US-0.3.5, US-0.10.14). */
 export function EditCollectifPage(handle: Handle<EditCollectifPageProps>) {
   return () => {
     const { viewer, csrfToken, collectif, values, errors = {} } = handle.props
@@ -28,12 +28,18 @@ export function EditCollectifPage(handle: Handle<EditCollectifPageProps>) {
     return (
       <Layout title={`Modifier ${collectif.name}`} viewer={viewer} section="collectifs">
         <h1>Modifier « {collectif.name} »</h1>
-        <p class="status">
-          Pour changer le nom du collectif, contactez un administrateur de la plateforme.
-        </p>
         <ErrorSummary errors={errors} />
         <form method="post" action={routes.collectifs.edit.action.href({ slug })} class="stack">
           <CsrfField token={csrfToken} />
+          <TextField
+            name="name"
+            label="Nom du collectif"
+            value={values.name}
+            error={errors.name}
+            required
+            maxLength={120}
+            hint="Son adresse dans l’application suit le nom : les anciens liens ne mènent plus à lui."
+          />
           <TextField
             name="city"
             label="Ville"

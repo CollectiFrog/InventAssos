@@ -104,7 +104,7 @@ per story when its version is planned; the issue links back here.
 - **US-0.3.4 Approve a responsible.** As an admin, I want to accept or reject a responsible
   request, so that I control who manages each collectif.
 - **US-0.3.5 Edit profile.** As a responsible, I want to edit my collectif's description and
-  contact phone, so that they stay current.
+  contact phone, so that they stay current. Its name too, from V0.10.x (US-0.10.14).
 - **US-0.3.6 Remove a responsible.** As an admin, I want to remove a responsible, so that I handle
   departures.
     - The last responsible of an active collectif cannot be removed without naming another.
@@ -343,13 +343,44 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
   stands out ([ADR 0030](../../adr/0030-lighter-shell/)).
     - The search button is a magnifier and « Ajouter du matériel » a « + », both with hidden names.
     - Administration is a section of Mon compte for admins and moderators, with the pending count;
-      it leaves the sidebar and the phone's top bar.
+      it leaves the sidebar and the phone's top bar (superseded by US-0.10.11).
 - **US-0.10.10 Lighter pages.** As a user, I want pages with fewer frames, words and repeats, so
   that I find what matters at a glance ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
     - Actions on an object are icons, one per kind of action, named on hover and for screen readers.
     - The top bar's « + » adds what the page is about; the page does not repeat it.
     - Lists, panels, empty states and settings are not framed; field hints show on hover.
     - The home page has one search field on computers; visitors no longer see the database status.
+- **US-0.10.11 Administration in the navigation.** As an admin or a moderator, I want Administration
+  in the main navigation, so that I reach it in one click
+  ([ADR 0033](../../adr/0033-administration-in-the-navigation/)).
+    - A fifth entry « Administration » for staff only, current on every admin page.
+    - Mon compte no longer has an Administration section; the home page keeps the pending requests.
+- **US-0.10.12 Lighter directory and categories.** As a user, I want cards that react as a whole and
+  lists that fit the screen, so that I click less precisely and see more at once.
+    - In Collectifs, the whole card of a collectif opens it, not only its name.
+    - Administration › Catégories is a table by default (order, name, key, items, actions), or
+      compact cards several to a row with « Grille »; the view stays after each change.
+    - On a collectif's page, staff who are not members see « Demander à rejoindre » set apart from
+      the inventory, as a secondary button.
+- **US-0.10.13 Lighter Mon compte.** As a user, I want my account settings in one short list, so
+  that I see my settings at a glance and change one without wading through explanations
+  ([ADR 0034](../../adr/0034-mon-compte-in-one-column/)).
+    - One column of rows « label · state | action », no table of contents, deletion last; version
+      and guide in a footer line.
+    - Name and phone are changed one at a time in their own row: the pencil turns the value into a
+      field, with ✓ to save and ✕ to cancel; the rest of the page does not move.
+    - On computers, Mon compte is at the foot of the sidebar, under the theme; phones keep the
+      initials at the top right.
+- **US-0.10.14 Rename a collectif.** As a responsible of C, a moderator or an admin, I want to change
+  C's name, so that it follows the association
+  ([ADR 0035](../../adr/0035-collectif-renamed-in-the-app/)).
+    - The name is the first field of « Modifier la présentation »; moderators may now edit it all.
+    - Its address follows the name; a name another collectif holds is refused (case and accents
+      ignored); the rename is logged, IDs only.
+- **US-0.10.15 Same cards everywhere, a lighter category form.** As a user, I want every card to
+  open with one click anywhere, and as an admin a short form to add a category.
+    - Equipment cards (grid and lists) open the item from anywhere on the card, like collectifs'.
+    - « Ajouter une catégorie » is one field, « Nouvelle catégorie » as its placeholder, and a « + ».
 
 ## V0.11 — Photos
 

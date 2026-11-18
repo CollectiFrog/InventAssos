@@ -6,7 +6,10 @@ sidebar:
 ---
 
 Study requested on 2026-11-18 after field feedback: Mon compte (`/compte/profil`) is "too heavy and
-too full of information; four columns is heavy". Status: **proposed**, no code changed. The visual
+too full of information; four columns is heavy". Status: **option A chosen** on 2026-11-18, with
+name and phone edited in place and Mon compte at the foot of the sidebar on computers
+([ADR 0034](../../adr/0034-mon-compte-in-one-column/)); inset groups (D) are the planned next step
+if Mon compte grows. The visual
 version, with mock-ups of each option, is the claude.ai page
 <https://claude.ai/artifact/2hDy2mbDMM9bGudDcdo6mg>.
 

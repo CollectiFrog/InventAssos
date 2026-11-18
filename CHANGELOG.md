@@ -8,6 +8,7 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ### Added
 
+- Responsibles, moderators and admins can rename a collectif in « Modifier la présentation »; its address follows the new name.
 - A dark theme: choose Automatique, Clair or Sombre in Mon compte › Apparence or at the foot of the sidebar; the choice is kept on this device.
 - Items to repair, out of order or archived show their state as a badge beside their name.
 
@@ -16,6 +17,18 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 - A new, calmer look in both themes: the Inter typeface, finer icons, denser lists, underlined fields and rounded buttons, smaller with a mouse and still large on phones and touch screens.
 - The add and edit forms for equipment are one column, with « Ajouter » or « Enregistrer » and « Annuler » always in reach at the bottom.
 - Equipment lists show the owner before the city, and on a phone each item takes one compact row.
+- In Collectifs, a click anywhere on a collectif's card opens it, not only on its name.
+- Admins and moderators find Administration in the main navigation again, after Collectifs; it leaves Mon compte.
+- Mon compte is one short list, a setting per row with its state and one button; the name and the phone change in their own row, with the pencil, then ✓ or ✕. On a computer, Mon compte is at the bottom of the menu on the left.
+- Administration › Catégories shows a compact table, or small cards side by side with « Grille »; moving a category up or down uses arrows.
+- Adding a category takes one field, « Nouvelle catégorie », and a « + ».
+- Equipment cards open the item from anywhere on the card, like collectifs' cards.
+- In Mon matériel › Lieux, a place's « Modifier » and « Supprimer » buttons sit on the right of its card on a computer.
+- Adding or editing a place no longer ends with a « Retour à mes lieux » link.
+
+### Fixed
+
+- On a collectif's page, « Demander à rejoindre » no longer sticks to « Ajouter du matériel » for admins and moderators who are not members.
 
 ## [0.10.1] - 2026-11-14
 

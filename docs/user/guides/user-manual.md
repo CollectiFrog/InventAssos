@@ -104,12 +104,16 @@ désactivé n'est plus affiché.
 
 ## Mon compte
 
-Touchez le rond avec vos initiales, en haut à droite. **Mon compte** est rangé en sections, avec un
-sommaire : **Profil** (votre nom et un numéro de téléphone facultatif), **Apparence** (thème
-**Automatique**, **Clair** ou **Sombre**), **Mes collectifs**,
-**Administration** (administrateurs et modérateurs), **Mot de passe** (le choisir ou le changer),
-**Session** (se déconnecter), **À propos** (le guide d'utilisation) et, en dernier, **Supprimer mon
-compte**. La suppression elle-même arrive avec la version 1.0 : la page explique ce qu'elle fera.
+Sur téléphone, touchez le rond avec vos initiales, en haut à droite ; sur ordinateur, cliquez sur
+**Mon compte** en bas du menu de gauche. **Mon compte** est une liste, un réglage par ligne avec son
+état et un bouton : votre **adresse e-mail**, votre **nom et prénom** et votre **téléphone**
+(facultatif), puis **Apparence** (thème **Automatique**, **Clair** ou **Sombre**), **Mes
+collectifs**, **Mot de passe** (le choisir ou le changer), **Session** (se déconnecter) et, en
+dernier, **Supprimer mon compte**. La suppression elle-même arrive avec la version 1.0 : la page
+explique ce qu'elle fera. Le numéro de version et le guide d'utilisation sont en bas de la page.
+
+Pour changer votre nom ou votre téléphone, touchez le **crayon** au bout de sa ligne : la valeur
+devient modifiable, sur la même ligne. Le **✓** enregistre, la **✕** annule sans rien changer.
 
 Le téléphone est **visible par les personnes de vos collectifs** : c'est ainsi qu'elles vous
 contactent au sujet du matériel. Laissez le champ vide pour ne pas le partager.
@@ -161,10 +165,12 @@ d'abord nommer un autre responsable.
 
 ## Modifier la présentation d'un collectif
 
-Si vous êtes responsable d'un collectif, sa page affiche **Modifier la présentation** : vous pouvez y
-changer la ville et la description, visibles par tous les utilisateurs validés, et le téléphone de contact,
-visible par les personnes qui voient le matériel du collectif. Pour
-changer le nom, contactez un administrateur.
+Si vous êtes responsable d'un collectif (ou modérateur, ou administrateur), sa page affiche
+**Modifier la présentation** : vous pouvez y changer son nom, la ville et la description, visibles
+par tous les utilisateurs validés, et le téléphone de contact, visible par les personnes qui voient
+le matériel du collectif. Deux collectifs ne peuvent pas porter le même nom (majuscules et accents
+ne comptent pas). L'adresse de la page suit le nom : après un changement, les anciens liens vers le
+collectif ne mènent plus à lui.
 
 ## Mon matériel
 

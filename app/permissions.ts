@@ -190,7 +190,7 @@ export function canApproveCollectif(actor: Actor, requestedBy: string | null): b
 /** "Edit C's profile": platform admin, or an active responsible of C. */
 export function canEditCollectif(actor: Actor, collectifId: string): boolean {
   if (!isValidatedUser(actor)) return false
-  return actor.isAdmin || actor.managedCollectifIds.has(collectifId)
+  return isActiveStaff(actor) || actor.managedCollectifIds.has(collectifId)
 }
 
 /** "Create, edit, delete C's locations": platform admin, or an active responsible of C. */

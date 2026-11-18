@@ -51,14 +51,16 @@ export function LocationsPage(handle: Handle<LocationsPageProps>) {
         ) : (
           <ul class="cards">
             {locations.map((location) => (
-              <li key={location.id} class="card">
-                <p>
-                  <strong>{location.name}</strong> · {location.city}
-                  <br />
-                  <span class="status">{location.ownerName}</span>
-                </p>
-                {location.address ? <p>{location.address}</p> : null}
-                {location.notes ? <p class="prose">{location.notes}</p> : null}
+              <li key={location.id} class="card row row-top">
+                <div class="row-main">
+                  <p>
+                    <strong>{location.name}</strong> · {location.city}
+                    <br />
+                    <span class="status">{location.ownerName}</span>
+                  </p>
+                  {location.address ? <p>{location.address}</p> : null}
+                  {location.notes ? <p class="prose">{location.notes}</p> : null}
+                </div>
                 <div class="icon-toolbar">
                   <IconLink
                     icon="edit"
@@ -102,9 +104,6 @@ export function LocationEditorPage(handle: Handle<LocationEditorPageProps>) {
       <Layout title={title} viewer={viewer} section="mine">
         <h1>{title}</h1>
         <LocationForm {...form} />
-        <p>
-          <a href={routes.locations.index.href()}>Retour à mes lieux</a>
-        </p>
       </Layout>
     )
   }

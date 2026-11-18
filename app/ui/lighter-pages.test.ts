@@ -99,7 +99,7 @@ describe('lighter pages (ADR 0031)', () => {
   })
 
   it('shows a text hint on hover, still read by screen readers', async () => {
-    const html = (await rita.get(routes.account.profile.index.href())).text
+    const html = (await rita.get(`${routes.account.profile.index.href()}?modifier=telephone`)).text
     const hint = /<p id="field-phone-hint" class="visually-hidden">([^<]+)<\/p>/.exec(html)?.[1]
     assert.ok(hint?.startsWith('Visible par les personnes de vos collectifs'))
     assert.match(html, new RegExp(`<span title="${hint}" class="hint-mark">`))

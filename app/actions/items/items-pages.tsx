@@ -112,13 +112,13 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
   }
 }
 
-/** A list of item summaries linking to their pages. */
+/** A list of item summaries; the whole card opens the item, like a collectif's (`card-link`). */
 export function ItemList(handle: Handle<{ items: ItemSummary[]; grid?: boolean }>) {
   return () => (
     <ul class={handle.props.grid ? 'cards item-grid' : 'cards'}>
       {handle.props.items.map((item) => (
         <li key={item.id} class="card">
-          <a href={routes.items.show.href({ itemId: item.id })}>
+          <a class="card-link" href={routes.items.show.href({ itemId: item.id })}>
             <strong>{item.name}</strong>
           </a>
           {item.quantity > 1 ? ` × ${item.quantity}` : null}

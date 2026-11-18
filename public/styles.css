@@ -154,6 +154,7 @@ main > p,
 .side-brand,
 .side-heading,
 .my-collectifs,
+.side-foot,
 .theme-switch {
   display: none;
 }
@@ -334,6 +335,53 @@ body.has-nav main {
   .header-links .top-add {
     display: inline-flex;
   }
+  /* Computers reach Mon compte from the foot of the sidebar (ADR 0034). */
+  .header-links .avatar {
+    display: none;
+  }
+  .side-foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: var(--space-3);
+  }
+  .side-account {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 52px;
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    text-align: center;
+    text-decoration: none;
+  }
+  .side-account:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+  .side-account[aria-current="page"] {
+    background: var(--bg-selected);
+    color: var(--text-primary);
+  }
+  .side-account .initials {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-md);
+    height: var(--icon-md);
+    border-radius: var(--radius-full);
+    background: var(--accent-subtle);
+    color: var(--accent-text);
+    font-size: 0.5625rem;
+    font-weight: var(--weight-semibold);
+  }
   body.has-nav main {
     padding-bottom: var(--space-16);
   }
@@ -360,7 +408,8 @@ body.has-nav main {
     clip-path: none;
   }
   .main-nav a,
-  .my-collectifs a {
+  .my-collectifs a,
+  .side-account {
     flex-direction: row;
     justify-content: flex-start;
     gap: var(--space-2);
@@ -407,11 +456,10 @@ body.has-nav main {
     font-size: 0.5625rem;
     font-weight: var(--weight-semibold);
   }
-  /* Theme switch at the foot of the sidebar (guidelines 5.1). */
+  /* Theme switch at the foot of the sidebar, above Mon compte (guidelines 5.1). */
   .theme-switch {
     display: flex;
-    margin-top: auto;
-    padding: var(--space-3) var(--space-2) 0;
+    padding: 0 var(--space-2);
   }
 }
 
@@ -923,11 +971,11 @@ kbd {
   background: var(--bg-surface);
   box-shadow: var(--shadow-1);
 }
-.cards:not(.directory):not(.item-grid) {
+.cards:not(.directory):not(.item-grid):not(.category-grid) {
   gap: 0;
   border-top: 1px solid var(--border-subtle);
 }
-.cards:not(.directory):not(.item-grid) > .card {
+.cards:not(.directory):not(.item-grid):not(.category-grid) > .card {
   min-height: var(--row-height);
   padding: var(--space-2) var(--space-2);
   border: 0;
@@ -935,11 +983,10 @@ kbd {
   border-radius: 0;
   background: transparent;
 }
-.cards:not(.directory):not(.item-grid) > .card:hover {
+.cards:not(.directory):not(.item-grid):not(.category-grid) > .card:hover {
   background: var(--bg-hover);
 }
-.card.empty-state,
-.setting .card {
+.card.empty-state {
   padding: 0;
   border: 0;
   background: transparent;
@@ -977,6 +1024,20 @@ kbd {
 }
 .card.row form {
   margin: 0;
+}
+/* A card with several lines: text on the left, its actions top right; they wrap below on phones. */
+.card.row.row-top {
+  align-items: flex-start;
+}
+.card.row > .row-main {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.card.row > .row-main > :first-child {
+  margin-top: 0;
+}
+.card.row > .row-main > :last-child {
+  margin-bottom: 0;
 }
 .prose {
   white-space: pre-line;
@@ -1062,8 +1123,35 @@ kbd {
   gap: var(--space-1);
   transition: border-color var(--duration-fast) var(--ease-out);
 }
-.directory-card:hover {
+.directory-card:hover,
+.item-grid > .card:hover {
   border-color: var(--border-strong);
+}
+.item-grid > .card {
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+/*
+ * Whole card as a link: the card's one link (`.card-link`) stretches over the card, so a click
+ * anywhere opens it while screen readers still hear only its name. The focus ring goes on the card.
+ */
+.card:has(.card-link) {
+  position: relative;
+}
+.card-link::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+}
+.card-link:focus-visible {
+  outline: none;
+}
+.card:has(.card-link:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.card:hover .card-link {
+  text-decoration: underline;
 }
 .directory-card p {
   margin: 0;
@@ -1080,9 +1168,6 @@ kbd {
 .directory-name a {
   color: var(--text-primary);
   text-decoration: none;
-}
-.directory-name a:hover {
-  text-decoration: underline;
 }
 .excerpt {
   display: -webkit-box;
@@ -1165,6 +1250,12 @@ kbd {
 }
 .empty-state p {
   margin-top: 0;
+}
+/* « Demander à rejoindre » under a collectif's tabs or notice: its own block, apart. */
+.join-panel {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* Tabs inside a page: links to distinct URLs, the current one underlined. */
@@ -1276,20 +1367,78 @@ kbd {
   vertical-align: 1px;
 }
 
-/* Categories (US-0.7.10): one row per category, in order. */
-.category-list {
-  display: grid;
-  gap: var(--space-3);
-  max-width: 48rem;
-  padding: 0;
-  list-style: none;
+/*
+ * Categories (US-0.7.10): a dense table by default, the name editable in place; or compact cards
+ * several to a row with ?vue=grille.
+ */
+.category-table {
+  max-width: 64rem;
 }
-.category-row {
+.category-table .inline-form {
+  flex-wrap: nowrap;
+  padding: var(--space-1) 0;
+}
+.category-table .inline-form input {
+  flex: 1 1 10rem;
+  min-width: 8rem;
+}
+.category-table td.cell-actions {
+  width: 1%;
+  white-space: nowrap;
+}
+.category-row-actions,
+.category-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+}
+.category-row-actions,
+.category-row-actions .icon-toolbar,
+.category-card-actions .icon-toolbar {
+  flex-wrap: nowrap;
+}
+.category-row-actions:has(.confirm[open]) {
+  flex-wrap: wrap;
+}
+.category-row-actions .confirm[open],
+.category-card-actions .confirm[open] {
+  flex-basis: 100%;
+  white-space: normal;
+}
+.category-add {
+  flex-wrap: nowrap;
+  max-width: 28rem;
+  margin-top: var(--space-4);
+}
+.category-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+}
+.category-card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-3);
 }
-.category-row p {
+.category-card p {
   margin: 0;
+}
+.category-card .inline-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.category-card .inline-form input {
+  width: 100%;
+  min-width: 0;
+}
+@container results (max-width: 40rem) {
+  .category-table td.cell-actions {
+    width: auto;
+  }
+  .data-table.category-table td.cell-actions::before {
+    content: none;
+  }
 }
 
 /* « Vérifiez avant d’ajouter » (US-0.7.7): owner and location grouped above the button. */
@@ -1518,73 +1667,74 @@ kbd {
 }
 
 /* ------------------------------------------------------------------ Settings template */
-/* Contents on the left, sections "explanation | content", the danger zone last. */
-.settings {
+/* Mon compte: one column of rows "label · state | action", deletion last (ADR 0034). */
+.setting-rows {
   display: grid;
-  gap: var(--space-6);
-  align-items: start;
+  max-width: 40rem;
 }
-.settings-toc {
+.setting-rows + .setting-rows {
+  margin-top: var(--space-8);
+}
+/* A row keeps its shape while edited: the value becomes the field, the pencil ✓ and ✕. */
+.setting-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px var(--space-2);
-}
-.toc-link {
-  display: inline-flex;
   align-items: center;
-  min-height: var(--control);
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-weight: var(--weight-medium);
-  text-decoration: none;
-}
-.toc-link:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-.settings-sections {
-  display: grid;
-  gap: var(--space-6);
-  min-width: 0;
-}
-.setting {
-  display: grid;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-4);
+  min-height: 3rem;
+  margin: 0;
+  padding: var(--space-2) 0;
   scroll-margin-top: 5rem;
 }
-.setting h2 {
-  margin: 0 0 var(--space-1);
-  font-size: var(--text-md);
+.setting-row + .setting-row {
+  border-top: 1px solid var(--border-subtle);
 }
-.setting p.status {
+.setting-label {
+  display: inline-flex;
+  flex: 0 0 10rem;
+  align-items: center;
   margin: 0;
+  color: var(--text-primary);
+  font-weight: var(--weight-medium);
+}
+.setting-value {
+  flex: 1 1 10rem;
+  min-width: 0;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.setting-value input {
+  width: 100%;
+}
+.setting-action {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+.setting-action .sign-out {
+  margin: 0;
+}
+.setting-error {
+  flex-basis: 100%;
+  order: 4;
+  margin: 0;
+}
+.setting-foot {
+  margin: var(--space-6) 0 0;
   color: var(--text-tertiary);
+  font-size: var(--text-xs);
 }
-/* Phones: the section title is enough; its explanation shows from 720 px (ADR 0031). */
+/* Phones: the label and its action on one line, the state under them. */
 @media (max-width: 719px) {
-  .setting p.status {
+  .setting-label {
+    flex: 1 1 auto;
+  }
+  .setting-value {
+    flex-basis: 100%;
+    order: 3;
+  }
+  .setting-value:empty {
     display: none;
-  }
-}
-@container main (min-width: 56rem) {
-  .settings {
-    grid-template-columns: 11rem minmax(0, 1fr);
-  }
-  .settings-toc {
-    position: sticky;
-    top: 4.5rem;
-    flex-direction: column;
-  }
-  .setting {
-    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
-    gap: var(--space-6);
-    padding-top: var(--space-6);
-    border-top: 1px solid var(--border-subtle);
-  }
-  .setting:first-child {
-    padding-top: 0;
-    border-top: 0;
   }
 }
 

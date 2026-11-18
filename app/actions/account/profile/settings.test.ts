@@ -30,29 +30,53 @@ describe('Mon compte as a settings page (US-0.7.13)', () => {
     await db.close()
   })
 
-  it('lists its sections in contents, the danger zone last', async () => {
+  it('lists one row per setting in one column, deletion last (ADR 0034)', async () => {
     const html = (await camille.get(routes.account.profile.index.href())).text
-    const toc = /<nav aria-label="Sur cette page"[^>]*>(.*?)<\/nav>/s.exec(html)?.[1] ?? ''
+    assert.doesNotMatch(html, /Sur cette page|class="settings/)
     assert.deepEqual(
-      [...toc.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]),
-      ['profil', 'apparence', 'collectifs', 'mot-de-passe', 'session', 'a-propos', 'supprimer'],
+      [...html.matchAll(/<(?:div|form) id="([^"]+)"[^>]*class="setting-row[" ]/g)].map((m) => m[1]),
+      [
+        'e-mail',
+        'nom',
+        'telephone',
+        'apparence',
+        'collectifs',
+        'mot-de-passe',
+        'session',
+        'supprimer',
+      ],
     )
-    for (const id of [
-      'profil',
-      'apparence',
-      'collectifs',
-      'mot-de-passe',
-      'session',
-      'a-propos',
-      'supprimer',
-    ]) {
-      assert.match(html, new RegExp(`<section id="${id}"[^>]*class="setting"`))
-    }
     assert.match(html, /<a href="\/collectifs\/collecti-frog">Collecti'FROG<\/a>/)
+    assert.match(html, /<a href="\/compte\/supprimer" class="button danger small">Supprimer…<\/a>/)
+    assert.match(html, /<p id="a-propos" class="setting-foot">/)
+  })
+
+  it('edits a field in its own row: a pencil, then the field with ✓ and ✕', async () => {
+    const page = routes.account.profile.index.href()
+    const html = (await camille.get(page)).text
+    assert.doesNotMatch(html, /<form id="(nom|telephone)"|<input id="field-/)
     assert.match(
       html,
-      /<div class="card danger-zone"><p><a href="\/compte\/supprimer" class="button danger">/,
+      /<a href="\/compte\/profil\?modifier=nom#nom" title="Modifier : nom et prénom"/,
     )
+    assert.match(
+      html,
+      /<a href="\/compte\/profil\?modifier=telephone#telephone" title="Modifier : téléphone"/,
+    )
+
+    const editing = (await camille.get(`${page}?modifier=telephone`)).text
+    const row = /<form id="telephone"[^>]*>(.*?)<\/form>/s.exec(editing)?.[1] ?? ''
+    assert.match(row, /<label for="field-phone" class="setting-label">Téléphone/)
+    assert.match(row, /<input id="field-phone" name="phone" type="tel"[^>]*autofocus/)
+    assert.match(row, /<button type="submit" title="Enregistrer" class="icon-button">/)
+    assert.match(
+      row,
+      /<a href="\/compte\/profil" title="Annuler" class="button secondary icon-button">/,
+    )
+    // Only that row changes; an unknown row name changes none.
+    assert.match(editing, /<div id="nom" class="setting-row">/)
+    const unknown = (await camille.get(`${page}?modifier=supprimer`)).text
+    assert.doesNotMatch(unknown, /<form id="/)
   })
 
   it('explains deletion at /compte/supprimer, and deletes nothing before V1.0', async () => {

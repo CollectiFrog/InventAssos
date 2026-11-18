@@ -168,10 +168,14 @@ export function CollectifPage(handle: Handle<CollectifPageProps>) {
         ) : membership === 'pendingResponsible' ? (
           <p class="status">Votre demande pour devenir responsable est en cours d’examen.</p>
         ) : membership === 'none' ? (
-          <div class="stack">
+          // Set apart from the tabs: staff see the inventory without being members, and its own
+          // « Ajouter du matériel » stays the page's one primary button.
+          <div class="stack join-panel">
             <form method="post" action={routes.collectifs.join.href({ slug })}>
               <CsrfField token={p.csrfToken} />
-              <button type="submit">Demander à rejoindre</button>
+              <button type="submit" class={inside ? 'secondary' : undefined}>
+                Demander à rejoindre
+              </button>
             </form>
             <form
               method="post"

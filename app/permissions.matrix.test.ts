@@ -427,10 +427,11 @@ const rules: Rule[] = [
     },
   },
   {
-    row: "Edit C's profile",
-    allowed: ['admin', 'responsibleOfC'],
+    row: "Edit C's profile, its name included",
+    allowed: ['admin', 'moderator', 'responsibleOfC'],
     act: (c, w) =>
       c.post(routes.collectifs.edit.action.href({ slug: w.c.slug }), {
+        name: w.c.name,
         city: 'Rennes',
         description: 'Changé',
       }),
