@@ -25,7 +25,7 @@ export function LocationsPage(handle: Handle<LocationsPageProps>) {
       <Layout title="Mes lieux" viewer={viewer} section="mine">
         <div class="page-head">
           <div>
-            <h1>Mon matériel</h1>
+            <h1 class="visually-hidden">Mon matériel</h1>
             <p class="status">Vos lieux de stockage : garage, cave, local personnel…</p>
           </div>
           <IconLink

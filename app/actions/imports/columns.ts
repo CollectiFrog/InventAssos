@@ -173,7 +173,7 @@ const synonyms: Record<InventoryField, { exact: string[]; contains: string[] }> 
     exact: ['état', 'état général', 'état du matériel', 'usure', 'condition', 'state'],
     contains: ['état', 'condition'],
   },
-  estimatedValue: {
+  replacementValue: {
     exact: [
       'valeur',
       'valeur estimée',

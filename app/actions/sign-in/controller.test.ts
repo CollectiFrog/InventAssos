@@ -68,7 +68,7 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     assert.equal(response.status, 303)
     assert.equal(response.location, routes.home.href())
     assert.notEqual(client.cookieHeader(), before)
-    assert.match((await client.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await client.get(routes.home.href())).text, /mon compte : Camille/)
 
     const again = await app.client().get(routes.signIn.link.href({ token }))
     assert.equal(again.status, 400)
@@ -159,6 +159,37 @@ describe('sign-in with an e-mail link (US-0.2.2)', () => {
     await db.exec(sql`update users set status = 'disabled'`)
 
     const home = await client.get(routes.home.href())
-    assert.doesNotMatch(home.text, /Bonjour Camille/)
+    assert.doesNotMatch(home.text, /mon compte : Camille/)
+  })
+})
+
+describe('sign-in page layout (US-0.10.17)', () => {
+  let db: Database
+
+  before(async () => {
+    db = await openTestDatabase()
+  })
+  after(async () => {
+    await db.close()
+  })
+
+  it('offers the password first, then « ou » and the e-mailed link, sign-up under the title', async () => {
+    const html = (await createTestApp(db).client().get(routes.signIn.form.index.href())).text
+    const order = [
+      '<h1>Se connecter</h1>',
+      'Pas encore de compte ? <a href="/inscription">Créer un compte</a>',
+      'id="field-email"',
+      'id="field-password"',
+      '>Se connecter</button>',
+      '<p class="or-divider">ou</p>',
+      'Recevoir un lien de connexion par e-mail',
+    ].map((text) => html.indexOf(text))
+    assert.ok(
+      order.every((at, i) => at > 0 && (i === 0 || at > (order[i - 1] ?? 0))),
+      `${order}`,
+    )
+    // The password is not marked optional, nor required: the link button posts without it.
+    assert.doesNotMatch(html, /facultatif/)
+    assert.doesNotMatch(html, /id="field-password"[^>]*required/)
   })
 })

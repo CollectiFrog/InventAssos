@@ -7,7 +7,8 @@ description: An optional password, hashed with scrypt, chosen only through an e-
 |----------|------------|------------|
 | Accepted | 2026-11-13 | @tritriper |
 
-Supersedes [0008](../0008-app-managed-accounts/).
+Supersedes [0008](../0008-app-managed-accounts/). The first password link now comes with the
+validation e-mail: [0036](../0036-password-link-in-the-validation-email/).
 
 ## Context
 

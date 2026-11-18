@@ -18,7 +18,9 @@ const fieldLabels: Record<string, string> = {
   serial_number: 'numéro de série',
   ref: 'référence',
   condition: 'état',
-  estimated_value: 'valeur',
+  replacement_value: 'valeur à neuf',
+  // Entries logged before migration 0020 name the former column.
+  estimated_value: 'valeur estimée',
   description: 'description',
 }
 

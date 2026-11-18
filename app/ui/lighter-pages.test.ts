@@ -1,4 +1,4 @@
-// ADR 0031: icon actions keep their names, the top bar's « + » follows the page, hints show on hover.
+// ADR 0031 and 0037: icon actions keep their names, adding is in the pages, hints show on hover.
 import * as assert from 'remix/assert'
 import type { Database } from 'remix/data-table'
 import { after, before, beforeEach, describe, it } from 'remix/test'
@@ -12,13 +12,6 @@ import { createTestLocation } from '../../test/locations.ts'
 import { createActiveUser } from '../../test/users.ts'
 import type { Collectif, Item } from '../data/tables.ts'
 import { routes } from '../routes.ts'
-
-/** The top bar's « + »: where it leads and what it says. */
-function topAdd(html: string): { href: string; label: string } | null {
-  const match = /<a href="([^"]+)" title="([^"]+)" class="button top-add icon-button">/.exec(html)
-  const decode = (text = '') => text.replaceAll('&#x27;', "'").replaceAll('&#39;', "'")
-  return match ? { href: decode(match[1]), label: decode(match[2]) } : null
-}
 
 describe('lighter pages (ADR 0031)', () => {
   let db: Database
@@ -65,25 +58,18 @@ describe('lighter pages (ADR 0031)', () => {
     assert.doesNotMatch(html, /<div class="card">\s*<p class="actions">/)
   })
 
-  it('makes the top bar’s « + » add equipment, to the collectif on its pages', async () => {
-    const show = (await rita.get(routes.collectifs.show.href({ slug: frog.slug }))).text
-    assert.deepEqual(topAdd(show), {
-      href: `${routes.items.create.index.href()}?pour=collectif:${frog.id}`,
-      label: "Ajouter du matériel à Collecti'FROG",
-    })
-    // The page no longer repeats it with its own button.
-    assert.doesNotMatch(show, /class="button">\s*Ajouter du matériel/)
-    const places = (await rita.get(routes.collectifs.places.href({ slug: frog.slug }))).text
-    assert.equal(
-      topAdd(places)?.href,
-      `${routes.items.create.index.href()}?pour=collectif:${frog.id}`,
+  it('adds equipment with « + Matériel » in the page, and the top bar has no « + » (ADR 0037)', async () => {
+    const mine = (await rita.get(routes.items.index.href())).text
+    assert.match(
+      mine,
+      /<a href="\/materiel\/nouveau" title="Ajouter du matériel" class="button secondary icon-button with-text">.*?<span aria-hidden="true">Matériel<\/span>/s,
     )
-    for (const url of [routes.home.href(), routes.locations.index.href()]) {
-      assert.equal(topAdd((await rita.get(url)).text)?.label, 'Ajouter du matériel', url)
+    for (const url of [routes.home.href(), routes.collectifs.show.href({ slug: frog.slug })]) {
+      assert.doesNotMatch((await rita.get(url)).text, /top-add/, url)
     }
   })
 
-  it('adds a place with « + Lieu » in the page, never with the top bar’s « + »', async () => {
+  it('adds a place with « + Lieu » in the page', async () => {
     const plusLieu = (href: string) =>
       new RegExp(
         `<a href="${href.replace('?', '\\?')}" title="[^"]+" class="button secondary icon-button with-text">.*?<span aria-hidden="true">Lieu</span>`,
@@ -109,8 +95,11 @@ describe('lighter pages (ADR 0031)', () => {
     )
   })
 
-  it('keeps a hint holding a link on the page', async () => {
+  it('puts « Mot de passe oublié ? » on the label’s line, outside the label (US-0.10.17)', async () => {
     const html = (await app.client().get(routes.signIn.form.index.href())).text
-    assert.match(html, /<p id="field-password-hint" class="hint"><a href="\/mot-de-passe">/)
+    assert.match(
+      html,
+      /<div class="label-row"><label for="field-password">Mot de passe<\/label><a href="\/mot-de-passe">Mot de passe oublié \?<\/a><\/div>/,
+    )
   })
 })

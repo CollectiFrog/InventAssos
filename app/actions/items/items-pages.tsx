@@ -60,10 +60,16 @@ export function MyItemsPage(handle: Handle<MyItemsPageProps>) {
       <Layout title="Mon matériel" viewer={viewer} section="mine">
         <div class="page-head">
           <div>
-            <h1>Mon matériel</h1>
+            <h1 class="visually-hidden">Mon matériel</h1>
             <p class="status">Ce qui est rangé chez vous en ce moment, et à qui il appartient.</p>
           </div>
           <div class="icon-toolbar">
+            <IconLink
+              icon="add"
+              label="Ajouter du matériel"
+              text="Matériel"
+              href={routes.items.create.index.href()}
+            />
             <IconLink
               icon="upload"
               label="Importer un fichier"
@@ -207,6 +213,7 @@ export function AddItemPage(handle: Handle<AddItemPageProps>) {
                 value={values.newLocationName}
                 error={errors.newLocationName}
                 requiredIfUsed
+                autoComplete="off"
                 maxLength={120}
                 hint="Garage, cave, local de répétition…"
               />

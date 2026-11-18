@@ -3,7 +3,7 @@ import type { Handle, RemixNode } from 'remix/component'
 import type { ItemDetails } from '../../data/items.ts'
 import { routes } from '../../routes.ts'
 import { CsrfField } from '../../ui/form.tsx'
-import { IconButton, IconLink } from '../../ui/icons.tsx'
+import { Icon, IconButton, IconLink } from '../../ui/icons.tsx'
 import { archiveReasonLabels, conditionLabels, formatEuros } from '../../ui/labels.ts'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
 import { itemStatusOf, StatusBadge } from '../../ui/status-badge.tsx'
@@ -34,6 +34,37 @@ export interface ItemPageProps {
 /** Digits and "+" only, for tel: and sms: links. */
 function dialable(phone: string): string {
   return phone.replace(/[^0-9+]/g, '')
+}
+
+const urlPattern = /https?:\/\/[^\s<>"]+[^\s<>".,;:!?)»]/g
+
+/**
+ * A description with its web addresses as short links, « shop.example ↗ » (US-0.10.22): pasted
+ * shop links run over several lines otherwise. Only http(s) addresses become links.
+ */
+export function Linkified(handle: Handle<{ text: string }>) {
+  return () => {
+    const { text } = handle.props
+    const parts: RemixNode[] = []
+    let last = 0
+    for (const match of text.matchAll(urlPattern)) {
+      let host: string
+      try {
+        host = new URL(match[0]).host
+      } catch {
+        continue
+      }
+      parts.push(text.slice(last, match.index))
+      parts.push(
+        <a href={match[0]} title={match[0]} rel="nofollow noopener noreferrer" class="url-link">
+          {host} ↗
+        </a>,
+      )
+      last = match.index + match[0].length
+    }
+    parts.push(text.slice(last))
+    return <>{parts}</>
+  }
 }
 
 /** Who owns the item, linked to their page when the viewer may open it. */
@@ -108,7 +139,10 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                   />{' '}
                 </>
               ) : null}
-              À <OwnerLink item={item} /> · rangé à {item.city}
+              {/* Computers show it in the side panel beside; phones only far below (US-0.10.22). */}
+              <span class="item-where">
+                À <OwnerLink item={item} /> · rangé à {item.city}
+              </span>
             </p>
           </div>
           {tools ? (
@@ -226,15 +260,27 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
                   <dd>{conditionLabels[item.condition]}</dd>
                 </>
               ) : null}
-              {item.estimated_value !== null ? (
+              {item.replacement_value !== null ? (
                 <>
-                  <dt>Valeur estimée</dt>
-                  <dd>{formatEuros(item.estimated_value)}</dd>
+                  <dt>Valeur à neuf</dt>
+                  <dd>{formatEuros(item.replacement_value)}</dd>
                 </>
               ) : null}
             </dl>
-            {item.description ? <p class="prose">{item.description}</p> : null}
-            {history}
+            {item.description ? (
+              <p class="prose">
+                <Linkified text={item.description} />
+              </p>
+            ) : null}
+            {history ? (
+              <details class="more">
+                <summary>
+                  Avancé
+                  <Icon name="chevronDown" size={14} />
+                </summary>
+                {history}
+              </details>
+            ) : null}
           </div>
           <aside class="detail-side" aria-label="Où le trouver">
             <div class="panel">

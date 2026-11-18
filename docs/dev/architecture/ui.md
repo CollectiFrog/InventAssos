@@ -61,28 +61,31 @@ flowchart TB
 | Entry        | URL                        | Holds                                                                              |
 |--------------|----------------------------|------------------------------------------------------------------------------------|
 | Accueil      | `/`                        | search field, pending requests (admins, moderators), my collectifs, recent in them |
-| Rechercher   | `/inventaire`              | text search in my collectifs' equipment, filters (category, my collectifs, city)   |
+| Rechercher   | `/inventaire`              | search field, then filter menus (category, my collectifs, city) over the results   |
 | Mon matériel | `/materiel`, tab `/lieux`  | what is stored in my locations: mine, my collectifs', borrowed; tab Lieux          |
 | Collectifs   | `/collectifs`              | my collectifs, then the directory of all (name, city); request a new one           |
 | Administration | `/admin`                 | admins and moderators only: requests, accounts, collectifs, team, categories       |
-| *Top bar*    | `/compte/profil`           | search (magnifier), « + » to add; account (initials) on phones only                |
+| *Top bar*    | `/compte/profil`           | phones only: the brand and the account (initials)                                  |
 
 - **Phone (< 720 px):** a tab bar fixed at the bottom with the four entries, icon and label.
 - **Computer (≥ 720 px):** the same `<nav>` becomes a left rail of 84 px (icon and label) up to
-  1099 px, then a sidebar of 240 px with "Mes collectifs" shortcuts (5 at most, then "Tous"). A
-  top bar holds the search field (submits to `/inventaire`) with a magnifier button, a « + » to add
-  equipment; icon buttons keep a visually hidden name
-  ([ADR 0030](../../adr/0030-lighter-shell/)). Mon compte is at the foot of the rail and the
-  sidebar, under the theme switch ([ADR 0034](../../adr/0034-mon-compte-in-one-column/)).
+  1099 px, then a sidebar of 240 px with "Mes collectifs" shortcuts (5 at most, then "Tous").
+  Computers have no top bar: search is the Rechercher entry, adding is in the pages, Mon compte is
+  at the foot of the rail and the sidebar, under the theme switch
+  ([ADR 0034](../../adr/0034-mon-compte-in-one-column/),
+  [ADR 0037](../../adr/0037-no-top-bar-on-computers/)).
+- **Page titles**: a page reached from a navigation entry (Accueil, Rechercher, Mon matériel,
+  Collectifs, Administration) keeps its `<h1>` for screen readers only (`visually-hidden`): the
+  current entry already says where one is. Other pages (a collectif, an item, a form) show theirs.
 - **Administration** is a fifth navigation entry for admins and moderators only, in the sidebar,
   the rail and the phone's tab bar ([ADR 0033](../../adr/0033-administration-in-the-navigation/)).
 - **Actions on an object** are square icon buttons (`IconLink`, `IconButton` in `app/ui/icons.tsx`),
   one icon per kind of action, grouped in an `icon-toolbar` beside the title; their names stay
   hidden for assistive technology and in `title`. Form submissions, empty-state invitations, contact
   and settings actions stay text buttons, except a field edited in its own settings row: pencil,
-  then ✓ and ✕ (ADR 0034). The top bar's « + » always adds equipment (preset to the
-  collectif on its page, through `add`); a page adds anything else with a labelled `IconLink`
-  (`text`), such as « + Lieu ». Text field hints show on hover behind an « i ».
+  then ✓ and ✕ (ADR 0034). A page adds with a labelled `IconLink` (`text`) where the list is:
+  « + Matériel » in Mon matériel and a collectif's Matériel tab (preset to that owner), « + Lieu »
+  in the Lieux tabs (ADR 0037). Text field hints show on hover behind an « i ».
   Cards keep a frame only in grids; lists, panels and settings sections are flat
   ([ADR 0031](../../adr/0031-icon-actions-and-fewer-frames/)).
 - **Content is fluid**: no page-wide `max-width`, only running text (`68ch`) and form fields are
@@ -96,6 +99,12 @@ flowchart TB
 - The account link shows the initials: in the top bar on phones, at the foot of the sidebar with
   « Mon compte » on computers; « Se déconnecter » is on the account page. Pending and
   rejected accounts have no navigation, only « Se déconnecter » in the top bar.
+- **Rechercher**: the search field first, then one menu per filter (`FilterMenu`, a `<details>`
+  of links: one click applies a filter, no script), the active filters as chips, then the results.
+  A new search keeps the filters, the view and the sort (US-0.10.21).
+- **Item page**: what the item is, then « Avancé » (`<details class="more">`) folds the fuller
+  sections, the history for now. Web addresses in a description show as « site ↗ » links
+  (US-0.10.22).
 - Detail pages have one link labelled « Retour » that goes back one page. The server builds it from
   the `Referer` header (sent for same-origin navigation, `Referrer-Policy: same-origin`) when it is
   an internal path, and falls back to the section's list page otherwise; no JavaScript, and it can
@@ -115,7 +124,7 @@ Deduced from the user stories V0.2 to V0.8. Coloured steps wait for a person wit
 ```mermaid
 flowchart LR
   subgraph j1[1 · Join · new volunteer]
-    a1[Sign up] --> a2[E-mail: request received] --> a3{{Approval}} --> a4[Sign-in link] --> a5[Dashboard]
+    a1[Sign up] --> a2[E-mail: request received] --> a3{{Approval}} --> a4[Choose a password] --> a5[Dashboard]
   end
   subgraph j2[2 · Find · in my collectifs]
     b1[Dashboard] --> b2[Search my collectifs] --> b3[Item page] --> b4[Call, SMS or write]
@@ -136,7 +145,7 @@ flowchart LR
 | 1 Join      | US-0.2.1 → US-0.2.5                      | the pending page says how long it takes and whom to contact            |
 | 2 Find      | US-0.6.1 → US-0.6.3, US-0.7.6, US-0.7.11 | three taps at most from the dashboard to the keeper's phone            |
 | 3 List      | US-0.4.2, US-0.5.1, US-0.7.4             | a location is created without leaving the add form                     |
-| 4 Collectif | US-0.3.1 → US-0.3.5, US-0.8.3            | a responsible lands on the collectif page, "Ajouter du matériel" first |
+| 4 Collectif | US-0.3.1 → US-0.3.5, US-0.8.3            | a responsible lands on the collectif page, « + Matériel » in its tab   |
 | 5 Approve   | US-0.2.4, US-0.3.7, US-0.8.4             | one table in `/admin`, Accept and Refuse on each row, undo right after |
 
 From V0.8, a request to join a collectif is approved by its responsibles, not by the platform.

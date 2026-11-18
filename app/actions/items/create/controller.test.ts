@@ -67,7 +67,7 @@ describe('add an item (US-0.5.1)', () => {
     assert.equal(item?.owner_user_id, max.id)
     assert.equal(item?.location_id, garage.id)
     assert.equal(item?.quantity, 2)
-    assert.equal(Number(item?.estimated_value), 150.5)
+    assert.equal(Number(item?.replacement_value), 150.5)
     const page = await client.get(response.location ?? '')
     assert.match(page.text, /Console Yamaha × 2/)
     assert.match(page.text, /150,50/)
@@ -105,7 +105,7 @@ describe('add an item (US-0.5.1)', () => {
       locationId: garage.id,
       owner: 'me',
       quantity: '0',
-      estimatedValue: 'beaucoup',
+      replacementValue: 'beaucoup',
       categoryId: 'spaceships',
     })
     assert.equal(response.status, 400)

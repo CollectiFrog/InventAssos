@@ -47,13 +47,13 @@ describe('disable an account (US-0.2.7)', () => {
   })
 
   it('disables the account, closes its open session at once and logs it', async () => {
-    assert.match((await memberClient.get(routes.home.href())).text, /Bonjour Max Member/)
+    assert.match((await memberClient.get(routes.home.href())).text, /mon compte : Max Member/)
 
     const response = await admin.post(routes.admin.disableAccount.href({ userId: member.id }))
 
     assert.equal(response.location, routes.admin.accounts.href())
     assert.equal((await findUserById(db, member.id))?.status, 'disabled')
-    assert.doesNotMatch((await memberClient.get(routes.home.href())).text, /Bonjour Max/)
+    assert.doesNotMatch((await memberClient.get(routes.home.href())).text, /mon compte : Max/)
     const [entry] = await listEntityHistory(db, 'user', member.id)
     assert.equal(entry?.action, 'account.disabled')
   })
@@ -135,7 +135,7 @@ describe('re-enable a disabled account (US-0.6.5)', () => {
     assert.equal(entry?.action, 'account.enabled')
     const client = app.client()
     await signIn(app, client, 'max@example.org')
-    assert.match((await client.get(routes.home.href())).text, /Bonjour Max Member/)
+    assert.match((await client.get(routes.home.href())).text, /mon compte : Max Member/)
   })
 
   it('leaves an account that is not disabled alone', async () => {

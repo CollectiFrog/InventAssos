@@ -61,14 +61,14 @@ describe('password sign-in (US-0.10.8)', () => {
     // Opening the link only shows the form: a mail scanner cannot use it up.
     const form = await client.get(routes.password.choose.index.href({ token }))
     assert.equal(form.status, 200)
-    assert.match(form.text, /Nouveau mot de passe/)
+    assert.match(form.text, /Choisir votre mot de passe/)
 
     const response = await client.post(routes.password.choose.action.href({ token }), {
       password,
       confirmation: password,
     })
     assert.equal(response.location, routes.home.href())
-    assert.match((await client.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await client.get(routes.home.href())).text, /mon compte : Camille/)
     assert.match((await findUserById(db, camille.id))?.password_hash ?? '', /^scrypt\$/)
     const [entry] = await listEntityHistory(db, 'user', camille.id)
     assert.equal(entry?.action, 'user.password_set')
@@ -84,7 +84,7 @@ describe('password sign-in (US-0.10.8)', () => {
     const response = await signInWithPassword(client, password, { suite: wanted })
     assert.equal(response.status, 303)
     assert.equal(response.location, wanted)
-    assert.match((await client.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await client.get(routes.home.href())).text, /mon compte : Camille/)
   })
 
   it('answers the same for a wrong password, an unknown address or no password yet', async () => {
@@ -192,11 +192,11 @@ describe('password sign-in (US-0.10.8)', () => {
   it('closes every other session and open sign-in link when the password changes', async () => {
     const elsewhere = app.client()
     await signIn(app, elsewhere, email)
-    assert.match((await elsewhere.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.match((await elsewhere.get(routes.home.href())).text, /mon compte : Camille/)
     await app.client().post(routes.signIn.form.action.href(), { email })
     const pending = lastSignInToken(app, email) ?? ''
     await choose()
-    assert.doesNotMatch((await elsewhere.get(routes.home.href())).text, /Bonjour Camille/)
+    assert.doesNotMatch((await elsewhere.get(routes.home.href())).text, /mon compte : Camille/)
     assert.equal((await app.client().get(routes.signIn.link.href({ token: pending }))).status, 400)
   })
 

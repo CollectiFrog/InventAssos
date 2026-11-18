@@ -90,9 +90,21 @@ describe('Rechercher and a collectif’s equipment as dense tables (US-0.7.13)',
 
   it('shows how many visible items each category and city holds', async () => {
     const html = await search()
-    assert.match(html, /<option value="lighting"[^>]*>Lumière \(1\)<\/option>/)
-    assert.match(html, /<option value="Vitré"[^>]*>Vitré \(1\)<\/option>/)
-    assert.match(html, /<option value="Rennes"[^>]*>Rennes \(2\)<\/option>/)
+    assert.match(html, /<a href="\/inventaire\?categorie=lighting">Lumière \(1\)<\/a>/)
+    assert.match(html, /<a href="\/inventaire\?ville=Vitr%C3%A9">Vitré \(1\)<\/a>/)
+    assert.match(html, /<a href="\/inventaire\?ville=Rennes">Rennes \(2\)<\/a>/)
+  })
+
+  it('applies a filter in one click and names it on its button (US-0.10.21)', async () => {
+    const html = await search('?q=o&categorie=sound')
+    const menu =
+      /<details class="filter-menu"><summary class="filter-button filter-set">Catégorie : Son<svg/
+    assert.match(html, menu)
+    // Each choice keeps the words typed; « Toutes » removes the filter.
+    assert.match(html, /<a href="\/inventaire\?q=o&amp;categorie=lighting">Lumière/)
+    assert.match(html, /<a href="\/inventaire\?q=o">Toutes les catégories<\/a>/)
+    assert.match(html, /<a href="\/inventaire\?q=o&amp;categorie=sound" aria-current="true">/)
+    assert.doesNotMatch(html, /Appliquer/)
   })
 
   it('switches to cards with ?vue=grille and keeps it when filtering', async () => {

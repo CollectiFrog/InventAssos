@@ -85,12 +85,16 @@ export function reapplyBySignInMail(to: string, signInUrl: string): Mail {
   }
 }
 
-/** To the person: their account is open. */
-export function accountApprovedMail(to: string, signInUrl: string): Mail {
+/** To the person: their account is open, with the link to choose a password (ADR 0036). */
+export function accountApprovedMail(to: string, chooseUrl: string, signInUrl: string): Mail {
   return {
     to,
     subject: `Votre compte ${appName} est validé`,
-    text: `Bonjour,\n\nVotre compte est validé : vous pouvez vous connecter.\n${signInUrl}${signature}`,
+    text:
+      'Bonjour,\n\nVotre compte est validé. Choisissez votre mot de passe, vous serez connecté ' +
+      `aussitôt :\n${chooseUrl}\n\nCe lien est valable 7 jours et ne sert qu’une fois. ` +
+      `Vous pouvez aussi vous connecter sans mot de passe, avec un lien reçu par e-mail :\n` +
+      `${signInUrl}${signature}`,
   }
 }
 

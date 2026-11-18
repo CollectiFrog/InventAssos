@@ -63,6 +63,7 @@ function RenameForm(handle: Handle<CategoryProps>) {
           <input
             id={`field-${nameField}`}
             name="name"
+            autoComplete="off"
             value={values[nameField] ?? category.name}
             maxLength={60}
             required
@@ -183,7 +184,7 @@ export function CategoriesPage(handle: Handle<CategoriesPageProps>) {
     })
     return (
       <Layout title="Catégories" viewer={viewer} section="admin">
-        <h1>Administration</h1>
+        <h1 class="visually-hidden">Administration</h1>
         <AdminTabs current="categories" viewer={viewer} />
         {notice ? (
           <p class="notice notice-success" role="status">
@@ -279,6 +280,7 @@ export function CategoriesPage(handle: Handle<CategoriesPageProps>) {
           <input
             id="field-name"
             name="name"
+            autoComplete="off"
             value={values.name}
             placeholder="Nouvelle catégorie"
             maxLength={60}

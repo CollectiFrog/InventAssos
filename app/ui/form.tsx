@@ -53,6 +53,9 @@ export interface TextFieldProps {
   requiredIfUsed?: boolean
   autoComplete?: string
   maxLength?: number
+  placeholder?: string
+  /** A link at the end of the label's line, outside the label (« Mot de passe oublié ? »). */
+  aside?: RemixNode
 }
 
 /** A labelled input with its hint and error message, linked for screen readers. */
@@ -63,14 +66,24 @@ export function TextField(handle: Handle<TextFieldProps>) {
     const describedBy = [p.hint ? `${id}-hint` : null, p.error ? `${id}-error` : null]
       .filter(Boolean)
       .join(' ')
+    const label = (
+      <label for={id}>
+        {p.label}
+        {p.required || p.requiredIfUsed ? null : <span class="optional"> (facultatif)</span>}
+        <HintMark hint={p.hint} />
+      </label>
+    )
 
     return (
       <div class={p.error ? 'field field-invalid' : 'field'}>
-        <label for={id}>
-          {p.label}
-          {p.required || p.requiredIfUsed ? null : <span class="optional"> (facultatif)</span>}
-          <HintMark hint={p.hint} />
-        </label>
+        {p.aside ? (
+          <div class="label-row">
+            {label}
+            {p.aside}
+          </div>
+        ) : (
+          label
+        )}
         <FieldHint id={`${id}-hint`} hint={p.hint} />
         <input
           id={id}
@@ -81,6 +94,7 @@ export function TextField(handle: Handle<TextFieldProps>) {
           required={p.required}
           autoComplete={p.autoComplete}
           maxLength={p.maxLength}
+          placeholder={p.placeholder}
           title={hoverText(p.hint)}
           aria-invalid={p.error ? 'true' : undefined}
           aria-describedby={describedBy || undefined}

@@ -65,8 +65,8 @@ export function PasswordChoosePage(
   return () => {
     const { csrfToken, token, errors = {} } = handle.props
     return (
-      <Layout title="Nouveau mot de passe">
-        <h1>Nouveau mot de passe</h1>
+      <Layout title="Choisir votre mot de passe">
+        <h1>Choisir votre mot de passe</h1>
         <ErrorSummary errors={errors} />
         <form method="post" action={routes.password.choose.action.href({ token })} class="stack">
           <CsrfField token={csrfToken} />
@@ -91,6 +91,10 @@ export function PasswordChoosePage(
           />
           <button type="submit">Enregistrer et me connecter</button>
         </form>
+        <p class="status">
+          Sans mot de passe, vous pouvez aussi{' '}
+          <a href={routes.signIn.form.index.href()}>recevoir un lien de connexion</a>.
+        </p>
       </Layout>
     )
   }

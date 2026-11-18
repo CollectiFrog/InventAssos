@@ -43,7 +43,7 @@ export interface ExistingItem {
   serialNumber: string | null
   condition: ItemCondition | null
   /** As the database returns it: « 150.50 », or null. */
-  estimatedValue: string | number | null
+  replacementValue: string | number | null
   description: string | null
   locationId: string
   locationName: string
@@ -128,7 +128,7 @@ const fieldLabels: Record<keyof ItemFields, string> = {
   serialNumber: inventoryHeaders.serialNumber,
   ref: inventoryHeaders.ref,
   condition: inventoryHeaders.condition,
-  estimatedValue: 'Valeur',
+  replacementValue: 'Valeur à neuf',
   description: inventoryHeaders.description,
 }
 
@@ -142,7 +142,7 @@ const fieldColumns: Record<keyof ItemFields, string> = {
   serialNumber: 'serial_number',
   ref: 'ref',
   condition: 'condition',
-  estimatedValue: 'estimated_value',
+  replacementValue: 'replacement_value',
   description: 'description',
 }
 
@@ -181,7 +181,7 @@ function formValueOf(item: ExistingItem): Record<keyof ItemFields, string> {
     serialNumber: item.serialNumber ?? '',
     ref: item.ref ?? '',
     condition: item.condition ?? '',
-    estimatedValue: item.estimatedValue === null ? '' : String(item.estimatedValue),
+    replacementValue: item.replacementValue === null ? '' : String(item.replacementValue),
     description: item.description ?? '',
   }
 }
@@ -190,7 +190,7 @@ function formValueOf(item: ExistingItem): Record<keyof ItemFields, string> {
 function sameValue(field: keyof ItemFields, before: ExistingItem, after: ItemFields): boolean {
   const old = formValueOf(before)[field]
   const next = after[field]
-  if (field === 'estimatedValue') {
+  if (field === 'replacementValue') {
     return (old === '' ? null : Number(old)) === (next === null ? null : Number(next))
   }
   return old === (next === null ? '' : String(next))
@@ -340,7 +340,7 @@ export function planImport(
           serialNumber: '',
           ref: archivedTwin ? '' : ref,
           condition: '',
-          estimatedValue: '',
+          replacementValue: '',
           description: '',
         }
     const set = (field: keyof ItemFields, value: string) => {
@@ -366,11 +366,11 @@ export function planImport(
       errors.push(`Quantité « ${quantityCell} » : indiquez un nombre entier de 1 à 999 999.`)
     } else if (!quantity.blank) set('quantity', String(quantity.value))
 
-    const valueCell = cellOf(cells, 'estimatedValue') ?? ''
+    const valueCell = cellOf(cells, 'replacementValue') ?? ''
     const value = parseEuros(valueCell)
     if (value === null) {
       errors.push(`Valeur « ${valueCell} » : montant non reconnu (exemple : 1 250,50).`)
-    } else if (!value.blank) set('estimatedValue', String(value.value))
+    } else if (!value.blank) set('replacementValue', String(value.value))
 
     const categoryCell = cellOf(cells, 'category') ?? ''
     if (categoryCell !== '' || !item) {

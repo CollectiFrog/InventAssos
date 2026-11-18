@@ -57,13 +57,18 @@ describe('dashboard (US-0.7.2)', () => {
     return (await client.get(routes.home.href())).text
   }
 
-  it('starts with a search field that searches my collectifs', async () => {
+  it('starts with a search field and no visible title (US-0.10.20)', async () => {
     const html = await home('rita@example.org')
     const form = /<form method="get" action="\/inventaire" class="home-search">(.*?)<\/form>/s.exec(
       html,
     )?.[1]
     assert.ok(form, 'expected the search form')
-    assert.match(form, /<label for="recherche-accueil">Chercher dans mes collectifs<\/label>/)
+    assert.match(
+      form,
+      /<label for="recherche-accueil" class="visually-hidden">Chercher dans mes collectifs<\/label>/,
+    )
+    assert.match(html, /<h1 class="visually-hidden">Accueil<\/h1>/)
+    assert.ok(html.indexOf('<h1') < html.indexOf('home-search'))
     assert.match(form, /name="q"/)
     assert.ok(html.indexOf('home-search') < html.indexOf('Ajouté récemment'))
   })

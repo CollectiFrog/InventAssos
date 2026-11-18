@@ -37,6 +37,7 @@ export function EditCollectifPage(handle: Handle<EditCollectifPageProps>) {
             value={values.name}
             error={errors.name}
             required
+            autoComplete="off"
             maxLength={120}
             hint="Son adresse dans l’application suit le nom : les anciens liens ne mènent plus à lui."
           />

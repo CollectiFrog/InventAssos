@@ -17,8 +17,8 @@ describe('inventory file format (ADR 0026)', () => {
 
   it('writes values as a French spreadsheet reads them', () => {
     assert.equal(formatValueCell(null), '')
-    assert.equal(formatValueCell('150.5' as unknown as Item['estimated_value']), '150,50')
-    assert.equal(formatValueCell(1250 as unknown as Item['estimated_value']), '1250,00')
+    assert.equal(formatValueCell('150.5' as unknown as Item['replacement_value']), '150,50')
+    assert.equal(formatValueCell(1250 as unknown as Item['replacement_value']), '1250,00')
   })
 
   it('writes one cell per column, labels instead of keys, the location name only', () => {
@@ -31,7 +31,7 @@ describe('inventory file format (ADR 0026)', () => {
       model: 'X',
       serial_number: null,
       condition: 'repair',
-      estimated_value: '99.9',
+      replacement_value: '99.9',
       description: 'deux\nlignes',
     } as unknown as Item
     const row = inventoryRow({ item, categoryName: 'Son', locationName: 'Local' })

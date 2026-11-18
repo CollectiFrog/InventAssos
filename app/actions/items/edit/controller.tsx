@@ -76,8 +76,8 @@ function valuesOf(item: ItemDetails): ItemFormValues {
     serialNumber: item.serial_number ?? '',
     ref: item.ref ?? '',
     condition: item.condition ?? '',
-    estimatedValue:
-      item.estimated_value === null ? '' : String(item.estimated_value).replace('.', ','),
+    replacementValue:
+      item.replacement_value === null ? '' : String(item.replacement_value).replace('.', ','),
     description: item.description ?? '',
   }
 }
