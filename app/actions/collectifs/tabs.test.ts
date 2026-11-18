@@ -87,6 +87,46 @@ describe('collectif page in tabs (US-0.7.5)', () => {
     assert.doesNotMatch(form, new RegExp(`collectif:${frog.id}`))
   })
 
+  it('lets the selected tab name the list: a count instead of a repeated title (US-0.10.23)', async () => {
+    const slug = frog.slug
+    const items = await page('rita@example.org', routes.collectifs.show.href({ slug }))
+    assert.match(
+      items,
+      /<h2 id="materiel-collectif" class="visually-hidden">Matériel du collectif<\/h2><p class="status">0 objet<\/p>/,
+    )
+    const places = await page('rita@example.org', routes.collectifs.places.href({ slug }))
+    assert.match(
+      places,
+      /<h2 id="lieux-collectif" class="visually-hidden">Lieux de stockage<\/h2><p class="status">1 lieu<\/p>/,
+    )
+    const people = await page('rita@example.org', routes.collectifs.people.href({ slug }))
+    assert.match(
+      people,
+      /<h2 id="membres" class="visually-hidden">Membres<\/h2><p class="status">1 membre<\/p>/,
+    )
+  })
+
+  it('puts an outsider’s two requests side by side, without explanation (US-0.10.23)', async () => {
+    const html = await page('lou@example.org', routes.collectifs.show.href({ slug: frog.slug }))
+    assert.match(
+      html,
+      /<div class="actions join-panel"><form[^>]*>.*?Demander à rejoindre<\/button><\/form><form[^>]*><input[^>]*\/><button type="submit" class="secondary">Demander à devenir responsable<\/button><\/form><\/div>/s,
+    )
+    assert.doesNotMatch(html, /plus de responsable joignable/)
+  })
+
+  it('asks the platform for a replacement responsible without a paragraph of explanation', async () => {
+    const admin = createTestApp(db, { adminEmails: ['lou@example.org'] })
+    const client = admin.client()
+    await signIn(admin, client, 'lou@example.org')
+    const html = (await client.get(routes.collectifs.people.href({ slug: frog.slug }))).text
+    assert.match(
+      html,
+      /<h2 id="gerer-responsables">Remplacer un responsable<\/h2><ul class="cards">/,
+    )
+    assert.doesNotMatch(html, /Pour la plateforme/)
+  })
+
   it('shows an outsider the same directory entry on every tab URL', async () => {
     for (const route of [routes.collectifs.places, routes.collectifs.people]) {
       const html = await page('lou@example.org', route.href({ slug: frog.slug }))

@@ -424,6 +424,13 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
       name.
     - « Avancé » folds the fuller sections: the history for now.
     - A web address in the description shows as a short link to its site.
+- **US-0.10.23 A lighter collectif page.** As a member, I want the collectif's tabs to show their
+  content without repeating themselves, so that the page reads at a glance.
+    - Matériel, Lieux and Membres no longer repeat their title under the selected tab: a count
+      (« 3 objets », « 1 lieu », « 4 membres ») stands in its place.
+    - « Demander à rejoindre » and « Demander à devenir responsable » sit side by side, with no
+      explanation; « Remplacer un responsable » has none either (both are in the user guide).
+    - The tab bar no longer shows a vertical scrollbar on Windows.
 
 ## V0.11 — Photos
 
