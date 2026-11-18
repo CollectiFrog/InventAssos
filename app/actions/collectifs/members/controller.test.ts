@@ -59,7 +59,7 @@ describe('collectif members (US-0.8.3, US-0.8.4, US-0.8.7)', () => {
     const html = (await ninaClient.get(routes.collectifs.show.href({ slug: slug() }))).text
     assert.match(
       html,
-      /<div class="stack join-panel">.*?<button type="submit">Demander à rejoindre/s,
+      /<div class="actions join-panel">.*?<button type="submit">Demander à rejoindre/s,
     )
     assert.doesNotMatch(html, /Console du FROG/)
   })
@@ -73,7 +73,7 @@ describe('collectif members (US-0.8.3, US-0.8.4, US-0.8.7)', () => {
     assert.match(html, /Console du FROG/)
     assert.match(
       html,
-      /<div class="stack join-panel">.*?<button[^>]*class="secondary"[^>]*>Demander à rejoindre/s,
+      /<div class="actions join-panel">.*?<button[^>]*class="secondary"[^>]*>Demander à rejoindre/s,
     )
   })
 

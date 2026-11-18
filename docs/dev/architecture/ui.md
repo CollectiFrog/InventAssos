@@ -113,9 +113,13 @@ flowchart TB
   links to distinct URLs, so they work without JavaScript and can be shared. Membres
   (`/collectifs/:slug/membres`, which replaced Responsables in V0.8) lists everyone with their
   role, the pending requests first for its responsibles, and counts them in the tab's label.
+  The selected tab names its list: the list's `<h2>` is for screen readers only and a count
+  (« 3 objets ») stands in its place. The bar draws its baseline as an inset shadow, so it only
+  ever scrolls sideways.
 - A collectif page seen from outside (not responsible, not member) shows its name, city and
-  description and the request buttons only (« Demander à rejoindre », then « Demander à devenir
-  responsable »): no tabs, no equipment.
+  description and the request buttons only, side by side without explanation (« Demander à
+  rejoindre », « Demander à devenir responsable »; the user guide explains them): no tabs, no
+  equipment.
 
 ## Journeys
 

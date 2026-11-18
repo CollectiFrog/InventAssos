@@ -1237,7 +1237,7 @@ kbd {
 .empty-state p {
   margin-top: 0;
 }
-/* « Demander à rejoindre » under a collectif's tabs or notice: its own block, apart. */
+/* « Demander à rejoindre » and « … devenir responsable » side by side, apart from the tabs. */
 .join-panel {
   margin-top: var(--space-8);
   padding-top: var(--space-6);
@@ -1249,14 +1249,16 @@ kbd {
   display: flex;
   gap: var(--space-1);
   margin-bottom: var(--space-5);
+  /* Scrolls sideways if the tabs are wider than a phone, never up and down: the baseline is an
+     inset shadow under the underlines, not a border they overlap, so nothing overflows below. */
   overflow-x: auto;
-  border-bottom: 1px solid var(--border-subtle);
+  overflow-y: hidden;
+  box-shadow: inset 0 -1px 0 var(--border-subtle);
 }
 .tabs a {
   display: inline-flex;
   align-items: center;
   min-height: var(--control-lg);
-  margin-bottom: -1px;
   padding: 0 var(--space-3);
   border-bottom: 2px solid transparent;
   color: var(--text-secondary);
