@@ -1,0 +1,173 @@
+/*
+ * Design tokens (docs/dev/design/ui-guidelines.md, ADR 0032). Components never hard-code a colour,
+ * size, radius or duration: they read these. Each colour is light-dark(light, dark); the theme only
+ * sets color-scheme, so both themes share one list and cannot drift apart.
+ */
+
+/* Inter, variable with optical sizes (Inter Display for headings), self-hosted: SIL OFL 1.1, see fonts/. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin-opsz-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin-ext-opsz-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Themes: system by default; the cookie set from Mon compte puts data-theme on <html> (no flash). */
+:root {
+  color-scheme: light dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root {
+  /* Surfaces, from the back to the front: each layer one step lighter (dark) or whiter (light). */
+  --bg-canvas: light-dark(#fcfcfd, #08090a);
+  --bg-panel: light-dark(#f7f7f8, #0f1011);
+  --bg-surface: light-dark(#ffffff, #151618);
+  --bg-raised: light-dark(#ffffff, #1c1d20);
+  --bg-hover: light-dark(rgb(0 0 0 / 0.035), rgb(255 255 255 / 0.04));
+  --bg-selected: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.07));
+
+  /* Borders: 1 px, low contrast; form controls get --border-control (3:1, WCAG 1.4.11). */
+  --border-subtle: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.06));
+  --border: light-dark(rgb(0 0 0 / 0.09), rgb(255 255 255 / 0.09));
+  --border-strong: light-dark(rgb(0 0 0 / 0.15), rgb(255 255 255 / 0.14));
+  --border-control: light-dark(#8b8d92, #64666c);
+
+  /* Text: three levels, all at least 4.5:1 on every surface. */
+  --text-primary: light-dark(#1a1b1e, #f7f8f8);
+  --text-secondary: light-dark(#4b4f57, #b4b6bc);
+  --text-tertiary: light-dark(#65696f, #8a8f98);
+
+  /*
+   * One accent: primary action, focus, selection, links. Collecti'FROG purple, taken from the
+   * mock-up until the brand's exact value is known (open question in the guidelines).
+   * --accent fills (white text on it), --accent-text is for text and links on surfaces.
+   */
+  --accent: light-dark(#595082, #6b62a6);
+  --accent-hover: light-dark(#4a4270, #7a71b4);
+  --accent-text: light-dark(#595082, #aaa2dc);
+  --accent-subtle: color-mix(in srgb, var(--accent) 12%, var(--bg-canvas));
+  /* Tonal fills of secondary and danger pills; stronger in dark so the pill keeps its shape. */
+  --accent-tonal: light-dark(#ebeaf0, #1c1a2b);
+  --accent-tonal-hover: light-dark(#dfdde8, #262339);
+  --on-accent: #ffffff;
+  --focus-ring: light-dark(#595082, #8b82c8);
+
+  --danger: light-dark(#b42318, #c5372e);
+  --danger-hover: light-dark(#9b1c13, #d4463d);
+  --danger-text: light-dark(#b42318, #f47067);
+  --on-danger: #ffffff;
+  --danger-tonal: light-dark(#f6e5e4, #2e1210);
+  --danger-tonal-hover: light-dark(#f0d6d4, #3d1714);
+
+  /* Equipment states: always icon + word + colour, on a 12 % tint. */
+  --status-available: light-dark(#116329, #4ac26b);
+  --status-lent: light-dark(#8a5a00, #d9a531);
+  --status-broken: light-dark(#b42318, #f47067);
+  --status-reserved: light-dark(#0b5cb5, #6cb6ff);
+  --status-archived: light-dark(#5c6067, #9a9fa8);
+  --tint: 12%;
+
+  /* Type: Inter, 13 px dense UI by default. */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Geist Mono", Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --leading-xs: 1rem;
+  --text-sm: 0.8125rem;
+  --leading-sm: 1.25rem;
+  --text-md: 0.875rem;
+  --leading-md: 1.375rem;
+  --text-lg: 1rem;
+  --leading-lg: 1.5rem;
+  --text-xl: 1.25rem;
+  --leading-xl: 1.75rem;
+  --text-2xl: 1.5rem;
+  --leading-2xl: 2rem;
+  --text-3xl: 2rem;
+  --leading-3xl: 2.5rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --tracking-heading: -0.015em;
+
+  /* Spacing: 4 px base. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 999px;
+
+  /* Sizes: compact controls on a mouse, 44 px wherever a finger may tap (see below). */
+  --control-sm: 28px;
+  --control-md: 32px;
+  --control-lg: 36px;
+  --row-height: 36px;
+  --touch: 44px;
+  --control: var(--control-md);
+  /* Pills are a little lower than fields: without a frame, a field looks lower than it is. */
+  --button: 30px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-stroke: 1.5;
+  --sidebar-width: 240px;
+  --rail-width: 72px;
+  --thumb: 28px;
+
+  /* Elevation: a token, so another light theme can be tried by changing tokens only. */
+  --shadow-1: none;
+  --shadow-2: light-dark(0 4px 16px rgb(0 0 0 / 0.08), none);
+  --shadow-3: light-dark(0 12px 40px rgb(0 0 0 / 0.14), 0 12px 40px rgb(0 0 0 / 0.5));
+  --backdrop: light-dark(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.55));
+
+  /* Motion: opacity and transform only. */
+  --duration-fast: 120ms;
+  --duration-overlay: 180ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* A finger is less precise than a mouse: every control grows to the 44 px touch target. */
+@media (pointer: coarse), (max-width: 719px) {
+  :root {
+    --control: var(--touch);
+    --button: var(--touch);
+    --row-height: var(--touch);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-overlay: 0ms;
+  }
+}

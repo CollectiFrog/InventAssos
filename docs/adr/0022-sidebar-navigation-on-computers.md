@@ -7,6 +7,8 @@ description: From 720 px the four entries move to a left sidebar (a rail below 1
 |----------|------------|------------|
 | Accepted | 2026-11-11 | @tritriper |
 
+The item form's "two fields per row" is superseded by [0032](../0032-linear-style-design-system/).
+
 Supersedes the computer part of [0019](../0019-interface-conventions/) ("from 720 px, in the top
 bar") and the "content centred, at most 60 rem" rule of [UI](../../architecture/ui/). Everything
 else in 0019 stands: one responsive interface, four entries, bottom tab bar on phones, no client

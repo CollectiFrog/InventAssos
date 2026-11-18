@@ -1,7 +1,8 @@
 import type { Handle, RemixNode } from 'remix/component'
 import { appInitials, appName } from '../brand.ts'
 import { routes } from '../routes.ts'
-import { Icon, icons } from './icons.tsx'
+import { type Theme, themeLabels, themes } from '../theme.ts'
+import { Icon, type IconName } from './icons.tsx'
 
 /** What the shell needs to know about the signed-in person; null for a visitor. */
 export type Viewer = {
@@ -15,6 +16,8 @@ export type Viewer = {
   csrfToken: string
   /** Collectifs the person belongs to, by name, for the sidebar's "Mes collectifs". */
   collectifs: readonly { name: string; slug: string }[]
+  /** Light, dark or system, from the theme cookie (ADR 0032). */
+  theme: Theme
 } | null
 
 /** The four navigation entries (US-0.7.1); a page names the one it belongs to. */
@@ -38,6 +41,8 @@ export interface LayoutProps {
   trail?: Crumb[]
   /** Where « Retour » goes on phones: the previous page of this site, else the parent. */
   back?: string
+  /** Forces a theme over the viewer's choice: the design preview's `?theme=` (ADR 0032). */
+  theme?: Theme
   /** What the top bar's « + » adds here; equipment in general by default (ADR 0031). */
   add?: { href: string; label: string }
   children?: RemixNode
@@ -53,42 +58,15 @@ export function initialsOf(name: string): string {
   return letters.map((word = '') => word.charAt(0).toLocaleUpperCase('fr')).join('')
 }
 
-const entries: { section: Section; label: string; href: string; icon: RemixNode }[] = [
-  {
-    section: 'home',
-    label: 'Accueil',
-    href: routes.home.href(),
-    icon: <path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z" />,
-  },
-  {
-    section: 'search',
-    label: 'Rechercher',
-    href: routes.inventory.index.href(),
-    icon: icons.search,
-  },
-  {
-    section: 'mine',
-    label: 'Mon matériel',
-    href: routes.items.index.href(),
-    icon: (
-      <>
-        <path d="M3 8l9-5 9 5v8l-9 5-9-5z" />
-        <path d="M3 8l9 5 9-5M12 13v8" />
-      </>
-    ),
-  },
+const entries: { section: Section; label: string; href: string; icon: IconName }[] = [
+  { section: 'home', label: 'Accueil', href: routes.home.href(), icon: 'home' },
+  { section: 'search', label: 'Rechercher', href: routes.inventory.index.href(), icon: 'search' },
+  { section: 'mine', label: 'Mon matériel', href: routes.items.index.href(), icon: 'equipment' },
   {
     section: 'collectifs',
     label: 'Collectifs',
     href: routes.collectifs.index.href(),
-    icon: (
-      <>
-        <circle cx="9" cy="8" r="3.5" />
-        <path d="M2.5 20c.5-3.5 3.2-5.5 6.5-5.5s6 2 6.5 5.5" />
-        <circle cx="17" cy="9" r="2.5" />
-        <path d="M17 14.5c2.4 0 4.2 1.6 4.5 4.5" />
-      </>
-    ),
+    icon: 'people',
   },
 ]
 
@@ -101,14 +79,23 @@ export function Layout(handle: Handle<LayoutProps>) {
       label: 'Ajouter du matériel',
     }
     const navigates = viewer?.isActive === true
+    const theme = handle.props.theme ?? viewer?.theme ?? 'system'
 
     return (
-      <html lang="fr">
+      <html lang="fr" data-theme={theme === 'system' ? undefined : theme}>
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta name="color-scheme" content="light dark" />
+          <meta name="color-scheme" content={theme === 'system' ? 'light dark' : theme} />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+          <link
+            rel="preload"
+            href="/fonts/inter-latin-opsz-normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+          />
+          <link rel="stylesheet" href="/tokens.css" />
           <link rel="stylesheet" href="/styles.css" />
           <title>{`${title} · ${appName}`}</title>
         </head>
@@ -224,7 +211,7 @@ function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section
         <nav aria-label="Navigation principale" class="main-nav">
           {entries.map((entry) => (
             <a href={entry.href} aria-current={entry.section === section ? 'page' : undefined}>
-              <Icon>{entry.icon}</Icon>
+              <Icon name={entry.icon} />
               <span>{entry.label}</span>
             </a>
           ))}
@@ -254,6 +241,9 @@ function Sidebar(handle: Handle<{ viewer: NonNullable<Viewer>; section?: Section
             </nav>
           </>
         ) : null}
+        <div class="theme-switch">
+          <ThemeSwitch csrfToken={viewer.csrfToken} theme={viewer.theme} compact />
+        </div>
       </aside>
     )
   }
@@ -269,4 +259,46 @@ export function SignOutButton(handle: Handle<{ csrfToken: string }>) {
       </button>
     </form>
   )
+}
+
+const themeIcons: Record<Theme, IconName> = { system: 'system', light: 'light', dark: 'dark' }
+
+/**
+ * Automatique / Clair / Sombre: one form, one button per choice, the current one pressed. The
+ * server stores the choice in a cookie and sends the person back (ADR 0032). `compact` shows icons.
+ */
+export function ThemeSwitch(
+  handle: Handle<{ csrfToken: string; theme: Theme; compact?: boolean }>,
+) {
+  return () => {
+    const { csrfToken, theme, compact } = handle.props
+    return (
+      <form
+        method="post"
+        action={routes.appearance.href()}
+        class={compact ? undefined : 'theme-choice'}
+        aria-label="Thème"
+      >
+        <input type="hidden" name="_csrf" value={csrfToken} />
+        {themes.map((choice) => (
+          <button
+            type="submit"
+            name="theme"
+            value={choice}
+            aria-pressed={choice === theme ? 'true' : 'false'}
+            title={compact ? `Thème : ${themeLabels[choice].toLowerCase()}` : undefined}
+          >
+            {compact ? (
+              <>
+                <Icon name={themeIcons[choice]} size={14} />
+                <span class="visually-hidden">{`Thème ${themeLabels[choice].toLowerCase()}`}</span>
+              </>
+            ) : (
+              themeLabels[choice]
+            )}
+          </button>
+        ))}
+      </form>
+    )
+  }
 }

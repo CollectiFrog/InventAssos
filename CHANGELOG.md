@@ -6,6 +6,17 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+### Added
+
+- A dark theme: choose Automatique, Clair or Sombre in Mon compte › Apparence or at the foot of the sidebar; the choice is kept on this device.
+- Items to repair, out of order or archived show their state as a badge beside their name.
+
+### Changed
+
+- A new, calmer look in both themes: the Inter typeface, finer icons, denser lists, underlined fields and rounded buttons, smaller with a mouse and still large on phones and touch screens.
+- The add and edit forms for equipment are one column, with « Ajouter » or « Enregistrer » and « Annuler » always in reach at the bottom.
+- Equipment lists show the owner before the city, and on a phone each item takes one compact row.
+
 ## [0.10.1] - 2026-11-14
 
 ### Added

@@ -2,6 +2,7 @@ import type { Handle } from 'remix/component'
 
 import { type ItemSort, type ItemSummary, itemSortColumns } from '../data/items.ts'
 import { routes } from '../routes.ts'
+import { Icon } from './icons.tsx'
 
 /** How a list of items shows: a dense table (default on computers) or cards (ADR 0022). */
 export type ItemView = 'liste' | 'grille'
@@ -28,9 +29,9 @@ export function sortParam(sort: ItemSort): string {
 const headers: { column: ItemSort['column']; label: string; numeric?: boolean }[] = [
   { column: 'nom', label: 'Nom' },
   { column: 'categorie', label: 'Catégorie' },
-  { column: 'quantite', label: 'Qté', numeric: true },
-  { column: 'ville', label: 'Ville' },
   { column: 'proprietaire', label: 'Propriétaire' },
+  { column: 'ville', label: 'Ville' },
+  { column: 'quantite', label: 'Qté', numeric: true },
 ]
 
 /** Props of the items table. */
@@ -50,7 +51,7 @@ export function ItemTable(handle: Handle<ItemTableProps>) {
   return () => {
     const { items, caption, sort, sortHref } = handle.props
     return (
-      <table class="data-table">
+      <table class="data-table item-table">
         <caption class="visually-hidden">{caption}</caption>
         <thead>
           <tr>
@@ -81,11 +82,11 @@ export function ItemTable(handle: Handle<ItemTableProps>) {
                 </a>
               </td>
               <td data-label="Catégorie">{item.categoryName}</td>
+              <td data-label="Propriétaire">{item.ownerName}</td>
+              <td data-label="Ville">{item.city}</td>
               <td data-label="Quantité" class="num">
                 {item.quantity}
               </td>
-              <td data-label="Ville">{item.city}</td>
-              <td data-label="Propriétaire">{item.ownerName}</td>
             </tr>
           ))}
         </tbody>
@@ -103,9 +104,11 @@ export function ViewSwitch(
     return (
       <nav aria-label="Affichage" class="view-switch">
         <a href={hrefFor('liste')} aria-current={view === 'liste' ? 'page' : undefined}>
+          <Icon name="list" />
           Liste
         </a>
         <a href={hrefFor('grille')} aria-current={view === 'grille' ? 'page' : undefined}>
+          <Icon name="grid" />
           Grille
         </a>
       </nav>
@@ -134,7 +137,9 @@ export function ActiveFilters(handle: Handle<{ filters: ActiveFilter[]; clearHre
               aria-label={`Retirer le filtre ${filter.label}`}
             >
               {filter.label}
-              <span aria-hidden="true"> ✕</span>
+              <span class="chip-remove" aria-hidden="true">
+                <Icon name="close" size={12} />
+              </span>
             </a>
           </li>
         ))}

@@ -19,6 +19,10 @@ export const routes = route({
     choose: form('/mot-de-passe/nouveau/:token'),
   },
   signOut: post('/deconnexion'),
+  /** Stores the light, dark or system theme in a cookie (ADR 0032). */
+  appearance: post('/apparence'),
+  /** Tokens and components in both themes, outside production only (ADR 0032). */
+  designPreview: get('/dev/ui'),
   account: {
     profile: form('/compte/profil'),
     deletion: get('/compte/supprimer'),

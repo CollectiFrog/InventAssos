@@ -2,7 +2,7 @@ import type { Handle, RemixNode } from 'remix/component'
 import { appName, appVersion } from '../../../brand.ts'
 import { routes } from '../../../routes.ts'
 import { CsrfField, ErrorSummary, type FieldErrors, TextField } from '../../../ui/form.tsx'
-import { Layout, SignOutButton, type Viewer } from '../../../ui/layout.tsx'
+import { Layout, SignOutButton, ThemeSwitch, type Viewer } from '../../../ui/layout.tsx'
 
 /** The public user guide. */
 const guideUrl = 'https://collectifrog.github.io/InventAssos/'
@@ -49,6 +49,7 @@ function SettingSection(
 
 const sections = [
   { id: 'profil', title: 'Profil' },
+  { id: 'apparence', title: 'Apparence' },
   { id: 'collectifs', title: 'Mes collectifs' },
   { id: 'administration', title: 'Administration', staffOnly: true },
   { id: 'mot-de-passe', title: 'Mot de passe' },
@@ -123,6 +124,13 @@ export function ProfilePage(handle: Handle<ProfilePageProps>) {
                 />
                 <button type="submit">Enregistrer</button>
               </form>
+            </SettingSection>
+            <SettingSection
+              id="apparence"
+              title="Apparence"
+              text="Clair, sombre, ou comme votre appareil. Retenu sur cet appareil."
+            >
+              <ThemeSwitch csrfToken={csrfToken} theme={viewer?.theme ?? 'system'} />
             </SettingSection>
             <SettingSection
               id="collectifs"

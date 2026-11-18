@@ -6,6 +6,7 @@ import { CsrfField } from '../../ui/form.tsx'
 import { IconButton, IconLink } from '../../ui/icons.tsx'
 import { archiveReasonLabels, conditionLabels, formatEuros } from '../../ui/labels.ts'
 import { Layout, type Viewer } from '../../ui/layout.tsx'
+import { itemStatusOf, StatusBadge } from '../../ui/status-badge.tsx'
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'Europe/Paris' })
 
@@ -82,6 +83,10 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
       canDelete ||
       (deletion !== undefined && !deletion.requested)
     const phone = reachable ? item.contactPhone : null
+    const status = itemStatusOf({
+      archivedAt: item.archived_at ? new Date(String(item.archived_at)) : null,
+      condition: item.condition,
+    })
     return (
       <Layout title={item.name} viewer={viewer} trail={trail} back={back ?? trail.at(-2)?.href}>
         <div class="page-head item-head">
@@ -91,6 +96,18 @@ export function ItemPage(handle: Handle<ItemPageProps>) {
               {item.quantity > 1 ? ` × ${item.quantity}` : null}
             </h1>
             <p class="status">
+              {status ? (
+                <>
+                  <StatusBadge
+                    status={status}
+                    label={
+                      status === 'broken' && item.condition
+                        ? conditionLabels[item.condition]
+                        : undefined
+                    }
+                  />{' '}
+                </>
+              ) : null}
               À <OwnerLink item={item} /> · rangé à {item.city}
             </p>
           </div>

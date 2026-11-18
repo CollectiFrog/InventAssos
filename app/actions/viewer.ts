@@ -2,6 +2,7 @@ import { getCsrfToken } from 'remix/middleware/csrf'
 
 import type { AppContext } from '../middleware/index.ts'
 import { isActiveAdmin, isActiveStaff } from '../permissions.ts'
+import { themeFromCookieHeader } from '../theme.ts'
 import type { Viewer } from '../ui/layout.tsx'
 
 /** Shell data for the current request. Visitors get null, so no session is created for them. */
@@ -15,5 +16,6 @@ export function viewerOf(context: AppContext): Viewer {
     isActive: user.status === 'active',
     csrfToken: getCsrfToken(context),
     collectifs: user.collectifs.map(({ name, slug }) => ({ name, slug })),
+    theme: themeFromCookieHeader(context.request.headers.get('Cookie')),
   }
 }

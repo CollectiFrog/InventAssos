@@ -8,7 +8,9 @@ description: Same pages for phones and computers, bottom tab bar on phones, sobe
 | Accepted | 2026-11-09 | @tritriper |
 
 Partly superseded by [0022](../0022-sidebar-navigation-on-computers/): on computers the entries are
-in a left sidebar, not the top bar, and content is fluid.
+in a left sidebar, not the top bar, and content is fluid. Partly superseded by
+[0032](../0032-linear-style-design-system/): the values live in `public/tokens.css`, and controls
+are 44 px on touch screens only.
 
 ## Context
 
