@@ -158,7 +158,7 @@ From V0.8, a request to join a collectif is approved by its responsibles, not by
 
 | Zone         | Pages                                                                                                                        |
 |--------------|------------------------------------------------------------------------------------------------------------------------------|
-| Visitor      | `/connexion`, `/connexion/envoyee`, `/connexion/lien/:token`, `/inscription`, `/inscription/envoyee`                         |
+| Visitor      | `/` (landing page, ADR 0039), `/connexion`, `/connexion/envoyee`, `/connexion/lien/:token`, `/inscription`, `/inscription/envoyee`, `/mentions-legales` |
 | Password     | POST `/connexion/mot-de-passe`; `/mot-de-passe`, `/mot-de-passe/envoye`, `/mot-de-passe/nouveau/:token`                      |
 | Pending      | `/compte/statut`, `/compte/statut/redemander`                                                                                |
 | Accueil      | `/`                                                                                                                          |

@@ -5,8 +5,11 @@
 /** The name people see. */
 export const appName = 'AssoMatos'
 
+/** Where the code lives (MIT licence), linked from the landing page. */
+export const sourceCodeUrl = 'https://github.com/CollectiFrog/InventAssos'
+
 /** The logo's letters, shown in the sidebar. */
 export const appInitials = 'AM'
 
 /** The version shown on « Mon compte › À propos »; the release procedure bumps it. */
-export const appVersion = '0.10.2'
+export const appVersion = '0.10.3'

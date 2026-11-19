@@ -86,7 +86,8 @@ Always **icon + word + colour**, on a 12 % tint (`StatusBadge`, `app/ui/status-b
   `cv11`/`ss01`, `tabular-nums` in tables. Mono: the system monospace stack.
 - Scale: `--text-xs` 12/16, `--text-sm` **13/20 default UI**, `--text-md` 14/22 forms and running
   text, `--text-lg` 16/24 section titles, `--text-xl` 20/28 page titles, `--text-2xl` 24/32 item
-  title, `--text-3xl` 32/40 sign-in only. Weights 400 / 500 / 600; headings −0.015 em.
+  title, `--text-3xl` 32/40 sign-in only, `--text-display` (fluid, 28 to 64 px) the landing page's
+  title only. Weights 400 / 500 / 600; headings −0.015 em.
 - Spacing on a 4 px base (`--space-1` … `--space-16`). Radii: 4 (badges), 6 (buttons, inputs),
   8 (cards, menus), 12 (sign-in card, dialogs).
 - Controls 28 / **32** / 36 px with a mouse, buttons **30 px**; `--control` and `--button` become
@@ -105,7 +106,7 @@ Always **icon + word + colour**, on a 12 % tint (`StatusBadge`, `app/ui/status-b
 - Icons: **Lucide** shapes, 16 px, stroke 1.5, `currentColor` (`app/ui/icons.tsx`).
 - Elevation: none in dark (surfaces and borders do it); a soft shadow in light for raised layers.
 - Motion: 120 ms hover and press, 180 ms overlays, opacity and transform only; off with
-  `prefers-reduced-motion`.
+  `prefers-reduced-motion`. The landing scene loops in `--duration-scene` (20 s).
 
 ## Screens
 
@@ -121,6 +122,9 @@ Always **icon + word + colour**, on a 12 % tint (`StatusBadge`, `app/ui/status-b
 - **Forms**: one column of 560 px of underlined fields, labels above, errors under them, sticky
   footer with the submit pill and « Annuler ».
 - **Sign-in, sign-up**: a centred card on the canvas; the only place with a (faint) gradient.
+- **Landing page** (visitors, ADR 0039): no shell, one screen; an isometric scene drawn with a dark
+  line and one colour per place (`--place-1` to `--place-4`, grey `--place-0` outside the
+  collectif), the text on its empty side.
 - Every list keeps its empty state (a sentence and the next action) and « Tout effacer » for filters.
 
 ## Accessibility
@@ -144,6 +148,6 @@ decision:
 
 ## Open questions
 
-- The **exact Collecti'FROG purple** (hex from the brand assets): `#595082` comes from the mock-up.
-- A **logo** for the sidebar and the sign-in page (today the letters « AM »).
+- A **logo** for the sidebar and the sign-in page (today the letters « AM »): the landing page uses
+  Collecti'FROG's frog (`public/logo.svg`, ADR 0039); the shell may follow.
 - A soft or neumorphic light theme: possible later by changing tokens only.
