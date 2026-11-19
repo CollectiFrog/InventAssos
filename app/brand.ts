@@ -12,4 +12,4 @@ export const sourceCodeUrl = 'https://github.com/CollectiFrog/InventAssos'
 export const appInitials = 'AM'
 
 /** The version shown on « Mon compte › À propos »; the release procedure bumps it. */
-export const appVersion = '0.10.2'
+export const appVersion = '0.10.3'

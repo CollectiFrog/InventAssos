@@ -6,6 +6,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+## [0.10.3] - 2026-11-19
+
 ### Added
 
 - A new home page for visitors: an animated village shows what AssoMatos is for, with « Rejoindre AssoMatos » and « Se connecter » on one screen.
@@ -175,7 +177,8 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 [X.Y.Z]: https://github.com/CollectiFrog/InventAssos/compare/vX.Y.(Z-1)...vX.Y.Z
 -->
 
-[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.2...HEAD
+[Unreleased]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.3...HEAD
+[0.10.3]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.2...v0.10.3
 [0.10.2]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/CollectiFrog/InventAssos/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/CollectiFrog/InventAssos/compare/v0.6.1...v0.10.0
