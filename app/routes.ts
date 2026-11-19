@@ -23,6 +23,8 @@ export const routes = route({
   appearance: post('/apparence'),
   /** Tokens and components in both themes, outside production only (ADR 0032). */
   designPreview: get('/dev/ui'),
+  /** Legal notice, open to visitors; a placeholder until V1.0 (US-0.10.24). */
+  legal: get('/mentions-legales'),
   account: {
     profile: form('/compte/profil'),
     deletion: get('/compte/supprimer'),

@@ -230,12 +230,16 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     for (const page of [signInPage, signUpPage, home]) {
       assert.equal(mainNav(page), null)
       assert.doesNotMatch(page, /class="sidebar"|class="avatar"/)
+    }
+    for (const page of [signInPage, signUpPage]) {
       assert.match(page, /<div class="header-links"><\/div>/)
     }
+    // The landing page fills the screen without the shell's top bar (US-0.10.24).
+    assert.doesNotMatch(home, /class="top-bar"/)
     assert.match(signInPage, /Pas encore de compte \? <a href="\/inscription">Créer un compte<\/a>/)
     assert.match(signUpPage, /Déjà un compte \? <a href="\/connexion">Se connecter<\/a>/)
-    assert.match(home, /<a href="\/connexion" class="button">Se connecter/)
-    assert.match(home, /<a href="\/inscription" class="button secondary">Créer un compte/)
+    assert.match(home, /<a href="\/inscription" class="button large">Rejoindre AssoMatos<\/a>/)
+    assert.match(home, /<a href="\/connexion" class="button large secondary">Se connecter<\/a>/)
   })
 })
 

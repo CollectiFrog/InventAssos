@@ -420,19 +420,26 @@ body.has-nav main {
   }
 }
 
+/* A page without the shell fills the screen itself: the landing page (Layout `bare`, ADR 0039). */
+body.bare main {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 /* ------------------------------------------------------------------ Bare pages: sign-in, sign-up */
 /* The only place with a background gradient, kept faint (guidelines 5.4). */
-body:not(.has-nav) {
+body:not(.has-nav, .bare) {
   min-height: 100vh;
   background:
     radial-gradient(60rem 30rem at 50% -10rem, var(--accent-subtle), transparent 70%),
     var(--bg-canvas);
 }
-body:not(.has-nav) .top-bar {
+body:not(.has-nav, .bare) .top-bar {
   border-bottom-color: transparent;
   background: transparent;
 }
-body:not(.has-nav) main {
+body:not(.has-nav, .bare) main {
   max-width: 28rem;
   margin: var(--space-8) auto;
   padding: var(--space-8);
@@ -441,15 +448,15 @@ body:not(.has-nav) main {
   background: var(--bg-surface);
   box-shadow: var(--shadow-2);
 }
-body:not(.has-nav) main h1 {
+body:not(.has-nav, .bare) main h1 {
   font-size: var(--text-2xl);
   line-height: var(--leading-2xl);
 }
-body:not(.has-nav) .stack {
+body:not(.has-nav, .bare) .stack {
   max-width: none;
 }
 @media (max-width: 719px) {
-  body:not(.has-nav) main {
+  body:not(.has-nav, .bare) main {
     margin: var(--space-4) var(--space-4) var(--space-8);
     padding: var(--space-6) var(--space-5);
   }
@@ -2163,6 +2170,21 @@ kbd {
 }
 .swatch-status-archived {
   background: var(--status-archived);
+}
+.swatch-place-0 {
+  background: var(--place-0);
+}
+.swatch-place-1 {
+  background: var(--place-1);
+}
+.swatch-place-2 {
+  background: var(--place-2);
+}
+.swatch-place-3 {
+  background: var(--place-3);
+}
+.swatch-place-4 {
+  background: var(--place-4);
 }
 .surface-canvas {
   background: var(--bg-canvas);

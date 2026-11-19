@@ -6,7 +6,16 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!docs/site", "!design", "!**/*.md", "!**/*.mdx", "!**/*.yml", "!**/*.yaml"]
+    "includes": [
+      "**",
+      "!docs/site",
+      "!design",
+      "!**/*.md",
+      "!**/*.mdx",
+      "!**/*.yml",
+      "!**/*.yaml",
+      "!public/landing-scene.css"
+    ]
   },
   "formatter": {
     "enabled": true,

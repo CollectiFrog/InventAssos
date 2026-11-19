@@ -31,6 +31,10 @@ const colourGroups: { title: string; tokens: string[] }[] = [
       'status-archived',
     ],
   },
+  {
+    title: 'Lieux de la scène d’accueil',
+    tokens: ['place-1', 'place-2', 'place-3', 'place-4', 'place-0'],
+  },
 ]
 
 const typeScale: { token: string; sample: string }[] = [

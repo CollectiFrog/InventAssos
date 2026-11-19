@@ -4,6 +4,7 @@ import type { ItemSummary } from '../data/items.ts'
 import { routes } from '../routes.ts'
 import { Layout, type Viewer } from '../ui/layout.tsx'
 import { ItemList } from './items/items-pages.tsx'
+import { LandingPage } from './landing-page.tsx'
 
 /** What a validated user's home page shows (US-0.7.2). */
 export interface Dashboard {
@@ -18,13 +19,13 @@ function plural(n: number, one: string, many: string): string {
   return `${n} ${n > 1 ? many : one}`
 }
 
-/** Home page: the dashboard for validated users, a presentation for everyone else. */
+/** Home page: the dashboard for validated users, the landing page for visitors (US-0.10.24). */
 export function HomePage(
   handle: Handle<{
     databaseOk: boolean
     viewer: Viewer
     dashboard?: Dashboard
-    /** Just signed out: say so (US-0.7.7). */
+    /** Just signed out: the landing page says so (US-0.7.7). */
     signedOut?: boolean
   }>,
 ) {
@@ -38,28 +39,15 @@ export function HomePage(
         </Layout>
       )
     }
+    if (!viewer) return <LandingPage databaseOk={databaseOk} signedOut={signedOut} />
+    // Signed in but not validated yet: what the service is, with the way to sign out.
     return (
       <Layout title="Accueil" viewer={viewer} section="home">
         <h1>{appName}</h1>
-        {signedOut ? (
-          <p class="notice notice-success" role="status">
-            Vous êtes déconnecté. À bientôt !
-          </p>
-        ) : null}
         <p>
           Inventaire de matériel partagé entre associations : chaque collectif référence son
           matériel, ses membres le trouvent et contactent qui le garde.
         </p>
-        {viewer ? null : (
-          <p class="actions">
-            <a class="button" href={routes.signIn.form.index.href()}>
-              Se connecter
-            </a>
-            <a class="button secondary" href={routes.signUp.form.index.href()}>
-              Créer un compte
-            </a>
-          </p>
-        )}
         {databaseOk ? null : (
           <p class="notice notice-error">Le service est momentanément indisponible.</p>
         )}

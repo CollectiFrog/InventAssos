@@ -6,6 +6,10 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+### Added
+
+- A new home page for visitors: an animated village shows what AssoMatos is for, with « Rejoindre AssoMatos » and « Se connecter » on one screen.
+
 ## [0.10.2] - 2026-11-18
 
 ### Added
