@@ -9,7 +9,7 @@ AssoMatos est un service en ligne : rien à installer, un navigateur suffit.
 
 ## Créer son compte
 
-1. Sur la page d'accueil, choisissez **Créer un compte**.
+1. Sur la page d'accueil, choisissez **Rejoindre AssoMatos**.
 2. Indiquez votre nom et votre adresse e-mail, puis **Demander un compte**.
 3. Vous recevez un e-mail de confirmation. Un administrateur de la plateforme examine votre demande
    et vous écrit quand votre compte est validé.

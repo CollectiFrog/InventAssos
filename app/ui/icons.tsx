@@ -222,6 +222,25 @@ export const icons = {
       <rect x="2" y="4" width="20" height="16" rx="2" />
     </>
   ),
+  // The landing page's footer (US-0.10.24): import a spreadsheet, open source, Collecti'FROG.
+  sheet: (
+    <>
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M3 15h18" />
+      <path d="M9 9v12" />
+      <path d="M15 9v12" />
+    </>
+  ),
+  code: (
+    <>
+      <path d="m16 18 6-6-6-6" />
+      <path d="m8 6-6 6 6 6" />
+    </>
+  ),
+  heart: (
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+  ),
 } satisfies Record<string, RemixNode>
 
 /** A kind of icon from `icons`. */

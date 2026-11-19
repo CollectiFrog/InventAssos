@@ -43,6 +43,10 @@ export interface LayoutProps {
   back?: string
   /** Forces a theme over the viewer's choice: the design preview's `?theme=` (ADR 0032). */
   theme?: Theme
+  /** Stylesheets of this page only, after the shared ones: the landing page's (ADR 0039). */
+  stylesheets?: readonly string[]
+  /** No shell (top bar, navigation): the page fills the screen itself, like the landing page. */
+  bare?: boolean
   children?: RemixNode
 }
 
@@ -82,7 +86,17 @@ const adminEntry = {
 /** The HTML document every page renders into. Server-rendered only (ADR 0015). */
 export function Layout(handle: Handle<LayoutProps>) {
   return () => {
-    const { title, viewer = null, section, headerLink, trail = [], back, children } = handle.props
+    const {
+      title,
+      viewer = null,
+      section,
+      headerLink,
+      trail = [],
+      back,
+      stylesheets = [],
+      bare,
+      children,
+    } = handle.props
     const navigates = viewer?.isActive === true
     const theme = handle.props.theme ?? viewer?.theme ?? 'system'
 
@@ -102,71 +116,80 @@ export function Layout(handle: Handle<LayoutProps>) {
           />
           <link rel="stylesheet" href="/tokens.css" />
           <link rel="stylesheet" href="/styles.css" />
+          {stylesheets.map((href) => (
+            <link rel="stylesheet" href={href} />
+          ))}
           <title>{`${title} · ${appName}`}</title>
         </head>
-        <body class={navigates ? 'has-nav' : undefined}>
-          <a class="skip-link" href="#contenu">
-            Aller au contenu
-          </a>
-          <div class="shell">
-            {viewer && navigates ? (
-              <Sidebar viewer={viewer} section={section} onAccount={headerLink === 'account'} />
-            ) : null}
-            <div class="shell-body">
-              <header class="top-bar">
-                <a class="brand" href={routes.home.href()}>
-                  {appName}
-                </a>
-                <div class="header-links">
-                  {viewer && navigates ? (
-                    // Phones only: computers have no top bar, Mon compte is in the sidebar (ADR 0037).
-                    <a
-                      class="avatar"
-                      href={routes.account.profile.index.href()}
-                      // The visible initials start the name, for voice control (WCAG 2.5.3).
-                      aria-label={`${initialsOf(viewer.name)}, mon compte : ${viewer.name}`}
-                      aria-current={headerLink === 'account' ? 'page' : undefined}
-                    >
-                      {initialsOf(viewer.name)}
-                    </a>
-                  ) : viewer ? (
-                    <SignOutButton csrfToken={viewer.csrfToken} />
-                  ) : // Visitors: every page they reach links sign-in and sign-up itself (US-0.10.17).
-                  null}
-                </div>
-              </header>
-              <main id="contenu">
-                {back || trail.length > 0 ? (
-                  <div class="page-nav">
-                    {back ? (
-                      <a class="back-link" href={back}>
-                        <span aria-hidden="true">← </span>Retour
+        {bare ? (
+          <body class="bare">
+            <main id="contenu">{children}</main>
+          </body>
+        ) : (
+          <body class={navigates ? 'has-nav' : undefined}>
+            <a class="skip-link" href="#contenu">
+              Aller au contenu
+            </a>
+            <div class="shell">
+              {viewer && navigates ? (
+                <Sidebar viewer={viewer} section={section} onAccount={headerLink === 'account'} />
+              ) : null}
+              <div class="shell-body">
+                <header class="top-bar">
+                  <a class="brand" href={routes.home.href()}>
+                    {appName}
+                  </a>
+                  <div class="header-links">
+                    {viewer && navigates ? (
+                      // Phones only: computers have no top bar, Mon compte is in the sidebar (ADR 0037).
+                      <a
+                        class="avatar"
+                        href={routes.account.profile.index.href()}
+                        // The visible initials start the name, for voice control (WCAG 2.5.3).
+                        aria-label={`${initialsOf(viewer.name)}, mon compte : ${viewer.name}`}
+                        aria-current={headerLink === 'account' ? 'page' : undefined}
+                      >
+                        {initialsOf(viewer.name)}
                       </a>
-                    ) : null}
-                    {trail.length > 0 ? (
-                      <nav aria-label="Fil d’Ariane" class="breadcrumb">
-                        <ol>
-                          {trail.map((crumb, index) =>
-                            crumb.href && index < trail.length - 1 ? (
-                              <li>
-                                <a href={crumb.href} class="crumb-link">
-                                  {crumb.label}
-                                </a>
-                              </li>
-                            ) : (
-                              <li aria-current="page">{crumb.label}</li>
-                            ),
-                          )}
-                        </ol>
-                      </nav>
-                    ) : null}
+                    ) : viewer ? (
+                      <SignOutButton csrfToken={viewer.csrfToken} />
+                    ) : // Visitors: every page they reach links sign-in and sign-up itself (US-0.10.17).
+                    null}
                   </div>
-                ) : null}
-                {children}
-              </main>
+                </header>
+                <main id="contenu">
+                  {back || trail.length > 0 ? (
+                    <div class="page-nav">
+                      {back ? (
+                        <a class="back-link" href={back}>
+                          <span aria-hidden="true">← </span>Retour
+                        </a>
+                      ) : null}
+                      {trail.length > 0 ? (
+                        <nav aria-label="Fil d’Ariane" class="breadcrumb">
+                          <ol>
+                            {trail.map((crumb, index) =>
+                              crumb.href && index < trail.length - 1 ? (
+                                <li>
+                                  <a href={crumb.href} class="crumb-link">
+                                    {crumb.label}
+                                  </a>
+                                </li>
+                              ) : (
+                                <li aria-current="page">{crumb.label}</li>
+                              ),
+                            )}
+                          </ol>
+                        </nav>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-        </body>
+          </body>
+        )}
       </html>
     )
   }

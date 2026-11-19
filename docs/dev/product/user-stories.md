@@ -431,6 +431,20 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
     - « Demander à rejoindre » and « Demander à devenir responsable » sit side by side, with no
       explanation; « Remplacer un responsable » has none either (both are in the user guide).
     - The tab bar no longer shows a vertical scrollbar on Windows.
+- **US-0.10.24 A landing page that shows what AssoMatos is for.** As a collectif responsible who
+  does not know the service, I want its home page to tell me at a glance what it does, so that I
+  join with my collectif.
+    - Visitors land on one screen, with no scroll on computers and phones: the Collecti'FROG logo
+      and « AssoMatos », « À plusieurs, on a déjà tout le matériel. », « Qui a quoi ? Où est-il ?
+      Puis-je l’utiliser samedi ? », then « Rejoindre AssoMatos » above « Se connecter ».
+    - An animated isometric scene, without script (ADR 0039): gear in four places, coloured by
+      place, lines up in a dashboard; six pieces from every place are chosen for a party, gather at
+      the party hall, then go home. A neighbour outside the collectif's fence keeps its gear grey
+      and out of the dashboard. With reduced motion, the scene stays on the village.
+    - A footer line: « Importez votre tableur (CSV) », « Open source, licence MIT, sur GitHub »
+      (link to the repository), « Un projet Collecti’FROG », « Mentions légales ».
+    - « Mentions légales » opens `/mentions-legales`, a page under construction until V1.0.
+    - Signed-in users keep their dashboard; pending accounts keep the short presentation.
 
 ## V0.11 — Photos
 

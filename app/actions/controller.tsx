@@ -14,6 +14,7 @@ import { backHref } from './back-link.ts'
 import { DesignPreviewPage } from './design-preview-page.tsx'
 import { notFound, requireUser } from './guards.tsx'
 import { type Dashboard, HomePage } from './home-page.tsx'
+import { LegalPage } from './landing-page.tsx'
 import { viewerOf } from './viewer.ts'
 
 /** How many recent items the dashboard lists. */
@@ -65,6 +66,10 @@ export default createController(routes, {
       const response = redirect(backHref(context, routes.home.href()), 303)
       response.headers.append('Set-Cookie', themeCookie(theme, { secure }))
       return response
+    },
+    // Open to everyone, signed in or not; written for V1.0 (US-0.10.24).
+    legal(context) {
+      return context.render(<LegalPage viewer={viewerOf(context)} />)
     },
     // Tokens and components in both themes, for design reviews; not served in production.
     designPreview(context) {

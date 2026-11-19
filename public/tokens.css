@@ -154,6 +154,25 @@
   --duration-fast: 120ms;
   --duration-overlay: 180ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* The landing scene's loop, and the quick beat of its bobbing people and twinkling bulbs. */
+  --duration-scene: 20s;
+  --duration-scene-beat: 800ms;
+
+  /* Landing page (ADR 0039): its title, one colour per place of the scene, the drawing's line. */
+  --text-display: clamp(1.75rem, 3.6vw, 4rem);
+  --text-display-portrait: clamp(1.75rem, 6.5vw, 2.75rem);
+  --place-0: light-dark(#a3a5ad, #5c6067);
+  --place-1: light-dark(#6b5fb5, #9d93e0);
+  --place-2: light-dark(#1f8a8a, #4cc3c3);
+  --place-3: light-dark(#c46a1c, #f0a050);
+  --place-4: light-dark(#3f8a3a, #7fcb6f);
+  --scene-line: light-dark(#2b2a33, #c9c7d6);
+  --scene-side-left: light-dark(#dedbe8, #24232c);
+  --scene-side-right: light-dark(#cfcbdc, #1c1b23);
+  --scene-trail: light-dark(#e3e0ec, #262531);
+  --scene-tree: light-dark(#b9dfb2, #2f5a2c);
+  --scene-skin: light-dark(#e3b48f, #c9976f);
+  --scene-beam: light-dark(rgb(89 80 130 / 0.14), rgb(255 255 255 / 0.07));
 }
 
 /* A finger is less precise than a mouse: every control grows to the 44 px touch target. */

@@ -10,7 +10,8 @@
     "test": "NODE_ENV=test remix test",
     "test:a11y": "NODE_ENV=test remix test --type e2e",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check . && remix doctor"
+    "lint": "biome check . && remix doctor",
+    "landing:css": "node scripts/landing-scene-css.ts"
   },
   "engines": {
     "node": ">=24.3.0"
