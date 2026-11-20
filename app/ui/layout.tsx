@@ -1,5 +1,5 @@
 import type { Handle, RemixNode } from 'remix/component'
-import { appInitials, appName } from '../brand.ts'
+import { appName } from '../brand.ts'
 import { routes } from '../routes.ts'
 import { type Theme, themeLabels, themes } from '../theme.ts'
 import { Icon, type IconName } from './icons.tsx'
@@ -137,6 +137,7 @@ export function Layout(handle: Handle<LayoutProps>) {
               <div class="shell-body">
                 <header class="top-bar">
                   <a class="brand" href={routes.home.href()}>
+                    <span class="logo" aria-hidden="true" />
                     {appName}
                   </a>
                   <div class="header-links">
@@ -211,9 +212,7 @@ function Sidebar(
     return (
       <aside class="sidebar">
         <a class="brand side-brand" href={routes.home.href()}>
-          <span class="logo" aria-hidden="true">
-            {appInitials}
-          </span>
+          <span class="logo" aria-hidden="true" />
           <span class="brand-name">{appName}</span>
         </a>
         <nav aria-label="Navigation principale" class="main-nav">

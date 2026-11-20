@@ -445,6 +445,11 @@ Remarks gathered from the first weeks of use, shipped together as one patch.
       (link to the repository), « Un projet Collecti’FROG », « Mentions légales ».
     - « Mentions légales » opens `/mentions-legales`, a page under construction until V1.0.
     - Signed-in users keep their dashboard; pending accounts keep the short presentation.
+- **US-0.10.25 Collecti'FROG's frog as the logo.** As a user, I want the same logo wherever I meet
+  AssoMatos, so that I recognise the service and who runs it.
+    - The frog, in the accent purple of the theme, replaces « AM » in the sidebar and the rail, and
+      stands before « AssoMatos » in the top bar (phones, sign-in and sign-up pages).
+    - The browser tab shows the frog in white on a purple square.
 
 ## V0.11 — Photos
 

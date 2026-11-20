@@ -44,12 +44,8 @@
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-heading);
 }
-/* The Collecti'FROG frog, tinted by the theme: a mask over the accent colour (CSP: img-src 'self'). */
-.landing-logo {
+.landing-brand .logo {
   width: 2.6em;
-  aspect-ratio: 520 / 346;
-  background: currentColor;
-  mask: url("/logo.svg") center / contain no-repeat;
 }
 .landing-text h1 {
   margin: var(--space-1) 0 0;
