@@ -111,8 +111,11 @@ Always **icon + word + colour**, on a 12 % tint (`StatusBadge`, `app/ui/status-b
 ## Screens
 
 - **Shell**: sidebar 240 px on `--bg-panel` (rail below 1100 px, bottom tab bar below 720 px),
-  current entry as a grey fill; theme switch at the foot of the sidebar. Top bar: search field,
-  « + », account.
+  current entry as a grey fill; theme switch at the foot of the sidebar. Top bar on phones only:
+  brand and account ([ADR 0037](../../adr/0037-no-top-bar-on-computers/)).
+- **Logo**: Collecti'FROG's frog (`public/logo.svg`), the `.logo` class paints it as a mask over
+  `--accent-text`, so it follows the theme; before « AssoMatos » in the sidebar and the top bar,
+  alone on the rail. The favicon is the frog in white on a `#595082` square.
 - **Lists** (Rechercher, a collectif's equipment): Nom · Catégorie · Propriétaire · Ville · Qté,
   36 px rows, hairline separators, sortable headers; active filters as removable chips; Liste /
   Grille as a segmented control. On a phone, one compact row per item: the name, then « catégorie ·
@@ -148,6 +151,4 @@ decision:
 
 ## Open questions
 
-- A **logo** for the sidebar and the sign-in page (today the letters « AM »): the landing page uses
-  Collecti'FROG's frog (`public/logo.svg`, ADR 0039); the shell may follow.
 - A soft or neumorphic light theme: possible later by changing tokens only.

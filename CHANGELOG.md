@@ -6,6 +6,10 @@ One change per line, written for users. Sections: Added, Changed, Deprecated, Re
 
 ## [Unreleased]
 
+### Changed
+
+- Collecti'FROG's frog is the logo everywhere: sidebar, top bar, sign-in pages and the browser tab.
+
 ## [0.10.3] - 2026-11-19
 
 ### Added

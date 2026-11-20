@@ -6,7 +6,7 @@ AssoMatos (InventAssos) is MIT-licensed. It ships these third-party works, under
 |----------------------------------------|---------------------------------------------------|----------------------------------------|
 | Inter 4 (variable, optical sizes)      | `public/fonts/inter-*.woff2`                      | SIL Open Font License 1.1, see below   |
 | Lucide icons (shapes copied as paths)  | `app/ui/icons.tsx`                                | ISC, see below                         |
-| Collecti'FROG logo (the frog)          | `public/logo.svg`                                 | Collecti'FROG's mark, not under MIT    |
+| Collecti'FROG logo (the frog)          | `public/logo.svg`, `public/favicon.svg`           | Collecti'FROG's mark, not under MIT    |
 
 ## Inter
 

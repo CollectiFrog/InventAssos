@@ -23,7 +23,7 @@ export function LandingPage(handle: Handle<{ databaseOk: boolean; signedOut?: bo
           </div>
           <div class="landing-text">
             <p class="landing-brand">
-              <span class="landing-logo" aria-hidden="true" />
+              <span class="logo" aria-hidden="true" />
               {appName}
             </p>
             <h1>À plusieurs, on a déjà tout le matériel.</h1>

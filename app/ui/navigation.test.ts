@@ -49,6 +49,22 @@ describe('navigation (US-0.7.1, ADR 0022)', () => {
     await db.close()
   })
 
+  it('shows Collecti’FROG’s frog as the logo, in the sidebar and the top bar (US-0.10.25)', async () => {
+    const app = createTestApp(db)
+    const client = app.client()
+    await signIn(app, client, 'camille@example.org')
+
+    const html = (await client.get(routes.home.href())).text
+    const brands = [...html.matchAll(/<a [^>]*class="brand[^"]*"[^>]*>(.*?)<\/a>/gs)]
+    assert.equal(brands.length, 2, 'the top bar and the sidebar each link the brand')
+    for (const [, inner = ''] of brands) {
+      assert.match(inner, /^<span aria-hidden="true" class="logo"><\/span>/)
+      assert.match(inner, /AssoMatos/)
+    }
+    assert.doesNotMatch(html, />AM</)
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/favicon\.svg"/)
+  })
+
   it('gives a validated user the four entries, in order, with their URLs', async () => {
     const app = createTestApp(db)
     const client = app.client()

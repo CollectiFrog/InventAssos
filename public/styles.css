@@ -143,11 +143,22 @@ main > p,
   background: var(--bg-canvas);
 }
 .brand {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
   color: var(--text-primary);
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-heading);
   text-decoration: none;
+}
+/* Collecti'FROG's frog (US-0.10.25): a mask over the accent, so it follows the theme (img-src 'self'). */
+.logo {
+  flex: none;
+  width: 2.2em;
+  aspect-ratio: 520 / 346;
+  background: var(--accent-text);
+  mask: url("/logo.svg") center / contain no-repeat;
 }
 .side-brand,
 .side-heading,
@@ -269,19 +280,6 @@ body.has-nav main {
     justify-content: center;
     gap: var(--space-2);
     padding: var(--space-1) 0 var(--space-3);
-  }
-  .logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--on-accent);
-    font-size: 0.6875rem;
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0;
   }
   /* Hidden on the rail but still read, so the brand link keeps its name (WCAG 2.4.4). */
   .brand-name {
